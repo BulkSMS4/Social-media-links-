@@ -1,0 +1,68 @@
+<!DOCTYPE html><html>
+<head>
+  <title>Form View</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    input, button, textarea { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: 1px solid #ccc; }
+    img { display: block; margin: auto; max-width: 120px; }
+    h2, p { text-align: center; }
+    form button { margin-top: 15px; }
+  </style>
+</head>
+<body>
+<div class="container" id="formContainer">Loading form...</div><script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const id = new URLSearchParams(location.search).get("id");
+const container = document.getElementById("formContainer");
+
+async function loadForm() {
+  if (!id) return container.innerHTML = "Form ID is missing.";
+  const docRef = doc(db, "forms", id);
+  const snap = await getDoc(docRef);
+
+  if (!snap.exists()) {
+    container.innerHTML = "Form not found.";
+    return;
+  }
+
+  const data = snap.data();
+  let html = `<div style="background:${data.bgColor}; color:${data.textColor}; padding:20px; border-radius:10px;">`;
+  if (data.logo) html += `<img src="${data.logo}">`;
+  if (data.title) html += `<h2>${data.title}</h2>`;
+  if (data.description) html += `<p>${data.description}</p>`;
+  if (data.warning) html += `<p style='color:red;font-weight:bold;'>${data.warning}</p>`;
+
+  html += `<form>`;
+  if (data.addAuth) {
+    html += `<label>Username</label><input type="text">
+             <label>Password</label><input type="password">`;
+  }
+  [...(data.fields || []), ...(data.extraFields || [])].forEach(f => {
+    if (f.trim()) html += `<label>${f}</label><input type="text">`;
+  });
+
+  html += `<button style="background:${data.btnColor};color:white;padding:10px;">${data.buttonText || "Submit"}</button>`;
+  html += `</form></div>`;
+
+  container.innerHTML = html;
+}
+
+loadForm();
+</script></body>
+</html>
