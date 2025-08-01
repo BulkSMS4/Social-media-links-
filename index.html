@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fake Social Media Form Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f5; padding: 20px; }
+    .container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
+    label { font-weight: bold; display: block; margin-top: 15px; }
+    #result { margin-top: 20px; padding: 20px; background: #e8f0fe; border-radius: 10px; }
+    .form-preview { border: 1px solid #ccc; padding: 15px; background: #fff; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>📄 Build Your Fake Social Media Form</h2>
+
+  <label>Page Title</label>
+  <input type="text" id="pageTitle" placeholder="e.g. Facebook Login">
+
+  <label>Logo Image URL</label>
+  <input type="text" id="logoUrl" placeholder="https://...facebook-logo.png">
+
+  <label>Button Text</label>
+  <input type="text" id="buttonText" placeholder="e.g. Log In">
+
+  <label>Extra Fields (optional, one per line)</label>
+  <textarea id="inputFields" rows="4" placeholder="e.g. Recovery Email&#10;Phone Number"></textarea>
+
+  <button onclick="generateForm()">✅ Generate Fake Form</button>
+
+  <div id="result"></div>
+</div>
+
+<script>
+function generateForm() {
+  const title = document.getElementById("pageTitle").value;
+  const logo = document.getElementById("logoUrl").value;
+  const extras = document.getElementById("inputFields").value.split("\n").filter(i => i.trim() !== "");
+  const buttonText = document.getElementById("buttonText").value || "Log In";
+
+  let html = `<div class="form-preview">\n`;
+  if (logo) html += `<img src="${logo}" style="width:100px;display:block;margin:auto;"><br>\n`;
+  if (title) html += `<h2 style="text-align:center;">${title}</h2>\n`;
+
+  html += `<form>\n`;
+
+  // Default: Username and Password
+  html += `<label>Username or Email</label><input type="text" placeholder="Username or Email"><br><br>\n`;
+  html += `<label>Password</label><input type="password" placeholder="Password"><br><br>\n`;
+
+  // Extra fields
+  extras.forEach(i => {
+    html += `<label>${i}</label><input type="text" placeholder="${i}"><br><br>\n`;
+  });
+
+  html += `<button type="submit">${buttonText}</button>\n`;
+  html += `</form>\n</div>`;
+
+  // Preview and Code
+  document.getElementById("result").innerHTML = `
+    <h3>🔎 Preview</h3>
+    ${html}
+    <h3>📋 Copy HTML Code</h3>
+    <textarea rows="10" readonly>${html.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</textarea>
+  `;
+}
+</script>
+
+</body>
+</html>
