@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Saved Forms</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background: #eef2f5; padding: 20px; }
+    .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+    .form-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin: 10px 0; }
+    .form-card h3 { margin: 0 0 10px; }
+    .form-card a { text-decoration: none; color: blue; font-size: 14px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>📂 Saved Forms</h2>
+  <div id="formsList">Loading...</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const formsList = document.getElementById("formsList");
+
+async function loadForms() {
+  const q = query(collection(db, "forms"), orderBy("created", "desc"));
+  const snapshot = await getDocs(q);
+  formsList.innerHTML = "";
+
+  if (snapshot.empty) {
+    formsList.innerHTML = "<p>No forms found.</p>";
+    return;
+  }
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const div = document.createElement("div");
+    div.className = "form-card";
+    div.innerHTML = `
+      <h3>${data.title || "Untitled Form"}</h3>
+      <p>${data.description || "No description."}</p>
+      <a href="/form.html?id=${doc.id}" target="_blank">🔗 View Form</a>
+    `;
+    formsList.appendChild(div);
+  });
+}
+
+loadForms();
+</script>
+</body>
+</html>
