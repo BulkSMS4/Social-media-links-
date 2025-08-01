@@ -1,0 +1,75 @@
+<!DOCTYPE html><html>
+<head>
+  <title>📊 My Form Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background: #f0f2f5; margin: 0; }
+    .sidebar {
+      width: 220px;
+      background: #2c3e50;
+      height: 100vh;
+      position: fixed;
+      color: white;
+      padding-top: 20px;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    .sidebar a {
+      display: block;
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+    }
+    .sidebar a:hover { background: #34495e; }
+    .main {
+      margin-left: 0;
+      padding: 0;
+    }
+    .topbar {
+      background: #fff;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .menu-button {
+      cursor: pointer;
+      font-size: 24px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: #ecf0f1;
+    }
+    iframe {
+      width: 100vw;
+      height: calc(100vh - 50px);
+      border: none;
+      border-radius: 0;
+      display: block;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="menu-button" onclick="toggleMenu()">⋮</span>
+  </div>  <div class="sidebar" id="menu">
+    <a href="#" onclick="loadPage('index.html')">🛠️ Build New Form</a>
+    <a href="#" onclick="loadPage('forms.html')">📂 View Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback.html')">📥 View Feedback</a>
+  </div>  <div class="main">
+    <iframe id="iframePage" src="index.html"></iframe>
+  </div>  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+
+    function loadPage(page) {
+      const iframe = document.getElementById("iframePage");
+      iframe.src = page;
+      document.getElementById("menu").style.display = "none";
+    }
+  </script></body>
+</html>
