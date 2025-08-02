@@ -55,22 +55,28 @@
 </div>
 
 <script type="module">
-  // Firebase imports
+  // Import the functions from Firebase SDKs
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
+  // Your Firebase config
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+    authDomain: "usahackersland.firebaseapp.com",
+    projectId: "usahackersland",
+    storageBucket: "usahackersland.firebasestorage.app",
+    messagingSenderId: "588407428267",
+    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+    measurementId: "G-ZJ05T7YNSQ"
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const analytics = getAnalytics(app);
 
+  // Login function
   window.login = function () {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
@@ -78,7 +84,7 @@
 
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        window.location.href = "admin.html";
+        window.location.href = "admin.html"; // redirect on success
       })
       .catch(err => {
         errorDiv.textContent = "❌ " + err.message;
