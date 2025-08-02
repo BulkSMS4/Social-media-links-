@@ -1,75 +1,113 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>📊 My Form Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
   <style>
-    body { font-family: sans-serif; background: #f0f2f5; margin: 0; }
-    .sidebar {
-      width: 220px;
-      background: #2c3e50;
-      height: 100vh;
-      position: fixed;
-      color: white;
-      padding-top: 20px;
-      display: none;
-      flex-direction: column;
-      z-index: 1000;
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
     }
-    .sidebar a {
-      display: block;
-      color: white;
-      padding: 12px 20px;
-      text-decoration: none;
-    }
-    .sidebar a:hover { background: #34495e; }
-    .main {
-      margin-left: 0;
-      padding: 0;
-    }
-    .topbar {
+    .container {
+      max-width: 800px;
+      margin: auto;
       background: #fff;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      padding: 10px 20px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      border-radius: 10px;
     }
-    .menu-button {
-      cursor: pointer;
-      font-size: 24px;
-      padding: 4px 10px;
-      border-radius: 6px;
-      background: #ecf0f1;
+    h1 {
+      text-align: center;
     }
-    iframe {
-      width: 100vw;
-      height: calc(100vh - 50px);
-      border: none;
-      border-radius: 0;
+    input[type="file"] {
+      margin-top: 10px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100%;
+    }
+    img#dashboardLogo {
       display: block;
+      margin: 15px auto;
+      max-width: 150px;
+      border-radius: 10px;
     }
-    .hidden { display: none !important; }
+    .section {
+      margin-top: 40px;
+    }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <span class="menu-button" onclick="toggleMenu()">⋮</span>
-  </div>  <div class="sidebar" id="menu">
-    <a href="#" onclick="loadPage('index.html')">🛠️ Build New Form</a>
-    <a href="#" onclick="loadPage('forms.html')">📂 View Saved Forms</a>
-    <a href="#" onclick="loadPage('feedback.html')">📥 View Feedback</a>
-  </div>  <div class="main">
-    <iframe id="iframePage" src="index.html"></iframe>
-  </div>  <script>
-    function toggleMenu() {
-      const menu = document.getElementById("menu");
-      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
-    }
 
-    function loadPage(page) {
-      const iframe = document.getElementById("iframePage");
-      iframe.src = page;
-      document.getElementById("menu").style.display = "none";
+<div class="container">
+  <h1>📊 Dashboard</h1>
+
+  <!-- ✅ Dashboard Logo -->
+  <div style="text-align:center;">
+    <img id="dashboardLogo" src="logo.png" alt="Dashboard Logo" />
+    <div id="adminUpload" style="display:none;">
+      <label for="dashboardLogoInput"><strong>Upload Dashboard Logo</strong></label>
+      <input type="file" id="dashboardLogoInput" accept="image/*" />
+    </div>
+  </div>
+
+  <!-- ✅ Dashboard Menu -->
+  <div class="section">
+    <h2>🔧 Tools</h2>
+    <ul>
+      <li><a href="index.html">🧰 Form Builder</a></li>
+      <li><a href="forms.html">📁 My Created Forms</a></li>
+      <li><a href="feedback.html">💬 Form Submissions</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>📌 Tips</h2>
+    <p>Make sure your forms are saved and tested. Use the builder to add logos, banners, input fields, and more.</p>
+  </div>
+</div>
+
+<!-- ✅ Firebase Auth to check for admin -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const adminEmail = "admin@example.com"; // ✅ Replace this with your admin email
+  const dashboardLogoInput = document.getElementById('dashboardLogoInput');
+  const dashboardLogo = document.getElementById('dashboardLogo');
+  const adminUpload = document.getElementById('adminUpload');
+
+  onAuthStateChanged(auth, user => {
+    if (user && user.email === adminEmail) {
+      adminUpload.style.display = "block";
     }
-  </script></body>
+  });
+
+  dashboardLogoInput?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        dashboardLogo.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+
+</body>
 </html>
