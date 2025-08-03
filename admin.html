@@ -2,24 +2,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard</title>
+  <title>⚙️ Admin Dashboard</title>
   <style>
     body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
     .header { background: #222; color: #fff; padding: 20px; text-align: center; }
-    .nav { background: #333; color: #fff; padding: 10px; display: flex; justify-content: space-around; }
-    .nav a { color: white; text-decoration: none; font-weight: bold; }
+    .nav {
+      background: #333;
+      color: #fff;
+      padding: 10px;
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 12px;
+      background-color: #444;
+      border-radius: 5px;
+    }
+    .nav a:hover {
+      background-color: #555;
+    }
     .container { padding: 20px; }
     iframe { width: 100%; height: 85vh; border: none; }
+    .logo-upload {
+      background: #222;
+      padding: 10px;
+      text-align: center;
+    }
+    .logo-upload img {
+      height: 50px;
+      margin-bottom: 10px;
+    }
+    .logo-upload input {
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <img src="/logo.png" alt="Dashboard Logo" style="height: 50px;">
-    <h1>Admin Dashboard</h1>
+  <div class="logo-upload">
+    <img id="dashboardLogo" src="/logo.png" alt="Dashboard Logo">
+    <br>
+    <input type="file" id="logoInput">
+  </div>  <div class="header">
+    <h1>🛠️ Admin Dashboard</h1>
   </div>  <div class="nav">
-    <a href="#" onclick="loadPage('form-builder')">Form Builder</a>
-    <a href="#" onclick="loadPage('forms')">Saved Forms</a>
-    <a href="#" onclick="loadPage('feedback')">Feedback</a>
+    <a href="#" onclick="loadPage('form-builder')">🧩 Form Builder</a>
+    <a href="#" onclick="loadPage('forms')">📂 Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback')">📥 Feedback</a>
+    <a href="#" onclick="loadPage('victims')">🔍 View Victims</a>
+    <a href="#" onclick="loadPage('members')">👥 Registered Members</a>
+    <a href="#" onclick="loadPage('links')">🔗 All Created Links</a>
   </div>  <div class="container">
     <iframe id="iframePage" src="form-builder.html"></iframe>
   </div>  <script>
@@ -28,6 +64,28 @@
       if (page === 'form-builder') iframe.src = "index.html";
       else if (page === 'forms') iframe.src = "forms.html";
       else if (page === 'feedback') iframe.src = "feedback.html";
+      else if (page === 'victims') iframe.src = "victims.html";
+      else if (page === 'members') iframe.src = "members.html";
+      else if (page === 'links') iframe.src = "links.html";
+    }
+
+    const logoInput = document.getElementById("logoInput");
+    const dashboardLogo = document.getElementById("dashboardLogo");
+
+    logoInput.addEventListener("change", () => {
+      const file = logoInput.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imageData = reader.result;
+        localStorage.setItem("dashboardLogo", imageData);
+        dashboardLogo.src = imageData;
+      };
+      if (file) reader.readAsDataURL(file);
+    });
+
+    const savedLogo = localStorage.getItem("dashboardLogo");
+    if (savedLogo) {
+      dashboardLogo.src = savedLogo;
     }
   </script></body>
 </html>
