@@ -1,0 +1,60 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔗 View Created Links</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f7f7; padding: 20px; }
+    h2 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h2>🔗 All Created Links</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Link</th>
+        <th>Created By</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody id="linksTable"></tbody>
+  </table>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+      measurementId: "G-ZJ05T7YNSQ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadLinks() {
+      const table = document.getElementById("linksTable");
+      const snapshot = await getDocs(collection(db, "forms"));
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const tr = document.createElement("tr");
+        const created = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : "-";
+        tr.innerHTML = `
+          <td><a href="/form.html?id=${doc.id}" target="_blank">/form.html?id=${doc.id}</a></td>
+          <td>${data.email || "-"}</td>
+          <td>${created}</td>
+        `;
+        table.appendChild(tr);
+      });
+    }
+
+    loadLinks();
+  </script></body>
+</html>
