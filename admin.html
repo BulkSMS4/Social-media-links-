@@ -1,139 +1,33 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #111;
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-      position: relative;
-    }
-    #adminLogo {
-      height: 60px;
-      object-fit: contain;
-      margin-bottom: 5px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 10px;
-    }
-    input[type="file"], button {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      width: 100%;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      font-weight: bold;
-    }
-    #logoutBtn {
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      background: #dc3545;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
+    .header { background: #222; color: #fff; padding: 20px; text-align: center; }
+    .nav { background: #333; color: #fff; padding: 10px; display: flex; justify-content: space-around; }
+    .nav a { color: white; text-decoration: none; font-weight: bold; }
+    .container { padding: 20px; }
+    iframe { width: 100%; height: 85vh; border: none; }
   </style>
 </head>
 <body>
-
-<header>
-  <img id="adminLogo" src="" alt="Admin Logo" />
-  <h2>Admin Dashboard</h2>
-  <button id="logoutBtn">Logout</button>
-</header>
-
-<div class="container">
-  <h3>Upload Dashboard Logo (Admin Only)</h3>
-  <input type="file" id="logoInput" accept="image/*">
-  <button onclick="uploadLogo()">📤 Upload Logo</button>
-  <p id="uploadStatus"></p>
-
-  <hr>
-  <h3>📁 Your Tools</h3>
-  <button onclick="location.href='index.html'">🎨 Open Form Builder</button>
-  <button onclick="location.href='forms.html'">📄 View Saved Forms</button>
-</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const storage = getStorage(app);
-
-  // 🛡️ Check if user is logged in
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      location.href = "admin-login.html"; // redirect to login
-    } else {
-      loadLogo();
+  <div class="header">
+    <img src="/logo.png" alt="Dashboard Logo" style="height: 50px;">
+    <h1>Admin Dashboard</h1>
+  </div>  <div class="nav">
+    <a href="#" onclick="loadPage('form-builder')">Form Builder</a>
+    <a href="#" onclick="loadPage('forms')">Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback')">Feedback</a>
+  </div>  <div class="container">
+    <iframe id="iframePage" src="form-builder.html"></iframe>
+  </div>  <script>
+    function loadPage(page) {
+      const iframe = document.getElementById("iframePage");
+      if (page === 'form-builder') iframe.src = "index.html";
+      else if (page === 'forms') iframe.src = "forms.html";
+      else if (page === 'feedback') iframe.src = "feedback.html";
     }
-  });
-
-  // 🔐 Logout button
-  document.getElementById("logoutBtn").onclick = () => {
-    signOut(auth).then(() => {
-      location.href = "admin-login.html";
-    });
-  };
-
-  // 📤 Upload admin logo to Firebase Storage
-  async function uploadLogo() {
-    const fileInput = document.getElementById("logoInput");
-    const file = fileInput.files[0];
-    if (!file) return alert("Select a file");
-
-    const logoRef = ref(storage, "admin/logo.png");
-    await uploadBytes(logoRef, file);
-    const url = await getDownloadURL(logoRef);
-    localStorage.setItem("adminLogo", url);
-    document.getElementById("adminLogo").src = url;
-    document.getElementById("uploadStatus").textContent = "✅ Logo uploaded and saved!";
-  }
-
-  // 🖼️ Load admin logo from localStorage or Firebase
-  async function loadLogo() {
-    const saved = localStorage.getItem("adminLogo");
-    if (saved) {
-      document.getElementById("adminLogo").src = saved;
-    } else {
-      try {
-        const url = await getDownloadURL(ref(storage, "admin/logo.png"));
-        document.getElementById("adminLogo").src = url;
-        localStorage.setItem("adminLogo", url);
-      } catch (e) {
-        console.log("No logo yet");
-      }
-    }
-  }
-</script>
-
-</body>
+  </script></body>
 </html>
