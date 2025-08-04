@@ -1,0 +1,50 @@
+<!DOCTYPE html><html>
+<head>
+  <meta charset="UTF-8">
+  <title>Generated Form Output</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    textarea {
+      width: 100%;
+      height: 400px;
+      font-family: monospace;
+      white-space: pre;
+      overflow-x: auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔧 Generated Form HTML</h2>
+    <textarea id="formCode" readonly></textarea>
+    <br>
+    <button onclick="copyCode()">📋 Copy Code</button>
+  </div>  <script>
+    // This should be set dynamically from form builder
+    const generatedHTML = localStorage.getItem("generatedFormHTML") || "<!-- No form generated -->";
+    document.getElementById("formCode").value = generatedHTML;
+
+    function copyCode() {
+      const textArea = document.getElementById("formCode");
+      textArea.select();
+      document.execCommand("copy");
+      alert("✅ Form HTML copied to clipboard!");
+    }
+  </script></body>
+</html>
