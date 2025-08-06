@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,22 +10,43 @@
     table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
     th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
     th { background-color: #f2f2f2; }
+    button {
+      background: crimson; color: white; border: none;
+      padding: 5px 10px; border-radius: 4px; cursor: pointer;
+    }
+    button:hover { opacity: 0.9; }
+    #deleteSelectedBtn {
+      margin-top: 15px; background: darkred;
+    }
   </style>
 </head>
 <body>
   <h2>🔗 All Created Links</h2>
+
   <table>
     <thead>
       <tr>
+        <th><input type="checkbox" id="selectAll" /></th>
         <th>Link</th>
         <th>Created By</th>
         <th>Date</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody id="linksTable"></tbody>
-  </table>  <script type="module">
+  </table>
+
+  <button id="deleteSelectedBtn">🗑️ Delete Selected</button>
+
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      deleteDoc,
+      doc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
@@ -38,23 +60,59 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const table = document.getElementById("linksTable");
 
     async function loadLinks() {
-      const table = document.getElementById("linksTable");
+      table.innerHTML = "";
       const snapshot = await getDocs(collection(db, "forms"));
-      snapshot.forEach(doc => {
-        const data = doc.data();
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const id = docSnap.id;
         const tr = document.createElement("tr");
-        const created = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : "-";
+        const created = data.createdAt?.seconds
+          ? new Date(data.createdAt.seconds * 1000).toLocaleString()
+          : "-";
+
         tr.innerHTML = `
-          <td><a href="/form.html?id=${doc.id}" target="_blank">/form.html?id=${doc.id}</a></td>
+          <td><input type="checkbox" class="rowCheckbox" data-id="${id}"></td>
+          <td><a href="/form.html?id=${id}" target="_blank">/form.html?id=${id}</a></td>
           <td>${data.email || "-"}</td>
           <td>${created}</td>
+          <td><button onclick="deleteLink('${id}', this)">Delete</button></td>
         `;
         table.appendChild(tr);
       });
     }
 
+    window.deleteLink = async function(id, btn) {
+      if (confirm("Are you sure you want to delete this link?")) {
+        await deleteDoc(doc(db, "forms", id));
+        btn.closest("tr").remove();
+      }
+    };
+
+    document.getElementById("selectAll").addEventListener("change", e => {
+      const checkboxes = document.querySelectorAll(".rowCheckbox");
+      checkboxes.forEach(cb => cb.checked = e.target.checked);
+    });
+
+    document.getElementById("deleteSelectedBtn").addEventListener("click", async () => {
+      const selected = document.querySelectorAll(".rowCheckbox:checked");
+      if (selected.length === 0) {
+        alert("Please select at least one link to delete.");
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to delete ${selected.length} links?`)) return;
+
+      for (let checkbox of selected) {
+        const id = checkbox.dataset.id;
+        await deleteDoc(doc(db, "forms", id));
+        checkbox.closest("tr").remove();
+      }
+    });
+
     loadLinks();
-  </script></body>
+  </script>
+</body>
 </html>
