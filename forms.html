@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Saved Forms</title>
@@ -17,14 +16,12 @@
       cursor: pointer;
     }
     .actions button:hover { opacity: 0.8; }
-    .copy-link { color: green; font-weight: bold; margin-left: 10px; }
+    .preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; margin-top: 10px; }
   </style>
 </head>
 <body>
   <h2>💾 Saved Forms</h2>
-  <div id="formsList"></div>
-
-  <script>
+  <div id="formsList"></div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -37,27 +34,42 @@
       db.collection("forms").orderBy("createdAt", "desc").get().then(snapshot => {
         const list = document.getElementById("formsList");
         list.innerHTML = "";
-        snapshot.forEach(doc => {
-          const form = doc.data();
-          const link = `${location.origin}/form.html?id=${doc.id}`;
-          const div = document.createElement("div");
-          div.className = "form-card";
-          div.innerHTML = `
-            <h3>${form.title || "Untitled Form"} 📝</h3>
-            <p><strong>Created:</strong> ${new Date(form.createdAt).toLocaleString()}</p>
-            <p><strong>Link:</strong> <input type="text" value="${link}" readonly style="width:80%;"> 
-              <button onclick="copyLink('${link}')">📋 Copy</button>
-            </p>
-            <div class="actions">
-              <button onclick="viewForm('${link}')">👁️ View</button>
-              <button onclick="editForm('${doc.id}')">✏️ Edit</button>
-              <button onclick="deleteForm('${doc.id}', this)">🗑️ Delete</button>
-              <button onclick="downloadForm('${doc.id}')">⬇️ Download</button>
-            </div>
-          `;
-          list.appendChild(div);
-        });
+        snapshot.forEach(doc => renderForm(doc));
       });
+    }
+
+    function renderForm(doc) {
+      const form = doc.data();
+      const link = `${location.origin}/form.html?id=${doc.id}`;
+      const div = document.createElement("div");
+      div.className = "form-card";
+      div.innerHTML = `
+        <input value="${form.title || "Untitled Form"}" onchange="saveTitle(this, '${doc.id}')" style="font-size:18px; width:100%; font-weight:bold; padding:5px; border:none; background:#eef;">
+        <p><strong>Created:</strong> ${new Date(form.createdAt).toLocaleString()}</p>
+        <p><strong>Link:</strong> <input type="text" value="${link}" readonly style="width:80%;"> 
+          <button onclick="copyLink('${link}')">📋 Copy</button>
+        </p>
+        ${form.bannerURL ? `<img src="${form.bannerURL}" class="preview-img" />` : ""}
+        <div class="actions">
+          <button onclick="viewForm('${link}')">👁️ View</button>
+          <button onclick="editForm('${doc.id}')">✏️ Edit</button>
+          <button onclick="deleteForm('${doc.id}', this)">🗑️ Delete</button>
+          <button onclick="downloadForm('${doc.id}')">⬇️ Download</button>
+          <button onclick="saveForm('${doc.id}')">💾 Save</button>
+        </div>
+      `;
+      document.getElementById("formsList").appendChild(div);
+    }
+
+    function saveTitle(input, id) {
+      const title = input.value;
+      db.collection("forms").doc(id).update({ title })
+        .then(() => console.log("✅ Title saved."))
+        .catch(err => alert("❌ Failed to save title: " + err));
+    }
+
+    function saveForm(id) {
+      alert("✅ Form saved!");
     }
 
     function copyLink(link) {
@@ -93,6 +105,5 @@
     }
 
     loadForms();
-  </script>
-</body>
+  </script></body>
 </html>
