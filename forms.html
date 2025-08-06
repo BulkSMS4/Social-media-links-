@@ -1,64 +1,81 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
+  <meta charset="UTF-8">
   <title>Saved Forms</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; background: #eef2f5; padding: 20px; }
-    .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
-    .form-card { border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin: 10px 0; }
-    .form-card h3 { margin: 0 0 10px; }
-    .form-card a { text-decoration: none; color: blue; font-size: 14px; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    .form-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .form-card h3 { margin-top: 0; }
+    .actions button {
+      margin: 5px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .view { background: #2196F3; color: white; }
+    .edit { background: #FFC107; color: black; }
+    .delete { background: #f44336; color: white; }
+    .download { background: #4CAF50; color: white; }
+    .copy { background: #9C27B0; color: white; }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>📂 Saved Forms</h2>
-  <div id="formsList">Loading...</div>
-</div>
+  <h2>📄 Your Saved Forms</h2>
+  <div id="formsContainer"></div>  <script>
+    const forms = [
+      { id: 'abc123', title: 'Login Page', link: 'https://example.com/form.html?id=abc123' },
+      { id: 'xyz789', title: 'Feedback Form', link: 'https://example.com/form.html?id=xyz789' }
+    ]; // Replace with Firebase fetch
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    function renderForms() {
+      const container = document.getElementById('formsContainer');
+      container.innerHTML = '';
+      forms.forEach(form => {
+        const div = document.createElement('div');
+        div.className = 'form-card';
+        div.innerHTML = `
+          <h3>📝 ${form.title}</h3>
+          <p>🔗 <a href="${form.link}" target="_blank">${form.link}</a></p>
+          <div class="actions">
+            <button class="view" onclick="window.open('${form.link}', '_blank')">👁️ View</button>
+            <button class="edit" onclick="editForm('${form.id}')">✏️ Edit</button>
+            <button class="delete" onclick="deleteForm('${form.id}')">🗑️ Delete</button>
+            <button class="download" onclick="downloadForm('${form.id}')">📥 Download</button>
+            <button class="copy" onclick="copyToClipboard('${form.link}')">📋 Copy</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
+    function editForm(id) {
+      alert('Edit form with ID: ' + id);
+      // Redirect to build.html?id={id} and prefill data (logic to be added)
+    }
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    function deleteForm(id) {
+      if (confirm('Are you sure you want to delete this form?')) {
+        alert('Deleted form with ID: ' + id);
+        // Remove from Firebase and update UI
+      }
+    }
 
-const formsList = document.getElementById("formsList");
+    function downloadForm(id) {
+      alert('Download functionality for form ID: ' + id);
+      // Generate and download HTML/JSON/etc.
+    }
 
-async function loadForms() {
-  const q = query(collection(db, "forms"), orderBy("created", "desc"));
-  const snapshot = await getDocs(q);
-  formsList.innerHTML = "";
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => alert('Link copied to clipboard'));
+    }
 
-  if (snapshot.empty) {
-    formsList.innerHTML = "<p>No forms found.</p>";
-    return;
-  }
-
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "form-card";
-    div.innerHTML = `
-      <h3>${data.title || "Untitled Form"}</h3>
-      <p>${data.description || "No description."}</p>
-      <a href="/form.html?id=${doc.id}" target="_blank">🔗 View Form</a>
-    `;
-    formsList.appendChild(div);
-  });
-}
-
-loadForms();
-</script>
-</body>
+    renderForms();
+  </script></body>
 </html>
