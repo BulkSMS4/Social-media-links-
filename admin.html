@@ -1,4 +1,7 @@
-<!-- Updated Admin Dashboard with working navigation and logo upload --><!DOCTYPE html><html lang="en"><head>
+<!-- Admin Dashboard with Generate Option -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard</title>
@@ -52,6 +55,7 @@
     </div>
     <h1>Admin Dashboard</h1>
   </div>
+
   <div class="nav">
     <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
     <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
@@ -59,14 +63,19 @@
     <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
     <a href="#" onclick="loadPage('members')">👥 Members</a>
     <a href="#" onclick="loadPage('links')">🔗 Links</a>
+    <a href="#" onclick="loadPage('generate')">🧾 Generate</a> <!-- New Link Added -->
   </div>
+
   <div class="logo-upload">
     <h3>📷 Upload Dashboard Logo</h3>
     <input type="file" id="logoInput" accept="image/*" />
   </div>
+
   <div class="container">
     <iframe id="iframePage" src="index.html"></iframe>
-  </div>  <script>
+  </div>
+
+  <script>
     function loadPage(page) {
       const iframe = document.getElementById("iframePage");
       if (page === 'form-builder') iframe.src = "index.html";
@@ -75,6 +84,7 @@
       else if (page === 'victims') iframe.src = "victims.html";
       else if (page === 'members') iframe.src = "members.html";
       else if (page === 'links') iframe.src = "links.html";
+      else if (page === 'generate') iframe.src = "generate.html"; // Load generate.html
     }
 
     const logoInput = document.getElementById('logoInput');
@@ -97,5 +107,6 @@
     if (savedLogo) {
       dashboardLogo.src = savedLogo;
     }
-  </script></body>
+  </script>
+</body>
 </html>
