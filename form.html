@@ -38,65 +38,68 @@
     const db = firebase.firestore();
 
     const params = new URLSearchParams(location.search);
-    const formId = params.get("id");
+    let formId = params.get("id");
+
+    // If no form ID is provided in URL, use default form ID
+    if (!formId) {
+      formId = "defaultForm123"; // <-- change this to your default Firestore form ID
+    }
+
     const $ = id => document.getElementById(id);
 
-    if (!formId) {
-      $('formView').innerHTML = `<p style="color:red;">❌ No form ID provided in URL.</p>`;
-    } else {
-      db.collection("forms").doc(formId).get().then(doc => {
-        if (!doc.exists) {
-          $('formView').innerHTML = `<p style="color:red;">❌ Form not found.</p>`;
-          return;
-        }
+    db.collection("forms").doc(formId).get().then(doc => {
+      if (!doc.exists) {
+        $('formView').innerHTML = `<p style="color:red;">❌ Form not found.</p>`;
+        return;
+      }
 
-        const data = doc.data();
-        let html = `<div style="color:${data.textColor};background:${data.bgColor};padding:20px;border-radius:10px;background-image:url('${data.bgImageURL}');background-size:${data.bgWidth} ${data.bgHeight};">`;
+      const data = doc.data();
+      let html = `<div style="color:${data.textColor};background:${data.bgColor};padding:20px;border-radius:10px;background-image:url('${data.bgImageURL}');background-size:${data.bgWidth} ${data.bgHeight};">`;
 
-        if (data.title) html += `<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
-        if (data.avatarURL) html += `<div style="text-align:center;"><img src="${data.avatarURL}" style="width:120px;border-radius:50%;border:2px solid #ccc;"></div>`;
-        if (data.bannerURL) html += `<img src="${data.bannerURL}" style="width:100%;">`;
-        if (data.logoURL) html += `<div style="text-align:center;"><img src="${data.logoURL}" style="width:100px;"></div>`;
-        if (data.description) html += `<p style="text-align:center;">${data.description}</p>`;
-        if (data.warning) html += `<p style="color:${data.warningColor};text-align:center;font-weight:bold;">${data.warning}</p>`;
+      if (data.title) html += `<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
+      if (data.avatarURL) html += `<div style="text-align:center;"><img src="${data.avatarURL}" style="width:120px;border-radius:50%;border:2px solid #ccc;"></div>`;
+      if (data.bannerURL) html += `<img src="${data.bannerURL}" style="width:100%;">`;
+      if (data.logoURL) html += `<div style="text-align:center;"><img src="${data.logoURL}" style="width:100px;"></div>`;
+      if (data.description) html += `<p style="text-align:center;">${data.description}</p>`;
+      if (data.warning) html += `<p style="color:${data.warningColor};text-align:center;font-weight:bold;">${data.warning}</p>`;
 
-        html += `<form>`;
-        if (data.addAuth) {
-          html += `<input placeholder="${data.usernamePlaceholder || 'Username'}"><input type="password" placeholder="${data.passwordPlaceholder || 'Password'}">`;
-        }
+      html += `<form>`;
+      if (data.addAuth) {
+        html += `<input placeholder="${data.usernamePlaceholder || 'Username'}" type="text">
+                 <input type="password" placeholder="${data.passwordPlaceholder || 'Password'}">`;
+      }
 
-        if (data.frontDesc) html += `<label>${data.frontDesc}</label><input type="file">`;
-        if (data.backDesc) html += `<label>${data.backDesc}</label><input type="file">`;
-        if (data.extraDesc) html += `<p style="color:${data.extraDescColor}">${data.extraDesc}</p>`;
+      if (data.frontDesc) html += `<label>${data.frontDesc}</label><input type="file">`;
+      if (data.backDesc) html += `<label>${data.backDesc}</label><input type="file">`;
+      if (data.extraDesc) html += `<p style="color:${data.extraDescColor}">${data.extraDesc}</p>`;
 
-        const fields = [...(data.fields || []), ...(data.extraFields || [])];
-        fields.forEach(f => {
-          if (f.trim()) html += `<input placeholder="${f.trim()}">`;
-        });
-
-        let emoji = {
-          arrow: "➡️", check: "✅", lock: "🔒",
-          user: "👤", credit: "💳", none: ""
-        }[data.btnIcon] || "";
-
-        html += `<button style="background:${data.btnColor};">${emoji} ${data.buttonText}</button>`;
-        if (data.footerText) html += `<p style="text-align:center;">${data.footerText}</p>`;
-        if (data.redirectDesc && data.useRedirect) html += `<p style="text-align:center;color:gray;">${data.redirectDesc}</p>`;
-        html += `</form>`;
-
-        if ((data.imageGallery || []).length || (data.videoGallery || []).length) {
-          html += `<div style="margin-top:15px;">`;
-          data.imageGallery.forEach(url => html += `<img src="${url}">`);
-          data.videoGallery.forEach(url => html += `<video controls src="${url}"></video>`);
-          html += `</div>`;
-        }
-
-        html += `</div>`;
-        $('formView').innerHTML = html;
-      }).catch(err => {
-        $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form.</p><pre>${err.message}</pre>`;
+      const fields = [...(data.fields || []), ...(data.extraFields || [])];
+      fields.forEach(f => {
+        if (f.trim()) html += `<input placeholder="${f.trim()}">`;
       });
-    }
+
+      let emoji = {
+        arrow: "➡️", check: "✅", lock: "🔒",
+        user: "👤", credit: "💳", none: ""
+      }[data.btnIcon] || "";
+
+      html += `<button style="background:${data.btnColor};">${emoji} ${data.buttonText}</button>`;
+      if (data.footerText) html += `<p style="text-align:center;">${data.footerText}</p>`;
+      if (data.redirectDesc && data.useRedirect) html += `<p style="text-align:center;color:gray;">${data.redirectDesc}</p>`;
+      html += `</form>`;
+
+      if ((data.imageGallery || []).length || (data.videoGallery || []).length) {
+        html += `<div style="margin-top:15px;">`;
+        data.imageGallery.forEach(url => html += `<img src="${url}">`);
+        data.videoGallery.forEach(url => html += `<video controls src="${url}"></video>`);
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      $('formView').innerHTML = html;
+    }).catch(err => {
+      $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form.</p><pre>${err.message}</pre>`;
+    });
   </script>
 </body>
-</html> 
+</html>
