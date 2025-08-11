@@ -264,7 +264,7 @@
       fields,
       createdAt: new Date().toISOString()
     }).then(docRef => {
-  const link = `https://bulksms4.github.io/BulkSMS4/Social-media-links/form.html?id=${docRef.id}`;
+  const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
   document.getElementById("shareLink").innerHTML = `
     <strong>✅ Link:</strong> 
     <a href="${link}" target="_blank">${link}</a>
