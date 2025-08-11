@@ -1,6 +1,9 @@
-const functions = require('firebase-functions');
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-// A simple HTTP function
-exports.helloWorld = functions.https.onRequest((request, response) => {
-  response.send("Hello from Firebase!");
+admin.initializeApp();
+
+// Example HTTP function — change logic as needed
+exports.helloWorld = functions.https.onRequest((req, res) => {
+  res.send("Hello from Firebase Cloud Functions!");
 });
