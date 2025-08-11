@@ -265,9 +265,9 @@
       fields,
       createdAt: new Date().toISOString()
     }).then(docRef => {
-      const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
-$("shareLink").innerHTML = `<strong>✅ Link:</strong> <a href="${link}" target="_blank">${link}</a>`;
-$("shareLink").style.display = "block";
+const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
+document.getElementById("shareLink").innerHTML = `<strong>✅ Link:</strong> <a href="${link}" target="_blank">${link}</a>`;
+document.getElementById("shareLink").style.display = "block";
   }
 
   const inputs = [
