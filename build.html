@@ -174,7 +174,6 @@
 
     const htmlParts = [`<div style="background:${get("bgColor")};color:${get("textColor")};padding:20px;border-radius:10px;background-image:url('${get("bgImageURL")}');background-size:${get("bgWidth")} ${get("bgHeight")}">`];
 
-    // Avatar -> Logo -> Title -> Subtitle
     if (get("avatarURL")) {
       htmlParts.push(`<div style="text-align:center;">
                         <img src="${get("avatarURL")}" style="width:120px;border-radius:50%;border:2px solid #ccc;">
@@ -265,12 +264,13 @@
       fields,
       createdAt: new Date().toISOString()
     }).then(docRef => {
-  const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
-  document.getElementById("shareLink").innerHTML = `<strong>✅ Link:</strong> <a href="${link}" target="_blank">${link}</a>`;
-  document.getElementById("shareLink").style.display = "block";
-}).catch(error => {
-  console.error("Error adding document: ", error);
-});
+      const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
+      document.getElementById("shareLink").innerHTML = `<strong>✅ Link:</strong> <a href="${link}" target="_blank">${link}</a>`;
+      document.getElementById("shareLink").style.display = "block";
+    }).catch(error => {
+      console.error("Error adding document: ", error);
+    });
+  }
 
   const inputs = [
     "seoTitle", "metaDesc", "ogImage", "title", "subtitle", "subtitleColor", "titleColor", "avatarURL", "logoURL", 
