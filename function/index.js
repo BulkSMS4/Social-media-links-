@@ -3,7 +3,7 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-// Example HTTP function — change logic as needed
+// Example Cloud Function
 exports.helloWorld = functions.https.onRequest((req, res) => {
   res.send("Hello from Firebase Cloud Functions!");
 });
