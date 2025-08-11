@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Saved Forms</title>
@@ -21,7 +22,9 @@
 </head>
 <body>
   <h2>💾 Saved Forms</h2>
-  <div id="formsList"></div>  <script>
+  <div id="formsList"></div>  
+
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -40,7 +43,7 @@
 
     function renderForm(doc) {
       const form = doc.data();
-      const link = `${location.origin}/form.html?id=${doc.id}`;
+      const link = `${location.origin}/Social-media-links/form.html?id=${doc.id}`; // ✅ FIXED
       const div = document.createElement("div");
       div.className = "form-card";
       div.innerHTML = `
@@ -105,5 +108,6 @@
     }
 
     loadForms();
-  </script></body>
+  </script>
+</body>
 </html>
