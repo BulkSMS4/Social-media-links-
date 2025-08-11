@@ -74,16 +74,16 @@
           : "-";
 
         tr.innerHTML = `
-  <td><input type="checkbox" class="rowCheckbox" data-id="${id}"></td>
-  <td>
-    <a href="https://bulksms4.github.io/Social-media-links/form.html?id=${id}" target="_blank">
-      https://bulksms4.github.io/Social-media-links/form.html?id=${id}
-    </a>
-  </td>
-  <td>${data.email || "-"}</td>
-  <td>${created}</td>
-  <td><button onclick="deleteLink('${id}', this)">Delete</button></td>
-`;
+          <td><input type="checkbox" class="rowCheckbox" data-id="${id}"></td>
+          <td>
+            <a href="https://bulksms4.github.io/Social-media-links/form.html?id=${id}" target="_blank">
+              https://bulksms4.github.io/Social-media-links/form.html?id=${id}
+            </a>
+          </td>
+          <td>${data.email || "-"}</td>
+          <td>${created}</td>
+          <td><button onclick="deleteLink('${id}', this)">Delete</button></td>
+        `;
         table.appendChild(tr);
       });
     }
