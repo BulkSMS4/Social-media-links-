@@ -1,318 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Dashboard</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <style>
-    html, body {
-      margin: 0; padding: 0; height: 100%;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: white;
-      overflow-x: hidden;
-      position: relative;
-      transition: background 0.6s ease;
-    }
-    body.custom-background {
-      background-size: cover !important;
-      background-repeat: no-repeat !important;
-      background-position: center !important;
-    }
-    .header {
-      background: #222;
-      color: #fff;
-      padding: 10px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-      position: relative;
-      z-index: 10;
-    }
-    .header img {
-      height: 50px;
-    }
-    .nav {
-      background: #333;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      padding: 10px;
-      position: relative;
-      z-index: 10;
-    }
-    .nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      background: #444;
-      padding: 8px 15px;
-      border-radius: 5px;
-      transition: background 0.3s ease;
-    }
-    .nav a:hover {
-      background: #555;
-    }
-    iframe {
-      width: 100%;
-      height: 80vh;
-      border: none;
-      position: relative;
-      z-index: 10;
-      background: white;
-    }
-    .logo-upload {
-      background: #fff;
-      padding: 10px;
-      text-align: center;
-      position: relative;
-      z-index: 10;
-      color: black;
-    }
-    #bgThemeSelect {
-      position: relative;
-      z-index: 10;
-      margin: 12px auto;
-      display: block;
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
-      padding: 8px 12px;
-      font-size: 16px;
-      cursor: pointer;
-      font-family: monospace;
-      width: 250px;
-      border-radius: 5px;
-      user-select: none;
-      text-align: center;
-    }
-    /* Canvas behind everything */
-    #backgroundCanvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 1;
-      pointer-events: none;
-      display: block;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Dashboard</title>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: Arial, sans-serif;
+    color: white;
+    overflow-x: hidden;
+    position: relative;
+    background: black;
+  }
+  #backgroundCanvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    background: black;
+  }
+  .header {
+    background: rgba(0,0,0,0.8);
+    color: #0f0;
+    padding: 10px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    position: relative;
+    z-index: 10;
+    font-family: monospace;
+  }
+  .header img {
+    height: 50px;
+  }
+  .nav {
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    position: relative;
+    z-index: 10;
+    font-family: monospace;
+  }
+  .nav a {
+    color: #0f0;
+    text-decoration: none;
+    font-weight: bold;
+    background: rgba(0,0,0,0.6);
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  .nav a:hover {
+    background: rgba(0,255,0,0.3);
+  }
+  iframe {
+    width: 100%;
+    height: 70vh;
+    border: none;
+    position: relative;
+    z-index: 10;
+    background: #111;
+  }
+  .logo-upload {
+    background: #111;
+    padding: 10px;
+    text-align: center;
+    color: #0f0;
+    position: relative;
+    z-index: 10;
+    max-width: 350px;
+    margin: 20px auto;
+    border-radius: 8px;
+    font-family: monospace;
+  }
+  #logoutBtn {
+    background: none;
+    border: 1px solid #0f0;
+    color: #0f0;
+    cursor: pointer;
+    font-family: monospace;
+    padding: 5px 15px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+  }
+  #logoutBtn:hover {
+    background: #0f0;
+    color: black;
+  }
+</style>
 </head>
 <body>
-  <div class="header">
-    <img id="dashboardLogo" src="logo.png" alt="Logo" />
-    <h1>Admin Dashboard</h1>
-  </div>
 
-  <!-- Background Theme Selector dropdown at top -->
-  <select id="bgThemeSelect" title="Select Background Theme">
-    <option value="default">Default Gradient</option>
-    <option value="stars">Starfield</option>
-    <option value="mountains">Mountains</option>
-    <option value="custom">Custom Image</option>
-    <option disabled>──────────── Hacker Themes ────────────</option>
-    <option value="matrix">Matrix Green Code Rain</option>
-    <option value="hex">Hexadecimal Blue Code Rain</option>
-    <option value="glitch">Digital Glitch Flicker</option>
-    <option value="grid">Cyber Neon Grid</option>
-    <option value="binary">Binary Stream</option>
-  </select>
+<canvas id="backgroundCanvas"></canvas>
 
-  <div class="nav">
-    <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
-    <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
-    <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
-    <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
-    <a href="#" onclick="loadPage('members')">👥 Members</a>
-    <a href="#" onclick="loadPage('links')">🔗 Links</a>
-    <a href="#" onclick="loadPage('generate')">🧾 Generate</a>
-    <a href="#" onclick="loadPage('bank')">🏦 Bank</a>
-    <a href="#" onclick="loadPage('tracking')">📦 Tracking (Carrier Federal)</a>
-  </div>
+<div class="header">
+  <img id="dashboardLogo" src="logo.png" alt="Logo" />
+  <h1>ADMIN DASHBOARD</h1>
+  <button id="logoutBtn">Logout</button>
+</div>
 
-  <div class="logo-upload">
-    <h3>📷 Change Platform Logo (Admin Only)</h3>
-    <input type="file" id="logoInput" accept="image/*" />
-  </div>
+<div class="logo-upload">
+  <label>Upload Platform Logo:</label><br />
+  <input type="file" id="logoInput" accept="image/*" />
+</div>
 
-  <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
+<div class="nav">
+  <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
+  <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
+  <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
+  <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
+  <a href="#" onclick="loadPage('members')">👥 Members</a>
+  <a href="#" onclick="loadPage('links')">🔗 Links</a>
+  <a href="#" onclick="loadPage('generate')">🧾 Generate</a>
+  <a href="#" onclick="loadPage('bank')">🏦 Bank</a>
+  <a href="#" onclick="loadPage('tracking')">📦 Tracking (Carrier Federal)</a>
+</div>
 
-  <canvas id="backgroundCanvas"></canvas>
+<iframe id="iframePage" src="Social-media-links/build.html"></iframe>
 
-  <script>
-    // Your Firebase config and auth setup (unchanged)
-    const firebaseConfig = {
-      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-      authDomain: "usahackersland.firebaseapp.com",
-      projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com",
-      messagingSenderId: "588407428267",
-      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+<script>
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+    authDomain: "usahackersland.firebaseapp.com",
+    projectId: "usahackersland",
+    storageBucket: "usahackersland.appspot.com",
+    messagingSenderId: "588407428267",
+    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
+  // Redirect if not logged in or not admin
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = "login.html"; // redirect to login page
+      return;
+    }
+    try {
+      const doc = await db.collection('users').doc(user.uid).get();
+      if (!doc.exists || doc.data().role !== 'admin') {
+        alert("Access denied. Admins only.");
+        await auth.signOut();
         window.location.href = "login.html";
         return;
       }
-      try {
-        const docSnap = await db.collection("users").doc(user.uid).get();
-        if (!docSnap.exists) {
-          alert("No user record found. Contact support.");
-          return auth.signOut();
-        }
-        const userData = docSnap.data();
-        if (userData.role !== "admin") {
-          return window.location.href = "dashboard.html";
-        }
-      } catch (err) {
-        console.error(err);
-      }
+    } catch (err) {
+      console.error("Error checking user role:", err);
+      alert("Error verifying user. Please login again.");
+      await auth.signOut();
+      window.location.href = "login.html";
+      return;
+    }
+  });
+
+  // Logout button
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    auth.signOut().then(() => {
+      window.location.href = "login.html";
     });
+  });
 
-    // Page loader function (unchanged)
-    const base = "Social-media-links/";
-    function loadPage(page) {
-      const iframe = document.getElementById("iframePage");
-      if (page === 'form-builder') iframe.src = base + "build.html";
-      else if (page === 'forms') iframe.src = base + "forms.html";
-      else if (page === 'feedback') iframe.src = base + "feedback.html";
-      else if (page === 'victims') iframe.src = base + "victims.html";
-      else if (page === 'members') iframe.src = base + "members.html";
-      else if (page === 'links') iframe.src = base + "links.html";
-      else if (page === 'generate') iframe.src = base + "generate.html";
-      else if (page === 'bank') iframe.src = base + "bank.html";
-      else if (page === 'tracking') iframe.src = base + "tracking.html";
+  // Logo upload & persistence via localStorage
+  const logoInput = document.getElementById('logoInput');
+  const dashboardLogo = document.getElementById('dashboardLogo');
+  logoInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      dashboardLogo.src = e.target.result;
+      localStorage.setItem('platformLogo', e.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+  // Load saved logo
+  const savedLogo = localStorage.getItem('platformLogo');
+  if (savedLogo) {
+    dashboardLogo.src = savedLogo;
+  }
+
+  // Navigation page loading
+  const base = "Social-media-links/";
+  function loadPage(page) {
+    const iframe = document.getElementById('iframePage');
+    const pages = {
+      'form-builder': base + "build.html",
+      'forms': base + "forms.html",
+      'feedback': base + "feedback.html",
+      'victims': base + "victims.html",
+      'members': base + "members.html",
+      'links': base + "links.html",
+      'generate': base + "generate.html",
+      'bank': base + "bank.html",
+      'tracking': base + "tracking.html"
+    };
+    if(pages[page]) iframe.src = pages[page];
+  }
+
+  // MATRIX Background effect
+  const canvas = document.getElementById('backgroundCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let animationFrameId;
+
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+  const fontSize = 16;
+  let columns = Math.floor(width / fontSize);
+  const drops = new Array(columns).fill(1);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = '#0F0';
+    ctx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = letters.charAt(Math.floor(Math.random() * letters.length));
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      if (drops[i] * fontSize > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+
+      drops[i]++;
     }
+    animationFrameId = requestAnimationFrame(draw);
+  }
+  draw();
 
-    // Logo upload & persistence
-    const logoInput = document.getElementById('logoInput');
-    const dashboardLogo = document.getElementById('dashboardLogo');
-    logoInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = event => {
-          const logoURL = event.target.result;
-          dashboardLogo.src = logoURL;
-          localStorage.setItem('platformLogo', logoURL);
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-    const savedLogo = localStorage.getItem('platformLogo');
-    if (savedLogo) dashboardLogo.src = savedLogo;
+</script>
 
-    // Background themes
-
-    const canvas = document.getElementById('backgroundCanvas');
-    const ctx = canvas.getContext('2d');
-    let width, height;
-    let animationFrameId = null;
-    let currentThemeCancel = null;
-
-    function resizeCanvas() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', () => {
-      resizeCanvas();
-      if(currentThemeCancel) {
-        currentThemeCancel();
-        currentThemeCancel = themeFunctions[bgThemeSelect.value]();
-      }
-    });
-    resizeCanvas();
-
-    // Hacker animated themes
-
-    function matrixTheme() {
-      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
-      const fontSize = 16;
-      const columns = Math.floor(width / fontSize);
-      const drops = new Array(columns).fill(1);
-      function draw() {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = '#0F0';
-        ctx.font = fontSize + "px monospace";
-        for(let i = 0; i < drops.length; i++) {
-          const text = letters.charAt(Math.floor(Math.random() * letters.length));
-          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-          if(drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
-          drops[i]++;
-        }
-        animationFrameId = requestAnimationFrame(draw);
-      }
-      draw();
-      return () => cancelAnimationFrame(animationFrameId);
-    }
-
-    function hexTheme() {
-      const letters = '0123456789ABCDEF';
-      const fontSize = 14;
-      const columns = Math.floor(width / fontSize);
-      const drops = new Array(columns).fill(1);
-      function draw() {
-        ctx.fillStyle = 'rgba(0, 0, 20, 0.1)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = '#00f';
-        ctx.font = fontSize + "px monospace";
-        for(let i = 0; i < drops.length; i++) {
-          const text = letters.charAt(Math.floor(Math.random() * letters.length));
-          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-          if(drops[i] * fontSize > height && Math.random() > 0.98) drops[i] = 0;
-          drops[i]++;
-        }
-        animationFrameId = requestAnimationFrame(draw);
-      }
-      draw();
-      return () => cancelAnimationFrame(animationFrameId);
-    }
-
-    function glitchTheme() {
-      let glitchChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
-      let glitchXPositions = [];
-      let glitchYPositions = [];
-      function setupGlitches() {
-        glitchXPositions = [];
-        glitchYPositions = [];
-        for(let i = 0; i < 50; i++) {
-          glitchXPositions.push(Math.random() * width);
-          glitchYPositions.push(Math.random() * height);
-        }
-      }
-      function draw() {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, width, height);
-        ctx.font = 'bold 22px monospace';
-        ctx.fillStyle = '#0f0';
-        for(let i = 0; i < glitchXPositions.length; i++) {
-          const char = glitchChars.charAt(Math.floor(Math.random() * glitchChars.length));
-          ctx.fillText(char, glitchXPositions[i], glitchYPositions[i]);
-          glitchYPositions[i] += 20;
-          if(glitchYPositions[i] > height) glitchYPositions[i] = 0;
-        }
-        animationFrameId = requestAnimationFrame(draw);
-      }
-      setupGlitches();
-      draw();
-      return () => cancelAnimationFrame(animationFrameId);
-    }
-
-    function gridTheme() {
-      const gridSize = 50;
-      let lineOpacity = 0;
-      let increasing = true;
-      function draw() {
-        ctx.clearRect(0, 0, width, height);
-        ctx.strokeStyle = `rgba(0, 255, 255, ${line
+</body>
+</html>
