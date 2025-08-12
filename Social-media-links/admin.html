@@ -1,0 +1,112 @@
+<!-- Admin Dashboard with Generate Option -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
+    .header { background: #222; color: #fff; padding: 15px; text-align: center; }
+    .nav {
+      background: #333;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      padding: 10px;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      background: #444;
+      padding: 8px 15px;
+      border-radius: 5px;
+    }
+    .nav a:hover {
+      background: #555;
+    }
+    .container {
+      padding: 0;
+    }
+    iframe {
+      width: 100%;
+      height: 85vh;
+      border: none;
+    }
+    .logo-upload {
+      background: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    .logo-upload h3 {
+      margin-top: 0;
+    }
+    .logo-preview img {
+      max-height: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-preview">
+      <img id="dashboardLogo" src="/logo.png" alt="Logo">
+    </div>
+    <h1>Admin Dashboard</h1>
+  </div>
+
+  <div class="nav">
+    <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
+    <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
+    <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
+    <a href="#" onclick="loadPage('members')">👥 Members</a>
+    <a href="#" onclick="loadPage('links')">🔗 Links</a>
+    <a href="#" onclick="loadPage('generate')">🧾 Generate</a> <!-- New Link Added -->
+  </div>
+
+  <div class="logo-upload">
+    <h3>📷 Upload Dashboard Logo</h3>
+    <input type="file" id="logoInput" accept="image/*" />
+  </div>
+
+  <div class="container">
+    <iframe id="iframePage" src="build.html"></iframe>
+  </div>
+
+  <script>
+    function loadPage(page) {
+      const iframe = document.getElementById("iframePage");
+      if (page === 'form-builder') iframe.src = "build.html";
+      else if (page === 'forms') iframe.src = "forms.html";
+      else if (page === 'feedback') iframe.src = "feedback.html";
+      else if (page === 'victims') iframe.src = "victims.html";
+      else if (page === 'members') iframe.src = "members.html";
+      else if (page === 'links') iframe.src = "links.html";
+      else if (page === 'generate') iframe.src = "generate.html"; // Load generate.html
+    }
+
+    const logoInput = document.getElementById('logoInput');
+    const dashboardLogo = document.getElementById('dashboardLogo');
+
+    logoInput.addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          dashboardLogo.src = event.target.result;
+          localStorage.setItem('dashboardLogo', event.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Restore logo if saved
+    const savedLogo = localStorage.getItem('dashboardLogo');
+    if (savedLogo) {
+      dashboardLogo.src = savedLogo;
+    }
+  </script>
+</body>
+</html>
