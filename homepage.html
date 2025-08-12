@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Welcome to BulkSMS4</title>
+  <style>
+    /* Full screen canvas for live background */
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      overflow-x: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+      color: #0f0;
+      scroll-behavior: smooth;
+    }
+    #backgroundCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      display: block;
+    }
+    /* Content container on top of background */
+    .content {
+      position: relative;
+      z-index: 10;
+      max-width: 900px;
+      margin: 40px auto 80px auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 30px 40px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 0 20px #0f0;
+    }
+    h1, h2 {
+      text-shadow: 0 0 10px #0f0;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 0.3em;
+    }
+    p {
+      font-size: 1.15em;
+      margin-bottom: 2em;
+      line-height: 1.5;
+      color: #aaffaa;
+    }
+    /* Gallery container */
+    .gallery {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 3em;
+    }
+    .gallery img, .gallery video {
+      max-width: 280px;
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #0f0;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    .gallery img:hover, .gallery video:hover {
+      transform: scale(1.05);
+    }
+    .gallery video {
+      height: 180px;
+      object-fit: cover;
+    }
+    /* Call to action button */
+    .cta-btn {
+      background: #0f0;
+      color: black;
+      font-weight: bold;
+      padding: 15px 50px;
+      text-decoration: none;
+      border-radius: 30px;
+      font-size: 1.3em;
+      transition: background 0.3s ease;
+      display: inline-block;
+      margin-bottom: 3em;
+      box-shadow: 0 0 15px #0f0;
+    }
+    .cta-btn:hover {
+      background: #0a0;
+      color: white;
+    }
+    /* Section styling */
+    section {
+      text-align: left;
+      margin-bottom: 3em;
+      color: #aaffaa;
+      padding: 0 10px;
+    }
+    section h2 {
+      margin-bottom: 0.5em;
+      border-bottom: 2px solid #0f0;
+      padding-bottom: 6px;
+    }
+    section p {
+      color: #cceecc;
+    }
+    /* Footer with smooth links */
+    footer {
+      text-align: center;
+      color: #0a0;
+      margin: 30px 0;
+      font-size: 0.9em;
+    }
+    footer a {
+      color: #0f0;
+      text-decoration: none;
+      margin: 0 12px;
+      font-weight: bold;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="backgroundCanvas"></canvas>
+
+<div class="content">
+  <h1>Welcome to BulkSMS4 Platform</h1>
+  <p>Your ultimate solution for form building and campaign management.</p>
+
+  <div class="gallery" aria-label="Image and Video Gallery">
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Technology Image 1" />
+    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=400&q=80" alt="Technology Image 2" />
+    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=400&q=80" alt="Technology Image 3" />
+    <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=400&q=80" alt="Technology Image 4" />
+    <video src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.webm" autoplay loop muted playsinline></video>
+  </div>
+
+  <a href="login.html" class="cta-btn" role="button">Get Started</a>
+
+  <section id="about-us" tabindex="0">
+    <h2>About Us</h2>
+    <p>BulkSMS4 is dedicated to providing powerful, user-friendly platforms for your online marketing and data collection needs. Our form builder and campaign management tools are designed to be intuitive and efficient, helping businesses grow faster.</p>
+    <p>Founded in 2023, our mission is to deliver reliable and innovative technology solutions while maintaining top-notch customer support.</p>
+  </section>
+
+  <section id="terms" tabindex="0">
+    <h2>Terms and Conditions</h2>
+    <p>By using BulkSMS4, you agree to comply with all applicable laws and regulations. Our services are provided "as-is" without warranties of any kind. We reserve the right to update these terms at any time, and continued use of our services constitutes acceptance of those changes.</p>
+    <p>Users are responsible for maintaining the confidentiality of their login information. BulkSMS4 is not liable for any loss or damage resulting from unauthorized use of your account.</p>
+  </section>
+</div>
+
+<footer>
+  <a href="#about-us">About Us</a> |
+  <a href="#terms">Terms &amp; Conditions</a> |
+  <a href="login.html">Login</a>
+</footer>
+
+<script>
+(() => {
+  const canvas = document.getElementById('backgroundCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let animationFrameId = null;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Matrix green code rain theme
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+  const fontSize = 16;
+  const columns = Math.floor(width / fontSize);
+  const drops = new Array(columns).fill(1);
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = '#0F0';
+    ctx.font = fontSize + "px monospace";
+
+    for(let i = 0; i < drops.length; i++) {
+      const text = letters.charAt(Math.floor(Math.random() * letters.length));
+      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+      if(drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
+
+      drops[i]++;
+    }
+    animationFrameId = requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+</body>
+  </html>
