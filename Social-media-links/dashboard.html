@@ -2,17 +2,23 @@
 <html>
 <head>
   <title>📋 User Dashboard - Form Builder</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
   <style>
+    /* Existing styles */
     body {
       font-family: Arial, sans-serif;
       background: #f9f9f9;
       margin: 0;
       padding: 0;
+      position: relative;
+      overflow-x: hidden;
+      color: #0f0; /* make text green for matrix vibe */
     }
     .navbar {
       background: #0077cc;
@@ -21,6 +27,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
+      z-index: 10;
     }
     .navbar h1 { margin: 0; font-size: 20px; }
     .navbar button {
@@ -35,22 +43,27 @@
       max-width: 900px;
       margin: 20px auto;
       padding: 20px;
-      background: white;
+      background: rgba(0,0,0,0.6);
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
+      position: relative;
+      z-index: 10;
+      color: #0f0;
     }
     .section {
       margin-top: 30px;
     }
     h2 {
-      border-bottom: 2px solid #eee;
+      border-bottom: 2px solid #0f0;
       padding-bottom: 8px;
     }
     .card {
-      background: #f0f0f0;
+      background: rgba(0,0,0,0.3);
       padding: 10px;
       border-radius: 6px;
       margin: 10px 0;
+      color: #0f0;
+      font-family: monospace;
     }
     a.button {
       display: inline-block;
@@ -61,13 +74,28 @@
       text-decoration: none;
       border-radius: 5px;
     }
+
+    /* Matrix Canvas styling */
+    #backgroundCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      background: black;
+    }
   </style>
 </head>
 <body>
+  <!-- Matrix background canvas -->
+  <canvas id="backgroundCanvas"></canvas>
+
   <div class="navbar">
     <h1>📋 Form Builder Dashboard</h1>
     <button onclick="logout()">Logout</button>
   </div>  
+
   <div class="dashboard">
     <div>
       <a href="index.html" class="button">🛠 Build Form</a>
@@ -179,6 +207,47 @@
         });
       });
     }
+
+
+    // Matrix background animation
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
+    const fontSize = 16;
+    let columns = Math.floor(width / fontSize);
+    const drops = new Array(columns).fill(1);
+
+    function draw() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.fillStyle = '#0F0';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+
   </script>
 </body>
 </html>
