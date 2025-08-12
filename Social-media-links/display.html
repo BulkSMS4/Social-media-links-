@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
+    .form-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    h2, p { text-align: center; }
+    img { display: block; margin: auto; }
+  </style>
+</head>
+<body>
+  <div id="form" class="form-container">Loading form...</div>
+
+  <script>
+    function parseQuery() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedData = urlParams.get('data');
+      if (!encodedData) return null;
+      try {
+        return JSON.parse(decodeURIComponent(encodedData));
+      } catch {
+        return null;
+      }
+    }
+
+    const config = parseQuery();
+    const container = document.getElementById("form");
+
+    if (!config) {
+      container.innerHTML = "<p>❌ Invalid or missing form data.</p>";
+    } else {
+      let html = `<div style="background:${config.bgColor};color:${config.textColor};padding:20px;border-radius:10px;">`;
+
+      if (config.avatar) html += `<img src="${config.avatar}" style="width:60px;height:60px;border-radius:50%;margin-bottom:10px;">`;
+      if (config.banner) html += `<img src="${config.banner}" style="width:${config.bannerWidth}px;height:${config.bannerHeight}px;border-radius:8px;margin-bottom:10px;">`;
+      if (config.logo) html += `<img src="${config.logo}" style="width:${config.logoWidth}px;height:${config.logoHeight}px;margin-bottom:10px;">`;
+
+      if (config.title) html += `<h2 style="color:${config.titleColor};">${config.title}</h2>`;
+      if (config.description) html += `<p>${config.description}</p>`;
+      if (config.warning) html += `<p style="color:${config.warningColor};font-weight:bold;">${config.warning}</p>`;
+
+      html += `<form>`;
+
+      if (config.addAuth) {
+        html += `<input type="text" placeholder="${config.usernamePlaceholder}"><br>`;
+        html += `<input type="password" placeholder="${config.passwordPlaceholder}"><br>`;
+      }
+
+      if (config.frontDesc) html += `<label>${config.frontDesc}</label><input type="file"><br>`;
+      if (config.backDesc) html += `<label>${config.backDesc}</label><input type="file"><br>`;
+
+      if (config.extraDesc) html += `<p style="color:${config.extraDescColor};text-align:center;">${config.extraDesc}</p>`;
+
+      const allFields = (config.fields || []).concat((config.extraFields || "").split("\n"));
+      allFields.filter(f => f.trim()).forEach(f => {
+        html += `<input type="text" placeholder="${f.trim()}"><br>`;
+      });
+
+      html += `<button style="background:${config.btnColor};color:white;">${config.buttonText || "Submit"}</button>`;
+
+      if (config.footerText) html += `<p style="margin-top:20px;">${config.footerText}</p>`;
+      if (config.redirectDesc) html += `<p style="font-size:13px;color:gray;">${config.redirectDesc}</p>`;
+
+      html += `</form></div>`;
+      container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
