@@ -1,0 +1,57 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate Form</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.firebasestorage.app",
+  messagingSenderId: "588407428267",
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+  measurementId: "G-ZJ05T7YNSQ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+document.getElementById("generateBtn").addEventListener("click", async () => {
+  const title = document.getElementById("formTitle").value;
+  const content = document.getElementById("formContent").value;
+
+  if (!title || !content) {
+    alert("Please fill both fields");
+    return;
+  }
+
+  const docRef = await addDoc(collection(db, "forms"), {
+    title,
+    content,
+    createdAt: new Date().toISOString()
+  });
+
+  const link = `${location.origin}/form.html?id=${docRef.id}`;
+  document.getElementById("formLink").innerHTML = `✅ Generated! <a href="${link}" target="_blank">${link}</a>`;
+});
+
+  </script>
+  <style>
+    body { font-family: sans-serif; background: #f9f9f9; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    input, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
+    #formLink a { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔗 Generate Shareable Form</h2>
+    <input type="text" id="formTitle" placeholder="Form Title" />
+    <textarea id="formContent" placeholder="Paste generated HTML or form data here..." rows="10"></textarea>
+    <button id="generateBtn">✅ Generate Link</button>
+    <div id="formLink"></div>
+  </div>
+</body>
+</html>
