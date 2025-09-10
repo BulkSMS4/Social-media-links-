@@ -1,0 +1,69 @@
+<!DOCTYPE html><html>
+<head>
+  <title>📥 Form Feedback</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; color: #333; }
+    .entry {
+      border-bottom: 1px solid #eee;
+      padding: 15px 0;
+    }
+    .entry:last-child { border-bottom: none; }
+    .field { font-weight: bold; color: #2c3e50; }
+    .value { margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📥 Submitted Feedback</h2>
+    <div id="feedbackList">Loading...</div>
+  </div>  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadFeedback() {
+      const querySnapshot = await getDocs(collection(db, "submissions"));
+      const container = document.getElementById("feedbackList");
+      container.innerHTML = "";
+
+      if (querySnapshot.empty) {
+        container.innerHTML = "<p>No feedback found.</p>";
+        return;
+      }
+
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.className = "entry";
+        for (const key in data) {
+          const val = data[key];
+          div.innerHTML += `<div class='field'>${key}:</div><div class='value'>${val}</div>`;
+        }
+        container.appendChild(div);
+      });
+    }
+
+    loadFeedback();
+  </script></body>
+</html>
