@@ -17,8 +17,8 @@
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    z-index: 0;
-    pointer-events: none;
+    z-index: -1;           /* 👈 behind everything */
+    pointer-events: none;  /* 👈 don’t block clicks */
     background: black;
   }
   .header {
@@ -67,6 +67,8 @@
   .content {
     margin-top: 70px;
     height: calc(100% - 70px);
+    position: relative;
+    z-index: 5;
   }
   iframe {
     width: 100%;
