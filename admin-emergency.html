@@ -11,25 +11,28 @@
       color: lime;
       padding: 20px;
     }
+
     h1 {
       text-align: center;
       margin-bottom: 20px;
     }
-    textarea {
+
+    textarea, input {
       width: 100%;
-      height: 120px;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid lime;
       background: #111;
       color: lime;
-      border: 1px solid lime;
-      border-radius: 8px;
-      padding: 10px;
-      resize: none;
       font-size: 16px;
     }
-    input[type="file"] {
-      margin-top: 10px;
-      color: lime;
+
+    textarea {
+      height: 120px;
+      resize: none;
     }
+
     button {
       margin-top: 15px;
       padding: 10px 20px;
@@ -40,9 +43,11 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     button:hover {
       background: #00cc00;
     }
+
     #preview {
       margin-top: 15px;
       max-width: 100%;
@@ -55,6 +60,8 @@
   <h1>Post Emergency Message</h1>
 
   <textarea id="message" placeholder="Type your emergency message here..."></textarea>
+  <input type="text" id="phone" placeholder="Optional: Phone number (e.g. +123456789)">
+  <input type="url" id="link" placeholder="Optional: Link (e.g. https://example.com)">
   <input type="file" id="imageInput" accept="image/*">
   <img id="preview" src="" alt="">
   <br>
@@ -77,14 +84,13 @@
       measurementId: "G-ZJ05T7YNSQ"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // Preview selected image
     const imageInput = document.getElementById("imageInput");
     const preview = document.getElementById("preview");
+
     imageInput.addEventListener("change", () => {
       const file = imageInput.files[0];
       if (file) {
@@ -96,9 +102,11 @@
       }
     });
 
-    // Post emergency message
     async function postEmergency() {
       const message = document.getElementById("message").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const link = document.getElementById("link").value.trim();
+
       if (!message) {
         alert("❌ Please enter a message.");
         return;
@@ -107,7 +115,6 @@
       let imageUrl = "";
 
       try {
-        // Upload image if selected
         if (imageInput.files[0]) {
           const file = imageInput.files[0];
           const storageRef = storage.ref('emergency/' + file.name);
@@ -115,21 +122,26 @@
           imageUrl = await snapshot.ref.getDownloadURL();
         }
 
-        // Save message & image to Firestore
         await db.collection("emergency").doc("current").set({
           text: message,
           image: imageUrl || "",
+          phone: phone || "",
+          link: link || "",
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         alert("✅ Emergency message posted successfully!");
+
+        // Clear form
         document.getElementById("message").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("link").value = "";
         preview.src = "";
         preview.style.display = "none";
 
       } catch (error) {
         console.error("Error posting emergency message:", error);
-        alert("❌ Failed to post emergency message. Check console for details.");
+        alert("❌ Failed to post emergency message.");
       }
     }
   </script>
