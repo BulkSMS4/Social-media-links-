@@ -23,21 +23,6 @@
       background: black;
     }
 
-    /* Sidebar */
-    #sidebar {
-      position: fixed;
-      top: 0; 
-      left: -250px;   /* Hidden by default */
-      width: 250px;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      padding: 20px;
-      z-index: 2000;
-    }
-    #sidebar.active { left: 0; }
-
     /* Menu button */
     #menuBtn {
       position: fixed;
@@ -62,6 +47,20 @@
       background: rgba(0,0,0,0.85);
       z-index: 1000;
     }
+
+    /* Sidebar container (menu will be injected here) */
+    #sidebar {
+      position: fixed;
+      top: 0; 
+      left: -260px;   /* hidden by default */
+      width: 260px;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      z-index: 2000;
+    }
+    #sidebar.active { left: 0; }
   </style>
 </head>
 <body>
@@ -76,9 +75,7 @@
   <div id="sidebar"></div>
 
   <!-- Main Dashboard Content -->
-  <div id="content">
-    <!-- Home page will be loaded here -->
-  </div>
+  <div id="content"></div>
 
   <script>
     const sidebar = document.getElementById("sidebar");
@@ -120,9 +117,9 @@
       window.location.href = "admin-login.html";
     }
 
-    // Load default pages
-    loadMenu();       // load admin menu
-    loadPage("home.html");  // default content
+    // Default: load menu + home.html into content
+    loadMenu();
+    loadPage("home.html");
 
     // Green matrix background animation
     const canvas = document.getElementById("matrix");
@@ -138,7 +135,7 @@
     function drawMatrix() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0F0"; // green
+      ctx.fillStyle = "#0F0";
       ctx.font = fontSize + "px monospace";
 
       for (let i = 0; i < drops.length; i++) {
