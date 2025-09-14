@@ -1,98 +1,129 @@
-<!-- admin-emergency.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Emergency Message</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #000;
-    color: lime;
-    padding: 20px;
-  }
-  h1 { text-align: center; color: red; }
-  label { display: block; margin-top: 15px; font-weight: bold; }
-  textarea {
-    width: 100%; height: 100px; background: #111; color: lime;
-    border: 1px solid lime; border-radius: 6px; padding: 10px;
-    font-size: 14px;
-  }
-  input[type="file"] { margin-top: 10px; }
-  button {
-    margin-top: 15px;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 6px;
-    background: lime;
-    color: black;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  #preview {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid red;
-    border-radius: 12px;
-    background: rgba(0,0,0,0.9);
-    text-align: center;
-  }
-  #preview img {
-    max-width: 100%;
-    border-radius: 10px;
-    margin-top: 10px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Emergency Message</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: lime;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      background: #111;
+      color: lime;
+      border: 1px solid lime;
+      border-radius: 8px;
+      padding: 10px;
+      resize: none;
+      font-size: 16px;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+      color: lime;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: lime;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00cc00;
+    }
+    #preview {
+      margin-top: 15px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
+  <h1>Post Emergency Message</h1>
 
-<h1>⚡ Admin Emergency Message</h1>
+  <textarea id="message" placeholder="Type your emergency message here..."></textarea>
+  <input type="file" id="imageInput" accept="image/*">
+  <img id="preview" src="" alt="" style="display:none;">
+  <br>
+  <button onclick="postEmergency()">Post Emergency</button>
 
-<label for="message">Emergency Text:</label>
-<textarea id="message" placeholder="Write your emergency message here..."></textarea>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
-<label for="image">Upload Image:</label>
-<input type="file" id="image" accept="image/*">
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.firebasestorage.app",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+      measurementId: "G-ZJ05T7YNSQ"
+    };
 
-<button onclick="updateMessage()">Preview & Save</button>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-<div id="preview">
-  <p>🚨 Emergency message preview will appear here</p>
-</div>
-
-<script>
-  const messageInput = document.getElementById("message");
-  const imageInput = document.getElementById("image");
-  const preview = document.getElementById("preview");
-
-  function updateMessage() {
-    const text = messageInput.value || "🚨 No message provided.";
-    const file = imageInput.files[0];
-
-    let imgHTML = "";
-    if(file) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        imgHTML = `<img src="${e.target.result}" alt="Emergency Image">`;
-        renderPreview(text, imgHTML);
+    // Preview selected image
+    const imageInput = document.getElementById("imageInput");
+    const preview = document.getElementById("preview");
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+        preview.style.display = "block";
+      } else {
+        preview.src = "";
+        preview.style.display = "none";
       }
-      reader.readAsDataURL(file);
-    } else {
-      renderPreview(text, imgHTML);
+    });
+
+    // Post emergency message
+    async function postEmergency() {
+      const message = document.getElementById("message").value.trim();
+      if (!message) {
+        alert("Please enter a message.");
+        return;
+      }
+
+      let imageUrl = "";
+
+      // Upload image if selected
+      if (imageInput.files[0]) {
+        const file = imageInput.files[0];
+        const storageRef = storage.ref('emergency/' + file.name);
+        const snapshot = await storageRef.put(file);
+        imageUrl = await snapshot.ref.getDownloadURL();
+      }
+
+      // Save message & image to Firestore
+      await db.collection("emergency").doc("current").set({
+        text: message,
+        image: imageUrl || ""
+      });
+
+      alert("✅ Emergency message posted successfully!");
+      document.getElementById("message").value = "";
+      preview.src = "";
+      preview.style.display = "none";
     }
-  }
-
-  function renderPreview(text, imgHTML) {
-    preview.innerHTML = `
-      <p>${text}</p>
-      ${imgHTML}
-    `;
-
-    // Optional: save to server (requires backend)
-    // fetch("/save-emergency", { method: "POST", body: JSON.stringify({ text, img: imgHTML }) });
-  }
-</script>
-
+  </script>
 </body>
 </html>
