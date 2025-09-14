@@ -1,0 +1,29 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: black;
+  color: lime;
+}
+
+/* Sidebar */
+#sidebar {
+  width: 250px;
+  background: rgba(0,0,0,0.95);
+  padding: 20px;
+}
+
+#sidebar a {
+  display: block;
+  padding: 12px;
+  color: lime;
+  text-decoration: none;
+  border-bottom: 1px solid #333;
+}
+
+#sidebar a:hover { background: #111; }
+
+/* Logout special style */
+#sidebar a.logout {
+  color: red;
+  font-weight: bold;
+}
