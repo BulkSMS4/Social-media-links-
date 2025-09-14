@@ -1,86 +1,96 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Menu</title>
-  <style>
-    #sidebar {
-      position: fixed;
-      top: 0; 
-      left: -250px;   /* Hidden by default */
-      width: 250px;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      padding: 20px;
-      z-index: 2000;
-    }
-    #sidebar.active { left: 0; }
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
 
-    #sidebar a {
-      display: block;
-      padding: 12px;
-      color: lime;
-      text-decoration: none;
-      border-bottom: 1px solid #333;
-    }
-    #sidebar a:hover { background: #111; }
+  /* Sidebar */
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px; /* Hidden by default */
+    width: 260px;
+    height: 100%;
+    background: linear-gradient(180deg, #000 0%, #001a00 100%);
+    border-right: 2px solid lime;
+    transition: left 0.3s ease-in-out;
+    padding-top: 60px;
+    z-index: 2000;
+    box-shadow: 4px 0 15px rgba(0,255,0,0.3);
+  }
+  #sidebar.active { left: 0; }
 
-    /* Logout */
-    #sidebar a.logout {
-      color: red;
-      font-weight: bold;
-    }
+  /* Sidebar links */
+  #sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    color: #0f0;
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 1px solid #003300;
+    transition: background 0.2s, color 0.2s;
+  }
+  #sidebar a:hover {
+    background: #003300;
+    color: #fff;
+  }
 
-    #menuBtn {
-      position: fixed;
-      top: 15px; left: 15px;
-      background: lime;
-      color: black;
-      padding: 10px 15px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      border-radius: 5px;
-      z-index: 2100;
-    }
-  </style>
-</head>
-<body>
+  /* Logout link */
+  #sidebar a.logout {
+    color: red;
+    border-top: 2px solid #003300;
+    margin-top: 20px;
+  }
+  #sidebar a.logout:hover {
+    background: #330000;
+    color: #fff;
+  }
 
-  <button id="menuBtn">☰ Menu</button>
+  /* Toggle button */
+  #menuToggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    background: lime;
+    color: black;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2100;
+    transition: background 0.2s;
+  }
+  #menuToggle:hover {
+    background: #00cc00;
+  }
 
-  <div id="sidebar">
-    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
-    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
-    <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
-    <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
-    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
-    <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
-    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
-  </div>
+  /* Header inside sidebar */
+  #sidebar h2 {
+    color: #0f0;
+    text-align: center;
+    margin: 0 0 20px;
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+</style>
 
-  <script>
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
+<div id="menuToggle" onclick="toggleMenu()">☰</div>
 
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("active");
-    });
+<div id="sidebar">
+  <h2>⚡ User Panel</h2>
+  <a href="#" onclick="parent.loadPage('home.html')">🏠 Home</a>
+  <a href="#" onclick="parent.loadPage('form-builder.html')">📝 Form Builder</a>
+  <a href="#" onclick="parent.loadPage('victims.html')">👀 View Victims</a>
+  <a href="#" onclick="parent.loadPage('links.html')">🔗 Links</a>
+  <a href="#" onclick="parent.loadPage('atm.html')">🏦 ATM</a>
+  <a href="#" onclick="parent.logout()" class="logout">🚪 Logout</a>
+</div>
 
-    function loadPage(file) {
-      if (window.parent && window.parent.loadPage) {
-        window.parent.loadPage(file);
-      }
-      sidebar.classList.remove("active");
-    }
-
-    function logout() {
-      localStorage.removeItem("role");
-      window.location.href = "login.html";
-    }
-  </script>
-</body>
-</html>
+<script>
+  function toggleMenu() {
+    document.getElementById('sidebar').classList.toggle('active');
+  }
+</script>
