@@ -14,7 +14,7 @@
       overflow: hidden;
     }
 
-    /* Canvas for green matrix background */
+    /* Matrix background */
     #matrix {
       position: fixed;
       top: 0; left: 0;
@@ -23,21 +23,73 @@
       background: black;
     }
 
-    /* Menu button */
-    #menuBtn {
+    /* Sidebar */
+    #sidebar {
       position: fixed;
-      top: 15px; left: 15px;
-      background: lime;
-      color: black;
-      padding: 10px 15px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      border-radius: 5px;
-      z-index: 2100;
+      top: 0;
+      left: -260px; /* Hidden by default */
+      width: 260px;
+      height: 100%;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      border-right: 2px solid lime;
+      transition: left 0.3s ease-in-out;
+      padding-top: 60px;
+      z-index: 2000;
+      box-shadow: 4px 0 15px rgba(0,255,0,0.3);
+    }
+    #sidebar.active { left: 0; }
+
+    #sidebar h2 {
+      color: #0f0;
+      text-align: center;
+      margin: 0 0 20px;
+      font-size: 22px;
+      letter-spacing: 1px;
     }
 
-    /* Main content */
+    #sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      color: #0f0;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px solid #003300;
+      transition: background 0.2s, color 0.2s;
+    }
+    #sidebar a:hover {
+      background: #003300;
+      color: #fff;
+    }
+    #sidebar a.logout {
+      color: red;
+      border-top: 2px solid #003300;
+      margin-top: 20px;
+    }
+    #sidebar a.logout:hover {
+      background: #330000;
+      color: #fff;
+    }
+
+    /* Toggle button */
+    #menuToggle {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      font-size: 24px;
+      background: lime;
+      color: black;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2100;
+      transition: background 0.2s;
+    }
+    #menuToggle:hover { background: #00cc00; }
+
+    /* Content */
     #content {
       margin: 0;
       padding: 20px;
@@ -47,86 +99,65 @@
       background: rgba(0,0,0,0.85);
       z-index: 1000;
     }
-
-    /* Sidebar container (menu will be injected here) */
-    #sidebar {
-      position: fixed;
-      top: 0; 
-      left: -260px;   /* hidden by default */
-      width: 260px;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      z-index: 2000;
-    }
-    #sidebar.active { left: 0; }
   </style>
 </head>
 <body>
-
   <!-- Matrix background -->
   <canvas id="matrix"></canvas>
 
-  <!-- Menu button -->
-  <button id="menuBtn">☰ Menu</button>
+  <!-- Toggle button -->
+  <div id="menuToggle" onclick="toggleMenu()">☰</div>
 
-  <!-- Sidebar (menu will load dynamically) -->
-  <div id="sidebar"></div>
+  <!-- Sidebar Menu -->
+  <div id="sidebar">
+    <h2>⚡ Admin Panel</h2>
+    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
+    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
+    <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
+    <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
+    <a href="#" onclick="loadPage('members.html')">👥 Members</a>
+    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
+    <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
+    <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency</a>
+    <a href="#" onclick="loadPage('upload-logo.html')">🖼️ Upload Logo</a>
+    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
+  </div>
 
-  <!-- Main Dashboard Content -->
+  <!-- Main Content -->
   <div id="content"></div>
 
   <script>
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const content = document.getElementById("content");
+    function toggleMenu() {
+      document.getElementById('sidebar').classList.toggle('active');
+    }
 
-    // Toggle sidebar
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.toggle("active");
-    });
-
-    // Load external HTML page dynamically into content
     async function loadPage(file) {
       try {
         const response = await fetch(file);
         const html = await response.text();
-        content.innerHTML = html;
-        sidebar.classList.remove("active"); // hide sidebar after click
+        document.getElementById("content").innerHTML = html;
+        document.getElementById("sidebar").classList.remove("active");
       } catch (err) {
-        content.innerHTML = "<p style='color:red'>Error loading " + file + "</p>";
+        document.getElementById("content").innerHTML =
+          "<p style='color:red'>Error loading " + file + "</p>";
       }
     }
 
-    // Load the sidebar menu (admin version)
-    async function loadMenu() {
-      try {
-        const response = await fetch("admin-menu.html");
-        const html = await response.text();
-        sidebar.innerHTML = html;
-      } catch (err) {
-        sidebar.innerHTML = "<p style='color:red'>Error loading menu</p>";
-      }
-    }
-
-    // Logout function (called from menu)
     function logout() {
       sessionStorage.clear();
       localStorage.clear();
       window.location.href = "admin-login.html";
     }
 
-    // Default: load menu + home.html into content
-    loadMenu();
+    // Default load
     loadPage("home.html");
 
-    // Green matrix background animation
+    // Matrix effect
     const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
-
     const letters = "01";
     const fontSize = 16;
     const columns = canvas.width / fontSize;
@@ -137,11 +168,9 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#0F0";
       ctx.font = fontSize + "px monospace";
-
       for (let i = 0; i < drops.length; i++) {
         const text = letters[Math.floor(Math.random() * letters.length)];
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
@@ -150,6 +179,5 @@
     }
     setInterval(drawMatrix, 50);
   </script>
-
 </body>
 </html>
