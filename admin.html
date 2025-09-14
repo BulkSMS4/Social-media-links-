@@ -47,6 +47,12 @@
     }
     #sidebar a:hover { background: #111; }
 
+    /* Logout special style */
+    #sidebar a.logout {
+      color: red;
+      font-weight: bold;
+    }
+
     /* Menu button */
     #menuBtn {
       position: fixed;
@@ -93,6 +99,7 @@
     <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
     <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency Message</a>
     <a href="#" onclick="loadPage('upload-logo.html')">🖼️ Upload Logo</a>
+    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
   </div>
 
   <!-- Main Dashboard Content -->
@@ -120,6 +127,13 @@
       } catch (err) {
         content.innerHTML = "<p style='color:red'>Error loading " + file + "</p>";
       }
+    }
+
+    // Logout function
+    function logout() {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = "admin-login.html"; // change if your login page has another name
     }
 
     // Load home.html by default
