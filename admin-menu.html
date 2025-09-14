@@ -68,8 +68,8 @@
   <a href="#" data-page="members.html">👥 Members</a>
   <a href="#" data-page="links.html">🔗 Links</a>
   <a href="#" data-page="generate.html">⚙️ Generate</a>
-  <!-- Updated to admin-emergency.html -->
-  <a href="#" data-page="admin-emergency.html">🚨 Emergency</a>
+  <!-- Post Emergency link for admin -->
+  <a href="#" data-page="admin-emergency.html">🚨 Post Emergency</a>
   <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
   <a href="#" class="logout">🚪 Logout</a>
 </div>
@@ -86,7 +86,7 @@
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const page = link.getAttribute('data-page');
-      // Tell parent dashboard to load page in iframe
+      // Load page inside dashboard iframe
       if (window.parent && window.parent.loadPage) {
         window.parent.loadPage(page);
       } else if (window.parent && window.parent.document.getElementById('dashboardFrame')) {
