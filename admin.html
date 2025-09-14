@@ -26,14 +26,15 @@
     /* Sidebar */
     #sidebar {
       position: fixed;
-      top: 0; left: -250px;
+      top: 0; 
+      left: -250px;   /* Hidden by default */
       width: 250px;
       height: 100%;
       background: rgba(0,0,0,0.95);
       overflow-y: auto;
       transition: left 0.3s ease;
       padding: 20px;
-      z-index: 1000;
+      z-index: 2000;
     }
     #sidebar.active { left: 0; }
 
@@ -57,21 +58,18 @@
       cursor: pointer;
       font-weight: bold;
       border-radius: 5px;
-      z-index: 1100;
+      z-index: 2100;
     }
 
     /* Main content */
     #content {
-      margin-left: 0;
+      margin: 0;
+      padding: 20px;
       width: 100%;
       height: 100%;
-    }
-
-    #dashboardFrame {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: white;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
     }
   </style>
 </head>
@@ -99,26 +97,32 @@
 
   <!-- Main Dashboard Content -->
   <div id="content">
-    <iframe id="dashboardFrame"></iframe>
+    <!-- Home page will be loaded here -->
   </div>
 
   <script>
     const sidebar = document.getElementById("sidebar");
     const menuBtn = document.getElementById("menuBtn");
-    const frame = document.getElementById("dashboardFrame");
+    const content = document.getElementById("content");
 
     // Toggle sidebar
     menuBtn.addEventListener("click", () => {
       sidebar.classList.toggle("active");
     });
 
-    // Load external HTML page inside iframe
-    function loadPage(file) {
-      frame.src = file;
-      sidebar.classList.remove("active");
+    // Load external HTML page dynamically
+    async function loadPage(file) {
+      try {
+        const response = await fetch(file);
+        const html = await response.text();
+        content.innerHTML = html;
+        sidebar.classList.remove("active"); // hide sidebar after click
+      } catch (err) {
+        content.innerHTML = "<p style='color:red'>Error loading " + file + "</p>";
+      }
     }
 
-    // Load home.html by default (Bank + Tracking)
+    // Load home.html by default
     loadPage("home.html");
 
     // Green matrix background animation
