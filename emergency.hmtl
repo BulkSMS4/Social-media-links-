@@ -1,33 +1,109 @@
-<!-- emergency.html -->
-<style>
-  #emergencyMessage {
-    background: rgba(0, 0, 0, 0.9);
-    border: 1px solid red;
-    border-radius: 12px;
-    padding: 15px;
-    margin: 20px auto;
-    color: red;
-    max-width: 1000px;
-    text-align: center;
-    font-size: 16px;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Message</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: lime;
+      margin: 0;
+      padding: 20px;
+    }
 
-  #emergencyMessage img {
-    max-width: 100%;
-    border-radius: 10px;
-    margin-top: 10px;
-  }
+    #emergencyMessage {
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid red;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px auto;
+      color: red;
+      max-width: 1000px;
+      text-align: center;
+      font-size: 16px;
+      box-shadow: 0 0 20px rgba(255,0,0,0.6);
+      transition: all 0.3s ease;
+    }
 
-  #emergencyMessage a {
-    color: lime;
-    font-weight: bold;
-    text-decoration: underline;
-  }
-</style>
+    #emergencyMessage img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
 
-<div id="emergencyMessage">
-  <!-- Replace text and image below -->
-  <p>🚨 This is an emergency message. Please take immediate action!</p>
-  <img src="emergency-image.jpg" alt="Emergency Image">
-  <p>For more info, call <a href="tel:+123456789">+123456789</a> or visit <a href="https://example.com" target="_blank">this link</a>.</p>
-</div>
+    #emergencyMessage a {
+      color: lime;
+      font-weight: bold;
+      text-decoration: underline;
+    }
+
+    /* Optional: Flash effect when new message arrives */
+    .flash {
+      animation: flashAnimation 1s ease;
+    }
+
+    @keyframes flashAnimation {
+      0% { background-color: rgba(255,0,0,0.2); }
+      50% { background-color: rgba(255,0,0,0.5); }
+      100% { background-color: rgba(0,0,0,0.9); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="emergencyMessage">
+    🚨 Loading emergency message...
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // -------------------------
+    // Firebase config
+    // -------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.firebasestorage.app",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+      measurementId: "G-ZJ05T7YNSQ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const emergencyDiv = document.getElementById("emergencyMessage");
+
+    // -------------------------
+    // Real-time listener
+    // -------------------------
+    db.collection("emergency").doc("current")
+      .onSnapshot(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          let html = '';
+
+          if (data.text) html += `<p>${data.text}</p>`;
+          if (data.image) html += `<img src="${data.image}" alt="Emergency Image">`;
+          if (data.phone) html += `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>`;
+          if (data.link) html += `<p>🔗 More info: <a href="${data.link}" target="_blank">${data.link}</a></p>`;
+
+          emergencyDiv.innerHTML = html;
+
+          // Flash effect to highlight new message
+          emergencyDiv.classList.add('flash');
+          setTimeout(() => emergencyDiv.classList.remove('flash'), 1000);
+
+        } else {
+          emergencyDiv.innerHTML = "🚨 No emergency messages at the moment.";
+        }
+      });
+  </script>
+
+</body>
+</html>
