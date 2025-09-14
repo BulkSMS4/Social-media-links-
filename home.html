@@ -164,27 +164,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Load emergency message
-    async function loadEmergency() {
-      try {
-        const doc = await db.collection("emergency").doc("current").get();
+    // -----------------------------
+    // Real-time Emergency Listener
+    // -----------------------------
+    const emergencyBox = document.getElementById("emergencyBox");
+    db.collection("emergency").doc("current")
+      .onSnapshot((doc) => {
         if (doc.exists) {
           const data = doc.data();
           let html = '';
           if (data.text) html += `<p>${data.text}</p>`;
           if (data.image) html += `<img src="${data.image}" alt="Emergency Image">`;
-          document.getElementById("emergencyBox").innerHTML = html;
+          emergencyBox.innerHTML = html;
         } else {
-          document.getElementById("emergencyBox").innerText = "🚨 No emergency messages at the moment.";
+          emergencyBox.innerText = "🚨 No emergency messages at the moment.";
         }
-      } catch (err) {
-        document.getElementById("emergencyBox").innerText = "🚨 Failed to load emergency message.";
-        console.error(err);
-      }
-    }
-
-    loadEmergency();
-    setInterval(loadEmergency, 10000); // refresh every 10s
+      });
 
     // Copy link function
     function copyText(id) {
@@ -205,5 +200,4 @@
   </script>
 
 </body>
-  </html>
-  
+</html>
