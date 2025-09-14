@@ -72,3 +72,34 @@
   <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
   <a href="#" class="logout">🚪 Logout</a>
 </div>
+
+<script>
+  // Toggle sidebar
+  function toggleMenu() {
+    document.getElementById('sidebar').classList.toggle('active');
+  }
+
+  // Handle clicks on all links except logout
+  const links = document.querySelectorAll('#sidebar a[data-page]');
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const page = link.getAttribute('data-page');
+      // Tell parent dashboard to load page in iframe
+      if (window.parent && window.parent.loadPage) {
+        window.parent.loadPage(page);
+      } else if (window.parent && window.parent.document.getElementById('dashboardFrame')) {
+        window.parent.document.getElementById('dashboardFrame').src = page;
+      }
+    });
+  });
+
+  // Handle logout
+  const logoutLink = document.querySelector('#sidebar a.logout');
+  logoutLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.parent && window.parent.logout) {
+      window.parent.logout();
+    }
+  });
+</script>
