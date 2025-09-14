@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Menu</title>
+  <style>
+    #sidebar {
+      position: fixed;
+      top: 0; 
+      left: -250px;   /* Hidden by default */
+      width: 250px;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      padding: 20px;
+      z-index: 2000;
+    }
+    #sidebar.active { left: 0; }
+
+    #sidebar a {
+      display: block;
+      padding: 12px;
+      color: lime;
+      text-decoration: none;
+      border-bottom: 1px solid #333;
+    }
+    #sidebar a:hover { background: #111; }
+
+    /* Logout */
+    #sidebar a.logout {
+      color: red;
+      font-weight: bold;
+    }
+
+    #menuBtn {
+      position: fixed;
+      top: 15px; left: 15px;
+      background: lime;
+      color: black;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+      z-index: 2100;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="menuBtn">☰ Menu</button>
+
+  <div id="sidebar">
+    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
+    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
+    <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
+    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
+    <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
+    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("active");
+    });
+
+    function loadPage(file) {
+      if (window.parent && window.parent.loadPage) {
+        window.parent.loadPage(file);
+      }
+      sidebar.classList.remove("active");
+    }
+
+    function logout() {
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
