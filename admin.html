@@ -162,7 +162,11 @@
           return res.text();
         })
         .then(html => {
-          contentDiv.innerHTML = html;
+          // Extract only <body> contents so the dashboard stays intact
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+          const bodyContent = doc.body.innerHTML;
+          contentDiv.innerHTML = bodyContent;
         })
         .catch(err => {
           contentDiv.innerHTML = `<h2 style="color:red;">❌ ${err.message}</h2>`;
