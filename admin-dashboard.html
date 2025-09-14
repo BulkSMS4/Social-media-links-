@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: black;
+      color: lime;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #menuToggle {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      font-size: 24px;
+      background: lime;
+      color: black;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2100;
+      transition: background 0.2s;
+    }
+    #menuToggle:hover { background: #00cc00; }
+
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px; 
+      width: 260px;
+      height: 100%;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      border-right: 2px solid lime;
+      transition: left 0.3s ease-in-out;
+      padding-top: 60px;
+      z-index: 2000;
+      box-shadow: 4px 0 15px rgba(0,255,0,0.3);
+    }
+    #sidebar.active { left: 0; }
+
+    #content {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+    }
+
+    #matrix {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: black;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Matrix Background -->
+  <canvas id="matrix"></canvas>
+
+  <!-- Menu Toggle -->
+  <div id="menuToggle" onclick="toggleMenu()">☰</div>
+
+  <!-- Admin Menu -->
+  <div id="sidebar"></div>
+
+  <!-- Main Content -->
+  <div id="content">
+    <iframe id="dashboardFrame" src="home.html" style="width:100%; height:100%; border:none;"></iframe>
+  </div>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const menuToggle = document.getElementById("menuToggle");
+
+    function toggleMenu() {
+      sidebar.classList.toggle("active");
+    }
+
+    async function loadMenu() {
+      try {
+        const response = await fetch("admin-menu.html");
+        const html = await response.text();
+        sidebar.innerHTML = html;
+      } catch (err) {
+        sidebar.innerHTML = "<p style='color:red'>Error loading menu</p>";
+      }
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = "admin-login.html";
+    }
+
+    loadMenu();
+
+    // Matrix Background
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = "01";
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
+  </script>
+
+</body>
+</html>
