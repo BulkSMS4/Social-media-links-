@@ -1,113 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: black;
-    color: lime;
-    height: 100vh;
-    overflow: hidden;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
 
-  /* Sidebar container */
-  #sidebarContainer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 2000;
-  }
+    /* Menu toggle button */
+    #menuToggle {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      font-size: 24px;
+      background: lime;
+      color: black;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2100;
+      transition: background 0.2s;
+    }
+    #menuToggle:hover {
+      background: #00cc00;
+    }
 
-  /* Toggle button */
-  #menuToggle {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    font-size: 24px;
-    background: lime;
-    color: black;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 2100;
-  }
+    /* Sidebar */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      border-right: 2px solid lime;
+      transition: left 0.3s ease-in-out;
+      padding-top: 60px;
+      z-index: 2000;
+      box-shadow: 4px 0 15px rgba(0,255,0,0.3);
+    }
+    #sidebar.active { left: 0; }
 
-  /* Main content iframe */
-  #dashboardFrame {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-</style>
+    /* Sidebar links */
+    #sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      color: #0f0;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px solid #003300;
+      transition: background 0.2s, color 0.2s;
+    }
+    #sidebar a:hover {
+      background: #003300;
+      color: #fff;
+    }
+    #sidebar a.logout {
+      color: red;
+      border-top: 2px solid #003300;
+      margin-top: 20px;
+    }
+    #sidebar a.logout:hover {
+      background: #330000;
+      color: #fff;
+    }
+    #sidebar h2 {
+      color: #0f0;
+      text-align: center;
+      margin: 0 0 20px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    /* iframe for content */
+    #dashboardFrame {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
 </head>
 <body>
 
-<!-- Menu toggle -->
-<div id="menuToggle">☰</div>
+  <div id="menuToggle" onclick="toggleMenu()">☰ Menu</div>
 
-<!-- Sidebar container -->
-<div id="sidebarContainer"></div>
+  <div id="sidebar">
+    <h2>⚡ Admin Panel</h2>
+    <a href="#" data-page="home.html">🏠 Home</a>
+    <a href="#" data-page="form-builder.html">📝 Form Builder</a>
+    <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
+    <a href="#" data-page="feedback.html">💬 Feedback</a>
+    <a href="#" data-page="victims.html">👀 View Victims</a>
+    <a href="#" data-page="members.html">👥 Members</a>
+    <a href="#" data-page="links.html">🔗 Links</a>
+    <a href="#" data-page="generate.html">⚙️ Generate</a>
+    <a href="#" data-page="admin-emergency.html">🚨 Admin Emergency</a>
+    <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
+    <a href="#" class="logout">🚪 Logout</a>
+  </div>
 
-<!-- Main content -->
-<iframe id="dashboardFrame" src="home.html"></iframe>
+  <!-- Dashboard content -->
+  <iframe id="dashboardFrame" src="home.html"></iframe>
 
-<script>
-  const sidebarContainer = document.getElementById('sidebarContainer');
-  const menuToggle = document.getElementById('menuToggle');
-  const dashboardFrame = document.getElementById('dashboardFrame');
-
-  // Load admin menu
-  async function loadAdminMenu() {
-    try {
-      const res = await fetch('admin-menu.html');
-      const html = await res.text();
-      sidebarContainer.innerHTML = html;
-
-      // Add toggle functionality after menu is loaded
-      const sidebar = sidebarContainer.querySelector('#sidebar');
-      menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('active');
-      });
-
-      // Override menu links to load pages in iframe
-      const links = sidebar.querySelectorAll('a');
-      links.forEach(link => {
-        link.addEventListener('click', (e) => {
-          const page = link.getAttribute('data-page') || link.getAttribute('href');
-          if (page && !link.classList.contains('logout')) {
-            e.preventDefault();
-            dashboardFrame.src = page;
-            sidebar.classList.remove('active');
-          }
-        });
-      });
-
-      // Override logout link
-      const logoutLink = sidebar.querySelector('.logout');
-      if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          sessionStorage.clear();
-          localStorage.clear();
-          window.location.href = "admin-login.html";
-        });
-      }
-
-    } catch (err) {
-      sidebarContainer.innerHTML = "<p style='color:red'>Failed to load admin menu.</p>";
-      console.error(err);
+  <script>
+    function toggleMenu() {
+      document.getElementById('sidebar').classList.toggle('active');
     }
-  }
 
-  loadAdminMenu();
-</script>
+    const links = document.querySelectorAll('#sidebar a[data-page]');
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = link.getAttribute('data-page');
+        document.getElementById('dashboardFrame').src = page;
+        document.getElementById('sidebar').classList.remove('active');
+      });
+    });
 
+    document.querySelector('#sidebar a.logout').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert("Logging out..."); // Replace with real logout
+    });
+  </script>
 </body>
 </html>
