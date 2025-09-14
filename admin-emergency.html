@@ -11,12 +11,10 @@
       color: lime;
       padding: 20px;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 20px;
     }
-
     textarea, input {
       width: 100%;
       margin-top: 10px;
@@ -27,12 +25,7 @@
       color: lime;
       font-size: 16px;
     }
-
-    textarea {
-      height: 120px;
-      resize: none;
-    }
-
+    textarea { height: 120px; resize: none; }
     button {
       margin-top: 15px;
       padding: 10px 20px;
@@ -43,11 +36,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
-    button:hover {
-      background: #00cc00;
-    }
-
+    button:hover { background: #00cc00; }
     #preview {
       margin-top: 15px;
       max-width: 100%;
@@ -65,15 +54,15 @@
   <input type="file" id="imageInput" accept="image/*">
   <img id="preview" src="" alt="">
   <br>
-  <button onclick="postEmergency()">Post Emergency</button>
+  <button id="postBtn" onclick="postEmergency()">Post Emergency</button>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -87,10 +76,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
+    const auth = firebase.auth();
 
     const imageInput = document.getElementById("imageInput");
     const preview = document.getElementById("preview");
+    const postBtn = document.getElementById("postBtn");
 
+    // Preview selected image
     imageInput.addEventListener("change", () => {
       const file = imageInput.files[0];
       if (file) {
@@ -99,6 +91,19 @@
       } else {
         preview.src = "";
         preview.style.display = "none";
+      }
+    });
+
+    // Check if user is admin
+    const ADMIN_UID = "xjsW37kcdzTrdJddHjvhmdpFeV22";
+
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        alert("❌ Please log in as admin to post emergency messages.");
+        postBtn.disabled = true;
+      } else if (user.uid !== ADMIN_UID) {
+        alert("❌ You are not authorized to post emergency messages.");
+        postBtn.disabled = true;
       }
     });
 
@@ -141,7 +146,7 @@
 
       } catch (error) {
         console.error("Error posting emergency message:", error);
-        alert("❌ Failed to post emergency message.");
+        alert("❌ Failed to post emergency message: " + error.message);
       }
     }
   </script>
