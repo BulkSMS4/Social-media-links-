@@ -1,4 +1,3 @@
-<!-- home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,7 +54,7 @@
 
     .dashboard-section p {
       font-size: 14px;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
     }
 
     .link-box {
@@ -63,10 +62,16 @@
       padding: 8px;
       border: 1px solid lime;
       border-radius: 6px;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       font-size: 14px;
       word-break: break-all;
       color: lime;
+    }
+
+    .link-desc {
+      font-size: 13px;
+      color: #adff2f;
+      margin-bottom: 8px;
     }
 
     .btn {
@@ -100,13 +105,24 @@
     <!-- 🏛️ Bank Section -->
     <div class="dashboard-section">
       <h2>🏛️ BANK</h2>
+
+      <!-- Copy Link -->
       <p>Copy this link and send to your client:</p>
       <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
+      <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
       <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
-      <button class="btn btn-lime" onclick="openInDashboard('https://bulksms4.github.io/BANKING/')">
+
+      <!-- Open Account -->
+      <p>Open account here to register:</p>
+      <div class="link-desc">➡️ Click to open the registration page to start creating a client account.</div>
+      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://sp0m.com')">
         Open Account
       </button>
-      <button class="btn btn-green" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
+
+      <!-- Credit Account -->
+      <p>Credit your bank account:</p>
+      <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
+      <button class="btn btn-green" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
         💵💰 Credited your bank account 🪙
       </button>
     </div>
@@ -114,14 +130,18 @@
     <!-- ✈️🚢 Track Package Section -->
     <div class="dashboard-section">
       <h2>✈️🚢 Track Package 🛍️🛒</h2>
-      <p>Give this link to your client to track the package you send 🛍️🧑‍💻🚚:</p>
+
+      <!-- Copy Link -->
+      <p>Copy this link and send to your client:</p>
       <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
+      <div class="link-desc">➡️ Give this link to your client to track the package you send.</div>
       <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
-      <button class="btn btn-lime" onclick="openInDashboard('https://x-cargo-exprees.web.app/')">
-        Open Tracking
-      </button>
-      <button class="btn btn-green" onclick="openInDashboard('https://x-cargo-exprees.web.app/create')">
-        ➕ Create Package
+
+      <!-- Open Tracking -->
+      <p>Open the account to create packages:</p>
+      <div class="link-desc">➡️ Open the account here to start creating the package for your client.</div>
+      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/')">
+        Open Tracking Account here👇
       </button>
     </div>
   </div>
@@ -185,4 +205,4 @@
   </script>
 
 </body>
-</html>
+        </html>
