@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>📋 User Dashboard - Form Builder</title>
   <meta charset="UTF-8" />
@@ -17,29 +17,38 @@
       overflow: hidden;
       position: relative;
     }
-    .navbar {
-      background: #007700cc;
-      color: white;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      z-index: 2;
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -250px; /* hidden by default */
+      width: 250px;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      padding: 20px;
+      z-index: 2000;
     }
-    .navbar h1 {
-      margin: 0;
-      font-size: 20px;
-    }
-    .navbar button {
-      background: white;
-      color: #007700;
-      padding: 8px 16px;
+    #sidebar.active { left: 0; }
+
+    /* Menu button */
+    #menuBtn {
+      position: fixed;
+      top: 15px; left: 15px;
+      background: lime;
+      color: black;
+      padding: 10px 15px;
       border: none;
-      border-radius: 4px;
       cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+      z-index: 2100;
     }
-    .dashboard {
+
+    /* Content area */
+    #content {
       max-width: 900px;
       margin: 20px auto;
       padding: 20px;
@@ -49,11 +58,9 @@
       position: relative;
       z-index: 2;
       overflow-y: auto;
-      height: calc(100vh - 70px);
+      height: calc(100vh - 40px);
     }
-    .section {
-      margin-top: 30px;
-    }
+
     h2 {
       border-bottom: 2px solid #0f0;
       padding-bottom: 8px;
@@ -66,17 +73,8 @@
       margin: 10px 0;
       color: #aaffaa;
     }
-    a.button {
-      display: inline-block;
-      margin: 10px 5px;
-      padding: 10px 20px;
-      background: #007700;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      font-weight: bold;
-    }
-    /* Canvas covers whole background */
+
+    /* Canvas background */
     #backgroundCanvas {
       position: fixed;
       top: 0; left: 0;
@@ -90,20 +88,14 @@
 <body>
   <canvas id="backgroundCanvas"></canvas>
 
-  <div class="navbar">
-    <h1>📋 Form Builder Dashboard</h1>
-    <button onclick="logout()">Logout</button>
-  </div>
+  <!-- Menu button -->
+  <button id="menuBtn">☰ Menu</button>
 
-  <div class="dashboard">
-    <div>
-      <a href="Social-media-links/index.html" class="button" target="_blank">🛠 Build Form</a>
-      <a href="Social-media-links/forms.html" class="button" target="_blank">🔗 My Links</a>
-      <a href="Social-media-links/victims.html" class="button" target="_blank">👥 View Victims</a>
-      <a href="Social-media-links/bank.html" class="button" target="_blank">🏦 Bank</a>
-      <a href="Social-media-links/tracking.html" class="button" target="_blank">📦 Tracking</a>
-    </div>
+  <!-- Sidebar (menu loads dynamically) -->
+  <div id="sidebar"></div>
 
+  <!-- Dashboard content -->
+  <div id="content">
     <div class="section" id="forms">
       <h2>🔗 My Created Links</h2>
       <div id="formsList">Loading forms...</div>
@@ -131,7 +123,25 @@
 
     let currentUserEmail = null;
 
-    // Redirect to login if no user
+    // Sidebar toggle
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("active");
+    });
+
+    // Load user menu
+    async function loadMenu() {
+      try {
+        const res = await fetch("user-menu.html");
+        const html = await res.text();
+        sidebar.innerHTML = html;
+      } catch (err) {
+        sidebar.innerHTML = "<p style='color:red'>Error loading menu</p>";
+      }
+    }
+
+    // Auth check
     auth.onAuthStateChanged(async (user) => {
       if (!user) {
         window.location.href = "login.html";
@@ -144,9 +154,6 @@
           return auth.signOut();
         }
         const userData = docSnap.data();
-
-        // Removed admin redirect to keep user here
-
         if (userData.paid === false) {
           return window.location.href = "payment.html";
         }
@@ -205,13 +212,10 @@
       });
     }
 
-    // MATRIX GREEN CODE RAIN BACKGROUND
-
+    // Matrix green code background
     const canvas = document.getElementById('backgroundCanvas');
     const ctx = canvas.getContext('2d');
     let width, height;
-    let animationFrameId = null;
-
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
@@ -231,18 +235,20 @@
       ctx.fillStyle = '#0F0';
       ctx.font = fontSize + "px monospace";
 
-      for(let i = 0; i < drops.length; i++) {
+      for (let i = 0; i < drops.length; i++) {
         const text = letters.charAt(Math.floor(Math.random() * letters.length));
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
 
-        if(drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
+        if (drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
 
         drops[i]++;
       }
-      animationFrameId = requestAnimationFrame(draw);
+      requestAnimationFrame(draw);
     }
     draw();
 
+    // Load user menu after DOM ready
+    loadMenu();
   </script>
 </body>
 </html>
