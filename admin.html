@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
+  <title>Admin Dashboard</title>
   <style>
     body {
       margin: 0;
@@ -37,21 +37,6 @@
       z-index: 2000;
     }
     #sidebar.active { left: 0; }
-
-    #sidebar a {
-      display: block;
-      padding: 12px;
-      color: lime;
-      text-decoration: none;
-      border-bottom: 1px solid #333;
-    }
-    #sidebar a:hover { background: #111; }
-
-    /* Logout special style */
-    #sidebar a.logout {
-      color: red;
-      font-weight: bold;
-    }
 
     /* Menu button */
     #menuBtn {
@@ -87,20 +72,8 @@
   <!-- Menu button -->
   <button id="menuBtn">☰ Menu</button>
 
-  <!-- Sidebar Menu -->
-  <div id="sidebar">
-    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
-    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
-    <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
-    <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
-    <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
-    <a href="#" onclick="loadPage('members.html')">👥 Members</a>
-    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
-    <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
-    <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency Message</a>
-    <a href="#" onclick="loadPage('upload-logo.html')">🖼️ Upload Logo</a>
-    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
-  </div>
+  <!-- Sidebar (menu will load dynamically) -->
+  <div id="sidebar"></div>
 
   <!-- Main Dashboard Content -->
   <div id="content">
@@ -117,7 +90,7 @@
       sidebar.classList.toggle("active");
     });
 
-    // Load external HTML page dynamically
+    // Load external HTML page dynamically into content
     async function loadPage(file) {
       try {
         const response = await fetch(file);
@@ -129,15 +102,27 @@
       }
     }
 
-    // Logout function
+    // Load the sidebar menu (admin version)
+    async function loadMenu() {
+      try {
+        const response = await fetch("admin-menu.html");
+        const html = await response.text();
+        sidebar.innerHTML = html;
+      } catch (err) {
+        sidebar.innerHTML = "<p style='color:red'>Error loading menu</p>";
+      }
+    }
+
+    // Logout function (called from menu)
     function logout() {
       sessionStorage.clear();
       localStorage.clear();
-      window.location.href = "admin-login.html"; // change if your login page has another name
+      window.location.href = "admin-login.html";
     }
 
-    // Load home.html by default
-    loadPage("home.html");
+    // Load default pages
+    loadMenu();       // load admin menu
+    loadPage("home.html");  // default content
 
     // Green matrix background animation
     const canvas = document.getElementById("matrix");
