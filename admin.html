@@ -8,14 +8,28 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #111;
+      background: black;
       color: white;
+      overflow: hidden;
     }
+
+    /* Matrix Canvas */
+    canvas#matrix {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
     .header {
       display: flex;
       align-items: center;
-      background: #000;
+      background: rgba(0, 0, 0, 0.9);
       padding: 10px;
+      z-index: 10;
+      position: relative;
     }
     .menu-btn {
       font-size: 22px;
@@ -34,7 +48,7 @@
       left: -250px;
       width: 250px;
       height: 100%;
-      background: #222;
+      background: rgba(0, 0, 0, 0.95);
       padding-top: 60px;
       transition: 0.3s;
       z-index: 1000;
@@ -47,7 +61,8 @@
       border-bottom: 1px solid #333;
     }
     .sidebar a:hover {
-      background: #444;
+      background: #0f0;
+      color: black;
     }
     .sidebar.show {
       left: 0;
@@ -56,6 +71,8 @@
       margin-top: 0;
       width: 100%;
       height: calc(100vh - 50px);
+      overflow: auto;
+      padding: 20px;
     }
     iframe {
       width: 100%;
@@ -63,9 +80,38 @@
       border: none;
       background: #111;
     }
+
+    /* Bank and Tracking Boxes */
+    .card {
+      background: rgba(0,0,0,0.8);
+      padding: 20px;
+      border: 1px solid #0f0;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #0f0;
+      color: black;
+      text-decoration: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .copy-input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+    }
   </style>
 </head>
 <body>
+
+  <canvas id="matrix"></canvas>
 
   <div class="header">
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
@@ -74,8 +120,7 @@
   </div>
 
   <div class="sidebar" id="sidebar">
-    <a href="#" onclick="loadPage('bank.html')">🏛️ Bank</a>
-    <a href="#" onclick="loadPage('federal.html')">📦 Federal (Tracking Carrier)</a>
+    <a href="#" onclick="loadHome()">🏠 Home</a>
     <a href="#" onclick="loadPage('form-builder.html')">📑 Form Builder</a>
     <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
     <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
@@ -86,8 +131,25 @@
     <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency Message</a>
   </div>
 
-  <div class="content">
-    <iframe id="mainFrame" src=""></iframe>
+  <div class="content" id="mainContent">
+    <!-- Default Home Content -->
+    <div class="card">
+      <h2>🏛️ BANK</h2>
+      <p>Copy this link and send to your client:</p>
+      <input class="copy-input" type="text" value="https://bulksms4.github.io/BANKING/" id="bankLink" readonly>
+      <button class="btn" onclick="copyLink('bankLink')">📋 Copy Link</button>
+      <a href="https://bulksms4.github.io/BANKING/" target="_blank" class="btn">Open Account</a>
+      <a href="#" class="btn">💵💰 Credited your bank account 🪙</a>
+    </div>
+
+    <div class="card">
+      <h2>✈️🚢 Track Package 🛍️🛒</h2>
+      <p>Give this link to your client to track the package you send 🛍️🧑‍💻🚚</p>
+      <input class="copy-input" type="text" value="https://x-cargo-exprees.web.app/" id="trackLink" readonly>
+      <button class="btn" onclick="copyLink('trackLink')">📋 Copy Link</button>
+      <a href="https://x-cargo-exprees.web.app/" target="_blank" class="btn">🌍 Open Tracking</a>
+      <a href="#" class="btn">📦 Create Package</a>
+    </div>
   </div>
 
   <script>
@@ -96,14 +158,69 @@
     }
 
     function loadPage(page) {
-      document.getElementById("mainFrame").src = page;
+      document.getElementById("mainContent").innerHTML =
+        '<iframe src="' + page + '"></iframe>';
       document.getElementById("sidebar").classList.remove("show");
     }
 
-    // Load logo dynamically if admin sets a new one
-    function setLogo(url) {
-      document.getElementById("dashboardLogo").src = url;
+    function loadHome() {
+      document.getElementById("mainContent").innerHTML = `
+        <div class="card">
+          <h2>🏛️ BANK</h2>
+          <p>Copy this link and send to your client:</p>
+          <input class="copy-input" type="text" value="https://bulksms4.github.io/BANKING/" id="bankLink" readonly>
+          <button class="btn" onclick="copyLink('bankLink')">📋 Copy Link</button>
+          <a href="https://bulksms4.github.io/BANKING/" target="_blank" class="btn">Open Account</a>
+          <a href="#" class="btn">💵💰 Credited your bank account 🪙</a>
+        </div>
+
+        <div class="card">
+          <h2>✈️🚢 Track Package 🛍️🛒</h2>
+          <p>Give this link to your client to track the package you send 🛍️🧑‍💻🚚</p>
+          <input class="copy-input" type="text" value="https://x-cargo-exprees.web.app/" id="trackLink" readonly>
+          <button class="btn" onclick="copyLink('trackLink')">📋 Copy Link</button>
+          <a href="https://x-cargo-exprees.web.app/" target="_blank" class="btn">🌍 Open Tracking</a>
+          <a href="#" class="btn">📦 Create Package</a>
+        </div>
+      `;
+      document.getElementById("sidebar").classList.remove("show");
     }
+
+    function copyLink(id) {
+      const input = document.getElementById(id);
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value);
+      alert("Copied: " + input.value);
+    }
+
+    // Matrix background animation
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    const letters = '01';
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0,0,0,0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px monospace';
+      drops.forEach((y, x) => {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, x * fontSize, y * fontSize);
+        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[x] = 0;
+        drops[x]++;
+      });
+    }
+    setInterval(drawMatrix, 33);
+
+    window.addEventListener("resize", () => {
+      canvas.height = window.innerHeight;
+      canvas.width = window.innerWidth;
+    });
   </script>
 </body>
 </html>
