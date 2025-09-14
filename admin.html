@@ -1,85 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: black;
-      color: lime;
-      height: 100vh;
-      overflow: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: black;
+    color: lime;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-    /* Sidebar container */
-    #sidebarContainer {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 2000;
-    }
+  /* Sidebar container */
+  #sidebarContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000;
+  }
 
-    /* Main content */
-    #content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
+  /* Toggle button */
+  #menuToggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    background: lime;
+    color: black;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2100;
+  }
 
-    #dashboardFrame {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+  /* Main content iframe */
+  #dashboardFrame {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+</style>
 </head>
 <body>
 
-  <!-- Sidebar will be loaded here -->
-  <div id="sidebarContainer"></div>
+<!-- Menu toggle -->
+<div id="menuToggle">☰</div>
 
-  <!-- Main dashboard content -->
-  <div id="content">
-    <iframe id="dashboardFrame" src="home.html"></iframe>
-  </div>
+<!-- Sidebar container -->
+<div id="sidebarContainer"></div>
 
-  <script>
-    // Load the admin menu dynamically
-    async function loadAdminMenu() {
-      try {
-        const response = await fetch("admin-menu.html");
-        const html = await response.text();
-        document.getElementById("sidebarContainer").innerHTML = html;
-      } catch (err) {
-        document.getElementById("sidebarContainer").innerHTML =
-          "<p style='color:red'>Failed to load admin menu</p>";
-        console.error(err);
+<!-- Main content -->
+<iframe id="dashboardFrame" src="home.html"></iframe>
+
+<script>
+  const sidebarContainer = document.getElementById('sidebarContainer');
+  const menuToggle = document.getElementById('menuToggle');
+  const dashboardFrame = document.getElementById('dashboardFrame');
+
+  // Load admin menu
+  async function loadAdminMenu() {
+    try {
+      const res = await fetch('admin-menu.html');
+      const html = await res.text();
+      sidebarContainer.innerHTML = html;
+
+      // Add toggle functionality after menu is loaded
+      const sidebar = sidebarContainer.querySelector('#sidebar');
+      menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+      });
+
+      // Override menu links to load pages in iframe
+      const links = sidebar.querySelectorAll('a');
+      links.forEach(link => {
+        link.addEventListener('click', (e) => {
+          const page = link.getAttribute('data-page') || link.getAttribute('href');
+          if (page && !link.classList.contains('logout')) {
+            e.preventDefault();
+            dashboardFrame.src = page;
+            sidebar.classList.remove('active');
+          }
+        });
+      });
+
+      // Override logout link
+      const logoutLink = sidebar.querySelector('.logout');
+      if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          sessionStorage.clear();
+          localStorage.clear();
+          window.location.href = "admin-login.html";
+        });
       }
-    }
 
-    // Load a page inside the iframe
-    function loadPage(page) {
-      document.getElementById("dashboardFrame").src = page;
-      // Close the sidebar after selecting
-      const sidebar = document.getElementById("sidebar");
-      if (sidebar) sidebar.classList.remove("active");
+    } catch (err) {
+      sidebarContainer.innerHTML = "<p style='color:red'>Failed to load admin menu.</p>";
+      console.error(err);
     }
+  }
 
-    // Logout function
-    function logout() {
-      sessionStorage.clear();
-      localStorage.clear();
-      window.location.href = "admin-login.html";
-    }
-
-    loadAdminMenu();
-  </script>
+  loadAdminMenu();
+</script>
 
 </body>
 </html>
