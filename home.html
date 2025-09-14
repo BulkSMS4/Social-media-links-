@@ -87,8 +87,12 @@
     <p>Copy this link and send to your client:</p>
     <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
     <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
-    <a href="https://bulksms4.github.io/BANKING/" target="_blank" class="btn btn-lime">Open Account</a>
-    <button class="btn btn-green">💵💰 Credited your bank account 🪙</button>
+    <button class="btn btn-lime" onclick="openInDashboard('https://bulksms4.github.io/BANKING/')">
+      Open Account
+    </button>
+    <button class="btn btn-green" onclick="openInDashboard('https://bulksms4.github.io/BANKING/credit')">
+      💵💰 Credited your bank account 🪙
+    </button>
   </div>
 
   <!-- ✈️🚢 Track Package Section -->
@@ -97,8 +101,12 @@
     <p>Give this link to your client to track the package you send 🛍️🧑‍💻🚚:</p>
     <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
     <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
-    <a href="https://x-cargo-exprees.web.app/" target="_blank" class="btn btn-lime">Open Tracking</a>
-    <a href="https://x-cargo-exprees.web.app/create" target="_blank" class="btn btn-green">➕ Create Package</a>
+    <button class="btn btn-lime" onclick="openInDashboard('https://x-cargo-exprees.web.app/')">
+      Open Tracking
+    </button>
+    <button class="btn btn-green" onclick="openInDashboard('https://x-cargo-exprees.web.app/create')">
+      ➕ Create Package
+    </button>
   </div>
 </div>
 
@@ -109,6 +117,16 @@
     navigator.clipboard.writeText(text).then(() => {
       alert("✅ Link copied: " + text);
     });
+  }
+
+  // Open link inside parent dashboard iframe
+  function openInDashboard(url) {
+    if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
+      window.parent.document.getElementById("dashboardFrame").src = url;
+    } else {
+      // fallback if not inside dashboard
+      window.location.href = url;
+    }
   }
 
   // Load emergency message (from emergency.html)
