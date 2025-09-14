@@ -1,4 +1,4 @@
-<!-- home.html -->
+<!-- home.html (for admin & user) -->
 <style>
   .emergency-box {
     background: rgba(0, 0, 0, 0.9);
@@ -73,6 +73,13 @@
   @media (max-width: 900px) {
     .dashboard-grid { grid-template-columns: 1fr; }
   }
+
+  iframe.content-frame {
+    width: 100%;
+    height: 90vh;
+    border: none;
+    border-radius: 12px;
+  }
 </style>
 
 <!-- Emergency Message -->
@@ -119,17 +126,17 @@
     });
   }
 
-  // Open link inside parent dashboard iframe
+  // Open link inside parent dashboard content area
   function openInDashboard(url) {
-    if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
-      window.parent.document.getElementById("dashboardFrame").src = url;
+    if (window.parent && window.parent.document.getElementById("content")) {
+      window.parent.document.getElementById("content").innerHTML =
+        `<iframe class="content-frame" src="${url}"></iframe>`;
     } else {
-      // fallback if not inside dashboard
       window.location.href = url;
     }
   }
 
-  // Load emergency message (from emergency.html)
+  // Load emergency message from shared emergency.html
   async function loadEmergency() {
     try {
       let res = await fetch("emergency.html?_=" + Date.now());
@@ -140,6 +147,7 @@
         "🚨 Emergency message could not be loaded.";
     }
   }
+
   loadEmergency();
   setInterval(loadEmergency, 10000); // refresh every 10s
 </script>
