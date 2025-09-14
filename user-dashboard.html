@@ -32,6 +32,27 @@
       height: 100%;
       z-index: 2000;
     }
+
+    /* Emergency overlay */
+    #emergencyOverlay {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: red;
+      color: #fff;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(255,0,0,0.5);
+      z-index: 5000;
+      max-width: 300px;
+      display: none;
+      font-weight: bold;
+    }
+    #emergencyOverlay img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -43,6 +64,14 @@
 
   <!-- Main Content -->
   <iframe id="dashboardFrame" src="home.html"></iframe>
+
+  <!-- Emergency overlay -->
+  <div id="emergencyOverlay"></div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
   <script>
     // Function to load a page in the dashboard iframe
@@ -56,6 +85,36 @@
         loadPage(event.data.page);
       }
     });
+
+    // -----------------------------
+    // Firebase initialization
+    // -----------------------------
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.firebasestorage.app",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+      measurementId: "G-ZJ05T7YNSQ"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Real-time emergency listener
+    const overlay = document.getElementById("emergencyOverlay");
+    db.collection("emergency").doc("current")
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          overlay.innerHTML = `<p>${data.text}</p>` + (data.image ? `<img src="${data.image}" alt="Emergency">` : '');
+          overlay.style.display = "block";
+
+          console.log("✅ Emergency message delivered to user dashboard!");
+        } else {
+          overlay.style.display = "none";
+        }
+      });
   </script>
 </body>
 </html>
