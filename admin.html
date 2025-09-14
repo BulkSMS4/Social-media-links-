@@ -14,7 +14,7 @@
       overflow: hidden;
     }
 
-    /* Matrix background */
+    /* Canvas for green matrix background */
     #matrix {
       position: fixed;
       top: 0; left: 0;
@@ -36,6 +36,7 @@
       padding-top: 60px;
       z-index: 2000;
       box-shadow: 4px 0 15px rgba(0,255,0,0.3);
+      overflow-y: auto;
     }
     #sidebar.active { left: 0; }
 
@@ -62,6 +63,7 @@
       background: #003300;
       color: #fff;
     }
+
     #sidebar a.logout {
       color: red;
       border-top: 2px solid #003300;
@@ -87,28 +89,35 @@
       z-index: 2100;
       transition: background 0.2s;
     }
-    #menuToggle:hover { background: #00cc00; }
+    #menuToggle:hover {
+      background: #00cc00;
+    }
 
-    /* Content */
+    /* Content area */
     #content {
-      margin: 0;
+      margin-left: 0;
       padding: 20px;
       width: 100%;
       height: 100%;
       overflow-y: auto;
       background: rgba(0,0,0,0.85);
       z-index: 1000;
+      transition: margin-left 0.3s ease;
+    }
+    #sidebar.active ~ #content {
+      margin-left: 260px;
     }
   </style>
 </head>
 <body>
+
   <!-- Matrix background -->
   <canvas id="matrix"></canvas>
 
-  <!-- Toggle button -->
+  <!-- Sidebar toggle button -->
   <div id="menuToggle" onclick="toggleMenu()">☰</div>
 
-  <!-- Sidebar Menu -->
+  <!-- Sidebar menu -->
   <div id="sidebar">
     <h2>⚡ Admin Panel</h2>
     <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
@@ -124,40 +133,44 @@
     <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
   </div>
 
-  <!-- Main Content -->
+  <!-- Main content area -->
   <div id="content"></div>
 
   <script>
+    const sidebar = document.getElementById("sidebar");
+    const content = document.getElementById("content");
+
     function toggleMenu() {
-      document.getElementById('sidebar').classList.toggle('active');
+      sidebar.classList.toggle("active");
     }
 
+    // Load HTML into content area
     async function loadPage(file) {
       try {
-        const response = await fetch(file);
+        const response = await fetch(file + "?_=" + Date.now());
         const html = await response.text();
-        document.getElementById("content").innerHTML = html;
-        document.getElementById("sidebar").classList.remove("active");
+        content.innerHTML = html;
       } catch (err) {
-        document.getElementById("content").innerHTML =
-          "<p style='color:red'>Error loading " + file + "</p>";
+        content.innerHTML = "<p style='color:red'>Error loading " + file + "</p>";
       }
     }
 
+    // Logout
     function logout() {
       sessionStorage.clear();
       localStorage.clear();
       window.location.href = "admin-login.html";
     }
 
-    // Default load
+    // Load default home page
     loadPage("home.html");
 
-    // Matrix effect
+    // Green matrix background animation
     const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
+
     const letters = "01";
     const fontSize = 16;
     const columns = canvas.width / fontSize;
@@ -168,9 +181,11 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#0F0";
       ctx.font = fontSize + "px monospace";
+
       for (let i = 0; i < drops.length; i++) {
         const text = letters[Math.floor(Math.random() * letters.length)];
         ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
         if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
           drops[i] = 0;
         }
@@ -179,5 +194,6 @@
     }
     setInterval(drawMatrix, 50);
   </script>
+
 </body>
 </html>
