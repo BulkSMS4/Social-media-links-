@@ -1,0 +1,98 @@
+<!-- admin-emergency.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Emergency Message</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: lime;
+    padding: 20px;
+  }
+  h1 { text-align: center; color: red; }
+  label { display: block; margin-top: 15px; font-weight: bold; }
+  textarea {
+    width: 100%; height: 100px; background: #111; color: lime;
+    border: 1px solid lime; border-radius: 6px; padding: 10px;
+    font-size: 14px;
+  }
+  input[type="file"] { margin-top: 10px; }
+  button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 6px;
+    background: lime;
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #preview {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid red;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.9);
+    text-align: center;
+  }
+  #preview img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>⚡ Admin Emergency Message</h1>
+
+<label for="message">Emergency Text:</label>
+<textarea id="message" placeholder="Write your emergency message here..."></textarea>
+
+<label for="image">Upload Image:</label>
+<input type="file" id="image" accept="image/*">
+
+<button onclick="updateMessage()">Preview & Save</button>
+
+<div id="preview">
+  <p>🚨 Emergency message preview will appear here</p>
+</div>
+
+<script>
+  const messageInput = document.getElementById("message");
+  const imageInput = document.getElementById("image");
+  const preview = document.getElementById("preview");
+
+  function updateMessage() {
+    const text = messageInput.value || "🚨 No message provided.";
+    const file = imageInput.files[0];
+
+    let imgHTML = "";
+    if(file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imgHTML = `<img src="${e.target.result}" alt="Emergency Image">`;
+        renderPreview(text, imgHTML);
+      }
+      reader.readAsDataURL(file);
+    } else {
+      renderPreview(text, imgHTML);
+    }
+  }
+
+  function renderPreview(text, imgHTML) {
+    preview.innerHTML = `
+      <p>${text}</p>
+      ${imgHTML}
+    `;
+
+    // Optional: save to server (requires backend)
+    // fetch("/save-emergency", { method: "POST", body: JSON.stringify({ text, img: imgHTML }) });
+  }
+</script>
+
+</body>
+</html>
