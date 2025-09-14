@@ -1,8 +1,93 @@
 <!-- emergency.html -->
-<div style="text-align:left; color:white; font-family:Arial; line-height:1.5;">
-  <h3 style="color:red;">🚨 Emergency Update</h3>
-  <p>Dear Clients,</p>
-  <p>Our systems are currently under scheduled maintenance. Please expect delays.</p>
-  <img src="https://via.placeholder.com/600x250.png?text=Emergency+Image" alt="Emergency Notice">
-  <p><b>Support Team</b><br>Updated: 14 Sept 2025</p>
+<style>
+  .fb-post {
+    background: #1a1a1a;
+    color: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .fb-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .fb-header img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .fb-header .fb-user {
+    font-weight: bold;
+    color: #e4e6eb;
+  }
+
+  .fb-header .fb-time {
+    font-size: 12px;
+    color: #aaa;
+  }
+
+  .fb-message {
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .fb-image {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .fb-actions {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #aaa;
+    margin-top: 8px;
+  }
+
+  .fb-actions span {
+    cursor: pointer;
+  }
+
+  .fb-actions span:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="fb-post">
+  <!-- Post Header -->
+  <div class="fb-header">
+    <img src="https://via.placeholder.com/100x100.png?text=Admin" alt="Profile">
+    <div>
+      <div class="fb-user">Admin Page</div>
+      <div class="fb-time">September 14, 2025 · 🔴 Emergency</div>
+    </div>
+  </div>
+
+  <!-- Post Message -->
+  <div class="fb-message">
+    🚨 <b>Important Update:</b><br>
+    Our systems are currently under maintenance. Please expect delays with form submissions and tracking updates.
+  </div>
+
+  <!-- Post Image -->
+  <img src="https://via.placeholder.com/700x300.png?text=Emergency+Notice" class="fb-image" alt="Emergency">
+
+  <!-- Post Actions -->
+  <div class="fb-actions">
+    <span>👍 Like</span>
+    <span>💬 Comment</span>
+    <span>↪️ Share</span>
+  </div>
 </div>
