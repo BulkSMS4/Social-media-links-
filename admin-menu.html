@@ -1,4 +1,3 @@
-<!-- admin-menu.html -->
 <style>
   body {
     margin: 0;
@@ -82,30 +81,21 @@
 
 <div id="sidebar">
   <h2>⚡ Admin Panel</h2>
-  <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
-  <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
-  <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
-  <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
-  <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
-  <a href="#" onclick="loadPage('members.html')">👥 Members</a>
-  <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
-  <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
-  <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency</a>
-  <a href="#" onclick="loadPage('upload-logo.html')">🖼️ Upload Logo</a>
-  <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
+  <a href="#" onclick="parent.loadPage('home.html')">🏠 Home</a>
+  <a href="#" onclick="parent.loadPage('form-builder.html')">📝 Form Builder</a>
+  <a href="#" onclick="parent.loadPage('saved-forms.html')">💾 Saved Forms</a>
+  <a href="#" onclick="parent.loadPage('feedback.html')">💬 Feedback</a>
+  <a href="#" onclick="parent.loadPage('victims.html')">👀 View Victims</a>
+  <a href="#" onclick="parent.loadPage('members.html')">👥 Members</a>
+  <a href="#" onclick="parent.loadPage('links.html')">🔗 Links</a>
+  <a href="#" onclick="parent.loadPage('generate.html')">⚙️ Generate</a>
+  <a href="#" onclick="parent.loadPage('emergency.html')">🚨 Emergency</a>
+  <a href="#" onclick="parent.loadPage('upload-logo.html')">🖼️ Upload Logo</a>
+  <a href="#" onclick="parent.logout()" class="logout">🚪 Logout</a>
 </div>
 
 <script>
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('active');
-  }
-
-  function loadPage(page) {
-    window.parent.postMessage({ action: "loadPage", page: page }, "*");
-    toggleMenu(); // close after click
-  }
-
-  function logout() {
-    window.parent.postMessage({ action: "logout" }, "*");
   }
 </script>
