@@ -1,4 +1,3 @@
-<!-- admin-menu.html -->
 <style>
   body {
     margin: 0;
@@ -49,25 +48,6 @@
     color: #fff;
   }
 
-  /* Toggle button */
-  #menuToggle {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    font-size: 24px;
-    background: lime;
-    color: black;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 2100;
-    transition: background 0.2s;
-  }
-  #menuToggle:hover {
-    background: #00cc00;
-  }
-
   /* Header inside sidebar */
   #sidebar h2 {
     color: #0f0;
@@ -78,29 +58,17 @@
   }
 </style>
 
-<div id="menuToggle" onclick="toggleMenu()">☰</div>
-
 <div id="sidebar">
   <h2>⚡ Admin Panel</h2>
-  <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
-  <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
-  <a href="#" onclick="loadPage('saved-forms.html')">💾 Saved Forms</a>
-  <a href="#" onclick="loadPage('feedback.html')">💬 Feedback</a>
-  <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
-  <a href="#" onclick="loadPage('members.html')">👥 Members</a>
-  <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
-  <a href="#" onclick="loadPage('generate.html')">⚙️ Generate</a>
-  <a href="#" onclick="loadPage('emergency.html')">🚨 Emergency</a>
-  <a href="#" onclick="loadPage('upload-logo.html')">🖼️ Upload Logo</a>
-  <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
+  <a href="#" data-page="home.html">🏠 Home</a>
+  <a href="#" data-page="form-builder.html">📝 Form Builder</a>
+  <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
+  <a href="#" data-page="feedback.html">💬 Feedback</a>
+  <a href="#" data-page="victims.html">👀 View Victims</a>
+  <a href="#" data-page="members.html">👥 Members</a>
+  <a href="#" data-page="links.html">🔗 Links</a>
+  <a href="#" data-page="generate.html">⚙️ Generate</a>
+  <a href="#" data-page="emergency.html">🚨 Emergency</a>
+  <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
+  <a href="#" class="logout">🚪 Logout</a>
 </div>
-
-<script>
-  function toggleMenu() {
-    document.getElementById('sidebar').classList.toggle('active');
-  }
-
-  // These functions must exist in admin-dashboard.html
-  // loadPage(page) => loads the page into #dashboardFrame
-  // logout() => logs out the admin
-</script>
