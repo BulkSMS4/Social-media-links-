@@ -47,6 +47,7 @@
       margin-top: 15px;
       max-width: 100%;
       border-radius: 8px;
+      display: none;
     }
   </style>
 </head>
@@ -55,7 +56,7 @@
 
   <textarea id="message" placeholder="Type your emergency message here..."></textarea>
   <input type="file" id="imageInput" accept="image/*">
-  <img id="preview" src="" alt="" style="display:none;">
+  <img id="preview" src="" alt="">
   <br>
   <button onclick="postEmergency()">Post Emergency</button>
 
@@ -99,30 +100,37 @@
     async function postEmergency() {
       const message = document.getElementById("message").value.trim();
       if (!message) {
-        alert("Please enter a message.");
+        alert("❌ Please enter a message.");
         return;
       }
 
       let imageUrl = "";
 
-      // Upload image if selected
-      if (imageInput.files[0]) {
-        const file = imageInput.files[0];
-        const storageRef = storage.ref('emergency/' + file.name);
-        const snapshot = await storageRef.put(file);
-        imageUrl = await snapshot.ref.getDownloadURL();
+      try {
+        // Upload image if selected
+        if (imageInput.files[0]) {
+          const file = imageInput.files[0];
+          const storageRef = storage.ref('emergency/' + file.name);
+          const snapshot = await storageRef.put(file);
+          imageUrl = await snapshot.ref.getDownloadURL();
+        }
+
+        // Save message & image to Firestore
+        await db.collection("emergency").doc("current").set({
+          text: message,
+          image: imageUrl || "",
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("✅ Emergency message posted successfully!");
+        document.getElementById("message").value = "";
+        preview.src = "";
+        preview.style.display = "none";
+
+      } catch (error) {
+        console.error("Error posting emergency message:", error);
+        alert("❌ Failed to post emergency message. Check console for details.");
       }
-
-      // Save message & image to Firestore
-      await db.collection("emergency").doc("current").set({
-        text: message,
-        image: imageUrl || ""
-      });
-
-      alert("✅ Emergency message posted successfully!");
-      document.getElementById("message").value = "";
-      preview.src = "";
-      preview.style.display = "none";
     }
   </script>
 </body>
