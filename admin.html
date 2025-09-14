@@ -14,7 +14,7 @@
       overflow: hidden;
     }
 
-    /* Canvas for green matrix background */
+    /* Matrix background */
     #matrix {
       position: fixed;
       top: 0; left: 0;
@@ -27,7 +27,7 @@
     #sidebar {
       position: fixed;
       top: 0;
-      left: -260px; /* Hidden by default */
+      left: -260px;
       width: 260px;
       height: 100%;
       background: linear-gradient(180deg, #000 0%, #001a00 100%);
@@ -89,11 +89,9 @@
       z-index: 2100;
       transition: background 0.2s;
     }
-    #menuToggle:hover {
-      background: #00cc00;
-    }
+    #menuToggle:hover { background: #00cc00; }
 
-    /* Content area */
+    /* Main content area */
     #content {
       margin-left: 0;
       padding: 20px;
@@ -104,9 +102,7 @@
       z-index: 1000;
       transition: margin-left 0.3s ease;
     }
-    #sidebar.active ~ #content {
-      margin-left: 260px;
-    }
+    #sidebar.active ~ #content { margin-left: 260px; }
   </style>
 </head>
 <body>
@@ -117,7 +113,7 @@
   <!-- Sidebar toggle button -->
   <div id="menuToggle" onclick="toggleMenu()">☰</div>
 
-  <!-- Sidebar menu -->
+  <!-- Admin Sidebar menu -->
   <div id="sidebar">
     <h2>⚡ Admin Panel</h2>
     <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
@@ -134,7 +130,9 @@
   </div>
 
   <!-- Main content area -->
-  <div id="content"></div>
+  <div id="content">
+    <!-- Home / Emergency messages will appear here -->
+  </div>
 
   <script>
     const sidebar = document.getElementById("sidebar");
@@ -144,18 +142,38 @@
       sidebar.classList.toggle("active");
     }
 
-    // Load HTML into content area
     async function loadPage(file) {
       try {
-        const response = await fetch(file + "?_=" + Date.now());
-        const html = await response.text();
-        content.innerHTML = html;
+        const res = await fetch(file + "?_=" + Date.now());
+        let html = await res.text();
+
+        // If home.html, load emergency messages
+        if(file === "home.html") {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, "text/html");
+          content.innerHTML = html;
+
+          async function loadEmergency() {
+            try {
+              const emRes = await fetch("emergency.html?_=" + Date.now());
+              const emHtml = await emRes.text();
+              const emergencyBox = content.querySelector("#emergencyBox");
+              if(emergencyBox) emergencyBox.innerHTML = emHtml;
+            } catch {
+              const emergencyBox = content.querySelector("#emergencyBox");
+              if(emergencyBox) emergencyBox.innerHTML = "🚨 Emergency message could not be loaded.";
+            }
+          }
+          loadEmergency();
+          setInterval(loadEmergency, 10000);
+        } else {
+          content.innerHTML = html;
+        }
       } catch (err) {
         content.innerHTML = "<p style='color:red'>Error loading " + file + "</p>";
       }
     }
 
-    // Logout
     function logout() {
       sessionStorage.clear();
       localStorage.clear();
@@ -165,35 +183,30 @@
     // Load default home page
     loadPage("home.html");
 
-    // Green matrix background animation
+    // Matrix animation
     const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
-
     const letters = "01";
     const fontSize = 16;
     const columns = canvas.width / fontSize;
     const drops = Array(Math.floor(columns)).fill(1);
 
     function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillStyle = "rgba(0,0,0,0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "#0F0";
       ctx.font = fontSize + "px monospace";
 
       for (let i = 0; i < drops.length; i++) {
         const text = letters[Math.floor(Math.random() * letters.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
-        }
+        ctx.fillText(text, i*fontSize, drops[i]*fontSize);
+        if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
       }
     }
     setInterval(drawMatrix, 50);
   </script>
-
 </body>
 </html>
