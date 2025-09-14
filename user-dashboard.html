@@ -9,26 +9,53 @@
       margin: 0;
       font-family: Arial, sans-serif;
       overflow: hidden;
+      background: #000;
+      color: lime;
     }
 
-    /* iframe for content */
+    /* iframe for main content */
     #dashboardFrame {
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
+      left: 260px; /* space for user menu */
+      width: calc(100% - 260px);
       height: 100%;
       border: none;
+    }
+
+    /* Container for user menu */
+    #menuContainer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      z-index: 2000;
     }
   </style>
 </head>
 <body>
-  <!-- Dashboard content -->
+
+  <!-- User Menu -->
+  <div id="menuContainer">
+    <iframe id="userMenuFrame" src="user-menu.html" style="width:100%; height:100%; border:none;"></iframe>
+  </div>
+
+  <!-- Main Content -->
   <iframe id="dashboardFrame" src="home.html"></iframe>
 
   <script>
-    // In user dashboard, the home.html will automatically display emergency messages
-    // posted by admin, because home.html fetches data from Firestore.
+    // Function to load a page in the dashboard iframe
+    function loadPage(page) {
+      document.getElementById('dashboardFrame').src = page;
+    }
+
+    // Make the menu links inside the iframe communicate with this dashboard
+    window.addEventListener('message', (event) => {
+      if(event.data && event.data.page) {
+        loadPage(event.data.page);
+      }
+    });
   </script>
 </body>
 </html>
