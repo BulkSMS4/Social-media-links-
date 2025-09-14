@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: black;
+      color: lime;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Canvas for green matrix background */
+    #matrix {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: black;
+    }
+
+    /* Menu toggle button */
+    #menuToggle {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      font-size: 24px;
+      background: lime;
+      color: black;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 2100;
+      transition: background 0.2s;
+    }
+    #menuToggle:hover {
+      background: #00cc00;
+    }
+
+    /* Sidebar */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px; /* Hidden by default */
+      width: 260px;
+      height: 100%;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      border-right: 2px solid lime;
+      transition: left 0.3s ease-in-out;
+      padding-top: 60px;
+      z-index: 2000;
+      box-shadow: 4px 0 15px rgba(0,255,0,0.3);
+      overflow-y: auto;
+    }
+    #sidebar.active { left: 0; }
+
+    #sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      color: #0f0;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px solid #003300;
+      transition: background 0.2s, color 0.2s;
+    }
+    #sidebar a:hover {
+      background: #003300;
+      color: #fff;
+    }
+    #sidebar a.logout {
+      color: red;
+      border-top: 2px solid #003300;
+      margin-top: 20px;
+    }
+    #sidebar a.logout:hover {
+      background: #330000;
+      color: #fff;
+    }
+
+    #sidebar h2 {
+      color: #0f0;
+      text-align: center;
+      margin: 0 0 20px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    /* Main content area */
+    #content {
+      margin: 0;
+      padding: 20px;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.85);
+      z-index: 1000;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Matrix background -->
+  <canvas id="matrix"></canvas>
+
+  <!-- Menu toggle button -->
+  <div id="menuToggle" onclick="toggleMenu()">☰</div>
+
+  <!-- Sidebar menu -->
+  <div id="sidebar">
+    <h2>⚡ User Panel</h2>
+    <a href="#" onclick="loadPage('home.html')">🏠 Home</a>
+    <a href="#" onclick="loadPage('form-builder.html')">📝 Form Builder</a>
+    <a href="#" onclick="loadPage('victims.html')">👀 View Victims</a>
+    <a href="#" onclick="loadPage('links.html')">🔗 Links</a>
+    <a href="#" onclick="loadPage('atm.html')">🏦 ATM</a>
+    <a href="#" onclick="logout()" class="logout">🚪 Logout</a>
+  </div>
+
+  <!-- Main content -->
+  <div id="content">
+    <!-- Dynamic content will load here -->
+  </div>
+
+  <script>
+    const sidebar = document.getElementById("sidebar");
+    const content = document.getElementById("content");
+
+    function toggleMenu() {
+      sidebar.classList.toggle("active");
+    }
+
+    function loadPage(file) {
+      fetch(file)
+        .then(res => res.text())
+        .then(html => {
+          content.innerHTML = html;
+          sidebar.classList.remove("active"); // close menu
+        })
+        .catch(() => {
+          content.innerHTML = "<p style='color:red'>Error loading page: " + file + "</p>";
+        });
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+
+    // Load default page
+    loadPage("home.html");
+
+    // Green matrix animation
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops = Array(columns).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0,0,0,0.05)";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
+
+    // Adjust canvas on resize
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+
+</body>
+</html>
