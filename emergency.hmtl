@@ -1,0 +1,8 @@
+<!-- emergency.html -->
+<div style="text-align:left; color:white; font-family:Arial; line-height:1.5;">
+  <h3 style="color:red;">🚨 Emergency Update</h3>
+  <p>Dear Clients,</p>
+  <p>Our systems are currently under scheduled maintenance. Please expect delays.</p>
+  <img src="https://via.placeholder.com/600x250.png?text=Emergency+Image" alt="Emergency Notice">
+  <p><b>Support Team</b><br>Updated: 14 Sept 2025</p>
+</div>
