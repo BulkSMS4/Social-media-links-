@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin Emergency Messages</title>
+  <title>Admin Emergency Message</title>
   <style>
     body {
       background: #000;
@@ -22,23 +22,24 @@
       border: 1px solid #0f0;
       padding: 16px;
       border-radius: 10px;
-      margin-bottom: 16px;
+      margin-top: 20px;
       box-shadow: 0 0 10px rgba(0,255,0,0.2);
+      text-align: center;
     }
     .msg-box img {
       max-width: 100%;
       border-radius: 8px;
-      margin-top: 10px;
+      margin: 10px 0;
     }
     .delete-btn {
       background: red;
       color: #fff;
       border: none;
       padding: 8px 12px;
-      margin-top: 10px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
+      margin-top: 12px;
     }
     .delete-btn:hover {
       background: darkred;
@@ -47,7 +48,6 @@
       background: #111;
       padding: 20px;
       border-radius: 10px;
-      margin-bottom: 20px;
       border: 1px solid lime;
     }
     input, textarea {
@@ -72,18 +72,18 @@
   </style>
 </head>
 <body>
-  <h1>🚨 Admin Emergency Messages</h1>
+  <h1>🚨 Admin Emergency Message</h1>
 
-  <!-- Form to post new emergency -->
+  <!-- Form to post emergency -->
   <div class="new-msg">
-    <h2>Post New Emergency</h2>
+    <h2>Post / Update Emergency</h2>
     <textarea id="msgText" placeholder="Type emergency message..."></textarea>
     <input type="file" id="msgImage" accept="image/*">
-    <button onclick="postMessage()">Post</button>
+    <button onclick="postMessage()">Save</button>
   </div>
 
-  <!-- Messages will appear here -->
-  <div id="messages"></div>
+  <!-- Current message -->
+  <div id="messageBox" class="msg-box" style="display:none;"></div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -107,9 +107,9 @@
     const storage = firebase.storage();
     const auth = firebase.auth();
 
-    const messagesDiv = document.getElementById("messages");
+    const messageBox = document.getElementById("messageBox");
 
-    // ✅ Post new message
+    // ✅ Post or update emergency
     async function postMessage() {
       const text = document.getElementById("msgText").value.trim();
       const file = document.getElementById("msgImage").files[0];
@@ -121,12 +121,12 @@
 
       let imageUrl = null;
       if (file) {
-        const storageRef = storage.ref("emergency/" + Date.now() + "_" + file.name);
+        const storageRef = storage.ref("emergency/current_" + file.name);
         await storageRef.put(file);
         imageUrl = await storageRef.getDownloadURL();
       }
 
-      await db.collection("emergency").add({
+      await db.collection("emergency").doc("current").set({
         text,
         image: imageUrl,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -136,36 +136,35 @@
       document.getElementById("msgImage").value = "";
     }
 
-    // ✅ Load messages
-    db.collection("emergency").orderBy("timestamp","desc")
-      .onSnapshot(snapshot => {
-        messagesDiv.innerHTML = "";
-        snapshot.forEach(doc => {
+    // ✅ Show current message
+    db.collection("emergency").doc("current")
+      .onSnapshot(doc => {
+        if (doc.exists) {
           const data = doc.data();
-          const div = document.createElement("div");
-          div.className = "msg-box";
-          div.innerHTML = `
+          messageBox.style.display = "block";
+          messageBox.innerHTML = `
             <p>${data.text || ""}</p>
             ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
           `;
 
-          // Show delete button if admin
+          // Show delete if admin
           auth.onAuthStateChanged(user => {
             if (user && user.email === "admin@gmail.com") { // change to your admin email
               const btn = document.createElement("button");
               btn.className = "delete-btn";
               btn.textContent = "Delete";
               btn.onclick = async () => {
-                if (confirm("Delete this message?")) {
-                  await db.collection("emergency").doc(doc.id).delete();
+                if (confirm("Delete this emergency?")) {
+                  await db.collection("emergency").doc("current").delete();
+                  messageBox.style.display = "none";
                 }
               };
-              div.appendChild(btn);
+              messageBox.appendChild(btn);
             }
           });
-
-          messagesDiv.appendChild(div);
-        });
+        } else {
+          messageBox.style.display = "none";
+        }
       });
   </script>
 </body>
