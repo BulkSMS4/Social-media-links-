@@ -20,12 +20,6 @@
       margin-bottom: 20px;
     }
 
-    #emergencyContainer {
-      max-height: 90vh;       /* ✅ limit height */
-      overflow-y: auto;       /* ✅ scroll if too many messages */
-      padding-right: 10px;
-    }
-
     .emergencyCard {
       background: rgba(0, 0, 0, 0.95);
       border: 3px solid red;
@@ -33,12 +27,11 @@
       padding: 40px 20px;
       margin: 30px auto;
       color: red;
-      width: 95%;             /* ✅ almost full screen */
+      width: 95%;
       text-align: center;
-      font-size: 24px;        /* ✅ bigger text */
+      font-size: 24px;
       line-height: 1.6;
       box-shadow: 0 0 25px rgba(255,0,0,0.7);
-      transition: all 0.3s ease;
     }
 
     .emergencyCard img {
@@ -53,22 +46,12 @@
       font-size: 22px;
       text-decoration: underline;
     }
-
-    .flash {
-      animation: flashAnimation 1s ease;
-    }
-
-    @keyframes flashAnimation {
-      0% { background-color: rgba(255,0,0,0.2); }
-      50% { background-color: rgba(255,0,0,0.5); }
-      100% { background-color: rgba(0,0,0,0.95); }
-    }
   </style>
 </head>
 <body>
 
-  <h2>🚨 Emergency Messages 🚨</h2>
-  <div id="emergencyContainer">Loading messages...</div>
+  <h2>🚨 Emergency Message 🚨</h2>
+  <div id="emergencyContainer">Loading message...</div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -82,7 +65,7 @@
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
       projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com", // ✅ fixed
+      storageBucket: "usahackersland.appspot.com",
       messagingSenderId: "588407428267",
       appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
       measurementId: "G-ZJ05T7YNSQ"
@@ -93,32 +76,24 @@
     const container = document.getElementById("emergencyContainer");
 
     // -------------------------
-    // Real-time listener for ALL docs in emergency
+    // Real-time listener for ONLY ONE doc
     // -------------------------
-    db.collection("emergency").orderBy("timestamp", "desc")
-      .onSnapshot(snapshot => {
-        if (snapshot.empty) {
-          container.innerHTML = "<p style='color:red; font-size:22px;'>🚨 No emergency messages at the moment.</p>";
+    db.collection("emergency").doc("current")
+      .onSnapshot(doc => {
+        if (!doc.exists) {
+          container.innerHTML = "<p style='color:red; font-size:22px;'>🚨 No emergency message right now.</p>";
           return;
         }
 
-        let html = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          html += `
-            <div class="emergencyCard flash">
-              ${data.text ? `<p>${data.text}</p>` : ""}
-              ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
-              ${data.phone ? `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
-              ${data.link ? `<p>🔗 More info: <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
-            </div>
-          `;
-        });
-
-        container.innerHTML = html;
-
-        // ✅ Auto-scroll to the top (latest message)
-        container.scrollTo({ top: 0, behavior: "smooth" });
+        const data = doc.data();
+        container.innerHTML = `
+          <div class="emergencyCard">
+            ${data.text ? `<p>${data.text}</p>` : ""}
+            ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
+            ${data.phone ? `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
+            ${data.link ? `<p>🔗 More info: <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
+          </div>
+        `;
       });
   </script>
 
