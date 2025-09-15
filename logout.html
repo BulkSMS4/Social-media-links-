@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Logout</title>
+  <style>
+    body {
+      background: #000;
+      color: lime;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #111;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #2eccff;
+      text-align: center;
+      min-width: 280px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    }
+    h1 { color: #00ccff; margin: 0 0 12px; font-size: 18px; }
+    p { margin: 8px 0; color: #cfc; font-size: 14px; }
+    button {
+      background: lime;
+      color: black;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+    button:hover { background:#bfff00; }
+    .small { font-size:12px; color:#9f9; margin-top:8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Sign out</h1>
+    <p id="userInfo">Checking sign-in status…</p>
+    <button id="logoutBtn">Log out</button>
+    <div class="small">You will be redirected after logout.</div>
+  </div>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // ----- CONFIG: change redirectTo if needed -----
+    const redirectTo = "login.html"; // change to where you want users to go after logout
+    // -----------------------------------------------
+
+    // Your Firebase config (storageBucket fixed)
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+      measurementId: "G-ZJ05T7YNSQ"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const userInfoEl = document.getElementById("userInfo");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // Show current user (if any)
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userInfoEl.textContent = "Signed in as: " + (user.email || ("UID: " + user.uid));
+      } else {
+        userInfoEl.textContent = "No user currently signed in.";
+      }
+    });
+
+    // Logout action
+    logoutBtn.addEventListener("click", async () => {
+      logoutBtn.disabled = true;
+      logoutBtn.textContent = "Signing out...";
+      try {
+        await auth.signOut();
+        alert("✅ You have been signed out.");
+        // redirect after short delay to allow alert to show
+        setTimeout(() => { window.location.href = redirectTo; }, 250);
+      } catch (err) {
+        console.error("Sign out error:", err);
+        alert("❌ Sign out failed: " + (err.message || err));
+        logoutBtn.disabled = false;
+        logoutBtn.textContent = "Log out";
+      }
+    });
+
+    // Optional: if page loaded and no user is signed in, redirect immediately
+    auth.getRedirectResult().catch(()=>{}); // harmless
+  </script>
+</body>
+</html>
