@@ -95,6 +95,48 @@
     @media (max-width: 900px) {
       .dashboard-grid { grid-template-columns: 1fr; }
     }
+
+    /* Popup Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #111;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      text-align: center;
+      border: 2px solid #ff3333;
+      color: #ff4444;
+      box-shadow: 0 0 20px red;
+      position: relative;
+    }
+    .modal-content img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+    }
+    .modal-close:hover {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -104,25 +146,30 @@
     🚨 Loading emergency message...
   </div>
 
+  <!-- Popup Modal -->
+  <div id="emergencyModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal()">&times;</span>
+      <div id="modalMessage"></div>
+    </div>
+  </div>
+
   <div class="dashboard-grid">
     <!-- 🏛️ Bank Section -->
     <div class="dashboard-section">
       <h2>🏛️ BANK</h2>
 
-      <!-- Copy Link -->
       <p>Copy this link and send to your client:</p>
       <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
       <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
       <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
 
-      <!-- Open Account -->
       <p>Open account here to register:</p>
       <div class="link-desc">➡️ Click to open the registration page to start creating a client account.</div>
       <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://sp0m.com')">
         Open Account
       </button>
 
-      <!-- Credit Account -->
       <p>Credit your bank account:</p>
       <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
       <button class="btn btn-green" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
@@ -134,13 +181,11 @@
     <div class="dashboard-section">
       <h2>✈️🚢 Track Package 🛍️🛒</h2>
 
-      <!-- Copy Link -->
       <p>Copy this link and send to your client:</p>
       <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
       <div class="link-desc">➡️ Give this link to your client to track the package you send.</div>
       <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
 
-      <!-- Open Tracking -->
       <p>Open the account to create packages:</p>
       <div class="link-desc">➡️ Open the account here to start creating the package for your client.</div>
       <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/')">
@@ -167,27 +212,60 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // -----------------------------
-    // Real-time Emergency Listener
-    // -----------------------------
     const emergencyBox = document.getElementById("emergencyBox");
+    const emergencyModal = document.getElementById("emergencyModal");
+    const modalMessage = document.getElementById("modalMessage");
+
+    // Real-time listener for emergencies
     db.collection("emergency").onSnapshot((snapshot) => {
       if (!snapshot.empty) {
         let html = "";
+        let firstMessage = null;
+
         snapshot.forEach(doc => {
           const data = doc.data();
-          html += `<div style="margin-bottom:20px;">
+          html += `<div style="margin-bottom:20px; cursor:pointer;" onclick="showModal('${doc.id}')">
                      ${data.text ? `<p>${data.text}</p>` : ""}
                      ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
                    </div>`;
+          if (!firstMessage) {
+            firstMessage = { id: doc.id, ...data };
+          }
         });
+
         emergencyBox.innerHTML = html;
+
+        // Automatically show popup for the first emergency
+        if (firstMessage) {
+          openModal(firstMessage);
+        }
       } else {
         emergencyBox.innerText = "🚨 No emergency messages at the moment.";
       }
     });
 
-    // Copy link function
+    function openModal(message) {
+      let html = "";
+      if (message.text) html += `<p>${message.text}</p>`;
+      if (message.image) html += `<img src="${message.image}">`;
+      modalMessage.innerHTML = html;
+      emergencyModal.style.display = "flex";
+    }
+
+    function closeModal() {
+      emergencyModal.style.display = "none";
+    }
+
+    // When clicking a message in the list
+    function showModal(docId) {
+      db.collection("emergency").doc(docId).get().then(doc => {
+        if (doc.exists) {
+          openModal(doc.data());
+        }
+      });
+    }
+
+    // Copy helper
     function copyText(id) {
       const text = document.getElementById(id).innerText;
       navigator.clipboard.writeText(text).then(() => {
@@ -195,7 +273,7 @@
       });
     }
 
-    // Open link inside parent dashboard iframe if exists
+    // Open links inside dashboard frame or redirect
     function openInDashboard(url) {
       if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
         window.parent.document.getElementById("dashboardFrame").src = url;
@@ -204,6 +282,5 @@
       }
     }
   </script>
-
 </body>
 </html>
