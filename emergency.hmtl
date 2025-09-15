@@ -13,29 +13,44 @@
       padding: 20px;
     }
 
-    .emergencyCard {
-      background: rgba(0, 0, 0, 0.9);
-      border: 2px solid red;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px auto;
+    h2 {
       color: red;
-      max-width: 800px;
       text-align: center;
-      font-size: 16px;
-      box-shadow: 0 0 20px rgba(255,0,0,0.6);
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    #emergencyContainer {
+      max-height: 90vh;       /* ✅ limit height */
+      overflow-y: auto;       /* ✅ scroll if too many messages */
+      padding-right: 10px;
+    }
+
+    .emergencyCard {
+      background: rgba(0, 0, 0, 0.95);
+      border: 3px solid red;
+      border-radius: 16px;
+      padding: 40px 20px;
+      margin: 30px auto;
+      color: red;
+      width: 95%;             /* ✅ almost full screen */
+      text-align: center;
+      font-size: 24px;        /* ✅ bigger text */
+      line-height: 1.6;
+      box-shadow: 0 0 25px rgba(255,0,0,0.7);
       transition: all 0.3s ease;
     }
 
     .emergencyCard img {
       max-width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
+      border-radius: 12px;
+      margin-top: 20px;
     }
 
     .emergencyCard a {
       color: lime;
       font-weight: bold;
+      font-size: 22px;
       text-decoration: underline;
     }
 
@@ -46,13 +61,13 @@
     @keyframes flashAnimation {
       0% { background-color: rgba(255,0,0,0.2); }
       50% { background-color: rgba(255,0,0,0.5); }
-      100% { background-color: rgba(0,0,0,0.9); }
+      100% { background-color: rgba(0,0,0,0.95); }
     }
   </style>
 </head>
 <body>
 
-  <h2 style="color:red; text-align:center;">🚨 Emergency Messages</h2>
+  <h2>🚨 Emergency Messages 🚨</h2>
   <div id="emergencyContainer">Loading messages...</div>
 
   <!-- Firebase -->
@@ -83,7 +98,7 @@
     db.collection("emergency").orderBy("timestamp", "desc")
       .onSnapshot(snapshot => {
         if (snapshot.empty) {
-          container.innerHTML = "<p style='color:red;'>🚨 No emergency messages at the moment.</p>";
+          container.innerHTML = "<p style='color:red; font-size:22px;'>🚨 No emergency messages at the moment.</p>";
           return;
         }
 
@@ -101,6 +116,9 @@
         });
 
         container.innerHTML = html;
+
+        // ✅ Auto-scroll to the top (latest message)
+        container.scrollTo({ top: 0, behavior: "smooth" });
       });
   </script>
 
