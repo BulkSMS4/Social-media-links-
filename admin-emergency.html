@@ -3,37 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Emergency Dashboard</title>
+  <title>Admin Emergency</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #111; color: lime; padding: 20px; }
-    h1 { color: red; }
-    .form-box { background: #000; padding: 15px; border: 1px solid red; border-radius: 8px; margin-bottom: 20px; }
-    input, textarea { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #555; background: #222; color: #fff; }
-    button { padding: 10px 15px; margin: 5px 0; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    .btn-post { background: lime; color: black; }
-    .btn-delete { background: red; color: white; }
-    .post { background: #222; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #444; }
-    img { max-width: 100%; border-radius: 6px; margin-top: 8px; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      margin: 20px;
+    }
+    h2 {
+      color: lime;
+    }
+    form {
+      background: #222;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    input, textarea {
+      background: #333;
+      color: #fff;
+    }
+    button {
+      background: lime;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00cc00;
+    }
+    .message {
+      background: #222;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .message img {
+      max-width: 200px;
+      display: block;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    .actions {
+      margin-top: 10px;
+    }
+    .actions button {
+      width: auto;
+      margin-right: 10px;
+      padding: 6px 12px;
+    }
+    .edit-btn {
+      background: orange;
+    }
+    .edit-btn:hover {
+      background: darkorange;
+    }
+    .delete-btn {
+      background: red;
+      color: white;
+    }
+    .delete-btn:hover {
+      background: darkred;
+    }
   </style>
 </head>
 <body>
 
-  <h1>🚨 Admin Emergency Messages</h1>
+  <h2>🚨 Admin Emergency Messages</h2>
 
-  <!-- Post Form -->
-  <div class="form-box">
-    <h2>Create New Emergency Post</h2>
-    <textarea id="msgText" placeholder="Enter emergency text"></textarea>
-    <input type="text" id="msgLink" placeholder="Add link (optional)">
-    <input type="text" id="msgNumber" placeholder="Add number (optional)">
-    <input type="text" id="msgImageUrl" placeholder="Image URL (optional)">
-    <input type="file" id="msgImageFile">
-    <button class="btn-post" onclick="postMessage()">Post</button>
-  </div>
+  <form id="emergencyForm">
+    <textarea id="messageText" placeholder="Enter emergency message..." required></textarea>
+    <input type="text" id="link" placeholder="Optional link (https://...)" />
+    <input type="text" id="phone" placeholder="Optional phone number" />
+    <input type="text" id="imageUrl" placeholder="Optional image URL" />
+    <input type="file" id="imageFile" accept="image/*" />
+    <button type="submit">Post Emergency</button>
+  </form>
 
-  <!-- Display Posts -->
-  <h2>All Emergency Posts</h2>
-  <div id="posts"></div>
+  <div id="messages"></div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -52,79 +107,86 @@
       appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
       measurementId: "G-ZJ05T7YNSQ"
     };
-
     firebase.initializeApp(firebaseConfig);
+
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    const ADMIN_UID = "xjsW37kcdzTrdJddHjvhmdpFeV22";
+    const form = document.getElementById("emergencyForm");
+    const messagesDiv = document.getElementById("messages");
 
-    // Check login
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user || user.uid !== ADMIN_UID) {
-        alert("Access denied. Admins only!");
-        document.body.innerHTML = "<h2 style='color:red'>⛔ Not authorized</h2>";
-      }
-    });
+    // Load messages
+    function loadMessages() {
+      db.collection("emergency").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.classList.add("message");
+          div.innerHTML = `
+            <p>${data.text || ""}</p>
+            ${data.link ? `<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
+            ${data.phone ? `<p>📞 ${data.phone}</p>` : ""}
+            ${data.image ? `<img src="${data.image}" alt="Emergency Image"/>` : ""}
+            <div class="actions">
+              <button class="edit-btn" onclick="editMessage('${doc.id}', \`${data.text || ""}\`, '${data.link || ""}', '${data.phone || ""}', '${data.image || ""}')">Edit</button>
+              <button class="delete-btn" onclick="deleteMessage('${doc.id}')">Delete</button>
+            </div>
+          `;
+          messagesDiv.appendChild(div);
+        });
+      });
+    }
 
     // Post new message
-    async function postMessage() {
-      const text = document.getElementById("msgText").value;
-      const link = document.getElementById("msgLink").value;
-      const number = document.getElementById("msgNumber").value;
-      const imageUrlInput = document.getElementById("msgImageUrl").value;
-      const imageFile = document.getElementById("msgImageFile").files[0];
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const text = document.getElementById("messageText").value;
+      const link = document.getElementById("link").value;
+      const phone = document.getElementById("phone").value;
+      const imageUrl = document.getElementById("imageUrl").value;
+      const file = document.getElementById("imageFile").files[0];
 
-      let finalImageUrl = imageUrlInput;
+      let finalImageUrl = imageUrl;
 
-      if (imageFile) {
-        const storageRef = storage.ref("emergency/" + Date.now() + "_" + imageFile.name);
-        await storageRef.put(imageFile);
+      if (file) {
+        const storageRef = storage.ref("emergency/" + Date.now() + "-" + file.name);
+        await storageRef.put(file);
         finalImageUrl = await storageRef.getDownloadURL();
       }
 
       await db.collection("emergency").add({
-        text, link, number,
+        text,
+        link,
+        phone,
         image: finalImageUrl || "",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
-      document.getElementById("msgText").value = "";
-      document.getElementById("msgLink").value = "";
-      document.getElementById("msgNumber").value = "";
-      document.getElementById("msgImageUrl").value = "";
-      document.getElementById("msgImageFile").value = "";
+      form.reset();
+    });
 
-      alert("✅ Emergency message posted");
-    }
-
-    // Load posts in real-time
-    const postsBox = document.getElementById("posts");
-    db.collection("emergency").orderBy("createdAt", "desc")
-      .onSnapshot(snapshot => {
-        postsBox.innerHTML = "";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          let html = `<div class="post">
-                        <p><b>Message:</b> ${data.text || ""}</p>
-                        ${data.link ? `<p><b>Link:</b> <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
-                        ${data.number ? `<p><b>Number:</b> ${data.number}</p>` : ""}
-                        ${data.image ? `<img src="${data.image}">` : ""}
-                        <button class="btn-delete" onclick="deletePost('${doc.id}')">Delete</button>
-                      </div>`;
-          postsBox.innerHTML += html;
-        });
-      });
-
-    // Delete post
-    async function deletePost(id) {
-      try {
+    // Delete message
+    async function deleteMessage(id) {
+      if (confirm("Are you sure you want to delete this message?")) {
         await db.collection("emergency").doc(id).delete();
-        alert("🗑️ Deleted successfully");
-      } catch (err) {
-        alert("Error deleting: " + err.message);
       }
     }
+
+    // Edit message
+    async function editMessage(id, text, link, phone, image) {
+      const newText = prompt("Edit message:", text);
+      if (newText !== null) {
+        await db.collection("emergency").doc(id).update({
+          text: newText,
+          link,
+          phone,
+          image
+        });
+      }
+    }
+
+    loadMessages();
   </script>
 </body>
 </html>
