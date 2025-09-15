@@ -71,7 +71,8 @@
   <!-- Post Emergency link for admin -->
   <a href="#" data-page="admin-emergency.html">🚨 Post Emergency</a>
   <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
-  <a href="#" class="logout">🚪 Logout</a>
+  <!-- Logout goes directly to logout.html -->
+  <a href="logout.html" class="logout">🚪 Logout</a>
 </div>
 
 <script>
@@ -95,12 +96,6 @@
     });
   });
 
-  // Handle logout
-  const logoutLink = document.querySelector('#sidebar a.logout');
-  logoutLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (window.parent && window.parent.logout) {
-      window.parent.logout();
-    }
-  });
+  // Logout link will now open logout.html directly
+  // (No extra JS needed)
 </script>
