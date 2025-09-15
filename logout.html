@@ -53,11 +53,10 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
-    // ----- CONFIG: change redirectTo if needed -----
-    const redirectTo = "login.html"; // change to where you want users to go after logout
-    // -----------------------------------------------
+    // Redirect destination after logout
+    const redirectTo = "index.html";
 
-    // Your Firebase config (storageBucket fixed)
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -74,7 +73,7 @@
     const userInfoEl = document.getElementById("userInfo");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // Show current user (if any)
+    // Show current user
     auth.onAuthStateChanged(user => {
       if (user) {
         userInfoEl.textContent = "Signed in as: " + (user.email || ("UID: " + user.uid));
@@ -89,9 +88,8 @@
       logoutBtn.textContent = "Signing out...";
       try {
         await auth.signOut();
-        alert("✅ You have been signed out.");
-        // redirect after short delay to allow alert to show
-        setTimeout(() => { window.location.href = redirectTo; }, 250);
+        // instant redirect to homepage
+        window.location.href = redirectTo;
       } catch (err) {
         console.error("Sign out error:", err);
         alert("❌ Sign out failed: " + (err.message || err));
@@ -99,9 +97,6 @@
         logoutBtn.textContent = "Log out";
       }
     });
-
-    // Optional: if page loaded and no user is signed in, redirect immediately
-    auth.getRedirectResult().catch(()=>{}); // harmless
   </script>
 </body>
 </html>
