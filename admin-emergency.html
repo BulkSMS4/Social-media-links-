@@ -2,66 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Emergency</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Emergency Messages</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #111;
+      background: #000;
       color: #0f0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
     }
-    h2 { color: #ff3333; }
-    label { display: block; margin-top: 10px; }
-    input, textarea, button {
+    h1 {
+      color: lime;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .msg-box {
+      background: #111;
+      border: 1px solid #0f0;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 10px rgba(0,255,0,0.2);
+    }
+    .msg-box img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .delete-btn {
+      background: red;
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      margin-top: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .delete-btn:hover {
+      background: darkred;
+    }
+    .new-msg {
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 1px solid lime;
+    }
+    input, textarea {
       width: 100%;
       padding: 10px;
-      margin-top: 6px;
+      margin: 8px 0;
       border-radius: 6px;
-      border: none;
-      font-size: 16px;
+      border: 1px solid #0f0;
+      background: #000;
+      color: lime;
     }
-    input, textarea { background: #222; color: #0f0; }
     button {
-      background: #ff3333;
-      color: #fff;
+      background: lime;
+      color: black;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
     }
-    button:hover { background: #cc0000; }
-    #preview {
-      margin-top: 15px;
-      max-width: 100%;
-      border-radius: 8px;
-      display: none;
-    }
+    button:hover { background:#bfff00; }
   </style>
 </head>
 <body>
-  <h2>🚨 Post Emergency Message</h2>
+  <h1>🚨 Admin Emergency Messages</h1>
 
-  <label for="message">Message</label>
-  <textarea id="message" rows="3" placeholder="Enter emergency message..."></textarea>
+  <!-- Form to post new emergency -->
+  <div class="new-msg">
+    <h2>Post New Emergency</h2>
+    <textarea id="msgText" placeholder="Type emergency message..."></textarea>
+    <input type="file" id="msgImage" accept="image/*">
+    <button onclick="postMessage()">Post</button>
+  </div>
 
-  <label for="imageFile">Upload Image (optional)</label>
-  <input type="file" id="imageFile" accept="image/*">
-
-  <img id="preview" alt="Image Preview">
-
-  <button onclick="postEmergency()">Post Emergency</button>
+  <!-- Messages will appear here -->
+  <div id="messages"></div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
-    // ✅ Firebase config (make sure storageBucket is correct)
+    // 🔑 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
       projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com", // ✅ FIXED HERE
+      storageBucket: "usahackersland.appspot.com",
       messagingSenderId: "588407428267",
       appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
       measurementId: "G-ZJ05T7YNSQ"
@@ -69,46 +105,68 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
+    const auth = firebase.auth();
 
-    const fileInput = document.getElementById("imageFile");
-    const preview = document.getElementById("preview");
+    const messagesDiv = document.getElementById("messages");
 
-    // Preview image before upload
-    fileInput.addEventListener("change", (e) => {
-      if (e.target.files && e.target.files[0]) {
-        preview.src = URL.createObjectURL(e.target.files[0]);
-        preview.style.display = "block";
+    // ✅ Post new message
+    async function postMessage() {
+      const text = document.getElementById("msgText").value.trim();
+      const file = document.getElementById("msgImage").files[0];
+
+      if (!text && !file) {
+        alert("Please enter a message or choose an image.");
+        return;
       }
-    });
 
-    // ✅ Post emergency message
-    async function postEmergency() {
-      const text = document.getElementById("message").value.trim();
-      const file = fileInput.files[0];
-
-      let imageUrl = "";
-
-      try {
-        if (file) {
-          const storageRef = storage.ref("emergency/" + file.name);
-          await storageRef.put(file);
-          imageUrl = await storageRef.getDownloadURL();
-        }
-
-        await db.collection("emergency").doc("current").set({
-          text: text || "⚠ Emergency Alert!",
-          image: imageUrl
-        });
-
-        alert("🚨 Emergency message posted!");
-        document.getElementById("message").value = "";
-        fileInput.value = "";
-        preview.style.display = "none";
-      } catch (error) {
-        console.error("Error posting emergency:", error);
-        alert("❌ Failed to post emergency. Check console for details.");
+      let imageUrl = null;
+      if (file) {
+        const storageRef = storage.ref("emergency/" + Date.now() + "_" + file.name);
+        await storageRef.put(file);
+        imageUrl = await storageRef.getDownloadURL();
       }
+
+      await db.collection("emergency").add({
+        text,
+        image: imageUrl,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      document.getElementById("msgText").value = "";
+      document.getElementById("msgImage").value = "";
     }
+
+    // ✅ Load messages
+    db.collection("emergency").orderBy("timestamp","desc")
+      .onSnapshot(snapshot => {
+        messagesDiv.innerHTML = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const div = document.createElement("div");
+          div.className = "msg-box";
+          div.innerHTML = `
+            <p>${data.text || ""}</p>
+            ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
+          `;
+
+          // Show delete button if admin
+          auth.onAuthStateChanged(user => {
+            if (user && user.email === "admin@gmail.com") { // change to your admin email
+              const btn = document.createElement("button");
+              btn.className = "delete-btn";
+              btn.textContent = "Delete";
+              btn.onclick = async () => {
+                if (confirm("Delete this message?")) {
+                  await db.collection("emergency").doc(doc.id).delete();
+                }
+              };
+              div.appendChild(btn);
+            }
+          });
+
+          messagesDiv.appendChild(div);
+        });
+      });
   </script>
 </body>
 </html>
