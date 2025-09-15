@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emergency Message</title>
+  <title>Emergency Messages</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,33 +13,32 @@
       padding: 20px;
     }
 
-    #emergencyMessage {
+    .emergencyCard {
       background: rgba(0, 0, 0, 0.9);
       border: 2px solid red;
       border-radius: 12px;
       padding: 20px;
       margin: 20px auto;
       color: red;
-      max-width: 1000px;
+      max-width: 800px;
       text-align: center;
       font-size: 16px;
       box-shadow: 0 0 20px rgba(255,0,0,0.6);
       transition: all 0.3s ease;
     }
 
-    #emergencyMessage img {
+    .emergencyCard img {
       max-width: 100%;
       border-radius: 10px;
       margin-top: 10px;
     }
 
-    #emergencyMessage a {
+    .emergencyCard a {
       color: lime;
       font-weight: bold;
       text-decoration: underline;
     }
 
-    /* Optional: Flash effect when new message arrives */
     .flash {
       animation: flashAnimation 1s ease;
     }
@@ -53,9 +52,8 @@
 </head>
 <body>
 
-  <div id="emergencyMessage">
-    🚨 Loading emergency message...
-  </div>
+  <h2 style="color:red; text-align:center;">🚨 Emergency Messages</h2>
+  <div id="emergencyContainer">Loading messages...</div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -69,7 +67,7 @@
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
       projectId: "usahackersland",
-      storageBucket: "usahackersland.firebasestorage.app",
+      storageBucket: "usahackersland.appspot.com", // ✅ fixed
       messagingSenderId: "588407428267",
       appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
       measurementId: "G-ZJ05T7YNSQ"
@@ -77,31 +75,32 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const emergencyDiv = document.getElementById("emergencyMessage");
+    const container = document.getElementById("emergencyContainer");
 
     // -------------------------
-    // Real-time listener
+    // Real-time listener for ALL docs in emergency
     // -------------------------
-    db.collection("emergency").doc("current")
-      .onSnapshot(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          let html = '';
-
-          if (data.text) html += `<p>${data.text}</p>`;
-          if (data.image) html += `<img src="${data.image}" alt="Emergency Image">`;
-          if (data.phone) html += `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>`;
-          if (data.link) html += `<p>🔗 More info: <a href="${data.link}" target="_blank">${data.link}</a></p>`;
-
-          emergencyDiv.innerHTML = html;
-
-          // Flash effect to highlight new message
-          emergencyDiv.classList.add('flash');
-          setTimeout(() => emergencyDiv.classList.remove('flash'), 1000);
-
-        } else {
-          emergencyDiv.innerHTML = "🚨 No emergency messages at the moment.";
+    db.collection("emergency").orderBy("timestamp", "desc")
+      .onSnapshot(snapshot => {
+        if (snapshot.empty) {
+          container.innerHTML = "<p style='color:red;'>🚨 No emergency messages at the moment.</p>";
+          return;
         }
+
+        let html = "";
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          html += `
+            <div class="emergencyCard flash">
+              ${data.text ? `<p>${data.text}</p>` : ""}
+              ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
+              ${data.phone ? `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
+              ${data.link ? `<p>🔗 More info: <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
       });
   </script>
 
