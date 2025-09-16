@@ -56,35 +56,54 @@
     font-size: 22px;
     letter-spacing: 1px;
   }
+
+  /* Toggle button */
+  #menuBtn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    background: lime;
+    border: none;
+    color: black;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2100;
+  }
+  #menuBtn:hover {
+    background: #bfff00;
+  }
 </style>
+
+<button id="menuBtn">☰ Menu</button>
 
 <div id="sidebar">
   <h2>⚡ User Panel</h2>
-  <a href="#" data-page="home.html">🏠 Home</a>
-  <a href="#" data-page="form-builder.html">📝 Form Builder</a>
-  <a href="#" data-page="victims.html">👀 View Victims</a>
-  <a href="#" data-page="links.html">🔗 Links</a>
-  <a href="#" data-page="atm.html">🏧 ATM</a>
+  <a href="home.html">🏠 Home</a>
+  <a href="form-builder.html">📝 Form Builder</a>
+  <a href="victims.html">👀 View Victims</a>
+  <a href="links.html">🔗 Links</a>
+  <a href="atm.html">🏧 ATM</a>
   <a href="#" class="logout">🚪 Logout</a>
 </div>
 
 <script>
-  // Toggle sidebar
-  function toggleMenu() {
-    document.getElementById('sidebar').classList.toggle('active');
-  }
+  const sidebar = document.getElementById('sidebar');
+  const menuBtn = document.getElementById('menuBtn');
 
-  // Handle clicks on all links except logout
-  const links = document.querySelectorAll('#sidebar a[data-page]');
+  // Toggle sidebar
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+
+  // Close sidebar after clicking a menu item
+  const links = document.querySelectorAll('#sidebar a');
   links.forEach(link => {
     link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const page = link.getAttribute('data-page');
-      // Tell parent dashboard to load page in iframe
-      if (window.parent && window.parent.loadPage) {
-        window.parent.loadPage(page);
-      } else if (window.parent && window.parent.document.getElementById('dashboardFrame')) {
-        window.parent.document.getElementById('dashboardFrame').src = page;
+      if (!link.classList.contains('logout')) {
+        // let navigation happen then hide menu
+        setTimeout(() => sidebar.classList.remove('active'), 300);
       }
     });
   });
@@ -93,8 +112,11 @@
   const logoutLink = document.querySelector('#sidebar a.logout');
   logoutLink.addEventListener('click', (e) => {
     e.preventDefault();
+    sidebar.classList.remove('active'); // hide sidebar on logout too
     if (window.parent && window.parent.logout) {
       window.parent.logout();
+    } else if (typeof logout === "function") {
+      logout();
     }
   });
 </script>
