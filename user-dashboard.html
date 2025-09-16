@@ -18,7 +18,7 @@
       position: fixed;
       top: 15px;
       left: 15px;
-      z-index: 3000;
+      z-index: 5000;
       background: lime;
       color: black;
       font-weight: bold;
@@ -105,12 +105,28 @@
     @media (max-width: 900px) {
       .dashboard-grid { grid-template-columns: 1fr; }
     }
+
+    /* Sidebar iframe overlay */
+    #userMenuFrame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      border: none;
+      z-index: 4000;
+      background: transparent;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body>
 
   <!-- Sidebar toggle button -->
   <button id="menuBtn" onclick="toggleMenu()">☰ Menu</button>
+
+  <!-- Sidebar (iframe) -->
+  <iframe id="userMenuFrame" src="user-menu.html"></iframe>
 
   <!-- Emergency Message -->
   <div id="emergencyBox" class="emergency-box">
@@ -205,10 +221,11 @@
       }
     }
 
-    // Make toggleMenu accessible
+    // ✅ Toggle menu inside iframe
     function toggleMenu() {
-      if (window.parent && window.parent.toggleMenu) {
-        window.parent.toggleMenu();
+      const sidebarFrame = document.getElementById("userMenuFrame");
+      if (sidebarFrame && sidebarFrame.contentWindow && sidebarFrame.contentWindow.toggleMenu) {
+        sidebarFrame.contentWindow.toggleMenu();
       }
     }
   </script>
