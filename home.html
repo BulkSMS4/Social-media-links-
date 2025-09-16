@@ -32,6 +32,22 @@
       margin-top: 10px;
     }
 
+    /* Emergency Admin Controls */
+    .admin-controls {
+      margin-top: 15px;
+      display: none; /* hidden by default for users */
+    }
+    .admin-controls button {
+      margin: 5px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-edit { background: lime; color: black; }
+    .btn-delete { background: red; color: white; }
+
     /* Grid */
     .dashboard-grid {
       display: grid;
@@ -102,6 +118,10 @@
   <!-- Emergency Message -->
   <div id="emergencyBox" class="emergency-box">
     🚨 Loading emergency message...
+    <div class="admin-controls" id="adminControls">
+      <button class="btn-edit" onclick="editEmergency()">✏️ Edit</button>
+      <button class="btn-delete" onclick="deleteEmergency()">🗑️ Delete</button>
+    </div>
   </div>
 
   <div class="dashboard-grid">
@@ -123,7 +143,7 @@
       <p>Credit your bank account:</p>
       <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
       <button class="btn btn-green" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
-        💵💰 Credited your bank account 🪙
+        💵💰 Credit your bank account 🪙
       </button>
     </div>
 
@@ -139,7 +159,7 @@
       <p>Open the account to create packages:</p>
       <div class="link-desc">➡️ Open the account here to start creating the package for your client.</div>
       <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/')">
-        Open Tracking Account here👇
+        Open Tracking Account here 👇
       </button>
     </div>
   </div>
@@ -163,6 +183,15 @@
     const db = firebase.firestore();
 
     const emergencyBox = document.getElementById("emergencyBox");
+    const adminControls = document.getElementById("adminControls");
+
+    // Check if admin (for demo: check query param "?role=admin")
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAdmin = urlParams.get("role") === "admin";
+
+    if (isAdmin) {
+      adminControls.style.display = "block"; // show admin buttons
+    }
 
     // Listen for only one doc: "current"
     db.collection("emergency").doc("current").onSnapshot(doc => {
@@ -174,6 +203,7 @@
           ${data.phone ? `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
           ${data.link ? `<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
         `;
+        if (isAdmin) emergencyBox.appendChild(adminControls);
       } else {
         emergencyBox.innerText = "🚨 No emergency messages at the moment.";
       }
@@ -195,6 +225,20 @@
         window.location.href = url;
       }
     }
+
+    // Admin functions
+    function editEmergency() {
+      const newText = prompt("✏️ Enter new emergency text:");
+      if (newText) {
+        db.collection("emergency").doc("current").set({ text: newText }, { merge: true });
+      }
+    }
+
+    function deleteEmergency() {
+      if (confirm("🗑️ Delete the emergency message?")) {
+        db.collection("emergency").doc("current").delete();
+      }
+    }
   </script>
 </body>
-    </html>
+        </html>
