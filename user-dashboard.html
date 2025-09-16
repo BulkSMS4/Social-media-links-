@@ -10,24 +10,18 @@
       background: #000;
       color: lime;
       margin: 0;
+      padding: 0;
     }
-
-    /* Push content to the right when sidebar is visible */
-    #mainContent {
-      margin-left: 260px;
-      padding: 20px;
-    }
-
     h2 {
       color: red;
       text-align: center;
+      margin: 20px 0;
     }
-
     .message {
       background: #111;
       border: 1px solid #333;
       padding: 20px;
-      margin-top: 20px;
+      margin: 20px;
       border-radius: 10px;
       text-align: center;
       box-shadow: 0 0 10px rgba(255,0,0,0.5);
@@ -41,34 +35,40 @@
       color: cyan;
       text-decoration: underline;
     }
+    /* Menu button */
+    #menuBtn {
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 3000;
+      background: lime;
+      color: black;
+      font-weight: bold;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,255,0,0.5);
+    }
+    #menuBtn:hover {
+      background: #bfff00;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar (loaded from user-menu.html) -->
-  <div id="userMenu"></div>
+  <!-- Sidebar toggle button -->
+  <button id="menuBtn" onclick="toggleMenu()">☰ Menu</button>
 
-  <!-- Dashboard Content -->
-  <div id="mainContent">
-    <h2>🚨 Emergency Message 🚨</h2>
-    <div id="messages">Loading...</div>
-  </div>
+  <h2>🚨 Emergency Message 🚨</h2>
+  <div id="messages">Loading...</div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
-    // ✅ Load sidebar into the dashboard
-    fetch("user-menu.html")
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById("userMenu").innerHTML = html;
-      })
-      .catch(err => console.error("Sidebar load failed:", err));
-
-    // ✅ Firebase config
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -80,11 +80,10 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
 
     const messagesDiv = document.getElementById("messages");
 
-    // ✅ Show current emergency message
+    // ✅ Listen for only the current message
     db.collection("emergency").doc("current")
       .onSnapshot(doc => {
         if (doc.exists) {
@@ -102,18 +101,11 @@
         }
       });
 
-    // ✅ Global logout function (called from sidebar)
-    function logout() {
-      auth.signOut().then(() => {
-        window.location.href = "index.html"; // back to homepage
-      }).catch(err => {
-        alert("❌ Logout failed: " + err.message);
-      });
-    }
-
-    // ✅ Page loader for sidebar links (optional)
-    function loadPage(page) {
-      window.location.href = page; // simple redirect
+    // Make toggleMenu accessible
+    function toggleMenu() {
+      if (window.parent && window.parent.toggleMenu) {
+        window.parent.toggleMenu();
+      }
     }
   </script>
 </body>
