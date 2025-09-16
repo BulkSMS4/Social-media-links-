@@ -3,18 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Emergency Messages</title>
+  <title>User Dashboard</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #000;
       color: lime;
+      margin: 0;
+    }
+
+    /* Push content to the right when sidebar is visible */
+    #mainContent {
+      margin-left: 260px;
       padding: 20px;
     }
+
     h2 {
       color: red;
       text-align: center;
     }
+
     .message {
       background: #111;
       border: 1px solid #333;
@@ -37,15 +45,30 @@
 </head>
 <body>
 
-  <h2>🚨 Emergency Message 🚨</h2>
-  <div id="messages">Loading...</div>
+  <!-- Sidebar (loaded from user-menu.html) -->
+  <div id="userMenu"></div>
+
+  <!-- Dashboard Content -->
+  <div id="mainContent">
+    <h2>🚨 Emergency Message 🚨</h2>
+    <div id="messages">Loading...</div>
+  </div>
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
-    // Firebase config
+    // ✅ Load sidebar into the dashboard
+    fetch("user-menu.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("userMenu").innerHTML = html;
+      })
+      .catch(err => console.error("Sidebar load failed:", err));
+
+    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -57,10 +80,11 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
     const messagesDiv = document.getElementById("messages");
 
-    // ✅ Listen for only the current message
+    // ✅ Show current emergency message
     db.collection("emergency").doc("current")
       .onSnapshot(doc => {
         if (doc.exists) {
@@ -77,6 +101,20 @@
           messagesDiv.innerHTML = `<p style="color:red;">🚨 No emergency message at the moment 🚨</p>`;
         }
       });
+
+    // ✅ Global logout function (called from sidebar)
+    function logout() {
+      auth.signOut().then(() => {
+        window.location.href = "index.html"; // back to homepage
+      }).catch(err => {
+        alert("❌ Logout failed: " + err.message);
+      });
+    }
+
+    // ✅ Page loader for sidebar links (optional)
+    function loadPage(page) {
+      window.location.href = page; // simple redirect
+    }
   </script>
 </body>
 </html>
