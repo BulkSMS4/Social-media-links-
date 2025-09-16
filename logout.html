@@ -53,7 +53,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
-    // Redirect destination after logout
     const redirectTo = "index.html";
 
     // Firebase config
@@ -82,13 +81,12 @@
       }
     });
 
-    // Logout action
+    // Logout only when button is clicked
     logoutBtn.addEventListener("click", async () => {
       logoutBtn.disabled = true;
       logoutBtn.textContent = "Signing out...";
       try {
         await auth.signOut();
-        // instant redirect to homepage
         window.location.href = redirectTo;
       } catch (err) {
         console.error("Sign out error:", err);
