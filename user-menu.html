@@ -2,6 +2,7 @@
   body {
     margin: 0;
     font-family: Arial, sans-serif;
+    background: transparent; /* prevent black overlay if iframe */
   }
 
   /* Sidebar */
@@ -73,7 +74,9 @@
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('active');
   }
-  window.toggleMenu = toggleMenu; // ✅ make available to dashboard
+
+  // ✅ Expose globally so parent (dashboard) can call it
+  window.toggleMenu = toggleMenu;
 
   // Handle clicks on all links except logout
   const links = document.querySelectorAll('#sidebar a[data-page]');
@@ -97,6 +100,6 @@
     if (window.parent && window.parent.logout) {
       window.parent.logout();
     }
-    toggleMenu(); // ✅ close after logout
+    toggleMenu(); // ✅ Close after logout
   });
 </script>
