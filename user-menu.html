@@ -1,105 +1,95 @@
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: transparent; /* prevent black overlay if iframe */
-  }
-
-  /* Sidebar */
-  #sidebar {
-    position: fixed;
-    top: 0;
-    left: -260px; /* Hidden by default */
-    width: 260px;
-    height: 100%;
-    background: linear-gradient(180deg, #000 0%, #001a00 100%);
-    border-right: 2px solid lime;
-    transition: left 0.3s ease-in-out;
-    padding-top: 60px;
-    z-index: 2000;
-    box-shadow: 4px 0 15px rgba(0,255,0,0.3);
-  }
-  #sidebar.active { left: 0; }
-
-  /* Sidebar links */
-  #sidebar a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 20px;
-    color: #0f0;
-    font-weight: bold;
-    text-decoration: none;
-    border-bottom: 1px solid #003300;
-    transition: background 0.2s, color 0.2s;
-  }
-  #sidebar a:hover {
-    background: #003300;
-    color: #fff;
-  }
-
-  /* Logout link */
-  #sidebar a.logout {
-    color: red;
-    border-top: 2px solid #003300;
-    margin-top: 20px;
-  }
-  #sidebar a.logout:hover {
-    background: #330000;
-    color: #fff;
-  }
-
-  /* Header inside sidebar */
-  #sidebar h2 {
-    color: #0f0;
-    text-align: center;
-    margin: 0 0 20px;
-    font-size: 22px;
-    letter-spacing: 1px;
-  }
-</style>
-
-<div id="sidebar">
-  <h2>⚡ User Panel</h2>
-  <a href="#" data-page="home.html">🏠 Home</a>
-  <a href="#" data-page="form-builder.html">📝 Form Builder</a>
-  <a href="#" data-page="victims.html">👀 View Victims</a>
-  <a href="#" data-page="links.html">🔗 Links</a>
-  <a href="#" data-page="atm.html">🏧 ATM</a>
-  <a href="#" class="logout">🚪 Logout</a>
-</div>
-
-<script>
-  // Toggle sidebar
-  function toggleMenu() {
-    document.getElementById('sidebar').classList.toggle('active');
-  }
-
-  // ✅ Expose globally so parent (dashboard) can call it
-  window.toggleMenu = toggleMenu;
-
-  // Handle clicks on all links except logout
-  const links = document.querySelectorAll('#sidebar a[data-page]');
-  links.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const page = link.getAttribute('data-page');
-      if (window.parent && window.parent.loadPage) {
-        window.parent.loadPage(page);
-      } else if (window.parent && window.parent.document.getElementById('dashboardFrame')) {
-        window.parent.document.getElementById('dashboardFrame').src = page;
-      }
-      toggleMenu(); // ✅ Close menu after navigation
-    });
-  });
-
-  // Handle logout
-  const logoutLink = document.querySelector('#sidebar a.logout');
-  logoutLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (window.parent && window.parent.logout) {
-      window.parent.logout();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Menu</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #000 0%, #001a00 100%);
+      color: lime;
     }
-    toggleMenu(); // ✅ Close after logout
-  });
-</script>
+
+    /* Sidebar */
+    #sidebar {
+      width: 100%;
+      height: 100vh;
+      padding-top: 60px;
+      box-sizing: border-box;
+    }
+
+    /* Sidebar links */
+    #sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      color: #0f0;
+      font-weight: bold;
+      text-decoration: none;
+      border-bottom: 1px solid #003300;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+    }
+    #sidebar a:hover {
+      background: #003300;
+      color: #fff;
+    }
+
+    /* Logout link */
+    #sidebar a.logout {
+      color: red;
+      border-top: 2px solid #003300;
+      margin-top: 20px;
+    }
+    #sidebar a.logout:hover {
+      background: #330000;
+      color: #fff;
+    }
+
+    /* Header inside sidebar */
+    #sidebar h2 {
+      color: #0f0;
+      text-align: center;
+      margin: 0 0 20px;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>⚡ User Panel</h2>
+    <a data-page="home.html">🏠 Home</a>
+    <a data-page="form-builder.html">📝 Form Builder</a>
+    <a data-page="victims.html">👀 View Victims</a>
+    <a data-page="links.html">🔗 Links</a>
+    <a data-page="atm.html">🏧 ATM</a>
+    <a class="logout">🚪 Logout</a>
+  </div>
+
+  <script>
+    // Handle clicks on all links except logout
+    const links = document.querySelectorAll('#sidebar a[data-page]');
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = link.getAttribute('data-page');
+
+        // ✅ Send message to parent (user-dashboard)
+        window.parent.postMessage({ action: "loadPage", page: page }, "*");
+      });
+    });
+
+    // Handle logout
+    const logoutLink = document.querySelector('#sidebar a.logout');
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      // ✅ Send logout message to parent (user-dashboard)
+      window.parent.postMessage({ action: "logout" }, "*");
+    });
+  </script>
+</body>
+</html>
