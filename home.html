@@ -95,63 +95,13 @@
     @media (max-width: 900px) {
       .dashboard-grid { grid-template-columns: 1fr; }
     }
-
-    /* Popup Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: #111;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 600px;
-      text-align: center;
-      border: 2px solid #ff3333;
-      color: #ff4444;
-      box-shadow: 0 0 20px red;
-      position: relative;
-    }
-    .modal-content img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 20px;
-      font-weight: bold;
-      color: #fff;
-      cursor: pointer;
-    }
-    .modal-close:hover {
-      color: red;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Emergency Messages -->
+  <!-- Emergency Message -->
   <div id="emergencyBox" class="emergency-box">
     🚨 Loading emergency message...
-  </div>
-
-  <!-- Popup Modal -->
-  <div id="emergencyModal" class="modal">
-    <div class="modal-content">
-      <span class="modal-close" onclick="closeModal()">&times;</span>
-      <div id="modalMessage"></div>
-    </div>
   </div>
 
   <div class="dashboard-grid">
@@ -213,57 +163,21 @@
     const db = firebase.firestore();
 
     const emergencyBox = document.getElementById("emergencyBox");
-    const emergencyModal = document.getElementById("emergencyModal");
-    const modalMessage = document.getElementById("modalMessage");
 
-    // Real-time listener for emergencies
-    db.collection("emergency").onSnapshot((snapshot) => {
-      if (!snapshot.empty) {
-        let html = "";
-        let firstMessage = null;
-
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          html += `<div style="margin-bottom:20px; cursor:pointer;" onclick="showModal('${doc.id}')">
-                     ${data.text ? `<p>${data.text}</p>` : ""}
-                     ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
-                   </div>`;
-          if (!firstMessage) {
-            firstMessage = { id: doc.id, ...data };
-          }
-        });
-
-        emergencyBox.innerHTML = html;
-
-        // Automatically show popup for the first emergency
-        if (firstMessage) {
-          openModal(firstMessage);
-        }
+    // Listen for only one doc: "current"
+    db.collection("emergency").doc("current").onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        emergencyBox.innerHTML = `
+          ${data.text ? `<p>${data.text}</p>` : ""}
+          ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
+          ${data.phone ? `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
+          ${data.link ? `<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
+        `;
       } else {
         emergencyBox.innerText = "🚨 No emergency messages at the moment.";
       }
     });
-
-    function openModal(message) {
-      let html = "";
-      if (message.text) html += `<p>${message.text}</p>`;
-      if (message.image) html += `<img src="${message.image}">`;
-      modalMessage.innerHTML = html;
-      emergencyModal.style.display = "flex";
-    }
-
-    function closeModal() {
-      emergencyModal.style.display = "none";
-    }
-
-    // When clicking a message in the list
-    function showModal(docId) {
-      db.collection("emergency").doc(docId).get().then(doc => {
-        if (doc.exists) {
-          openModal(doc.data());
-        }
-      });
-    }
 
     // Copy helper
     function copyText(id) {
@@ -283,4 +197,4 @@
     }
   </script>
 </body>
-</html>
+    </html>
