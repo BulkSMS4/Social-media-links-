@@ -10,7 +10,7 @@
       background: #000;
       color: lime;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
 
     /* Menu button */
@@ -18,7 +18,7 @@
       position: fixed;
       top: 15px;
       left: 15px;
-      z-index: 5000;
+      z-index: 3000;
       background: lime;
       color: black;
       font-weight: bold;
@@ -30,93 +30,33 @@
     }
     #menuBtn:hover { background: #bfff00; }
 
-    /* Emergency box */
-    .emergency-box {
-      background: #111;
-      border: 2px solid #ff3333;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px auto;
-      color: #ff4444;
-      max-width: 1000px;
-      text-align: center;
-      font-size: 16px;
-      box-shadow: 0 0 15px rgba(255,0,0,0.5);
-    }
-    .emergency-box img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-
-    /* Grid */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .dashboard-section {
-      background: #111;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      color: lime;
-      text-align: center;
-    }
-    .dashboard-section h2 {
-      margin-bottom: 10px;
-      color: limegreen;
-      font-size: 20px;
-    }
-    .dashboard-section p {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-    .link-box {
-      background: #000;
-      padding: 8px;
-      border: 1px solid lime;
-      border-radius: 6px;
-      margin-bottom: 5px;
-      font-size: 14px;
-      word-break: break-all;
-      color: lime;
-    }
-    .link-desc {
-      font-size: 13px;
-      color: #adff2f;
-      margin-bottom: 8px;
-    }
-    .btn {
-      display: inline-block;
-      padding: 10px 15px;
-      margin: 5px;
-      border-radius: 6px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn-lime { background: lime; color: black; }
-    .btn-green { background: green; color: white; }
-    .btn-copy { background: #333; color: lime; border: 1px solid lime; }
-
-    @media (max-width: 900px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-    }
-
-    /* Sidebar iframe overlay */
-    #userMenuFrame {
+    /* Sidebar (menu iframe) */
+    #menuFrame {
       position: fixed;
       top: 0;
       left: 0;
       width: 260px;
       height: 100%;
       border: none;
-      z-index: 4000;
-      background: transparent;
-      pointer-events: auto;
+      z-index: 2500;
+      pointer-events: none; /* default off */
+    }
+    #menuFrame.active {
+      pointer-events: auto; /* enable clicks when active */
+    }
+
+    /* Main content area */
+    #content {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    #dashboardFrame {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
   </style>
 </head>
@@ -125,49 +65,12 @@
   <!-- Sidebar toggle button -->
   <button id="menuBtn" onclick="toggleMenu()">☰ Menu</button>
 
-  <!-- Sidebar (iframe) -->
-  <iframe id="userMenuFrame" src="user-menu.html"></iframe>
+  <!-- Sidebar iframe -->
+  <iframe id="menuFrame" src="user-menu.html"></iframe>
 
-  <!-- Emergency Message -->
-  <div id="emergencyBox" class="emergency-box">
-    🚨 Loading emergency message...
-  </div>
-
-  <!-- Bank + Tracking sections -->
-  <div class="dashboard-grid">
-    <!-- 🏛️ Bank Section -->
-    <div class="dashboard-section">
-      <h2>🏛️ BANK</h2>
-      <p>Copy this link and send to your client:</p>
-      <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
-      <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
-      <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
-
-      <p>Open account here to register:</p>
-      <div class="link-desc">➡️ Click to open the registration page to start creating a client account.</div>
-      <button class="btn btn-lime" onclick="openInDashboard('https://sp0m.com')">Open Account</button>
-
-      <p>Credit your bank account:</p>
-      <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
-      <button class="btn btn-green" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
-        💵💰 Credit your bank account 🪙
-      </button>
-    </div>
-
-    <!-- ✈️🚢 Track Package Section -->
-    <div class="dashboard-section">
-      <h2>✈️🚢 Track Package 🛍️</h2>
-      <p>Copy this link and send to your client:</p>
-      <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
-      <div class="link-desc">➡️ Give this link to your client to track the package you send.</div>
-      <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
-
-      <p>Open the account to create packages:</p>
-      <div class="link-desc">➡️ Open the account here to start creating the package for your client.</div>
-      <button class="btn btn-lime" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/')">
-        Open Tracking Account here 👇
-      </button>
-    </div>
+  <!-- Main dashboard content -->
+  <div id="content">
+    <iframe id="dashboardFrame" src="home.html"></iframe>
   </div>
 
   <!-- Firebase -->
@@ -175,6 +78,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
+    // Firebase setup
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -187,47 +91,30 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    const emergencyBox = document.getElementById("emergencyBox");
+    // Sidebar toggle
+    function toggleMenu() {
+      const menuFrame = document.getElementById("menuFrame");
+      menuFrame.classList.toggle("active");
 
-    // Load emergency message
-    db.collection("emergency").doc("current").onSnapshot(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        emergencyBox.innerHTML = `
-          ${data.text ? `<p>${data.text}</p>` : ""}
-          ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
-          ${data.phone ? `<p>📞 <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
-          ${data.link ? `<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
-        `;
-      } else {
-        emergencyBox.innerText = "🚨 No emergency messages at the moment.";
+      // Call the toggle inside the iframe
+      if (menuFrame.contentWindow && menuFrame.contentWindow.toggleMenu) {
+        menuFrame.contentWindow.toggleMenu();
+      }
+    }
+    window.toggleMenu = toggleMenu; // ✅ accessible to children
+
+    // Listen for messages from sidebar
+    window.addEventListener("message", (event) => {
+      if (!event.data || !event.data.action) return;
+
+      if (event.data.action === "loadPage") {
+        document.getElementById("dashboardFrame").src = event.data.page;
+      }
+
+      if (event.data.action === "logout") {
+        window.location.href = "index.html"; // redirect to login
       }
     });
-
-    // Copy helper
-    function copyText(id) {
-      const text = document.getElementById(id).innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("✅ Link copied: " + text);
-      });
-    }
-
-    // Open links inside dashboard or new tab
-    function openInDashboard(url) {
-      if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
-        window.parent.document.getElementById("dashboardFrame").src = url;
-      } else {
-        window.location.href = url;
-      }
-    }
-
-    // ✅ Toggle menu inside iframe
-    function toggleMenu() {
-      const sidebarFrame = document.getElementById("userMenuFrame");
-      if (sidebarFrame && sidebarFrame.contentWindow && sidebarFrame.contentWindow.toggleMenu) {
-        sidebarFrame.contentWindow.toggleMenu();
-      }
-    }
   </script>
 </body>
-        </html>
+    </html>
