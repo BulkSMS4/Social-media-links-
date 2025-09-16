@@ -35,11 +35,12 @@
       background: red;
       color: #fff;
       border: none;
-      padding: 8px 12px;
+      padding: 10px 16px;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      margin-top: 12px;
+      margin-top: 16px;
+      width: 100%;
     }
     .delete-btn:hover {
       background: darkred;
@@ -79,7 +80,7 @@
     <h2>Post / Update Emergency</h2>
     <textarea id="msgText" placeholder="Type emergency message..."></textarea>
     <input type="file" id="msgImage" accept="image/*">
-    <button onclick="postMessage()">Save</button>
+    <button onclick="postMessage()">Save / Update</button>
   </div>
 
   <!-- Current message -->
@@ -121,14 +122,14 @@
 
       let imageUrl = null;
       if (file) {
-        const storageRef = storage.ref("emergency/current_" + file.name);
+        const storageRef = storage.ref("emergency/current_" + Date.now() + "_" + file.name);
         await storageRef.put(file);
         imageUrl = await storageRef.getDownloadURL();
       }
 
       await db.collection("emergency").doc("current").set({
         text,
-        image: imageUrl,
+        image: imageUrl || null,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
 
@@ -136,7 +137,7 @@
       document.getElementById("msgImage").value = "";
     }
 
-    // ✅ Show current message
+    // ✅ Show current message in real time
     db.collection("emergency").doc("current")
       .onSnapshot(doc => {
         if (doc.exists) {
@@ -147,14 +148,14 @@
             ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
           `;
 
-          // Show delete if admin
+          // Show delete button only if admin is logged in
           auth.onAuthStateChanged(user => {
-            if (user && user.email === "admin@gmail.com") { // change to your admin email
+            if (user && user.email === "admin@gmail.com") { // change this to your admin email
               const btn = document.createElement("button");
               btn.className = "delete-btn";
-              btn.textContent = "Delete";
+              btn.textContent = "🗑️ Delete Message";
               btn.onclick = async () => {
-                if (confirm("Delete this emergency?")) {
+                if (confirm("Delete this emergency message?")) {
                   await db.collection("emergency").doc("current").delete();
                   messageBox.style.display = "none";
                 }
