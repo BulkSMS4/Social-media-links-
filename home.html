@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
+  <title>Admin Dashboard Home</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,7 +32,7 @@
       margin-top: 10px;
     }
 
-    /* Emergency Admin Controls */
+    /* Admin controls */
     .admin-controls {
       margin-top: 15px;
       display: none; /* hidden by default for users */
@@ -48,7 +48,7 @@
     .btn-edit { background: lime; color: black; }
     .btn-delete { background: red; color: white; }
 
-    /* Grid */
+    /* Grid layout */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -56,6 +56,7 @@
       margin-top: 20px;
     }
 
+    /* Dashboard section */
     .dashboard-section {
       background: #111;
       border-radius: 12px;
@@ -64,18 +65,17 @@
       color: lime;
       text-align: center;
     }
-
     .dashboard-section h2 {
       margin-bottom: 10px;
       color: limegreen;
       font-size: 20px;
     }
-
     .dashboard-section p {
       font-size: 14px;
       margin-bottom: 4px;
     }
 
+    /* Link box */
     .link-box {
       background: #000;
       padding: 8px;
@@ -86,13 +86,13 @@
       word-break: break-all;
       color: lime;
     }
-
     .link-desc {
       font-size: 13px;
       color: #adff2f;
       margin-bottom: 8px;
     }
 
+    /* Buttons */
     .btn {
       display: inline-block;
       padding: 10px 15px;
@@ -103,10 +103,10 @@
       cursor: pointer;
       text-decoration: none;
     }
-
     .btn-lime { background: lime; color: black; }
     .btn-green { background: green; color: white; }
     .btn-copy { background: #333; color: lime; border: 1px solid lime; }
+    .btn-warning { font-weight: bold; cursor: pointer; }
 
     @media (max-width: 900px) {
       .dashboard-grid { grid-template-columns: 1fr; }
@@ -147,7 +147,7 @@
       </button>
     </div>
 
-    <!-- ✈️🚢 Track Package Section -->
+    <!-- ✈️🚢 Track & Package Section -->
     <div class="dashboard-section">
       <h2>✈️🚢 Track Package 🛍️🛒</h2>
 
@@ -157,9 +157,15 @@
       <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
 
       <p>Open the account to create packages:</p>
-      <div class="link-desc">➡️ Open the account here to start creating the package for your client.</div>
-      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/')">
-        Open Tracking Account here 👇
+      <div class="link-desc">📦 Creating anything that concerns packages for your client.</div>
+      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/create.html')">
+        📦 Click here to Create Package
+      </button>
+
+      <p>Update the package status:</p>
+      <div class="link-desc">⚠️ Suspend a package or send warning messages to your client.</div>
+      <button class="btn btn-warning" style="font-size:16px; padding:12px 18px; background: linear-gradient(90deg, #ff4444, #ffbb33); color: black;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/update-status.html')">
+        ⚠️ Click here to Update Package
       </button>
     </div>
   </div>
@@ -185,15 +191,15 @@
     const emergencyBox = document.getElementById("emergencyBox");
     const adminControls = document.getElementById("adminControls");
 
-    // Check if admin (for demo: check query param "?role=admin")
+    // Check admin role via URL param
     const urlParams = new URLSearchParams(window.location.search);
     const isAdmin = urlParams.get("role") === "admin";
 
     if (isAdmin) {
-      adminControls.style.display = "block"; // show admin buttons
+      adminControls.style.display = "block";
     }
 
-    // Listen for only one doc: "current"
+    // Listen for emergency message
     db.collection("emergency").doc("current").onSnapshot(doc => {
       if (doc.exists) {
         const data = doc.data();
@@ -217,7 +223,7 @@
       });
     }
 
-    // Open links inside dashboard frame or redirect
+    // Open links in dashboard iframe if available
     function openInDashboard(url) {
       if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
         window.parent.document.getElementById("dashboardFrame").src = url;
@@ -226,14 +232,13 @@
       }
     }
 
-    // Admin functions
+    // Admin emergency functions
     function editEmergency() {
       const newText = prompt("✏️ Enter new emergency text:");
       if (newText) {
         db.collection("emergency").doc("current").set({ text: newText }, { merge: true });
       }
     }
-
     function deleteEmergency() {
       if (confirm("🗑️ Delete the emergency message?")) {
         db.collection("emergency").doc("current").delete();
@@ -241,4 +246,4 @@
     }
   </script>
 </body>
-        </html>
+</html>
