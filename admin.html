@@ -71,6 +71,14 @@
 
   <div id="sidebar">
     <h2>⚡ Admin Panel</h2>
+
+    <!-- Cargo Management Links -->
+    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
+    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/view-invoices.html">💼 View All Invoices</a>
+    <a href="#" onclick="trackPackage()">🔍 Track Package</a>
+    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a>
+
+    <!-- Old Dashboard Links -->
     <a href="#" data-page="home.html">🏠 Home</a>
     <a href="#" data-page="form-builder.html">📝 Form Builder</a>
     <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
@@ -81,10 +89,11 @@
     <a href="#" data-page="generate.html">⚙️ Generate</a>
     <a href="#" data-page="admin-emergency.html">🚨 Admin Emergency</a>
     <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
+    
     <a href="#" class="logout">🚪 Logout</a>
   </div>
 
-  <!-- Dashboard -->
+  <!-- Dashboard iframe -->
   <iframe id="dashboardFrame" src="home.html"></iframe>
 
   <!-- Firebase -->
@@ -117,6 +126,15 @@
         document.getElementById('sidebar').classList.remove('active');
       });
     });
+
+    // Track Package function
+    function trackPackage() {
+      const packageId = prompt("Enter Package ID to track:", "XCE123456");
+      if (packageId) {
+        document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
+        document.getElementById('sidebar').classList.remove('active');
+      }
+    }
 
     // Logout (redirect to logout.html)
     document.querySelector('#sidebar a.logout').addEventListener('click', e => {
