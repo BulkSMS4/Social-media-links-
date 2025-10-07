@@ -1,43 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard Home</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin Dashboard Home — X-Cargo Express</title>
 <style>
-body {font-family: Arial, sans-serif; background: #000; color: lime; margin:0; padding:20px;}
-.emergency-box {background:#111; border:2px solid #ff3333; border-radius:12px; padding:20px; margin:20px auto; color:#ff4444; max-width:1000px; text-align:center; font-size:16px; box-shadow:0 0 15px rgba(255,0,0,0.5);}
-.emergency-box img {max-width:100%; border-radius:10px; margin-top:10px;}
-.admin-controls {margin-top:15px; display:none;}
-.admin-controls button {margin:5px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;}
-.btn-edit { background: lime; color: black; }
-.btn-delete { background: red; color: white; }
+  /* --- Dashboard base --- */
+  body { font-family: Arial, sans-serif; background:#000; color:lime; margin:0; padding:20px; }
+  .dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px; }
+  .dashboard-section { background:#111; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.4); color:lime; text-align:center; }
+  .dashboard-section h2 { margin-bottom:10px; color:limegreen; font-size:20px; }
+  .link-box { background:#000; padding:8px; border:1px solid lime; border-radius:6px; margin-bottom:5px; font-size:14px; word-break:break-all; color:lime; }
+  .link-desc { font-size:13px; color:#adff2f; margin-bottom:8px; }
+  .btn { display:inline-block; padding:10px 15px; margin:5px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; text-decoration:none;}
+  .btn-lime { background:lime; color:black; }
+  .btn-green { background:green; color:white; }
+  .btn-copy { background:#333; color:lime; border:1px solid lime; }
+  .btn-warning { font-weight:bold; cursor:pointer; }
 
-.dashboard-grid {display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;}
-.dashboard-section {background:#111; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.4); color:lime; text-align:center;}
-.dashboard-section h2 {margin-bottom:10px; color:limegreen; font-size:20px;}
-.dashboard-section p {font-size:14px; margin-bottom:4px;}
-.link-box {background:#000; padding:8px; border:1px solid lime; border-radius:6px; margin-bottom:5px; font-size:14px; word-break:break-all; color:lime;}
-.link-desc {font-size:13px; color:#adff2f; margin-bottom:8px;}
-.btn {display:inline-block; padding:10px 15px; margin:5px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; text-decoration:none;}
-.btn-lime { background: lime; color: black; }
-.btn-green { background: green; color: white; }
-.btn-copy { background: #333; color: lime; border: 1px solid lime; }
-.btn-warning { font-weight: bold; cursor: pointer; }
+  /* --- Popup overlay (center) --- */
+  #popupOverlay {
+    position: fixed; inset: 0; display: none; align-items:center; justify-content:center;
+    background: rgba(0,0,0,0.75); z-index: 99999;
+  }
+  #popupBox {
+    width: min(880px, 92%); max-height: 85vh; overflow:auto;
+    background:#111; border-radius:14px; padding:22px;
+    border: 4px solid var(--em-color, #ff3333);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 18px var(--em-color, rgba(255,0,0,0.6));
+    color: var(--em-color, red);
+  }
+  #popupBox h2 { margin:0 0 10px 0; color:#fff; font-size:22px; }
+  #popupContent { color: #fff; text-align:left; line-height:1.4; }
+  #popupContent p { margin:8px 0; color: var(--em-color, #ff3333); font-weight:600; }
+  #popupContent img { display:block; max-width:100%; border-radius:10px; margin-top:12px; }
+  #popupFooter { margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+  /* Admin controls */
+  .admin-controls { margin-left:auto; display:flex; gap:8px; }
+  .admin-controls input[type="color"]{ width:42px; height:34px; border:none; padding:0; background:none; cursor:pointer; }
+
+  /* --- Top Ticker / Marquee --- */
+  #tickerWrap { position: fixed; top: 0; left: 0; right: 0; height:42px; display:none; align-items:center; z-index:99990; pointer-events:none; }
+  #ticker { display:flex; align-items:center; height:42px; overflow:hidden; width:100%; background: rgba(0,0,0,0.6); border-bottom:3px solid var(--em-color, #ff3333); }
+  #tickerInner { white-space:nowrap; display:inline-block; padding-left:100%; animation: scroll-left 18s linear infinite; color:var(--em-color, #ff3333); font-weight:700; font-size:16px; pointer-events:auto; }
+  @keyframes scroll-left { from { transform:translateX(0%);} to { transform:translateX(-100%);} }
+
+  /* Siren mode (flashing) */
+  #sirenBar { display:none; width:100%; height:42px; align-items:center; justify-content:center; gap:10px; color:#fff; font-weight:800; pointer-events:none; }
+  .siren-flash { width:20px; height:20px; border-radius:4px; box-shadow:0 0 8px rgba(255,0,0,0.8); }
+  .siren-flash.left { background:#ff2d2d; animation: flashRed 1s infinite; }
+  .siren-flash.right { background:#1e90ff; animation: flashBlue 1s infinite; }
+  @keyframes flashRed { 0%{opacity:1}50%{opacity:0.25}100%{opacity:1} }
+  @keyframes flashBlue { 0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25} }
+
+  /* small helpers */
+  .hidden { display:none !important; }
+  .controls-left { display:flex; gap:8px; align-items:center; }
+  /* ensure body top space for ticker */
+  body.with-ticker { padding-top: 42px; box-sizing: border-box; }
 </style>
 </head>
 <body>
 
-<div id="emergencyBox" class="emergency-box">
-  🚨 Loading emergency message...
-  <div class="admin-controls" id="adminControls">
-    <button class="btn-edit" id="editEmergencyBtn">✏️ Edit</button>
-    <button class="btn-delete" id="deleteEmergencyBtn">🗑️ Delete</button>
+<!-- Popup overlay -->
+<div id="popupOverlay" aria-hidden="true">
+  <div id="popupBox" role="dialog" aria-labelledby="popupTitle">
+    <h2 id="popupTitle">🚨 Emergency Alert 🚨</h2>
+    <div id="popupContent">Loading...</div>
+    <div id="popupFooter">
+      <div class="controls-left">
+        <button id="closePopup" class="btn">Close</button>
+        <a id="popupLink" class="btn btn-lime hidden" href="#" target="_blank">Open Link</a>
+      </div>
+
+      <div class="admin-controls hidden" id="popupAdmin">
+        <label style="color:#fff;font-weight:700;margin-right:6px;">Color</label>
+        <input type="color" id="adminColor" value="#ff3333" title="Emergency color (saves to Firestore)">
+        <button id="editPopup" class="btn">✏️ Edit</button>
+        <button id="deletePopup" class="btn">🗑️ Delete</button>
+      </div>
+    </div>
   </div>
 </div>
 
+<!-- Top ticker (smooth) -->
+<div id="tickerWrap" class="hidden">
+  <div id="ticker">
+    <div id="tickerInner" aria-hidden="true"></div>
+  </div>
+  <div id="sirenBar" class="hidden">
+    <div class="siren-flash left"></div>
+    <div id="sirenText" style="font-weight:900; margin-left:8px;"></div>
+    <div class="siren-flash right"></div>
+  </div>
+</div>
+
+<!-- Dashboard content -->
 <div class="dashboard-grid">
-  <!-- BANK Section -->
   <div class="dashboard-section">
     <h2>🏛️ BANK</h2>
     <p>Copy this link and send to your client:</p>
@@ -52,7 +112,6 @@ body {font-family: Arial, sans-serif; background: #000; color: lime; margin:0; p
     <button class="btn btn-green" data-url="https://bulksms4.github.io/BANKING/create-account.html">💵💰 Credit your bank account 🪙</button>
   </div>
 
-  <!-- Track & Package Section -->
   <div class="dashboard-section">
     <h2>✈️🚢 Track Package 🛍️🛒</h2>
     <p>Copy the link below and send to your client:</p>
@@ -68,63 +127,348 @@ body {font-family: Arial, sans-serif; background: #000; color: lime; margin:0; p
   </div>
 </div>
 
+<!-- Firebase SDKs (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
 <script>
+/* ======================
+   Emergency popup + ticker
+   ====================== */
+
+// CONFIG: update if needed
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
   projectId: "usahackersland",
   storageBucket: "usahackersland.appspot.com",
   messagingSenderId: "588407428267",
-  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
-  measurementId: "G-ZJ05T7YNSQ"
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
 };
-firebase.initializeApp(firebaseConfig);
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-const emergencyBox = document.getElementById("emergencyBox");
-const adminControls = document.getElementById("adminControls");
-const isAdmin = new URLSearchParams(window.location.search).get("role") === "admin";
-if(isAdmin) adminControls.style.display = "block";
+// Elements
+const popupOverlay = document.getElementById('popupOverlay');
+const popupBox = document.getElementById('popupBox');
+const popupContent = document.getElementById('popupContent');
+const closePopup = document.getElementById('closePopup');
+const popupLink = document.getElementById('popupLink');
 
-// Emergency message listener
-db.collection("emergency").doc("current").onSnapshot(doc=>{
-  if(doc.exists){
-    const data = doc.data();
-    emergencyBox.innerHTML = `
-      ${data.text?`<p>${data.text}</p>`:""}
-      ${data.image?`<img src="${data.image}" alt="Emergency Image">`:""}
-      ${data.phone?`<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>`:""}
-      ${data.link?`<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>`:""}
-    `;
-    if(isAdmin) emergencyBox.appendChild(adminControls);
+const popupAdmin = document.getElementById('popupAdmin');
+const adminColor = document.getElementById('adminColor');
+const editPopupBtn = document.getElementById('editPopup');
+const deletePopupBtn = document.getElementById('deletePopup');
+
+const tickerWrap = document.getElementById('tickerWrap');
+const tickerInner = document.getElementById('tickerInner');
+const sirenBar = document.getElementById('sirenBar');
+const sirenText = document.getElementById('sirenText');
+
+const TICKER_SHOW_CLASS = 'with-ticker';
+
+// Behavior settings
+const POPUP_AUTO_SHOW_DELAY_MS = 10000; // show popup 10s after load
+const POPUP_AUTO_HIDE_MS = 10000;       // hide popup after 10s if user doesn't interact
+const CLOSED_HIDE_MS = 30 * 60 * 1000;  // 30 minutes after user manually closes, suppress popup
+const SIREN_SWITCH_AFTER_MS = 30 * 60 * 1000; // 30 minutes until ticker switches to siren
+
+// admin detection (URL ?role=admin)
+const urlParams = new URLSearchParams(window.location.search);
+const IS_ADMIN = urlParams.get('role') === 'admin';
+
+// show/hide helpers
+function showPopup() {
+  // apply color variable if present
+  document.documentElement.style.setProperty('--em-color', emergencyState.color || '#ff3333');
+  popupOverlay.style.display = 'flex';
+  popupOverlay.setAttribute('aria-hidden','false');
+  // ensure ticker top area visible
+  tickerWrap.classList.remove('hidden');
+  document.body.classList.add(TICKER_SHOW_CLASS);
+}
+function hidePopup() {
+  popupOverlay.style.display = 'none';
+  popupOverlay.setAttribute('aria-hidden','true');
+}
+
+// ticker functions
+function startTickerSmooth(text) {
+  sirenBar.style.display = 'none';
+  document.documentElement.style.setProperty('--em-color', emergencyState.color || '#ff3333');
+  tickerInner.style.animation = 'scroll-left 18s linear infinite';
+  tickerInner.textContent = '   ' + text + '   ';
+  tickerInner.style.color = emergencyState.color || '#ff3333';
+  tickerWrap.classList.remove('hidden');
+  tickerWrap.style.display = 'block';
+  sirenBar.classList.add('hidden');
+  // ensure top padding
+  document.body.classList.add(TICKER_SHOW_CLASS);
+}
+function startSirenMode(text) {
+  // show siren bar
+  tickerWrap.style.display = 'block';
+  tickerInner.style.display = 'none';
+  sirenBar.style.display = 'flex';
+  sirenText.textContent = ' ' + text + ' ';
+  // top padding remains
+  document.body.classList.add(TICKER_SHOW_CLASS);
+}
+
+// state
+let emergencyState = { text:'', image:'', phone:'', link:'', color:'#ff3333', timestamp: null };
+let popupAutoHideTimer = null;
+let popupAutoShowTimer = null;
+let closedUntil = Number(localStorage.getItem('emergencyPopupClosedUntil') || 0);
+let sirenSwitchTimer = null;
+let lastDocUpdate = 0;
+
+// Utility: load closedUntil from localStorage
+function setClosedFor30Min() {
+  closedUntil = Date.now() + CLOSED_HIDE_MS;
+  localStorage.setItem('emergencyPopupClosedUntil', String(closedUntil));
+}
+
+// show popup if allowed (not in closed period)
+function tryShowPopup(immediate=false) {
+  // if admin or regular check closedUntil
+  if (Date.now() < closedUntil) {
+    // user closed; don't show popup but ticker still runs
+    return;
+  }
+  // show popup: if immediate true show now, otherwise schedule after POPUP_AUTO_SHOW_DELAY_MS
+  if (popupAutoShowTimer) { clearTimeout(popupAutoShowTimer); popupAutoShowTimer = null; }
+  if (immediate) {
+    showAndAutoHidePopup();
   } else {
-    emergencyBox.innerText = "🚨 No emergency messages at the moment.";
+    popupAutoShowTimer = setTimeout(()=> showAndAutoHidePopup(), POPUP_AUTO_SHOW_DELAY_MS);
+  }
+}
+
+// show popup and auto-hide logic
+function showAndAutoHidePopup() {
+  // update CSS color var
+  document.documentElement.style.setProperty('--em-color', emergencyState.color || '#ff3333');
+  // populate content
+  renderPopupFromState();
+  showPopup();
+
+  // clear previous hide timer
+  if (popupAutoHideTimer) clearTimeout(popupAutoHideTimer);
+  popupAutoHideTimer = setTimeout(()=> {
+    hidePopup();
+    // after hide, ticker should start (already started elsewhere), start siren switch schedule if not already
+  }, POPUP_AUTO_HIDE_MS);
+}
+
+// render popup DOM from emergencyState
+function renderPopupFromState() {
+  // text
+  popupContent.innerHTML = '';
+  if (emergencyState.text) {
+    const p = document.createElement('p');
+    p.innerText = emergencyState.text;
+    popupContent.appendChild(p);
+  }
+  // image (if exists)
+  if (emergencyState.image) {
+    const img = document.createElement('img'); img.src = emergencyState.image;
+    img.alt = 'Emergency Image';
+    popupContent.appendChild(img);
+  }
+  // phone and link lines
+  if (emergencyState.phone) {
+    const ph = document.createElement('p'); ph.style.color = emergencyState.color || '#ff3333';
+    const a = document.createElement('a'); a.href = 'tel:' + emergencyState.phone; a.innerText = emergencyState.phone;
+    a.style.color = emergencyState.color || '#ff3333'; ph.appendChild(document.createTextNode('📞 ')); ph.appendChild(a);
+    popupContent.appendChild(ph);
+  }
+  if (emergencyState.link) {
+    popupLink.href = emergencyState.link;
+    popupLink.classList.remove('hidden');
+  } else popupLink.classList.add('hidden');
+}
+
+// firestore real-time listener
+db.collection('emergency').doc('current').onSnapshot(doc => {
+  if (!doc.exists) {
+    // hide everything
+    emergencyState = { text:'', image:'', phone:'', link:'', color:'#ff3333', timestamp: null };
+    hidePopup();
+    startTickerSmooth('');
+    return;
+  }
+  const data = doc.data();
+  // update state
+  emergencyState.text = data.text || '';
+  emergencyState.image = data.image || '';
+  emergencyState.phone = data.phone || '';
+  emergencyState.link = data.link || '';
+  emergencyState.color = data.color || '#ff3333';
+  emergencyState.timestamp = data.timestamp ? data.timestamp.toMillis ? data.timestamp.toMillis() : data.timestamp : Date.now();
+  lastDocUpdate = Date.now();
+
+  // set CSS var
+  document.documentElement.style.setProperty('--em-color', emergencyState.color);
+
+  // render popup content & show popup (unless closedUntil)
+  tryShowPopup(true); // immediate show when doc changes
+
+  // start ticker smooth mode with the same text
+  startTickerSmooth(emergencyState.text || '');
+
+  // schedule siren switch after SIREN_SWITCH_AFTER_MS from now
+  if (sirenSwitchTimer) clearTimeout(sirenSwitchTimer);
+  sirenSwitchTimer = setTimeout(() => {
+    startSirenMode(emergencyState.text || '');
+  }, SIREN_SWITCH_AFTER_MS);
+});
+
+// On initial page load, schedule default behavior: attempt to show popup after 10s if emergency exists
+window.addEventListener('load', () => {
+  // if item closed and still within 30min, keep hidden popup but show ticker
+  if (Date.now() < closedUntil) {
+    // fetch current doc once to populate ticker
+    db.collection('emergency').doc('current').get().then(doc => {
+      if (doc.exists) {
+        const d = doc.data();
+        emergencyState.text = d.text || '';
+        emergencyState.image = d.image || '';
+        emergencyState.phone = d.phone || '';
+        emergencyState.link = d.link || '';
+        emergencyState.color = d.color || '#ff3333';
+        startTickerSmooth(emergencyState.text || '');
+        // schedule siren
+        if (sirenSwitchTimer) clearTimeout(sirenSwitchTimer);
+        sirenSwitchTimer = setTimeout(() => startSirenMode(emergencyState.text || ''), SIREN_SWITCH_AFTER_MS);
+      }
+    });
+  } else {
+    // schedule to show if doc exists (listener will call tryShowPopup on change)
+    // But in case doc already loaded before listener attached, we call get() fallback
+    db.collection('emergency').doc('current').get().then(doc => {
+      if (doc.exists) {
+        const d = doc.data();
+        emergencyState.text = d.text || '';
+        emergencyState.image = d.image || '';
+        emergencyState.phone = d.phone || '';
+        emergencyState.link = d.link || '';
+        emergencyState.color = d.color || '#ff3333';
+        // schedule popup
+        tryShowPopup(false);
+        // start ticker smooth
+        startTickerSmooth(emergencyState.text || '');
+        // schedule siren
+        if (sirenSwitchTimer) clearTimeout(sirenSwitchTimer);
+        sirenSwitchTimer = setTimeout(() => startSirenMode(emergencyState.text || ''), SIREN_SWITCH_AFTER_MS);
+      }
+    });
   }
 });
 
-// Admin Emergency Actions
-document.getElementById("editEmergencyBtn").addEventListener("click",()=>{
-  const newText = prompt("✏️ Enter new emergency text:");
-  if(newText) db.collection("emergency").doc("current").set({text:newText},{merge:true});
-});
-document.getElementById("deleteEmergencyBtn").addEventListener("click",()=>{
-  if(confirm("🗑️ Delete the emergency message?")) db.collection("emergency").doc("current").delete();
+// Close button behavior (manual close)
+closePopup.addEventListener('click', () => {
+  hidePopup();
+  setClosedFor30Min();
 });
 
-// Copy buttons
-document.querySelectorAll('.btn-copy').forEach(btn=>{
-  btn.addEventListener('click',()=>{
+// Admin UI show/hide by URL ?role=admin
+if (IS_ADMIN) {
+  popupAdmin.classList.remove('hidden');
+  popupAdmin.style.display = 'flex';
+  // prefill admin color from firestore
+  db.collection('emergency').doc('current').get().then(doc=>{
+    if(doc.exists) {
+      const d = doc.data();
+      if (d.color) adminColor.value = d.color;
+    }
+  });
+} else {
+  popupAdmin.classList.add('hidden');
+}
+
+// admin color picker handler -> update firestore
+adminColor.addEventListener('input', async (e) => {
+  const c = e.target.value;
+  try {
+    await db.collection('emergency').doc('current').set({ color: c }, { merge: true });
+    // CSS var will be updated from listener
+  } catch (err) {
+    console.error('Error saving color:', err);
+    alert('Error saving color: ' + err.message);
+  }
+});
+
+// Admin edit: open prompt to edit fields (text/link/phone/image)
+editPopupBtn.addEventListener('click', async () => {
+  // fetch current
+  const doc = await db.collection('emergency').doc('current').get();
+  const data = doc.exists ? doc.data() : {};
+  const newText = prompt('Edit emergency text:', data.text || '');
+  if (newText === null) return; // cancel
+  const newLink = prompt('Edit link (leave blank for none):', data.link || '');
+  if (newLink === null) return;
+  const newPhone = prompt('Edit phone (leave blank for none):', data.phone || '');
+  if (newPhone === null) return;
+  const newImage = prompt('Edit image URL (leave blank for none):', data.image || '');
+  if (newImage === null) return;
+  // update firestore
+  await db.collection('emergency').doc('current').set({
+    text: newText,
+    link: newLink || '',
+    phone: newPhone || '',
+    image: newImage || '',
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+  alert('Emergency updated.');
+});
+
+// Admin delete
+deletePopupBtn.addEventListener('click', async () => {
+  if (!confirm('Delete current emergency?')) return;
+  await db.collection('emergency').doc('current').delete();
+  alert('Emergency deleted.');
+});
+
+// copy and open link buttons on dashboard content
+document.querySelectorAll('.btn-copy').forEach(btn => {
+  btn.addEventListener('click', () => {
     const id = btn.getAttribute('data-copy');
-    const text = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(text).then(()=>alert(`✅ Copied: ${text}`));
+    const txt = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(txt).then(()=> alert('✅ Copied: ' + txt));
+  });
+});
+document.querySelectorAll('button[data-url]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const url = btn.getAttribute('data-url');
+    window.open(url, '_blank');
   });
 });
 
-// Open URL buttons
-document.querySelectorAll('button[data-url]').forEach(btn=>{
-  btn.addEventListener('click',()=>window.open(btn.getAttribute('data-url'),"_blank"));
+// Make sure when popup hovered we cancel auto-hide
+popupOverlay.addEventListener('mouseenter', () => {
+  if (popupAutoHideTimer) clearTimeout(popupAutoHideTimer);
+});
+popupOverlay.addEventListener('mouseleave', () => {
+  // restart hide timer
+  if (popupOverlay.style.display !== 'none') {
+    popupAutoHideTimer = setTimeout(()=> hidePopup(), POPUP_AUTO_HIDE_MS);
+  }
+});
+
+// If ticker clicked open link (if exists)
+tickerInner.addEventListener('click', () => {
+  if (emergencyState.link) window.open(emergencyState.link, '_blank');
+});
+
+// Clean up on unload
+window.addEventListener('beforeunload', () => {
+  if (popupAutoHideTimer) clearTimeout(popupAutoHideTimer);
+  if (popupAutoShowTimer) clearTimeout(popupAutoShowTimer);
+  if (sirenSwitchTimer) clearTimeout(sirenSwitchTimer);
 });
 </script>
 </body>
