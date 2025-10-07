@@ -63,39 +63,6 @@
     height: 100%;
     border: none;
   }
-
-  /* Notification selection page */
-  .notification-page {
-    padding: 20px;
-    background: #000;
-    color: lime;
-  }
-  .notification-page h1 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  .notification-list {
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  .notification-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    margin-bottom: 5px;
-    background: #111;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  .notification-item:hover { background: #222; }
-  .notification-item button {
-    background: lime;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-  }
 </style>
 </head>
 <body>
@@ -108,8 +75,8 @@
   <!-- Home first -->
   <a href="#" data-page="home.html">🏠 Home</a>
 
-  <!-- Notifications -->
-  <a href="#" data-page="notifications.html">🔔 Notifications</a>
+  <!-- Notifications link -->
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/notifications.html">🔔 Notifications</a>
 
   <!-- Cargo Management Links -->
   <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
@@ -149,7 +116,6 @@ const firebaseConfig = {
   measurementId: "G-ZJ05T7YNSQ"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 
 // Sidebar toggle
 function toggleMenu() {
