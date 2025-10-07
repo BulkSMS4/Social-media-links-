@@ -1,146 +1,184 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      overflow: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
 
-    /* Menu toggle */
-    #menuToggle {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      font-size: 24px;
-      background: lime;
-      color: black;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 2100;
-    }
+  /* Menu toggle */
+  #menuToggle {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    background: lime;
+    color: black;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2100;
+  }
 
-    #sidebar {
-      position: fixed;
-      top: 0;
-      left: -260px;
-      width: 260px;
-      height: 100%;
-      background: linear-gradient(180deg, #000 0%, #001a00 100%);
-      border-right: 2px solid lime;
-      transition: left 0.3s ease-in-out;
-      padding-top: 60px;
-      z-index: 2000;
-    }
-    #sidebar.active { left: 0; }
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 260px;
+    height: 100%;
+    background: linear-gradient(180deg, #000 0%, #001a00 100%);
+    border-right: 2px solid lime;
+    transition: left 0.3s ease-in-out;
+    padding-top: 60px;
+    z-index: 2000;
+  }
+  #sidebar.active { left: 0; }
 
-    #sidebar a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 20px;
-      color: #0f0;
-      font-weight: bold;
-      text-decoration: none;
-      border-bottom: 1px solid #003300;
-    }
-    #sidebar a:hover { background: #003300; color: #fff; }
-    #sidebar a.logout { color: red; margin-top: 20px; border-top: 2px solid #003300; }
-    #sidebar a.logout:hover { background: #330000; color: #fff; }
-    #sidebar h2 { color: #0f0; text-align: center; margin-bottom: 20px; }
+  #sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    color: #0f0;
+    font-weight: bold;
+    text-decoration: none;
+    border-bottom: 1px solid #003300;
+  }
+  #sidebar a:hover { background: #003300; color: #fff; }
+  #sidebar a.logout { color: red; margin-top: 20px; border-top: 2px solid #003300; }
+  #sidebar a.logout:hover { background: #330000; color: #fff; }
+  #sidebar h2 { color: #0f0; text-align: center; margin-bottom: 20px; }
 
-    #dashboardFrame {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+  #dashboardFrame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  /* Notification selection page */
+  .notification-page {
+    padding: 20px;
+    background: #000;
+    color: lime;
+  }
+  .notification-page h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .notification-list {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .notification-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    background: #111;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .notification-item:hover { background: #222; }
+  .notification-item button {
+    background: lime;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+</style>
 </head>
 <body>
 
-  <div id="menuToggle" onclick="toggleMenu()">☰ Menu</div>
+<div id="menuToggle" onclick="toggleMenu()">☰ Menu</div>
 
-  <div id="sidebar">
-    <h2>⚡ Admin Panel</h2>
+<div id="sidebar">
+  <h2>⚡ Admin Panel</h2>
 
-    <!-- Cargo Management Links -->
-    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
-    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/view-invoices.html">💼 View All Invoices</a>
-    <a href="#" onclick="trackPackage()">🔍 Track Package</a>
-    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a>
+  <!-- Home first -->
+  <a href="#" data-page="home.html">🏠 Home</a>
 
-    <!-- Old Dashboard Links -->
-    <a href="#" data-page="home.html">🏠 Home</a>
-    <a href="#" data-page="form-builder.html">📝 Form Builder</a>
-    <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
-    <a href="#" data-page="feedback.html">💬 Feedback</a>
-    <a href="#" data-page="victims.html">👀 View Victims</a>
-    <a href="#" data-page="members.html">👥 Members</a>
-    <a href="#" data-page="links.html">🔗 Links</a>
-    <a href="#" data-page="generate.html">⚙️ Generate</a>
-    <a href="#" data-page="admin-emergency.html">🚨 Admin Emergency</a>
-    <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
-    
-    <a href="#" class="logout">🚪 Logout</a>
-  </div>
+  <!-- Notifications -->
+  <a href="#" data-page="notifications.html">🔔 Notifications</a>
 
-  <!-- Dashboard iframe -->
-  <iframe id="dashboardFrame" src="home.html"></iframe>
+  <!-- Cargo Management Links -->
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/view-invoices.html">💼 View All Invoices</a>
+  <a href="#" onclick="trackPackage()">🔍 Track Package</a>
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <!-- Old Dashboard Links -->
+  <a href="#" data-page="form-builder.html">📝 Form Builder</a>
+  <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
+  <a href="#" data-page="feedback.html">💬 Feedback</a>
+  <a href="#" data-page="victims.html">👀 View Victims</a>
+  <a href="#" data-page="members.html">👥 Members</a>
+  <a href="#" data-page="links.html">🔗 Links</a>
+  <a href="#" data-page="generate.html">⚙️ Generate</a>
+  <a href="#" data-page="admin-emergency.html">🚨 Admin Emergency</a>
+  <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-      authDomain: "usahackersland.firebaseapp.com",
-      projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com",
-      messagingSenderId: "588407428267",
-      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
-      measurementId: "G-ZJ05T7YNSQ"
-    };
-    firebase.initializeApp(firebaseConfig);
+  <a href="#" class="logout">🚪 Logout</a>
+</div>
 
-    // Sidebar toggle
-    function toggleMenu() {
-      document.getElementById('sidebar').classList.toggle('active');
-    }
+<!-- Dashboard iframe -->
+<iframe id="dashboardFrame" src="home.html"></iframe>
 
-    // Sidebar navigation
-    document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
-      link.addEventListener('click', e => {
-        e.preventDefault();
-        document.getElementById('dashboardFrame').src = link.getAttribute('data-page');
-        document.getElementById('sidebar').classList.remove('active');
-      });
-    });
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    // Track Package function
-    function trackPackage() {
-      const packageId = prompt("Enter Package ID to track:", "XCE123456");
-      if (packageId) {
-        document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
-        document.getElementById('sidebar').classList.remove('active');
-      }
-    }
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com",
+  messagingSenderId: "588407428267",
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+  measurementId: "G-ZJ05T7YNSQ"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-    // Logout (redirect to logout.html)
-    document.querySelector('#sidebar a.logout').addEventListener('click', e => {
-      e.preventDefault();
-      window.location.href = "logout.html";
-    });
-  </script>
+// Sidebar toggle
+function toggleMenu() {
+  document.getElementById('sidebar').classList.toggle('active');
+}
+
+// Sidebar navigation
+document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('dashboardFrame').src = link.getAttribute('data-page');
+    document.getElementById('sidebar').classList.remove('active');
+  });
+});
+
+// Track Package function
+function trackPackage() {
+  const packageId = prompt("Enter Package ID to track:", "XCE123456");
+  if (packageId) {
+    document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
+    document.getElementById('sidebar').classList.remove('active');
+  }
+}
+
+// Logout
+document.querySelector('#sidebar a.logout').addEventListener('click', e => {
+  e.preventDefault();
+  window.location.href = "logout.html";
+});
+</script>
 </body>
 </html>
