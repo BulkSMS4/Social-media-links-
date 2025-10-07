@@ -9,9 +9,10 @@
     margin: 0;
     font-family: Arial, sans-serif;
     overflow: hidden;
+    background: #f0f2f7;
   }
 
-  /* Menu toggle */
+  /* Menu toggle button */
   #menuToggle {
     position: fixed;
     top: 15px;
@@ -24,8 +25,10 @@
     font-weight: bold;
     cursor: pointer;
     z-index: 2100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
+  /* Sidebar styles */
   #sidebar {
     position: fixed;
     top: 0;
@@ -36,9 +39,17 @@
     border-right: 2px solid lime;
     transition: left 0.3s ease-in-out;
     padding-top: 60px;
-    z-index: 2000;
+    overflow-y: auto; /* Scrollable if too tall */
+    z-index: 2200; /* Above iframe */
   }
   #sidebar.active { left: 0; }
+
+  #sidebar h2 {
+    color: #0f0;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
 
   #sidebar a {
     display: flex;
@@ -49,12 +60,28 @@
     font-weight: bold;
     text-decoration: none;
     border-bottom: 1px solid #003300;
+    transition: background 0.2s, color 0.2s;
   }
-  #sidebar a:hover { background: #003300; color: #fff; }
-  #sidebar a.logout { color: red; margin-top: 20px; border-top: 2px solid #003300; }
-  #sidebar a.logout:hover { background: #330000; color: #fff; }
-  #sidebar h2 { color: #0f0; text-align: center; margin-bottom: 20px; }
+  #sidebar a:hover {
+    background: #003300;
+    color: #fff;
+  }
+  #sidebar a.active {
+    background: #007bff;
+    color: #fff;
+  }
 
+  #sidebar a.logout {
+    color: red;
+    margin-top: 20px;
+    border-top: 2px solid #003300;
+  }
+  #sidebar a.logout:hover {
+    background: #330000;
+    color: #fff;
+  }
+
+  /* Iframe */
   #dashboardFrame {
     position: absolute;
     top: 0;
@@ -62,30 +89,35 @@
     width: 100%;
     height: 100%;
     border: none;
+    z-index: 1000; /* Behind menu */
+  }
+
+  /* Scrollbar styling */
+  #sidebar::-webkit-scrollbar {
+    width: 8px;
+  }
+  #sidebar::-webkit-scrollbar-track {
+    background: #001a00;
+  }
+  #sidebar::-webkit-scrollbar-thumb {
+    background: lime;
+    border-radius: 4px;
   }
 </style>
 </head>
 <body>
 
-<div id="menuToggle" onclick="toggleMenu()">☰ Menu</div>
+<div id="menuToggle">☰ Menu</div>
 
 <div id="sidebar">
   <h2>⚡ Admin Panel</h2>
-
-  <!-- Home first -->
-  <a href="#" data-page="home.html">🏠 Home</a>
-
-  <!-- Notifications link -->
+  <a href="#" data-page="home.html" class="active">🏠 Home</a>
   <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/notifications.html">🔔 Notifications</a>
-
-  <!-- Cargo Management Links -->
   <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
   <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/view-invoices.html">💼 Search All Invoices</a>
-  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/all-invoices.html?">📜 All invoices</a>
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/all-invoices.html">📜 All Invoices</a>
   <a href="#" onclick="trackPackage()">🔍 Track Package</a>
-  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a> 
-
-  <!-- Old Dashboard Links -->
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a>
   <a href="#" data-page="form-builder.html">📝 Form Builder</a>
   <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
   <a href="#" data-page="feedback.html">💬 Feedback</a>
@@ -95,57 +127,46 @@
   <a href="#" data-page="generate.html">⚙️ Generate</a>
   <a href="#" data-page="admin-emergency.html">🚨 Admin Emergency</a>
   <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
-
   <a href="#" class="logout">🚪 Logout</a>
 </div>
 
-<!-- Dashboard iframe -->
 <iframe id="dashboardFrame" src="home.html"></iframe>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland",
-  storageBucket: "usahackersland.appspot.com",
-  messagingSenderId: "588407428267",
-  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
-  measurementId: "G-ZJ05T7YNSQ"
-};
-firebase.initializeApp(firebaseConfig);
-
-// Sidebar toggle
-function toggleMenu() {
-  document.getElementById('sidebar').classList.toggle('active');
-}
-
-// Sidebar navigation
-document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    document.getElementById('dashboardFrame').src = link.getAttribute('data-page');
-    document.getElementById('sidebar').classList.remove('active');
+  // Menu toggle
+  const menuToggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
   });
-});
 
-// Track Package function
-function trackPackage() {
-  const packageId = prompt("Enter Package ID to track:", "XCE123456");
-  if (packageId) {
-    document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
-    document.getElementById('sidebar').classList.remove('active');
+  // Navigation links
+  document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('dashboardFrame').src = link.getAttribute('data-page');
+      sidebar.classList.remove('active');
+      // Highlight active link
+      document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
+      link.classList.add('active');
+    });
+  });
+
+  // Track package
+  function trackPackage() {
+    const packageId = prompt("Enter Package ID to track:", "XCE123456");
+    if(packageId) {
+      document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
+      sidebar.classList.remove('active');
+    }
   }
-}
 
-// Logout
-document.querySelector('#sidebar a.logout').addEventListener('click', e => {
-  e.preventDefault();
-  window.location.href = "logout.html";
-});
+  // Logout
+  document.querySelector('#sidebar a.logout').addEventListener('click', e => {
+    e.preventDefault();
+    window.location.href = "logout.html";
+  });
 </script>
+
 </body>
 </html>
