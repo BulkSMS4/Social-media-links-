@@ -28,19 +28,19 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  /* Sidebar styles */
+  /* Sidebar */
   #sidebar {
     position: fixed;
     top: 0;
-    left: -260px;
-    width: 260px;
+    left: -280px;
+    width: 280px;
     height: 100%;
     background: linear-gradient(180deg, #000 0%, #001a00 100%);
     border-right: 2px solid lime;
     transition: left 0.3s ease-in-out;
     padding-top: 60px;
-    overflow-y: auto; /* Scrollable if too tall */
-    z-index: 2200; /* Above iframe */
+    overflow-y: auto;
+    z-index: 2200;
   }
   #sidebar.active { left: 0; }
 
@@ -51,18 +51,19 @@
     font-size: 20px;
   }
 
-  #sidebar a {
+  #sidebar a, #sidebar .submenu-toggle {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     padding: 14px 20px;
     color: #0f0;
     font-weight: bold;
     text-decoration: none;
     border-bottom: 1px solid #003300;
+    cursor: pointer;
     transition: background 0.2s, color 0.2s;
   }
-  #sidebar a:hover {
+  #sidebar a:hover, #sidebar .submenu-toggle:hover {
     background: #003300;
     color: #fff;
   }
@@ -70,15 +71,22 @@
     background: #007bff;
     color: #fff;
   }
-
   #sidebar a.logout {
     color: red;
     margin-top: 20px;
     border-top: 2px solid #003300;
   }
-  #sidebar a.logout:hover {
-    background: #330000;
-    color: #fff;
+  #sidebar a.logout:hover { background: #330000; color: #fff; }
+
+  /* Submenu */
+  .submenu {
+    display: none;
+    flex-direction: column;
+    padding-left: 20px;
+    background: #001a00;
+  }
+  .submenu a {
+    border-bottom: none;
   }
 
   /* Iframe */
@@ -89,20 +97,15 @@
     width: 100%;
     height: 100%;
     border: none;
-    z-index: 1000; /* Behind menu */
+    z-index: 1000;
   }
 
   /* Scrollbar styling */
   #sidebar::-webkit-scrollbar {
     width: 8px;
   }
-  #sidebar::-webkit-scrollbar-track {
-    background: #001a00;
-  }
-  #sidebar::-webkit-scrollbar-thumb {
-    background: lime;
-    border-radius: 4px;
-  }
+  #sidebar::-webkit-scrollbar-track { background: #001a00; }
+  #sidebar::-webkit-scrollbar-thumb { background: lime; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -111,15 +114,29 @@
 
 <div id="sidebar">
   <h2>⚡ Admin Panel</h2>
+
+  <!-- Direct links -->
   <a href="#" data-page="home.html" class="active">🏠 Home</a>
   <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/notifications.html">🔔 Notifications</a>
   <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
-  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/view-invoices.html">💼 Search All Invoices</a>
-  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/all-invoices.html">📜 All Invoices</a>
+
+  <!-- Invoices submenu -->
+  <div class="submenu-toggle">💼 Invoices ▸</div>
+  <div class="submenu">
+    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/view-invoices.html">Search All Invoices</a>
+    <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/all-invoices.html">All Invoices</a>
+  </div>
+
   <a href="#" onclick="trackPackage()">🔍 Track Package</a>
-  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a>
-  <a href="#" data-page="form-builder.html">📝 Form Builder</a>
-  <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
+  <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package</a> 
+
+  <!-- Forms submenu -->
+  <div class="submenu-toggle">📝 Forms ▸</div>
+  <div class="submenu">
+    <a href="#" data-page="form-builder.html">Form Builder</a>
+    <a href="#" data-page="saved-forms.html">Saved Forms</a>
+  </div>
+
   <a href="#" data-page="feedback.html">💬 Feedback</a>
   <a href="#" data-page="victims.html">👀 View Victims</a>
   <a href="#" data-page="members.html">👥 Members</a>
@@ -133,39 +150,48 @@
 <iframe id="dashboardFrame" src="home.html"></iframe>
 
 <script>
-  // Menu toggle
-  const menuToggle = document.getElementById('menuToggle');
-  const sidebar = document.getElementById('sidebar');
-  menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
-  });
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
 
-  // Navigation links
-  document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      document.getElementById('dashboardFrame').src = link.getAttribute('data-page');
-      sidebar.classList.remove('active');
-      // Highlight active link
-      document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
-      link.classList.add('active');
-    });
-  });
+// Toggle sidebar
+menuToggle.addEventListener('click', () => {
+  sidebar.classList.toggle('active');
+});
 
-  // Track package
-  function trackPackage() {
-    const packageId = prompt("Enter Package ID to track:", "XCE123456");
-    if(packageId) {
-      document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
-      sidebar.classList.remove('active');
-    }
-  }
-
-  // Logout
-  document.querySelector('#sidebar a.logout').addEventListener('click', e => {
+// Navigation links
+document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
+  link.addEventListener('click', e => {
     e.preventDefault();
-    window.location.href = "logout.html";
+    document.getElementById('dashboardFrame').src = link.getAttribute('data-page');
+    sidebar.classList.remove('active');
+    // Highlight active link
+    document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
   });
+});
+
+// Submenu toggle
+document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    const submenu = toggle.nextElementSibling;
+    submenu.style.display = submenu.style.display === 'flex' ? 'none' : 'flex';
+  });
+});
+
+// Track package prompt
+function trackPackage() {
+  const packageId = prompt("Enter Package ID to track:", "XCE123456");
+  if(packageId) {
+    document.getElementById('dashboardFrame').src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
+    sidebar.classList.remove('active');
+  }
+}
+
+// Logout
+document.querySelector('#sidebar a.logout').addEventListener('click', e => {
+  e.preventDefault();
+  window.location.href = "logout.html";
+});
 </script>
 
 </body>
