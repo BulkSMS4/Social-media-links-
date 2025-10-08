@@ -150,6 +150,25 @@ document.querySelectorAll('.btn-lime,.btn-green').forEach(btn=>{
   btn.addEventListener('click',()=>{ const url=btn.getAttribute('data-url'); if(url) window.open(url,'_blank'); });
 });
 
+// Emergency ticker from new settings
+db.collection('emergency').doc('current').onSnapshot(doc=>{
+  if(!doc.exists) return;
+  const data = doc.data();
+  const tickerText = data.text || '';
+  const tickerLink = data.linkHTML || '';
+  const bg = data.bgColor || '#000';
+  const color = data.color || '#ff3333';
+  if(!tickerText) { cornerTicker.style.display='none'; return; }
+  cornerTicker.style.display='flex';
+  cornerTicker.style.background = bg;
+  cornerTickerInner.innerHTML = '';
+  cornerTickerInner.innerHTML = tickerText + ' ' + (tickerLink || '');
+  cornerTickerInner.style.color = color;
+  const speed = Number(data.speedSec || 12);
+  cornerTickerInner.style.animation = `cornerScroll ${speed}s linear infinite`;
+  emergencyLink = data.linkHTML ? data.linkHTML.match(/href="([^"]+)"/)?.[1] || '' : '';
+});
+
 // Listen for posts dynamically
 db.collection('emergencyPosts').orderBy('createdAt','desc').onSnapshot(snapshot=>{
   postsList.innerHTML='';
@@ -164,14 +183,6 @@ db.collection('emergencyPosts').orderBy('createdAt','desc').onSnapshot(snapshot=
     if(data.imageURL){ const img=document.createElement('img'); img.src=data.imageURL; div.appendChild(img);}
     if(data.fileURL){ const a=document.createElement('a'); a.href=data.fileURL; a.innerText='⬇ Download'; a.className='download'; div.appendChild(a);}
     postsList.prepend(div);
-
-    // Update ticker
-    cornerTickerInner.innerHTML='';
-    if(data.imageURL){ const img=document.createElement('img'); img.src=data.imageURL; cornerTickerInner.appendChild(img);}
-    const span=document.createElement('span'); span.textContent=' ⚠️ '+data.text+' ⚠️ ';
-    span.style.color=data.color||'#ff3333';
-    cornerTickerInner.appendChild(span);
-    emergencyLink=data.link||'';
   });
 });
 </script>
