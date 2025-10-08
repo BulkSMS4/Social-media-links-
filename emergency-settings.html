@@ -61,7 +61,7 @@
   #previewInner {
     white-space: nowrap;
     display: inline-block;
-    padding-left: 100%;
+    padding-left:100%;
     font-weight: bold;
     font-size: 16px;
   }
@@ -143,7 +143,7 @@
     <div class="row">
       <div class="col">
         <label for="bgColor">Background Color</label>
-        <input type="color" id="bgColor" value="#ffffff">
+        <input type="color" id="bgColor" value="#000000">
       </div>
       <div class="col">
         <label for="textColor">Text Color</label>
@@ -159,6 +159,17 @@
           <option value="6">Fast</option>
           <option value="3">Faster</option>
         </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label for="linkText">Masked Link Text</label>
+        <input type="text" id="linkText" placeholder="Your custom word">
+      </div>
+      <div class="col">
+        <label for="linkURL">Link URL</label>
+        <input type="text" id="linkURL" placeholder="https://example.com">
       </div>
     </div>
 
@@ -212,6 +223,8 @@
   const speedSelect = document.getElementById('speedSelect');
   const previewWrap = document.getElementById('previewWrap');
   const previewInner = document.getElementById('previewInner');
+  const linkText = document.getElementById('linkText');
+  const linkURL = document.getElementById('linkURL');
   const btnPreview = document.getElementById('btnPreview');
   const btnSave = document.getElementById('btnSave');
   const btnReset = document.getElementById('btnReset');
@@ -222,38 +235,25 @@
   const DEFAULTS = {
     text: '',
     color: '#ff3333',
-    bgColor: '#ffffff',
+    bgColor: '#000000',
     popupColor: '#ff3333',
-    speedSec: 18
+    speedSec: 12,
+    linkText: '',
+    linkURL: ''
   };
-
-  // Realtime listener
-  docRef.onSnapshot(doc => {
-    if (doc.exists) {
-      const data = doc.data();
-      msgInput.value = data.text || '';
-      textColor.value = data.color || DEFAULTS.color;
-      bgColor.value = data.bgColor || DEFAULTS.bgColor;
-      popupBgColor.value = data.popupColor || DEFAULTS.popupColor;
-      speedSelect.value = data.speedSec || DEFAULTS.speedSec;
-      updatePreview();
-      lastSaved.textContent = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'Saved';
-    } else {
-      updatePreview();
-    }
-  });
 
   function updatePreview() {
     const text = msgInput.value.trim();
-    if (!text) {
-      previewWrap.style.display = 'none';
-      return;
-    }
-    previewWrap.style.display = 'flex';
+    if (!text) { previewWrap.style.display='none'; return; }
+    previewWrap.style.display='flex';
     previewWrap.style.background = bgColor.value;
     previewInner.style.color = textColor.value;
-    previewInner.textContent = text;
-    const speed = Number(speedSelect.value || 18);
+    let content = text;
+    if(linkText.value && linkURL.value){
+      content += ` <a href="${linkURL.value}" target="_blank" style="color:${textColor.value}; text-decoration:underline">${linkText.value}</a>`;
+    }
+    previewInner.innerHTML = content;
+    const speed = Number(speedSelect.value || 12);
     previewInner.style.animation = `scroll-left ${speed}s linear infinite`;
   }
 
@@ -266,6 +266,7 @@
       bgColor: bgColor.value,
       popupColor: popupBgColor.value,
       speedSec: Number(speedSelect.value),
+      linkHTML: linkText.value && linkURL.value ? `<a href="${linkURL.value}" target="_blank" style="color:${textColor.value}; text-decoration:underline">${linkText.value}</a>` : '',
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
     await docRef.set(data, { merge: true });
@@ -274,19 +275,36 @@
 
   btnReset.addEventListener('click', () => {
     if (!confirm('Reset to default settings?')) return;
-    msgInput.value = '';
+    msgInput.value = DEFAULTS.text;
     textColor.value = DEFAULTS.color;
     bgColor.value = DEFAULTS.bgColor;
     popupBgColor.value = DEFAULTS.popupColor;
     speedSelect.value = DEFAULTS.speedSec;
+    linkText.value = DEFAULTS.linkText;
+    linkURL.value = DEFAULTS.linkURL;
     updatePreview();
   });
 
-  document.querySelectorAll('[data-speed]').forEach(btn => {
-    btn.addEventListener('click', () => {
+  document.querySelectorAll('[data-speed]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
       speedSelect.value = btn.dataset.speed;
       updatePreview();
     });
+  });
+
+  // Realtime listener for preview
+  docRef.onSnapshot(doc=>{
+    if(!doc.exists) return;
+    const data = doc.data();
+    msgInput.value = data.text || DEFAULTS.text;
+    textColor.value = data.color || DEFAULTS.color;
+    bgColor.value = data.bgColor || DEFAULTS.bgColor;
+    popupBgColor.value = data.popupColor || DEFAULTS.popupColor;
+    speedSelect.value = data.speedSec || DEFAULTS.speedSec;
+    linkText.value = data.linkText || DEFAULTS.linkText;
+    linkURL.value = data.linkURL || DEFAULTS.linkURL;
+    updatePreview();
+    lastSaved.textContent = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'Saved';
   });
 </script>
 
