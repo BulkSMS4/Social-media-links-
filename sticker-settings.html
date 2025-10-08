@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Ticker Settings — Admin</title>
+<style>
+  body{font-family:Arial;margin:18px;background:#0b0b0b;color:lime;}
+  .card{background:#111;padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);max-width:780px;margin:auto;}
+  label{display:block;margin:10px 0 6px;color:#bfff00;font-weight:700;}
+  select,input[type=color],input[type=range]{padding:8px;border-radius:8px;border:none;background:#222;color:#fff;width:100%;}
+  .row{display:flex;gap:8px;align-items:center;}
+  .inline{display:inline-block;}
+  button{margin-top:12px;padding:10px 14px;background:lime;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;}
+  .small{width:150px;}
+  .hint{color:#9fc; font-size:13px;margin-top:6px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2 style="color:var(--em-color,#ff3333)">Ticker Settings</h2>
+    <label>Choose speed</label>
+    <select id="speedSelect">
+      <option value="fast">Fast</option>
+      <option value="normal" selected>Normal</option>
+      <option value="slow">Slow</option>
+      <option value="slower">Slower</option>
+      <option value="very-slow">Very slow</option>
+    </select>
+
+    <label>Background color (ticker bar)</label>
+    <input type="color" id="bgColor" value="#000000">
+
+    <label>Text color</label>
+    <input type="color" id="textColor" value="#ff3333">
+
+    <label>Save to apply globally</label>
+    <div class="row">
+      <button id="saveBtn">Save Settings</button>
+      <div class="hint">Settings saved to Firestore will apply to all dashboards using ticker_settings.</div>
+    </div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com",
+  messagingSenderId: "588407428267",
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const speedSelect = document.getElementById('speedSelect');
+const bgColor = document.getElementById('bgColor');
+const textColor = document.getElementById('textColor');
+const saveBtn = document.getElementById('saveBtn');
+
+async function load() {
+  const doc = await db.collection('ticker_settings').doc('current').get();
+  if (!doc.exists) return;
+  const d = doc.data();
+  if (d.speed) speedSelect.value = d.speed;
+  if (d.bgColor) bgColor.value = d.bgColor;
+  if (d.textColor) textColor.value = d.textColor;
+}
+
+saveBtn.addEventListener('click', async () => {
+  saveBtn.disabled = true;
+  try {
+    await db.collection('ticker_settings').doc('current').set({
+      speed: speedSelect.value,
+      bgColor: bgColor.value,
+      textColor: textColor.value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    alert('Saved.');
+  } catch (e) { alert('Error: ' + e.message); }
+  saveBtn.disabled = false;
+});
+
+load();
+</script>
+</body>
+</html>
