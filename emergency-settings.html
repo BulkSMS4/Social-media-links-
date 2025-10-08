@@ -194,7 +194,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
     authDomain: "usahackersland.firebaseapp.com",
@@ -228,7 +227,7 @@
     speedSec: 18
   };
 
-  // 🔁 Realtime listener
+  // Realtime listener
   docRef.onSnapshot(doc => {
     if (doc.exists) {
       const data = doc.data();
