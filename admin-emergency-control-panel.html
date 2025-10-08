@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚨 Admin Emergency Control</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: lime;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #111;
+    color: #0f0;
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 24px;
+    border-bottom: 2px solid lime;
+    box-shadow: 0 0 10px lime;
+  }
+
+  main {
+    margin-top: 30px;
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .control-card {
+    background: #001a00;
+    border: 2px solid lime;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,255,0,0.3);
+    padding: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .control-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px lime;
+  }
+
+  .control-card h2 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+
+  .control-card p {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 15px;
+  }
+
+  .btn {
+    display: inline-block;
+    background: lime;
+    color: black;
+    font-weight: bold;
+    padding: 10px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: center;
+    transition: background 0.3s;
+  }
+
+  .btn:hover {
+    background: #00cc00;
+  }
+
+  .danger {
+    background: red;
+    color: white;
+  }
+
+  .danger:hover {
+    background: darkred;
+  }
+</style>
+</head>
+<body>
+
+<header>🚨 Admin Emergency Control Panel</header>
+
+<main>
+  <div class="control-card">
+    <h2>📢 Emergency Broadcast Settings</h2>
+    <p>Edit and control your scrolling broadcast message across the dashboard.</p>
+    <a href="emergency-broadcast-settings.html" class="btn">Open Settings</a>
+  </div>
+
+  <div class="control-card">
+    <h2>🧾 Manage Emergency Posts</h2>
+    <p>View, edit, or delete emergency messages and attachments posted to the dashboard.</p>
+    <a href="emergency-posts.html" class="btn">Manage Posts</a>
+  </div>
+
+  <div class="control-card">
+    <h2>📂 Upload Emergency Files</h2>
+    <p>Upload emergency files like APK, ZIP, RAR, PDF, HTML, or images for users to download.</p>
+    <a href="emergency-files.html" class="btn">Upload Files</a>
+  </div>
+
+  <div class="control-card">
+    <h2>🎨 Customize Popup & Ticker</h2>
+    <p>Change popup color, scrolling speed, or alert style (siren, flash, etc.).</p>
+    <a href="emergency-style-settings.html" class="btn">Customize Look</a>
+  </div>
+
+  <div class="control-card">
+    <h2>🧹 Delete All Emergency Data</h2>
+    <p>Remove all emergency posts and settings permanently from Firebase.</p>
+    <button class="btn danger" onclick="confirmDelete()">Delete All Data</button>
+  </div>
+</main>
+
+<script>
+function confirmDelete() {
+  if (confirm("⚠️ Are you sure you want to delete ALL emergency data? This cannot be undone.")) {
+    alert("All emergency data deleted successfully (simulate Firebase delete).");
+    // Here you’ll later add Firestore delete logic:
+    // firebase.firestore().collection("emergencyPosts").get().then(...)
+  }
+}
+</script>
+
+</body>
+</html>
