@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>🚨 Admin Emergency Control</title>
+  <style>
+    body {
+      background: #000;
+      color: #0f0;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: lime;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .form-box {
+      background: #111;
+      border: 1px solid #0f0;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,255,0,0.3);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #0f0;
+      background: #000;
+      color: lime;
+    }
+    label {
+      font-weight: bold;
+      color: #0f0;
+    }
+    .color-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .color-input input[type=color] {
+      width: 50px;
+      height: 35px;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+    button {
+      background: lime;
+      color: black;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      width: 100%;
+    }
+    button:hover { background:#bfff00; }
+
+    .preview {
+      margin-top: 20px;
+      border: 1px solid lime;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+    .preview img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚨 Admin Emergency Control</h1>
+
+  <div class="form-box">
+    <label>Emergency Message:</label>
+    <textarea id="msgText" placeholder="Enter emergency message..."></textarea>
+
+    <label>Upload Image:</label>
+    <input type="file" id="msgImage" accept="image/*">
+
+    <div class="color-input">
+      <label>Text Color:</label>
+      <input type="color" id="textColor" value="#ffffff">
+    </div>
+    <div class="color-input">
+      <label>Box Background:</label>
+      <input type="color" id="boxColor" value="#111111">
+    </div>
+    <div class="color-input">
+      <label>Border / Alert Color:</label>
+      <input type="color" id="alertColor" value="#ff0000">
+    </div>
+
+    <label>Optional Phone Number:</label>
+    <input type="text" id="msgPhone" placeholder="+1 (800) 555-1212">
+
+    <label>Optional Link:</label>
+    <input type="url" id="msgLink" placeholder="https://example.com">
+
+    <label>Optional Link Text:</label>
+    <input type="text" id="msgLinkText" placeholder="View Details">
+
+    <button onclick="postMessage()">💾 Save / Update Message</button>
+    <button onclick="deleteMessage()" style="background:red;color:#fff;">🗑️ Delete Message</button>
+
+    <div class="preview" id="previewBox" style="display:none;">
+      <h3>Preview:</h3>
+      <div id="previewContent"></div>
+    </div>
+  </div>
+
+  <!-- Firebase + Cloudinary -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Cloudinary Upload Preset (Unsigned)
+    const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dymwisuau/image/upload";
+    const UPLOAD_PRESET = "unsigned_preset"; // change to your actual preset name
+
+    async function uploadToCloudinary(file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      formData.append("folder", "emergency/");
+      const res = await fetch(CLOUDINARY_URL, { method: "POST", body: formData });
+      const data = await res.json();
+      return data.secure_url;
+    }
+
+    async function postMessage() {
+      const text = document.getElementById("msgText").value.trim();
+      const file = document.getElementById("msgImage").files[0];
+      const textColor = document.getElementById("textColor").value;
+      const boxColor = document.getElementById("boxColor").value;
+      const alertColor = document.getElementById("alertColor").value;
+      const phone = document.getElementById("msgPhone").value.trim();
+      const link = document.getElementById("msgLink").value.trim();
+      const linkText = document.getElementById("msgLinkText").value.trim();
+
+      if (!text && !file) return alert("Please enter a message or upload an image.");
+
+      let imageUrl = null;
+      if (file) imageUrl = await uploadToCloudinary(file);
+
+      await db.collection("emergency").doc("current").set({
+        text,
+        image: imageUrl || null,
+        textColor,
+        boxColor,
+        color: alertColor,
+        phone,
+        link,
+        linkText,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      alert("✅ Emergency message updated!");
+      showPreview({ text, image: imageUrl, textColor, boxColor, color: alertColor, phone, link, linkText });
+    }
+
+    async function deleteMessage() {
+      if (confirm("Delete emergency message?")) {
+        await db.collection("emergency").doc("current").delete();
+        alert("❌ Message deleted!");
+        document.getElementById("previewBox").style.display = "none";
+      }
+    }
+
+    function showPreview(data) {
+      const box = document.getElementById("previewBox");
+      const content = document.getElementById("previewContent");
+      box.style.display = "block";
+      content.innerHTML = `
+        <div style="border:2px solid ${data.color};background:${data.boxColor};color:${data.textColor};padding:10px;border-radius:10px;">
+          <p>${data.text}</p>
+          ${data.image ? `<img src="${data.image}" alt="Image">` : ""}
+          ${data.phone ? `<p>📞 ${data.phone}</p>` : ""}
+          ${data.link ? `<a href="${data.link}" target="_blank" style="color:${data.color};font-weight:bold;">${data.linkText || "View"}</a>` : ""}
+        </div>
+      `;
+    }
+
+    // Load existing message
+    db.collection("emergency").doc("current").get().then(doc=>{
+      if(doc.exists) showPreview(doc.data());
+    });
+  </script>
+</body>
+</html>
