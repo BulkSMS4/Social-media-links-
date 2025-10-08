@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Emergency Ticker</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    /* 🌈 Custom background color (change dynamically) */
+    :root {
+      --ticker-bg: linear-gradient(90deg, #8b0000, #b30000, #8b0000);
+      --scroll-speed: 35s; /* default speed */
+    }
+
+    /* 🔥 Ticker bar */
+    .ticker {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: var(--ticker-bg);
+      color: #fff;
+      padding: 12px 0;
+      overflow: hidden;
+      z-index: 9999;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+    }
+
+    .ticker-content {
+      display: inline-block;
+      white-space: nowrap;
+      animation: scrollLeft var(--scroll-speed) linear infinite;
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding-left: 100%;
+    }
+
+    @keyframes scrollLeft {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .ticker .icon {
+      color: #ff4747;
+      margin-right: 10px;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @media (max-width: 600px) {
+      .ticker-content {
+        font-size: 1rem;
+      }
+    }
+
+    main {
+      margin-top: 70px; /* space below ticker */
+      text-align: center;
+      padding: 20px;
+      color: lime;
+    }
+
+    /* 🎨 Controls box */
+    .controls {
+      background: #111;
+      border: 1px solid lime;
+      padding: 16px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 20px;
+    }
+    label {
+      color: lime;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    select, input[type=color] {
+      background: #000;
+      color: lime;
+      border: 1px solid lime;
+      border-radius: 6px;
+      padding: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ticker">
+    <span class="ticker-content">
+      <span class="icon">🚨</span>
+      <span id="tickerText">Loading latest emergency message...</span>
+    </span>
+  </div>
+
+  <main>
+    <h2>Emergency Broadcast Settings</h2>
+    <p>This ticker shows the latest admin alerts in real time.</p>
+
+    <div class="controls">
+      <div>
+        <label for="bgColor">🎨 Background Color:</label>
+        <input type="color" id="bgColor" value="#8b0000">
+      </div>
+      <div style="margin-top:10px;">
+        <label for="speedSelect">⚡ Scroll Speed:</label>
+        <select id="speedSelect">
+          <option value="15s">Faster</option>
+          <option value="25s">Fast</option>
+          <option value="35s" selected>Normal</option>
+          <option value="50s">Slow</option>
+          <option value="70s">Very Slow</option>
+        </select>
+      </div>
+    </div>
+  </main>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // 🔑 Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+      authDomain: "usahackersland.firebaseapp.com",
+      projectId: "usahackersland",
+      storageBucket: "usahackersland.appspot.com",
+      messagingSenderId: "588407428267",
+      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
+      measurementId: "G-ZJ05T7YNSQ"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const tickerText = document.getElementById("tickerText");
+
+    // ✅ Listen for latest messages in emergencyPosts
+    db.collection("emergencyPosts")
+      .orderBy("timestamp", "desc")
+      .limit(5)
+      .onSnapshot(snapshot => {
+        if (!snapshot.empty) {
+          const texts = snapshot.docs.map(doc => `🚨 ${doc.data().text}`);
+          tickerText.textContent = texts.join("   ⸻   ");
+        } else {
+          tickerText.textContent = "No active emergency messages.";
+        }
+      });
+
+    // 🎨 Change background color dynamically
+    document.getElementById("bgColor").addEventListener("input", (e) => {
+      document.documentElement.style.setProperty("--ticker-bg", e.target.value);
+    });
+
+    // ⚡ Change scroll speed dynamically
+    document.getElementById("speedSelect").addEventListener("change", (e) => {
+      document.documentElement.style.setProperty("--scroll-speed", e.target.value);
+    });
+  </script>
+
+</body>
+</html>
