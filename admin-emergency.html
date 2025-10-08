@@ -50,6 +50,7 @@
       padding: 20px;
       border-radius: 10px;
       border: 1px solid lime;
+      margin-bottom: 20px;
     }
     input, textarea {
       width: 100%;
@@ -89,7 +90,6 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
   <script>
@@ -105,10 +105,12 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const storage = firebase.storage();
-    const auth = firebase.auth();
 
     const messageBox = document.getElementById("messageBox");
+
+    // ✅ CLOUDINARY CONFIG
+    const CLOUD_NAME = "dymwisuau"; 
+    const UPLOAD_PRESET = "emergency_upload";
 
     // ✅ Post or update emergency
     async function postMessage() {
@@ -122,9 +124,17 @@
 
       let imageUrl = null;
       if (file) {
-        const storageRef = storage.ref("emergency/current_" + Date.now() + "_" + file.name);
-        await storageRef.put(file);
-        imageUrl = await storageRef.getDownloadURL();
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", UPLOAD_PRESET);
+        formData.append("folder", "emergency");
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+        imageUrl = data.secure_url;
       }
 
       await db.collection("emergency").doc("current").set({
@@ -135,6 +145,7 @@
 
       document.getElementById("msgText").value = "";
       document.getElementById("msgImage").value = "";
+      alert("✅ Emergency message updated successfully!");
     }
 
     // ✅ Show current message in real time
@@ -147,22 +158,6 @@
             <p>${data.text || ""}</p>
             ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
           `;
-
-          // Show delete button only if admin is logged in
-          auth.onAuthStateChanged(user => {
-            if (user && user.email === "admin@gmail.com") { // change this to your admin email
-              const btn = document.createElement("button");
-              btn.className = "delete-btn";
-              btn.textContent = "🗑️ Delete Message";
-              btn.onclick = async () => {
-                if (confirm("Delete this emergency message?")) {
-                  await db.collection("emergency").doc("current").delete();
-                  messageBox.style.display = "none";
-                }
-              };
-              messageBox.appendChild(btn);
-            }
-          });
         } else {
           messageBox.style.display = "none";
         }
