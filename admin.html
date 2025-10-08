@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>👩‍💻 Admin Dashboard</title>
 <style>
   body {
     margin: 0;
@@ -175,7 +175,12 @@
     <a href="#" data-page="members.html">👥 Members</a>
     <a href="#" data-page="links.html">🔗 Links</a>
     <a href="#" data-page="generate.html">⚙️ Generate</a>
-    <a href="#" data-page="admin-emergency.html">🚨 Admin Emergency</a>
+
+    <!-- New menu items -->
+    <a href="#" data-page="ticker-settings.html">⚙️ Ticker Settings</a>
+    <a href="#" data-page="emergency-broadcast-settings.html">📡 Emergency Broadcast Settings</a>
+    <a href="#" data-page="admin-emergency-control.html">🚨 Admin Emergency Control</a>
+
     <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
   </div>
 
@@ -211,8 +216,6 @@ document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
 document.querySelectorAll('.submenu-toggle').forEach(toggle => {
   toggle.addEventListener('click', () => {
     const submenu = toggle.nextElementSibling;
-    const arrow = toggle.querySelector('.arrow');
-
     if (submenu.style.display === 'flex') {
       submenu.style.display = 'none';
       toggle.classList.remove('open');
@@ -238,6 +241,5 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   window.location.href = "logout.html";
 });
 </script>
-
 </body>
 </html>
