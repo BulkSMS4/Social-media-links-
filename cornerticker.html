@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Corner Ticker — Emergency Broadcast</title>
+<style>
+  :root{
+    --ticker-color: #ff3333;
+    --ticker-bg-solid: rgba(0,0,0,0.85);
+    --ticker-bg-glass: rgba(255,255,255,0.06);
+    --ticker-speed-seconds: 18s; /* default */
+  }
+
+  /* Container pinned top-right, above everything */
+  #cornerTicker {
+    position: fixed;
+    top: 10px;
+    right: 12px;
+    z-index: 2147483647; /* maximum */
+    pointer-events: auto;
+    display: none; /* hidden until content available */
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+    max-width: calc(100% - 24px);
+    box-sizing: border-box;
+  }
+
+  /* Two visual modes: solid (colored border) and glass (blurred translucent) */
+  #cornerTicker.solid {
+    background: var(--ticker-bg-solid);
+    border: 2px solid var(--ticker-color);
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 6px 22px rgba(0,0,0,0.6), 0 0 14px var(--ticker-color, rgba(255,0,0,0.3));
+    color: var(--ticker-color);
+  }
+  #cornerTicker.glass {
+    background: var(--ticker-bg-glass);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 6px 10px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    color: var(--ticker-color);
+  }
+
+  /* Siren icon (square) with animated color cycle */
+  .siren {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    flex: 0 0 auto;
+    box-shadow: 0 0 10px rgba(255,0,0,0.6);
+    animation: sirenCycle 2s linear infinite;
+  }
+  @keyframes sirenCycle {
+    0% { background: #ff2d2d; box-shadow: 0 0 10px #ff2d2d; }
+    33% { background: #ff8a00; box-shadow: 0 0 10px #ff8a00; }
+    66% { background: #ffd400; box-shadow: 0 0 10px #ffd400; }
+    100% { background: #ff2d2d; box-shadow: 0 0 10px #ff2d2d; }
+  }
+
+  /* Scrolling area (masked) */
+  .ticker-viewport {
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+    width: calc(100% - 40px); /* leave space for icon and close */
+    max-width: 900px;
+    box-sizing: border-box;
+  }
+
+  /* the moving inner content */
+  .ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: scroll-left var(--ticker-speed-seconds) linear infinite;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  @keyframes scroll-left {
+    from { transform: translateX(0%); }
+    to { transform: translateX(-100%); }
+  }
+
+  /* close button */
+  .ticker-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    margin-left: 8px;
+    cursor: pointer;
+    flex: 0 0 auto;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .ticker-close:hover { background: rgba(255,255,255,0.06); }
+
+  /* small responsive tweaks */
+  @media (max-width: 420px) {
+    #cornerTicker { left: 10px; right: 10px; top: 8px; min-width: auto; }
+    .ticker-viewport { width: calc(100% - 52px); }
+  }
+</style>
+</head>
+<body>
+  <div id="cornerTicker" class="solid" role="region" aria-live="polite" aria-label="Emergency broadcast">
+    <div class="siren" id="sirenIcon" aria-hidden="true"></div>
+    <div class="ticker-viewport" id="tickerViewport" title="Click to open link">
+      <div class="ticker-content" id="tickerContent">Loading...</div>
+    </div>
+    <button class="ticker-close" id="tickerClose" aria-label="Close">✕</button>
+  </div>
+
+  <!-- Firebase compat SDK (uses your existing firebase project) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+  // ---------- CONFIG (update if you want a different default) ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+    authDomain: "usahackersland.firebaseapp.com",
+    projectId: "usahackersland",
+    storageBucket: "usahackersland.appspot.com",
+    messagingSenderId: "588407428267",
+    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+  };
+
+  // initialize firebase if not already initialized
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // candidate doc paths (in order). first one found (exists) will be used.
+  const DOC_CANDIDATES = [
+    { collection: 'adminSettings', doc: 'emergency' },
+    { collection: 'broadcasts', doc: 'emergencyTicker' },
+    { collection: 'emergency', doc: 'current' }
+  ];
+
+  // UI references
+  const container = document.getElementById('cornerTicker');
+  const tickerContent = document.getElementById('tickerContent');
+  const tickerViewport = document.getElementById('tickerViewport');
+  const closeBtn = document.getElementById('tickerClose');
+  const sirenIcon = document.getElementById('sirenIcon');
+
+  // local state
+  let unsubscribe = null;
+  let activeDocRef = null;
+  let suppressedUntil = Number(localStorage.getItem('cornerTickerClosedUntil') || 0);
+
+  // Speed mapping (maps 'very-fast'..'very-slow' to seconds)
+  const SPEED_MAP = {
+    'very-fast': 6,
+    'fast': 10,
+    'normal': 18,
+    'slow': 28,
+    'very-slow': 48
+  };
+
+  // Helper: apply visual fields from doc
+  function applyVisuals(data) {
+    // color
+    const color = data.color || '#ff3333';
+    document.documentElement.style.setProperty('--ticker-color', color);
+    // mode
+    const mode = (data.mode || 'solid').toLowerCase();
+    container.classList.remove('solid','glass');
+    container.classList.add(mode === 'glass' ? 'glass' : 'solid');
+    // speed
+    const speedKey = (data.speed || 'normal').toLowerCase();
+    const seconds = SPEED_MAP[speedKey] || SPEED_MAP['normal'];
+    document.documentElement.style.setProperty('--ticker-speed-seconds', seconds + 's');
+    // text content
+    const text = data.text || data.cornerText || '';
+    const prefix = (data.prefix || '').toString();
+    const finalText = (prefix ? (prefix + ' ') : '') + text;
+    // set text in ticker content
+    tickerContent.textContent = finalText || '';
+    // when empty, hide the container
+    if (!finalText.trim() || data.enabled === false || data.enabled === 'false') {
+      hideTicker();
+    } else {
+      // show unless suppressed by manual close time
+      if (Date.now() < suppressedUntil) {
+        // user closed recently => keep hidden but keep listening so it will show after suppression
+        console.log('ticker suppressed until', new Date(suppressedUntil).toLocaleString());
+      } else showTicker();
+    }
+
+    // click link behavior
+    const link = data.link || '';
+    if (link) {
+      tickerViewport.style.cursor = 'pointer';
+      tickerViewport.onclick = () => window.open(link, '_blank');
+    } else {
+      tickerViewport.style.cursor = 'default';
+      tickerViewport.onclick = null;
+    }
+  }
+
+  function showTicker() {
+    container.style.display = 'flex';
+  }
+  function hideTicker() {
+    container.style.display = 'none';
+  }
+
+  // Try to locate first existing doc. Returns a promise that resolves with a DocumentReference or null.
+  async function findFirstDocRef() {
+    for (const c of DOC_CANDIDATES) {
+      try {
+        const ref = db.collection(c.collection).doc(c.doc);
+        const snap = await ref.get();
+        if (snap.exists) return ref;
+      } catch (err) {
+        console.warn('Error checking', c, err);
+      }
+    }
+    // none exist — fallback: use the first candidate reference for live updates (so admin can create it later)
+    const fallback = db.collection(DOC_CANDIDATES[0].collection).doc(DOC_CANDIDATES[0].doc);
+    return fallback;
+  }
+
+  // attach listener to a doc ref, updating visuals on change
+  function attachListenerTo(ref) {
+    if (!ref) return;
+    if (unsubscribe) unsubscribe();
+    unsubscribe = ref.onSnapshot(docSnap => {
+      if (!docSnap.exists) {
+        // hide if no doc or empty
+        hideTicker();
+        return;
+      }
+      const data = docSnap.data() || {};
+      applyVisuals(data);
+    }, err => {
+      console.error('Ticker snapshot error:', err);
+    });
+  }
+
+  // Try to find doc and attach
+  (async function init() {
+    try {
+      const docRef = await findFirstDocRef();
+      activeDocRef = docRef;
+      attachListenerTo(activeDocRef);
+      // auto show if there is already data and not suppressed (listener will handle)
+    } catch (err) {
+      console.error('Corner ticker init error:', err);
+    }
+  })();
+
+  // close button behavior -> hide for 30 minutes (like your popup)
+  closeBtn.addEventListener('click', () => {
+    const now = Date.now();
+    const suppressFor = 30 * 60 * 1000; // 30 minutes
+    suppressedUntil = now + suppressFor;
+    localStorage.setItem('cornerTickerClosedUntil', String(suppressedUntil));
+    hideTicker();
+  });
+
+  // If user reloads page while suppressed, keep it hidden until time passes.
+  // But keep listening so it will show after suppression passes (listener handles it, applyVisuals checks suppressedUntil).
+
+  // Ensure animation duration updates when CSS variable changes:
+  // MutationObserver to update style for tickerContent so animation restarts with new duration
+  const root = document.documentElement;
+  const mo = new MutationObserver(() => {
+    // restart animation by reassigning animationName
+    tickerContent.style.animation = 'none';
+    // Force reflow
+    // eslint-disable-next-line no-unused-expressions
+    tickerContent.offsetHeight;
+    tickerContent.style.animation = '';
+    // If text is short, duplicate content to keep smooth scrolling
+    ensureContentRepeat();
+  });
+  mo.observe(root, { attributes: true, attributeFilter: ['style'] });
+
+  // Duplicate content if it's short so scrolling is continuous and visible
+  function ensureContentRepeat() {
+    const text = tickerContent.textContent || '';
+    // if too short, repeat a few times separated by spaces
+    if (text.length > 0 && tickerContent.offsetWidth < tickerViewport.offsetWidth) {
+      const copies = Math.ceil((tickerViewport.offsetWidth * 2) / Math.max(1, tickerContent.offsetWidth));
+      tickerContent.textContent = ('   ' + text + '   ').repeat(Math.max(2, copies));
+    }
+  }
+  // watch resize to re-evaluate repeat
+  window.addEventListener('resize', ensureContentRepeat);
+  // initial call after small delay to allow fonts to render
+  setTimeout(ensureContentRepeat, 300);
+
+  // Accessibility: hide when reduced motion preferred
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    tickerContent.style.animation = 'none';
+  }
+
+  // Hide if page is hidden (tab not active) — optional to save CPU, but keep listener active
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      // pause animation
+      tickerContent.style.animationPlayState = 'paused';
+    } else {
+      tickerContent.style.animationPlayState = 'running';
+    }
+  });
+  </script>
+</body>
+</html>
