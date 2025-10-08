@@ -48,11 +48,6 @@ body::before {
   border:2px solid var(--em-color); border-radius:12px; display:flex; align-items:center;
   z-index: 99999; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.6); overflow:hidden;
 }
-.siren-flash { width:18px; height:18px; margin:0 4px; border-radius:4px; display:inline-block; vertical-align:middle; }
-.siren-flash.left { background:#ff2d2d; animation: flashRed 1s infinite; box-shadow:0 0 8px #ff2d2d; }
-.siren-flash.right { background:#1e90ff; animation: flashBlue 1s infinite; box-shadow:0 0 8px #1e90ff; }
-@keyframes flashRed {0%,100%{opacity:1}50%{opacity:0.25}}
-@keyframes flashBlue {0%,100%{opacity:0.25}50%{opacity:1}}
 #cornerTickerInner { display:flex; align-items:center; white-space: nowrap; padding-left:100%; animation: cornerScroll 12s linear infinite; }
 #cornerTickerInner img { height:32px; width:32px; object-fit:cover; border-radius:6px; margin-right:6px; }
 @keyframes cornerScroll { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
@@ -110,9 +105,7 @@ body::before {
 
 <!-- Top-right corner ticker -->
 <div id="cornerTicker" title="Click for emergency link" onclick="if(emergencyLink) window.open(emergencyLink,'_blank')">
-  <span class="siren-flash left"></span>
   <div id="cornerTickerInner">Loading emergency messages...</div>
-  <span class="siren-flash right"></span>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
