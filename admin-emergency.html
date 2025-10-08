@@ -1,167 +1,278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Admin Emergency Message</title>
-  <style>
-    body {
-      background: #000;
-      color: #0f0;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 {
-      color: lime;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .msg-box {
-      background: #111;
-      border: 1px solid #0f0;
-      padding: 16px;
-      border-radius: 10px;
-      margin-top: 20px;
-      box-shadow: 0 0 10px rgba(0,255,0,0.2);
-      text-align: center;
-    }
-    .msg-box img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-    .delete-btn {
-      background: red;
-      color: #fff;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 16px;
-      width: 100%;
-    }
-    .delete-btn:hover {
-      background: darkred;
-    }
-    .new-msg {
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid lime;
-      margin-bottom: 20px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #0f0;
-      background: #000;
-      color: lime;
-    }
-    button {
-      background: lime;
-      color: black;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover { background:#bfff00; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🚨 Admin Emergency Control</title>
+<style>
+  body {
+    background: #000;
+    color: #0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: lime;
+    margin-bottom: 20px;
+  }
+  .form-box {
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid lime;
+    margin-bottom: 30px;
+  }
+  input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #0f0;
+    background: #000;
+    color: lime;
+  }
+  button {
+    background: lime;
+    color: black;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  button:hover { background: #bfff00; }
+  .color-pickers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .color-pickers label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: lime;
+  }
+  .posts-container {
+    background: #111;
+    border: 1px solid #0f0;
+    padding: 10px;
+    border-radius: 10px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .post {
+    border-bottom: 1px solid #0f0;
+    padding: 15px 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+  .post img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+  }
+  .delete-btn {
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    float: right;
+  }
+  .delete-btn:hover { background: darkred; }
+  .download-link {
+    display: inline-block;
+    margin-top: 10px;
+    background: #222;
+    color: #00ffff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .download-link:hover { background: #333; }
+  a.linkified {
+    color: #00bfff;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+
+  /* ✅ Scrolling Ticker Style */
+  .ticker-container {
+    margin-bottom: 20px;
+    background: transparent;
+    border: 1px solid lime;
+    padding: 10px;
+    border-radius: 8px;
+  }
+</style>
 </head>
 <body>
-  <h1>🚨 Admin Emergency Message</h1>
 
-  <!-- Form to post emergency -->
-  <div class="new-msg">
-    <h2>Post / Update Emergency</h2>
-    <textarea id="msgText" placeholder="Type emergency message..."></textarea>
-    <input type="file" id="msgImage" accept="image/*">
-    <button onclick="postMessage()">Save / Update</button>
+<h1>🚨 Admin Emergency Control</h1>
+
+<!-- ⚡ TICKER POST SECTION -->
+<div class="form-box" id="tickerBox">
+  <h3>Post Scrolling Message (Ticker)</h3>
+  <textarea id="tickerText" placeholder="Enter short alert or announcement..."></textarea>
+  <div class="color-pickers">
+    <label>🖋 Text Color: <input type="color" id="tickerColor" value="#ff0000"></label>
+  </div>
+  <button onclick="postTicker()">🚨 Post Scrolling Message</button>
+</div>
+
+<!-- 🧩 EMERGENCY POST SECTION -->
+<div class="form-box" id="formBox">
+  <h3>Post / Update Emergency</h3>
+
+  <div class="color-pickers">
+    <label>🖋 Text Color: <input type="color" id="textColor" value="#00ff00"></label>
+    <label>📦 Box Color: <input type="color" id="boxColor" value="#111111"></label>
+    <label>📱 Mobile Box Color: <input type="color" id="mobileBoxColor" value="#000000"></label>
   </div>
 
-  <!-- Current message -->
-  <div id="messageBox" class="msg-box" style="display:none;"></div>
+  <textarea id="msgText" placeholder="Type emergency message..."></textarea>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <h4>Insert Highlighted Link</h4>
+  <input type="text" id="linkText" placeholder="Text to show (e.g., Verify Here)">
+  <input type="url" id="linkURL" placeholder="https://yourlink.com">
+  <button onclick="insertLink()">Insert Highlighted Link</button>
 
-  <script>
-    // 🔑 Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-      authDomain: "usahackersland.firebaseapp.com",
-      projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com",
-      messagingSenderId: "588407428267",
-      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee",
-      measurementId: "G-ZJ05T7YNSQ"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+  <h4>Upload Files (APK, ZIP, RAR, PDF, HTML, etc.)</h4>
+  <input type="file" id="msgFiles" multiple accept=".jpg,.png,.gif,.jpeg,.webp,.pdf,.zip,.rar,.apk,.html,.css,.txt,.doc,.docx,.ppt,.pptx">
+  <button onclick="postMessage()">🚨 Post Message</button>
+</div>
 
-    const messageBox = document.getElementById("messageBox");
+<!-- 📰 EMERGENCY POSTS -->
+<div class="posts-container" id="postsContainer">
+  <p style="text-align:center;color:#999;">Loading messages...</p>
+</div>
 
-    // ✅ CLOUDINARY CONFIG
-    const CLOUD_NAME = "dymwisuau"; 
-    const UPLOAD_PRESET = "emergency_upload";
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    // ✅ Post or update emergency
-    async function postMessage() {
-      const text = document.getElementById("msgText").value.trim();
-      const file = document.getElementById("msgImage").files[0];
+<script>
+  // 🔥 Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+    authDomain: "usahackersland.firebaseapp.com",
+    projectId: "usahackersland",
+    storageBucket: "usahackersland.appspot.com",
+    messagingSenderId: "588407428267",
+    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-      if (!text && !file) {
-        alert("Please enter a message or choose an image.");
-        return;
-      }
+  // ☁️ Cloudinary Setup
+  const CLOUD_NAME = "dymwisuau";
+  const UPLOAD_PRESET = "emergency_upload";
+  const postsContainer = document.getElementById("postsContainer");
 
-      let imageUrl = null;
-      if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", UPLOAD_PRESET);
-        formData.append("folder", "emergency");
+  // ✅ Insert highlighted link
+  function insertLink() {
+    const text = document.getElementById("linkText").value.trim();
+    const url = document.getElementById("linkURL").value.trim();
+    if (!text || !url) return alert("Please enter both text and URL.");
+    const textarea = document.getElementById("msgText");
+    textarea.value += ` [${text}](${url}) `;
+    document.getElementById("linkText").value = "";
+    document.getElementById("linkURL").value = "";
+  }
 
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-          method: "POST",
-          body: formData
-        });
-        const data = await response.json();
-        imageUrl = data.secure_url;
-      }
+  // ✅ Post Ticker Message
+  async function postTicker() {
+    const text = document.getElementById("tickerText").value.trim();
+    const color = document.getElementById("tickerColor").value;
+    if (!text) return alert("Please type a scrolling message first.");
+    await db.collection("emergencyTicker").doc("current").set({
+      text,
+      color,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById("tickerText").value = "";
+    alert("✅ Scrolling ticker message updated!");
+  }
 
-      await db.collection("emergency").doc("current").set({
-        text,
-        image: imageUrl || null,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
+  // ✅ Post Emergency Message
+  async function postMessage() {
+    const text = document.getElementById("msgText").value.trim();
+    const files = document.getElementById("msgFiles").files;
+    const textColor = document.getElementById("textColor").value;
+    const boxColor = document.getElementById("boxColor").value;
+    const mobileBoxColor = document.getElementById("mobileBoxColor").value;
 
-      document.getElementById("msgText").value = "";
-      document.getElementById("msgImage").value = "";
-      alert("✅ Emergency message updated successfully!");
+    if (!text && files.length === 0) return alert("Please enter a message or upload files.");
+
+    let uploadedFiles = [];
+
+    for (let file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", UPLOAD_PRESET);
+      formData.append("folder", "emergency");
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: "POST", body: formData });
+      const data = await res.json();
+      uploadedFiles.push({ url: data.secure_url, name: file.name });
     }
 
-    // ✅ Show current message in real time
-    db.collection("emergency").doc("current")
-      .onSnapshot(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          messageBox.style.display = "block";
-          messageBox.innerHTML = `
-            <p>${data.text || ""}</p>
-            ${data.image ? `<img src="${data.image}" alt="Emergency Image">` : ""}
-          `;
-        } else {
-          messageBox.style.display = "none";
-        }
-      });
-  </script>
+    await db.collection("emergencyPosts").add({
+      text,
+      files: uploadedFiles,
+      textColor,
+      boxColor,
+      mobileBoxColor,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById("msgText").value = "";
+    document.getElementById("msgFiles").value = "";
+    alert("✅ Emergency message posted!");
+  }
+
+  // ✅ Render Emergency Posts
+  db.collection("emergencyPosts").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+    postsContainer.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const id = doc.id;
+      postsContainer.innerHTML += `
+        <div class="post" style="background:${d.mobileBoxColor};color:${d.textColor};">
+          <button class="delete-btn" onclick="deletePost('${id}')">X</button>
+          <p>${linkify(d.text)}</p>
+          ${renderFiles(d.files)}
+        </div>`;
+    });
+  });
+
+  // ✅ Make links clickable
+  function linkify(text) {
+    return text
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" class="linkified" target="_blank">$1</a>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // ✅ Render uploaded files
+  function renderFiles(files = []) {
+    return files.map(f => {
+      const ext = f.name.split('.').pop().toLowerCase();
+      if (["jpg","jpeg","png","gif","webp"].includes(ext)) {
+        return `<img src="${f.url}" alt="${f.name}">`;
+      } else {
+        return `<a href="${f.url}" download class="download-link">📥 Download ${f.name}</a>`;
+      }
+    }).join("");
+  }
+
+  // ✅ Delete post
+  async function deletePost(id) {
+    if (confirm("Delete this post?")) await db.collection("emergencyPosts").doc(id).delete();
+  }
+</script>
 </body>
 </html>
