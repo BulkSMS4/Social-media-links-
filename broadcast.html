@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Emergency Broadcast</title>
+<style>
+  body {
+    background: #000;
+    color: #0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 10px;
+  }
+  .post {
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 10px;
+  }
+  .post a {
+    text-decoration: underline;
+    font-weight: bold;
+    word-break: break-all;
+  }
+  .post img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 8px;
+  }
+  .download-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<div id="posts"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+    authDomain: "usahackersland.firebaseapp.com",
+    projectId: "usahackersland",
+    storageBucket: "usahackersland.appspot.com",
+    messagingSenderId: "588407428267",
+    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const postsDiv = document.getElementById("posts");
+
+  function autoLink(text, color) {
+    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/g, `<a href="$2" target="_blank" style="color:${color}">$1</a>`);
+    return text.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" style="color:${color}">$1</a>`);
+  }
+
+  db.collection("emergencyPosts").orderBy("timestamp","desc").onSnapshot(snapshot=>{
+    postsDiv.innerHTML = "";
+    snapshot.forEach(doc=>{
+      const d = doc.data();
+      postsDiv.innerHTML += `
+        <div class="post" style="background:${d.mobileBoxColor};color:${d.textColor};">
+          <p>${autoLink(d.text||"", d.linkColor)}</p>
+          ${d.fileUrl ? renderFile(d.fileUrl, d.fileName, d.linkColor) : ""}
+        </div>`;
+    });
+  });
+
+  function renderFile(url, name, color) {
+    const ext = name.split('.').pop().toLowerCase();
+    if(["jpg","jpeg","png","gif","webp"].includes(ext)) {
+      return `<img src="${url}" alt="${name}">`;
+    } else {
+      return `<a href="${url}" download class="download-link" style="color:${color};border:1px solid ${color};">📥 Download ${name}</a>`;
+    }
+  }
+</script>
+</body>
+</html>
