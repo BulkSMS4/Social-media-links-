@@ -13,13 +13,13 @@
       font-family: Arial, sans-serif;
     }
 
-    /* 🌈 Custom background color (change dynamically) */
+    /* 🌈 Dynamic variables for color + speed */
     :root {
       --ticker-bg: linear-gradient(90deg, #8b0000, #b30000, #8b0000);
-      --scroll-speed: 35s; /* default speed */
+      --scroll-speed: 35s;
     }
 
-    /* 🔥 Ticker bar */
+    /* 🚨 Ticker bar */
     .ticker {
       position: fixed;
       top: 0;
@@ -27,10 +27,17 @@
       width: 100%;
       background: var(--ticker-bg);
       color: #fff;
-      padding: 12px 0;
+      padding: 10px 0;
       overflow: hidden;
       z-index: 9999;
       box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .ticker.hidden {
+      opacity: 0;
+      transform: translateY(-100%);
+      pointer-events: none;
     }
 
     .ticker-content {
@@ -58,20 +65,14 @@
       50% { opacity: 0.5; }
     }
 
-    @media (max-width: 600px) {
-      .ticker-content {
-        font-size: 1rem;
-      }
-    }
-
     main {
-      margin-top: 70px; /* space below ticker */
+      margin-top: 80px;
       text-align: center;
       padding: 20px;
       color: lime;
     }
 
-    /* 🎨 Controls box */
+    /* ⚙️ Admin control panel */
     .controls {
       background: #111;
       border: 1px solid lime;
@@ -80,11 +81,13 @@
       display: inline-block;
       margin-top: 20px;
     }
+
     label {
       color: lime;
       font-weight: bold;
       margin-right: 10px;
     }
+
     select, input[type=color] {
       background: #000;
       color: lime;
@@ -96,16 +99,18 @@
 </head>
 <body>
 
-  <div class="ticker">
+  <!-- 🚨 Emergency Ticker -->
+  <div id="ticker" class="ticker hidden">
     <span class="ticker-content">
       <span class="icon">🚨</span>
       <span id="tickerText">Loading latest emergency message...</span>
     </span>
   </div>
 
+  <!-- ⚙️ Control panel for testing -->
   <main>
-    <h2>Emergency Broadcast Settings</h2>
-    <p>This ticker shows the latest admin alerts in real time.</p>
+    <h2>Emergency Broadcast Control</h2>
+    <p>Adjust how the emergency message moves and looks.</p>
 
     <div class="controls">
       <div>
@@ -143,31 +148,52 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    const ticker = document.getElementById("ticker");
     const tickerText = document.getElementById("tickerText");
+    const bgColorPicker = document.getElementById("bgColor");
+    const speedSelect = document.getElementById("speedSelect");
 
-    // ✅ Listen for latest messages in emergencyPosts
+    // 🔄 Load saved settings
+    db.collection("settings").doc("ticker").get().then(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        if (data.bgColor) {
+          document.documentElement.style.setProperty("--ticker-bg", data.bgColor);
+          bgColorPicker.value = data.bgColor;
+        }
+        if (data.speed) {
+          document.documentElement.style.setProperty("--scroll-speed", data.speed);
+          speedSelect.value = data.speed;
+        }
+      }
+    });
+
+    // 💾 Save settings on change
+    bgColorPicker.addEventListener("input", async (e) => {
+      const color = e.target.value;
+      document.documentElement.style.setProperty("--ticker-bg", color);
+      await db.collection("settings").doc("ticker").set({ bgColor: color }, { merge: true });
+    });
+
+    speedSelect.addEventListener("change", async (e) => {
+      const speed = e.target.value;
+      document.documentElement.style.setProperty("--scroll-speed", speed);
+      await db.collection("settings").doc("ticker").set({ speed }, { merge: true });
+    });
+
+    // 📡 Real-time listener for emergency posts
     db.collection("emergencyPosts")
       .orderBy("timestamp", "desc")
       .limit(5)
       .onSnapshot(snapshot => {
         if (!snapshot.empty) {
-          const texts = snapshot.docs.map(doc => `🚨 ${doc.data().text}`);
-          tickerText.textContent = texts.join("   ⸻   ");
+          const messages = snapshot.docs.map(doc => `🚨 ${doc.data().text}`);
+          tickerText.textContent = messages.join("   ⸻   ");
+          ticker.classList.remove("hidden");
         } else {
-          tickerText.textContent = "No active emergency messages.";
+          ticker.classList.add("hidden");
         }
       });
-
-    // 🎨 Change background color dynamically
-    document.getElementById("bgColor").addEventListener("input", (e) => {
-      document.documentElement.style.setProperty("--ticker-bg", e.target.value);
-    });
-
-    // ⚡ Change scroll speed dynamically
-    document.getElementById("speedSelect").addEventListener("change", (e) => {
-      document.documentElement.style.setProperty("--scroll-speed", e.target.value);
-    });
   </script>
-
 </body>
 </html>
