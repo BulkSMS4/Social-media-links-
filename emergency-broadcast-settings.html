@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Emergency Broadcast Settings — Admin</title>
+<style>
+  body{font-family:Arial;background:#0b0b0b;color:lime;margin:18px;}
+  .card{background:#111;padding:16px;border-radius:10px;max-width:820px;margin:auto;border:1px solid rgba(255,255,255,0.03);}
+  label{display:block;margin-top:10px;color:#bfff00;font-weight:700;}
+  select,input[type=color],input[type=number]{padding:8px;border-radius:8px;border:none;background:#222;color:#fff;width:100%;}
+  button{margin-top:12px;padding:10px 14px;background:lime;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;}
+  .hint{color:#9fc;font-size:13px;margin-top:6px;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2>📡 Emergency Broadcast Settings</h2>
+
+    <label>Popup position</label>
+    <select id="position">
+      <option value="top-right">Top Right</option>
+      <option value="top-left">Top Left</option>
+      <option value="bottom-right">Bottom Right</option>
+      <option value="bottom-left">Bottom Left</option>
+      <option value="center">Center</option>
+    </select>
+
+    <label>Auto-hide seconds (popup)</label>
+    <input type="number" id="autoHide" value="10" min="1">
+
+    <label>Re-show suppression minutes after close</label>
+    <input type="number" id="suppressMinutes" value="30" min="1">
+
+    <label>Siren mode after minutes</label>
+    <input type="number" id="sirenAfter" value="30" min="1">
+
+    <label>Enable siren flashing</label>
+    <select id="sirenOn">
+      <option value="true" selected>Enabled</option>
+      <option value="false">Disabled</option>
+    </select>
+
+    <label>Popup background color</label>
+    <input type="color" id="popupBg" value="#111111">
+
+    <div style="margin-top:12px;">
+      <button id="save">Save Settings</button>
+      <div class="hint">Saves to <code>emergency_settings/current</code> in Firestore. Dashboards read this to apply broadcast behavior.</div>
+    </div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com",
+  messagingSenderId: "588407428267",
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const position = document.getElementById('position');
+const autoHide = document.getElementById('autoHide');
+const suppressMinutes = document.getElementById('suppressMinutes');
+const sirenAfter = document.getElementById('sirenAfter');
+const sirenOn = document.getElementById('sirenOn');
+const popupBg = document.getElementById('popupBg');
+const save = document.getElementById('save');
+
+async function load() {
+  const doc = await db.collection('emergency_settings').doc('current').get();
+  if (!doc.exists) return;
+  const d = doc.data();
+  if (d.position) position.value = d.position;
+  if (d.autoHide) autoHide.value = d.autoHide;
+  if (d.suppressMinutes) suppressMinutes.value = d.suppressMinutes;
+  if (d.sirenAfter) sirenAfter.value = d.sirenAfter;
+  if (typeof d.sirenOn !== 'undefined') sirenOn.value = d.sirenOn ? 'true' : 'false';
+  if (d.popupBg) popupBg.value = d.popupBg;
+}
+
+save.addEventListener('click', async () => {
+  save.disabled = true;
+  try {
+    await db.collection('emergency_settings').doc('current').set({
+      position: position.value,
+      autoHide: Number(autoHide.value),
+      suppressMinutes: Number(suppressMinutes.value),
+      sirenAfter: Number(sirenAfter.value),
+      sirenOn: sirenOn.value === 'true',
+      popupBg: popupBg.value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    alert('Settings saved.');
+  } catch (e) { alert('Error: ' + e.message); }
+  save.disabled = false;
+});
+
+load();
+</script>
+</body>
+</html>
