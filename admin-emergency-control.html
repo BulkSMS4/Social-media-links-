@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Admin Emergency Control</title>
+<style>
+  body{font-family:Arial;background:#0b0b0b;color:lime;padding:18px;}
+  .card{background:#111;padding:16px;border-radius:10px;max-width:860px;margin:auto;border:1px solid rgba(255,255,255,0.03);}
+  label{display:block;margin-top:10px;color:#bfff00;font-weight:700;}
+  input[type=text], textarea{width:100%;padding:10px;border-radius:8px;border:none;background:#222;color:#fff;}
+  input[type=file]{margin-top:6px;color:#fff;}
+  input[type=color]{width:56px;height:36px;border:none;padding:0;}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+  button{padding:10px 12px;background:lime;color:#000;border:none;border-radius:8px;font-weight:700;cursor:pointer;}
+  .hint{color:#9fc;font-size:13px;margin-top:6px;}
+  .posts{margin-top:18px;}
+  .post{background:#0b0b0b;padding:12px;border-radius:10px;margin-bottom:10px;border:2px solid rgba(255,255,255,0.03);}
+  .post .meta{font-size:12px;color:#9fd89f;margin-bottom:8px;}
+  .post img{max-width:100%;border-radius:8px;margin-top:8px;}
+  .download{display:inline-block;margin-top:8px;padding:8px 12px;border-radius:8px;background:#28a745;color:#fff;text-decoration:none;font-weight:700;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h2>🚨 Admin Emergency Control</h2>
+
+    <label>Main popup message (this powers the popup / ticker)</label>
+    <textarea id="mainText" rows="3" placeholder="Main emergency popup text..."></textarea>
+
+    <label>Popup text color</label>
+    <input type="color" id="mainTextColor" value="#ff3333">
+
+    <label>Popup background color</label>
+    <input type="color" id="mainBgColor" value="#111111">
+
+    <label>Image (optional) — will show in popup</label>
+    <input type="file" id="mainImage" accept="image/*">
+
+    <label>Link (optional) — put full URL that popup "Open Link" will open</label>
+    <input type="text" id="mainLink" placeholder="https://example.com">
+
+    <div class="row">
+      <button id="saveMain">Save Main Popup</button>
+      <div class="hint">Saves to <code>emergency/current</code>. Popup/ticker reads from that.</div>
+    </div>
+
+    <hr style="margin:16px 0;border:none;border-top:1px solid rgba(255,255,255,0.04)">
+
+    <h3>Create scroll/post item (shows in mobile box / feed)</h3>
+    <label>Post text</label>
+    <textarea id="postText" rows="3" placeholder="Message to appear in the top mobile feed"></textarea>
+
+    <label>Highlight color (post border)</label>
+    <input type="color" id="postColor" value="#ff3333">
+
+    <label>Image (optional)</label>
+    <input type="file" id="postImage" accept="image/*">
+
+    <label>Attach file (apk, zip, rar, pdf, html, css etc.)</label>
+    <input type="file" id="postFile">
+
+    <label>Optional masked download label (the text shown for download link)</label>
+    <input type="text" id="downloadLabel" placeholder="Download">
+
+    <div class="row">
+      <button id="publish">Publish Post</button>
+      <button id="clear">Clear</button>
+    </div>
+
+    <div class="hint">Images uploaded to Cloudinary (unsigned) and files uploaded to Firebase Storage. Posts saved to <code>emergencyPosts</code>.</div>
+
+    <div class="posts" id="posts"></div>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<script>
+/*
+  NOTES:
+  - Uses Firestore collections:
+     emergency/current           (document powering popup/ticker)
+     emergencyPosts              (collection of feed posts)
+  - Uses Cloudinary unsigned upload for images (image preview in popup & feed).
+    Replace CLOUD_NAME and UPLOAD_PRESET with your Cloudinary values (you gave earlier).
+  - Files (apk/zip/rar/pdf/html/...) uploaded to Firebase Storage, download link saved to post doc.
+*/
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com",
+  messagingSenderId: "588407428267",
+  appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+// CLOUDINARY (unsigned preset) - you gave values earlier
+const CLOUD_NAME = "dymwisuau";
+const UPLOAD_PRESET = "emergency_upload"; // ensure you created this unsigned preset in Cloudinary
+
+// DOM
+const mainText = document.getElementById('mainText');
+const mainTextColor = document.getElementById('mainTextColor');
+const mainBgColor = document.getElementById('mainBgColor');
+const mainImage = document.getElementById('mainImage');
+const mainLink = document.getElementById('mainLink');
+const saveMain = document.getElementById('saveMain');
+
+const postText = document.getElementById('postText');
+const postColor = document.getElementById('postColor');
+const postImage = document.getElementById('postImage');
+const postFile = document.getElementById('postFile');
+const downloadLabel = document.getElementById('downloadLabel');
+const publish = document.getElementById('publish');
+const clearBtn = document.getElementById('clear');
+const postsDiv = document.getElementById('posts');
+
+// helper: upload image to Cloudinary (unsigned)
+async function uploadImageToCloudinary(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  fd.append('folder', 'emergency');
+  const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+  const data = await resp.json();
+  if (!data.secure_url) throw new Error('Cloudinary upload failed');
+  return { url: data.secure_url, raw: data };
+}
+
+// helper: upload generic file to Firebase Storage (returns url + path)
+async function uploadFileToFirebase(file) {
+  const path = `emergencyFiles/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+  const ref = storage.ref(path);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  return { url, path };
+}
+
+// Save main popup (emergency/current)
+saveMain.addEventListener('click', async () => {
+  saveMain.disabled = true;
+  try {
+    let imageUrl = '';
+    if (mainImage.files[0]) {
+      const up = await uploadImageToCloudinary(mainImage.files[0]);
+      imageUrl = up.url;
+    }
+    await db.collection('emergency').doc('current').set({
+      text: mainText.value || '',
+      color: mainTextColor.value || '#ff3333',
+      bg: mainBgColor.value || '#111111',
+      image: imageUrl || '',
+      link: mainLink.value || '',
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    alert('Main popup saved.');
+  } catch (e) { alert('Error: ' + e.message); }
+  saveMain.disabled = false;
+});
+
+// Publish feed post
+publish.addEventListener('click', async () => {
+  publish.disabled = true;
+  try {
+    const text = postText.value.trim();
+    const color = postColor.value || '#ff3333';
+    if (!text && !postImage.files[0] && !postFile.files[0]) {
+      alert('Provide text, image or file.');
+      publish.disabled = false;
+      return;
+    }
+
+    let imageURL = '', imagePath = '';
+    let fileURL = '', filePath = '', fileName = '';
+    if (postImage.files[0]) {
+      const img = await uploadImageToCloudinary(postImage.files[0]);
+      imageURL = img.url;
+    }
+    if (postFile.files[0]) {
+      const upf = await uploadFileToFirebase(postFile.files[0]);
+      fileURL = upf.url;
+      filePath = upf.path;
+      fileName = postFile.files[0].name;
+    }
+
+    await db.collection('emergencyPosts').add({
+      text,
+      color,
+      imageURL,
+      imagePath,
+      fileURL,
+      filePath,
+      fileName,
+      downloadLabel: (downloadLabel.value || '').trim(),
+      author: 'Admin',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // clear
+    postText.value=''; postColor.value='#ff3333'; postImage.value=''; postFile.value=''; downloadLabel.value='';
+    alert('Post published.');
+  } catch (e) { alert('Publish error: ' + e.message); }
+  publish.disabled = false;
+});
+
+clearBtn.addEventListener('click', () => {
+  postText.value=''; postImage.value=''; postFile.value=''; downloadLabel.value='';
+});
+
+// render posts & allow admin delete
+function createPostEl(id, data) {
+  const el = document.createElement('div');
+  el.className = 'post';
+  el.style.border = `2px solid ${data.color || '#333'}`;
+  const when = new Date(data.createdAt ? data.createdAt.seconds*1000 : Date.now());
+  el.innerHTML = `<div class="meta">${when.toLocaleString()} — ${data.author||'Admin'}</div>`;
+  if (data.text) {
+    const p = document.createElement('div'); p.innerText = data.text; el.appendChild(p);
+  }
+  if (data.imageURL) {
+    const img = document.createElement('img'); img.src = data.imageURL; el.appendChild(img);
+  }
+  if (data.fileURL) {
+    // create masked download link (label or "Download")
+    const a = document.createElement('a');
+    a.href = data.fileURL;
+    a.className = 'download';
+    a.innerText = data.downloadLabel ? data.downloadLabel : `⬇ Download ${data.fileName || ''}`;
+    // set download attribute when possible (browser may ignore cross-origin)
+    a.setAttribute('download', data.fileName || '');
+    el.appendChild(a);
+  }
+  // admin delete
+  const del = document.createElement('button');
+  del.style.marginTop='10px';
+  del.style.background='#dc3545';
+  del.style.color='#fff';
+  del.style.border='none';
+  del.style.padding='8px 10px';
+  del.style.borderRadius='8px';
+  del.innerText='Delete';
+  del.addEventListener('click', async () => {
+    if (!confirm('Delete this post?')) return;
+    try {
+      if (data.imagePath) { await storage.ref(data.imagePath).delete(); }
+      if (data.filePath) { await storage.ref(data.filePath).delete(); }
+    } catch(e){ console.warn('delete storage err', e); }
+    await db.collection('emergencyPosts').doc(id).delete();
+  });
+  el.appendChild(del);
+
+  return el;
+}
+
+// listen posts
+db.collection('emergencyPosts').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+  postsDiv.innerHTML = '';
+  if (snapshot.empty) { postsDiv.innerHTML = '<div style="color:#999;padding:12px">No posts.</div>'; return; }
+  snapshot.forEach(doc=>{
+    const el = createPostEl(doc.id, doc.data());
+    postsDiv.appendChild(el);
+  });
+}, err=>{
+  postsDiv.innerHTML = `<div style="color:#f88">Error: ${err.message}</div>`;
+});
+
+// load main popup current values into form (for edit convenience)
+db.collection('emergency').doc('current').onSnapshot(doc=>{
+  if (!doc.exists) return;
+  const d = doc.data();
+  mainText.value = d.text || '';
+  mainTextColor.value = d.color || '#ff3333';
+  mainBgColor.value = d.bg || '#111111';
+  mainLink.value = d.link || '';
+});
+</script>
+</body>
+</html>
