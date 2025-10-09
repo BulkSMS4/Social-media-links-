@@ -130,8 +130,10 @@
 </div>
 
 <script>
-const cloudName = "dymwisuau";
-const uploadPreset = "xportbox";
+const cloudName = "dymwisuau";      // Your Cloudinary cloud name
+const uploadPreset = "xportbox";     // Your unsigned upload preset
+const folderName = "xportbox_assets"; // Asset folder for uploads
+
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const fileList = document.getElementById('fileList');
@@ -196,6 +198,7 @@ function uploadToCloudinary(file, onProgress) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', uploadPreset);
+  formData.append('folder', folderName); // ← All files go here
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
