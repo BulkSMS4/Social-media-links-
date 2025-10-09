@@ -1,49 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📁 File Uploader & Dashboard</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>📁 File Uploader & Dashboard (Firebase + Upload.io)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap">
 <style>
+/* (Styles unchanged from your requested theme) */
 body { font-family:"Poppins",sans-serif; background:#f3f5ff; margin:0; padding:20px; color:#333; }
-.uploader { max-width:600px; margin:auto; background:#fff; border-radius:20px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
-.title { font-size:1.3em; font-weight:600; text-align:center; margin-bottom:15px;}
-.drop-zone { border:3px dashed #4a90e2; border-radius:15px; padding:40px; text-align:center; cursor:pointer; transition:background 0.3s; }
-.drop-zone.dragover { background: rgba(74,144,226,0.1); }
-.drop-zone p { margin:0; font-size:0.95em; }
+.uploader { max-width:760px; margin:18px auto; background:#fff; border-radius:20px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+.title { font-size:1.25em; font-weight:600; text-align:center; margin-bottom:12px;}
+.drop-zone { border:3px dashed #4a90e2; border-radius:15px; padding:36px; text-align:center; cursor:pointer; transition:background 0.25s; }
+.drop-zone.dragover { background: rgba(74,144,226,0.06); }
+.drop-zone p { margin:0; font-size:0.95em; color:#1b3968; }
 
-input[type="color"], input[type="text"], textarea { width:100%; padding:8px; border-radius:10px; border:1px solid #ccc; margin-top:5px; }
+input[type="color"], input[type="text"], textarea { width:100%; padding:8px; border-radius:10px; border:1px solid #ddd; margin-top:8px; box-sizing:border-box;}
 textarea { resize: vertical; min-height:50px; }
 
 .file-list { margin-top:15px; }
-.file-card { display:flex; gap:12px; align-items:flex-start; background:#f9fafc; border:1px solid #ddd; padding:12px; border-radius:10px; margin-bottom:10px; }
-.file-preview { width:80px; height:80px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:16px; background:#fff; border:1px solid #ccc; box-shadow:0 2px 6px rgba(0,0,0,0.1); overflow:hidden; font-size:0.8em; color:#555; text-align:center; }
-.file-preview img { width:100%; height:100%; object-fit:contain; }
+.file-card { display:flex; gap:12px; align-items:flex-start; background:#f9fafc; border:1px solid #e6e9ef; padding:12px; border-radius:10px; margin-bottom:10px; }
+.file-preview { width:80px; height:80px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:16px; background:#fff; border:1px solid #ddd; box-shadow:0 2px 6px rgba(0,0,0,0.06); overflow:hidden; font-size:0.8em; color:#555; text-align:center; }
+.file-preview img { width:100%; height:100%; object-fit:cover; border-radius:12px; }
 .file-details { flex:1; }
-.file-card .actions { margin-top:8px; display:flex; gap:8px; }
-button { cursor:pointer; border:none; border-radius:8px; padding:6px 12px; font-weight:600; }
+.file-card .actions { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
+button { cursor:pointer; border:none; border-radius:8px; padding:8px 12px; font-weight:600; }
+button.primary { background:#1f6feb; color:white; }
 button.save-btn { background:#28a745; color:white; }
 button.delete-btn { background:#ff4a4a; color:white; }
+.small { padding:6px 10px; font-size:13px; }
 
-/* Dashboard */
-.top-mobile { position:relative; width:90%; max-width:1200px; margin:20px auto; border-radius:18px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
-.mobile-screen { background:#111; color:#33ff33; padding:16px; min-height:200px; overflow:auto; border:3px solid rgba(0,255,0,0.25); border-radius:14px; }
+.top-mobile { position:relative; width:92%; max-width:1200px; margin:20px auto; border-radius:18px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.25); }
+.mobile-screen { background:#111; color:#33ff33; padding:16px; min-height:220px; overflow:auto; border:3px solid rgba(0,255,0,0.08); border-radius:14px; }
 .mobile-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
-.mobile-title { font-weight:900; font-size:20px; color:#33ff33; text-shadow:0 0 10px green; }
-.post { background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:10px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6); }
+.mobile-title { font-weight:800; font-size:20px; color:#33ff33; text-shadow:0 0 6px rgba(51,255,51,0.08); }
+.post { background:#0f1720; border-radius:12px; padding:12px; margin-bottom:12px; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,0.5); }
 .post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-.post img { max-width:100%; border-radius:8px; margin-top:8px; border:1px solid #333; }
+.post img { max-width:100%; border-radius:8px; margin-top:8px; border:1px solid #222; display:block; }
 .post .download { display:inline-block; margin-top:8px; padding:8px 12px; border-radius:8px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
+.controls { display:flex; gap:8px; flex-wrap:wrap; }
+.notice { text-align:center; color:#9aa0b0; padding:18px 0; }
+.top-row { display:flex; gap:12px; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap;}
+.right-actions { display:flex; gap:8px; align-items:center; }
+.copy-link { background:#334155; color:#fff; padding:8px 10px; border-radius:8px; font-weight:600; cursor:pointer; }
+.small-muted { font-size:12px; color:#8891a6; }
+.input-inline { display:flex; gap:8px; align-items:center; }
+.progress { width:100%; height:6px; background:#e6eefc; border-radius:6px; overflow:hidden; margin-top:8px;}
+.progress > i { display:block; height:100%; width:0%; background:linear-gradient(90deg,#5eead4,#60a5fa); transition:width 0.25s ease; }
+
+/* toast container */
+#toast-container { position: fixed; right: 18px; bottom: 18px; z-index:99999; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+.toast { background:#1f6feb; color:white; padding:10px 14px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.18); opacity:0; transform:translateY(8px); transition:all .25s ease; }
+
+/* small queue area */
+#queueBox { position: fixed; left: 18px; bottom: 18px; background: rgba(255,255,255,0.95); padding:10px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.12); width:260px; font-size:13px; display:none; }
+#queueBox h4 { margin:0 0 8px 0; font-size:13px; }
 </style>
 </head>
 <body>
 
 <div class="uploader">
   <div class="title">📁 Select Files / APKs</div>
+
+  <div class="top-row">
+    <div class="small-muted">Supports images, pdf, zip, rar, docx, xlsx, txt, apk and more.</div>
+    <div class="right-actions">
+      <button id="openWidget" class="primary small">Upload via Upload.io Widget</button>
+      <button id="refreshBtn" class="small">Refresh Dashboard</button>
+    </div>
+  </div>
+
   <div class="drop-zone" id="dropZone">
-    <p>Drop files here or click to select</p>
+    <p>Drop files here or click to select — multiple allowed</p>
     <input type="file" id="fileInput" multiple style="display:none;">
   </div>
+
   <div class="file-list" id="fileList"></div>
 </div>
 
@@ -51,23 +81,36 @@ button.delete-btn { background:#ff4a4a; color:white; }
   <div class="mobile-screen" id="toolsPostsScreen">
     <div class="mobile-header">
       <div class="mobile-title">🛠️ Files / Tools ⚡</div>
+      <div class="small-muted">Admin view</div>
     </div>
     <div id="toolsPostsList">
-      <div style="color:#999;text-align:center;padding:30px 0;">Loading files...</div>
+      <div class="notice">Loading files...</div>
     </div>
   </div>
 </div>
 
+<!-- Toasts + queue -->
+<div id="toast-container"></div>
+<div id="queueBox"><h4>Upload Queue</h4><div id="queueList"></div></div>
+
+<!-- libraries -->
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://js.bytescale.com/upload-widget/v4"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-const cloudName="dymwisuau";
-const uploadPreset="xportbox";
-const folderName="xportbox_assets";
+/* ============================
+   CONFIG - update if needed
+   ============================ */
+// API path is proxied via firebase hosting rewrites to the Cloud Function
+const SIGN_UPLOAD_ENDPOINT = "/api/sign-upload"; // POST -> returns uploadUrl + headers
 
+// Optional Cloudinary for image optimization (keeps as before)
+const CLOUD_NAME = "dymwisuau";
+const CLOUDINARY_UPLOAD_PRESET = "xportbox";
+
+// Firebase config (same you provided earlier)
 const firebaseConfig = {
   apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain:"usahackersland.firebaseapp.com",
@@ -76,197 +119,421 @@ const firebaseConfig = {
   messagingSenderId:"588407428267",
   appId:"1:588407428267:web:7c4898cbb62efd3d5953ee"
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-const dropZone=document.getElementById('dropZone');
-const fileInput=document.getElementById('fileInput');
-const fileList=document.getElementById('fileList');
-const toolsPostsList=document.getElementById('toolsPostsList');
+/* ============================
+   UI Elements
+   ============================ */
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+const fileList = document.getElementById("fileList");
+const toolsPostsList = document.getElementById("toolsPostsList");
+const openWidgetBtn = document.getElementById("openWidget");
+const refreshBtn = document.getElementById("refreshBtn");
+
+const toastContainer = document.getElementById("toast-container");
+const queueBox = document.getElementById("queueBox");
+const queueList = document.getElementById("queueList");
+
 let selectedFiles = [];
+let uploadQueue = []; // queue of fileObjs being uploaded
 
-dropZone.addEventListener('click',()=>fileInput.click());
-dropZone.addEventListener('dragover',e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop',e=>{ e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change',e=>handleFiles(e.target.files));
+/* ============================
+   Toast helper
+   ============================ */
+function showToast(text, bg="#1f6feb", timeout=3500) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.style.background = bg;
+  t.textContent = text;
+  toastContainer.appendChild(t);
+  requestAnimationFrame(()=>{ t.style.opacity = 1; t.style.transform = "translateY(0)"; });
+  setTimeout(()=> {
+    t.style.opacity = 0; t.style.transform = "translateY(8px)";
+    setTimeout(()=> t.remove(), 300);
+  }, timeout);
+}
 
-function handleFiles(files){
-  [...files].forEach(file=>{
-    const fileObj = { file:file, description:'', imageFile:null, icon:null };
+/* ============================
+   Queue UI
+   ============================ */
+function addToQueueDisplay(id, name) {
+  queueBox.style.display = "block";
+  const row = document.createElement("div");
+  row.id = "q-" + id;
+  row.style.padding = "6px 0";
+  row.innerHTML = `<strong style="font-size:13px">${name}</strong><div id="q-${id}-p" style="height:6px;background:#eef2ff;margin-top:6px;border-radius:6px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:linear-gradient(90deg,#60a5fa,#5eead4)"></i></div>`;
+  queueList.appendChild(row);
+}
+function updateQueueProgress(id, pct) {
+  const el = document.querySelector(`#q-${id} i`);
+  if (el) el.style.width = pct + "%";
+}
+function removeFromQueueDisplay(id) {
+  const el = document.getElementById("q-" + id);
+  if (el) el.remove();
+  if (!queueList.children.length) queueBox.style.display = "none";
+}
+
+/* ============================
+   Drag & select handlers
+   ============================ */
+dropZone.addEventListener("click", () => fileInput.click());
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("dragover"); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener("change", e => handleFiles(e.target.files));
+
+openWidgetBtn.addEventListener("click", () => {
+  Bytescale.UploadWidget.open({ apiKey: "public_G22nhxs8iFCQLLuVRmpLaaYggHwx", maxFileCount: 5 }).then(files => {
+    if (!files || files.length === 0) return showToast("No files uploaded.", "#ffb020");
+    files.forEach(f => {
+      const meta = {
+        author: "Admin",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        color: "#33ff33",
+        files: [{
+          name: f.filename || f.fileName || f.name || "file",
+          fileURL: f.fileUrl,
+          type: (f.filename||f.name||"").split(".").pop().toLowerCase(),
+          image: "",
+          description: ""
+        }]
+      };
+      db.collection("emergencyFiles").add(meta).catch(e => console.error(e));
+    });
+    showToast("Upload.io widget: files saved to dashboard");
+    setTimeout(loadDashboard, 800);
+  }).catch(err => {
+    console.error(err);
+    showToast("Widget error", "#ff4a4a");
+  });
+});
+
+refreshBtn.addEventListener("click", loadDashboard);
+
+/* ============================
+   Handle files & render file card
+   ============================ */
+function handleFiles(files) {
+  [...files].forEach(file => {
+    const fileObj = { file, description: "", imageFile: null, icon: null, id: Date.now() + Math.floor(Math.random()*9999) };
     selectedFiles.push(fileObj);
     renderFileCard(fileObj);
   });
 }
 
-function renderFileCard(fileObj){
-  const card = document.createElement('div');
-  card.className='file-card';
+function renderFileCard(fileObj) {
+  const safeId = fileObj.id;
+  const card = document.createElement("div");
+  card.className = "file-card";
   card.innerHTML = `
-    <div class="file-preview" id="preview-${fileObj.file.name}">Loading...</div>
+    <div class="file-preview" id="preview-${safeId}">Loading...</div>
     <div class="file-details">
-      <div><strong>${fileObj.file.name}</strong></div>
+      <div><strong>${fileObj.file.name}</strong> <span class="small-muted" style="font-size:12px;margin-left:8px;">${(fileObj.file.size/1024/1024).toFixed(2)} MB</span></div>
       <textarea placeholder="Enter description"></textarea>
-      <input type="file" accept="image/*" />
-      <div class="actions">
-        <button class="save-btn">Save</button>
-        <button class="delete-btn">Delete</button>
+      <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+        <label style="font-size:13px; color:#556;">Optional preview image:</label>
+        <input type="file" accept="image/*" />
       </div>
+      <div class="actions">
+        <button class="save-btn small">Upload & Save</button>
+        <button class="delete-btn small">Remove</button>
+      </div>
+      <div class="progress" style="display:none"><i></i></div>
     </div>
   `;
   fileList.appendChild(card);
 
-  const textarea = card.querySelector('textarea');
+  const textarea = card.querySelector("textarea");
   const imgInput = card.querySelector('input[type="file"]');
-  const saveBtn = card.querySelector('.save-btn');
-  const deleteBtn = card.querySelector('.delete-btn');
+  const saveBtn = card.querySelector(".save-btn");
+  const deleteBtn = card.querySelector(".delete-btn");
+  const previewEl = card.querySelector(`#preview-${safeId}`);
+  const progressBar = card.querySelector(".progress");
+  const progressFill = progressBar.querySelector("i");
 
-  textarea.addEventListener('input',()=> fileObj.description = textarea.value);
-  imgInput.addEventListener('change',e=> fileObj.imageFile = e.target.files[0]);
-  deleteBtn.addEventListener('click',()=>{
-    selectedFiles = selectedFiles.filter(f=>f!==fileObj);
-    fileList.removeChild(card);
+  textarea.addEventListener("input", () => fileObj.description = textarea.value);
+  imgInput.addEventListener("change", e => fileObj.imageFile = e.target.files[0]);
+  deleteBtn.addEventListener("click", () => {
+    selectedFiles = selectedFiles.filter(f => f !== fileObj);
+    card.remove();
   });
-  saveBtn.addEventListener('click',()=> saveFile(fileObj, card));
+  saveBtn.addEventListener("click", () => startUpload(fileObj, card, progressBar, progressFill));
 
-  // Handle preview
-  const fileExt = fileObj.file.name.split('.').pop().toLowerCase();
-  if(['png','jpg','jpeg','gif','webp'].includes(fileExt)){
-    document.getElementById(`preview-${fileObj.file.name}`).innerHTML = `<img src="${URL.createObjectURL(fileObj.file)}">`;
-  } else if(fileExt==='apk'){
-    extractApkIcon(fileObj);
-  } else if(['zip','rar','pdf','docx','xlsx','txt'].includes(fileExt)){
-    document.getElementById(`preview-${fileObj.file.name}`).innerHTML = `<div>📄 ${fileExt.toUpperCase()}</div>`;
+  // Preview
+  const ext = fileObj.file.name.split(".").pop().toLowerCase();
+  if (["png","jpg","jpeg","gif","webp"].includes(ext)) {
+    previewEl.innerHTML = `<img src="${URL.createObjectURL(fileObj.file)}" alt="${fileObj.file.name}">`;
+  } else if (ext === "apk") {
+    extractApkIcon(fileObj).then(iconUrl => {
+      previewEl.innerHTML = iconUrl ? `<img src="${iconUrl}">` : `<div>📱 APK</div>`;
+    }).catch(()=> previewEl.innerHTML = `<div>📱 APK</div>`);
+  } else if (["zip","rar","pdf","docx","xlsx","txt"].includes(ext)) {
+    previewEl.innerHTML = `<div>📄 ${ext.toUpperCase()}</div>`;
   } else {
-    document.getElementById(`preview-${fileObj.file.name}`).innerHTML = `<div>📦 FILE</div>`;
+    previewEl.innerHTML = `<div>📦 FILE</div>`;
   }
 }
 
-// APK icon extraction
-function extractApkIcon(fileObj){
-  const reader = new FileReader();
-  reader.onload = function(e){
-    JSZip.loadAsync(e.target.result).then(zip=>{
-      const iconPaths=[
-        'res/mipmap-mdpi/ic_launcher.png',
-        'res/mipmap-hdpi/ic_launcher.png',
-        'res/mipmap-xhdpi/ic_launcher.png',
-        'res/mipmap-xxhdpi/ic_launcher.png',
-        'res/mipmap-xxxhdpi/ic_launcher.png',
-        'res/drawable-mdpi/ic_launcher.png',
-        'res/drawable-hdpi/ic_launcher.png',
-        'res/drawable-xhdpi/ic_launcher.png',
-        'res/drawable-xxhdpi/ic_launcher.png',
-        'res/drawable-xxxhdpi/ic_launcher.png'
-      ];
-      let found=false;
-      for(const path of iconPaths){
-        if(zip.files[path]){
-          zip.files[path].async('blob').then(blob=>{
-            const url=URL.createObjectURL(blob);
-            fileObj.icon=url;
-            const preview=document.getElementById(`preview-${fileObj.file.name}`);
-            preview.innerHTML=`<img src="${url}" alt="APK Icon">`;
-          });
-          found=true;
-          break;
-        }
-      }
-      if(!found){
-        const preview=document.getElementById(`preview-${fileObj.file.name}`);
-        preview.innerHTML=`<div>📱 APK</div>`;
-      }
-    });
-  };
-  reader.readAsArrayBuffer(fileObj.file);
-}
-
-async function saveFile(fileObj, card){
-  try{
-    card.querySelector('.save-btn').disabled=true;
-    const fileRes = await uploadToCloudinary(fileObj.file);
-    let imageURL='';
-    if(fileObj.imageFile){ const imgRes = await uploadToCloudinary(fileObj.imageFile); imageURL=imgRes.secure_url; }
-
-    await db.collection('emergencyFiles').add({
-      author:'Admin',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-      color:'#33ff33',
-      files:[{
-        name:fileObj.file.name,
-        fileURL:fileRes.secure_url,
-        type:fileObj.file.name.split('.').pop().toLowerCase(),
-        image:imageURL,
-        description:fileObj.description
-      }]
-    });
-
-    alert('✅ File saved!');
-    fileList.removeChild(card);
-    selectedFiles = selectedFiles.filter(f=>f!==fileObj);
-    loadDashboard();
-  }catch(err){
-    console.error(err);
-    alert('❌ Upload failed: '+err);
-    card.querySelector('.save-btn').disabled=false;
-  }
-}
-
-function uploadToCloudinary(file){
-  const url=`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
-  const formData=new FormData();
-  formData.append('file',file);
-  formData.append('upload_preset',uploadPreset);
-  formData.append('folder',folderName);
-
-  if(['apk','zip','rar','pdf','docx','xlsx','txt'].includes(file.name.split('.').pop().toLowerCase())){
-    formData.append('resource_type','raw');
-  }
-
-  return new Promise((resolve,reject)=>{
-    const xhr=new XMLHttpRequest();
-    xhr.open('POST',url);
-    xhr.onload=()=>{ 
-      try{ const res=JSON.parse(xhr.responseText); if(res.secure_url) resolve(res); else reject(res.error?.message||'Cloudinary error'); }
-      catch(e){ reject('Invalid Cloudinary response'); }
-    };
-    xhr.onerror=()=>reject('Network error');
-    xhr.send(formData);
+/* ============================
+   APK icon extraction (JSZip)
+   ============================ */
+function extractApkIcon(fileObj) {
+  return new Promise((resolve) => {
+    try {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        JSZip.loadAsync(e.target.result).then(zip => {
+          const iconPaths = [
+            'res/mipmap-xxxhdpi-v4/ic_launcher.png','res/mipmap-xxhdpi-v4/ic_launcher.png','res/mipmap-xhdpi-v4/ic_launcher.png',
+            'res/mipmap-hdpi-v4/ic_launcher.png','res/mipmap-mdpi-v4/ic_launcher.png',
+            'res/mipmap-xxxhdpi/ic_launcher.png','res/mipmap-xxhdpi/ic_launcher.png','res/mipmap-xhdpi/ic_launcher.png',
+            'res/drawable-xxxhdpi/ic_launcher.png','res/drawable-xxhdpi/ic_launcher.png','res/drawable-xhdpi/ic_launcher.png'
+          ];
+          for (const p of iconPaths) {
+            if (zip.files[p]) {
+              zip.files[p].async('blob').then(blob => {
+                const url = URL.createObjectURL(blob);
+                resolve(url);
+              });
+              return;
+            }
+          }
+          resolve(null);
+        }).catch(()=> resolve(null));
+      };
+      reader.readAsArrayBuffer(fileObj.file);
+    } catch (e) { resolve(null); }
   });
 }
 
-// Dashboard display
-function loadDashboard(){
-  toolsPostsList.innerHTML='<div style="color:#999;text-align:center;padding:30px 0;">Loading files...</div>';
-  db.collection('emergencyFiles').orderBy('createdAt','desc').get().then(snapshot=>{
-    if(snapshot.empty){
-      toolsPostsList.innerHTML='<div style="color:#999;text-align:center;padding:30px 0;">No files uploaded yet.</div>';
+/* ============================
+   Upload helpers
+   - 1) get signed upload URL from backend (/api/sign-upload)
+   - 2) POST the file to that uploadUrl using XHR (so we can track progress)
+   - 3) Save metadata in Firestore
+   ============================ */
+
+async function getSignedUploadUrl(filename) {
+  const res = await fetch(SIGN_UPLOAD_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename })
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(()=> "");
+    throw new Error("Failed to sign upload: " + (txt || res.statusText));
+  }
+  return res.json();
+}
+
+async function uploadFileToSignedUrl(uploadUrl, headers, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", uploadUrl, true);
+    // set any returned headers required by Upload.io
+    if (headers && typeof headers === "object") {
+      for (const k in headers) xhr.setRequestHeader(k, headers[k]);
+    }
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      try {
+        const json = JSON.parse(xhr.responseText);
+        // different Upload.io responses exist; common property: fileUrl
+        const fileUrl = json.fileUrl || json.data?.url || json.data?.fileUrl || json.url || json.data?.url;
+        if (fileUrl) resolve({ fileUrl, raw: json });
+        else reject(new Error("Upload failed: invalid upload response"));
+      } catch (err) { reject(err); }
+    };
+    xhr.onerror = () => reject(new Error("Network error during upload"));
+    const fd = new FormData();
+    fd.append("file", file);
+    xhr.send(fd);
+  });
+}
+
+async function uploadImageToCloudinary(imageFile) {
+  if (!CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) return null;
+  try {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+    const fd = new FormData();
+    fd.append("file", imageFile);
+    fd.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+    const res = await fetch(url, { method: "POST", body: fd });
+    const json = await res.json();
+    if (json.secure_url) return json.secure_url;
+    return null;
+  } catch (e) {
+    console.warn("Cloudinary image upload failed", e);
+    return null;
+  }
+}
+
+/* ============================
+   Upload queue management
+   ============================ */
+async function startUpload(fileObj, card, progressBar, progressFill) {
+  // Add to queue UI
+  addToQueueDisplay(fileObj.id, fileObj.file.name);
+  uploadQueue.push(fileObj);
+
+  try {
+    // 1) Request signed URL from Firebase Function
+    const sign = await getSignedUploadUrl(fileObj.file.name);
+    const uploadUrl = sign.uploadUrl;
+    const headers = sign.headers || {};
+
+    // 2) Upload file to Upload.io using the signed uploadUrl
+    const uploadResult = await uploadFileToSignedUrl(uploadUrl, headers, fileObj.file, pct => {
+      progressBar.style.display = "block";
+      progressFill.style.width = pct + "%";
+      updateQueueProgress(fileObj.id, pct);
+    });
+
+    showToast(`${fileObj.file.name} uploaded`, "#16a34a");
+
+    // 3) If user provided an image, try to put it to Cloudinary for preview, otherwise use Upload.io fileUrl
+    let imageURL = "";
+    if (fileObj.imageFile) {
+      const cloudImg = await uploadImageToCloudinary(fileObj.imageFile);
+      imageURL = cloudImg || uploadResult.fileUrl;
+    } else {
+      const ext = (fileObj.file.name.split(".").pop() || "").toLowerCase();
+      if (["png","jpg","jpeg","webp","gif"].includes(ext)) {
+        const cloudImg = await uploadImageToCloudinary(fileObj.file);
+        imageURL = cloudImg || uploadResult.fileUrl;
+      } else {
+        imageURL = "";
+      }
+    }
+
+    // 4) Save metadata to Firestore
+    const doc = {
+      author: "Admin",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      color: "#33ff33",
+      files: [{
+        name: fileObj.file.name,
+        fileURL: uploadResult.fileUrl,
+        type: (fileObj.file.name.split(".").pop() || "").toLowerCase(),
+        image: imageURL,
+        description: fileObj.description || ""
+      }]
+    };
+    await db.collection("emergencyFiles").add(doc);
+
+    showToast(`${fileObj.file.name} saved to dashboard`, "#1f6feb");
+    // remove card & queue
+    card.remove();
+    removeFromQueueDisplay(fileObj.id);
+    uploadQueue = uploadQueue.filter(f => f !== fileObj);
+    loadDashboard();
+  } catch (err) {
+    console.error("Upload error", err);
+    showToast("Upload failed: " + (err.message || err), "#ff4a4a");
+    removeFromQueueDisplay(fileObj.id);
+  } finally {
+    try { progressBar.style.display = "none"; progressFill.style.width = "0%"; } catch(e){}
+  }
+}
+
+/* ============================
+   Dashboard loader / controls
+   ============================ */
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[s]);
+}
+
+function createPostElement(file, docData) {
+  const post = document.createElement("div");
+  post.className = "post";
+
+  const ts = docData.createdAt?.seconds ? new Date(docData.createdAt.seconds * 1000).toLocaleString() : new Date().toLocaleString();
+
+  let html = `
+    <div class="meta">
+      <span style="max-width:68%;">${escapeHtml(file.name)}</span>
+      <span>${ts}</span>
+    </div>
+    ${file.image ? `<img src="${file.image}" alt="${escapeHtml(file.name)}">` : ''}
+    <p style="margin:8px 0 0 0; color:#d6dfea;">${escapeHtml(file.description || '')}</p>
+    <div class="controls" style="margin-top:10px;">
+      <a class="download" href="${file.fileURL}" target="_blank" rel="noopener noreferrer">Download</a>
+      <button class="small print-btn">Print / Save as PDF</button>
+      <button class="small open-btn">Open</button>
+      <button class="small copy-btn">Copy link</button>
+      <a class="small" style="background:#3b82f6;color:#fff;padding:8px 10px;border-radius:8px;text-decoration:none;" href="${file.fileURL}" download>Gallery Save</a>
+    </div>
+  `;
+  post.innerHTML = html;
+
+  const printBtn = post.querySelector(".print-btn");
+  const openBtn = post.querySelector(".open-btn");
+  const copyBtn = post.querySelector(".copy-btn");
+
+  printBtn.addEventListener("click", () => printFile(file));
+  openBtn.addEventListener("click", () => window.open(file.fileURL, "_blank"));
+  copyBtn.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(file.fileURL); showToast("Link copied"); }
+    catch(e) { prompt("Copy link", file.fileURL); }
+  });
+
+  return post;
+}
+
+function loadDashboard() {
+  toolsPostsList.innerHTML = '<div class="notice">Loading files...</div>';
+  db.collection("emergencyFiles").orderBy("createdAt", "desc").get().then(snapshot => {
+    toolsPostsList.innerHTML = "";
+    if (snapshot.empty) {
+      toolsPostsList.innerHTML = '<div class="notice">No files uploaded yet.</div>';
       return;
     }
-    toolsPostsList.innerHTML='';
-    snapshot.forEach(doc=>{
+    snapshot.forEach(doc => {
       const data = doc.data();
-      data.files.forEach(file=>{
-        const post = document.createElement('div');
-        post.className='post';
-        post.innerHTML=`
-          <div class="meta">
-            <span>${file.name}</span>
-            <span>${new Date(data.createdAt?.seconds*1000||Date.now()).toLocaleString()}</span>
-          </div>
-          ${file.image?`<img src="${file.image}">`:''}
-          <p>${file.description||''}</p>
-          <a class="download" href="${file.fileURL}" target="_blank">Download</a>
-        `;
-        toolsPostsList.appendChild(post);
+      (data.files || []).forEach(f => {
+        const el = createPostElement(f, data);
+        toolsPostsList.appendChild(el);
       });
     });
+  }).catch(err => {
+    console.error("Failed loading dashboard", err);
+    toolsPostsList.innerHTML = '<div class="notice">Failed to load files.</div>';
   });
 }
 
-// Initial load
+/* print helper - same as previous */
+function printFile(file) {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  const w = window.open("", "_blank");
+  w.document.write("<title>Print file</title>");
+  w.document.write('<style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#111} img{max-width:100%;height:auto} .meta{font-size:14px;color:#555;margin-bottom:8px}</style>');
+  w.document.write(`<div class="meta">File: <strong>${escapeHtml(file.name)}</strong></div>`);
+  if (["png","jpg","jpeg","gif","webp"].includes(ext)) {
+    w.document.write(`<img src="${file.fileURL}" alt="${escapeHtml(file.name)}">`);
+  } else if (ext === "pdf") {
+    w.document.write(`<iframe src="${file.fileURL}" style="width:100%;height:90vh;border:none"></iframe>`);
+  } else {
+    w.document.write('<div style="padding:12px;border:1px solid #eee;border-radius:8px;">');
+    w.document.write(`<p>Download link: <a href="${file.fileURL}" target="_blank">${file.fileURL}</a></p>`);
+    w.document.write("<h3>Invoice</h3>");
+    w.document.write("<p>Item: File Upload</p>");
+    w.document.write(`<p>Name: ${escapeHtml(file.name)}</p>`);
+    w.document.write(`<p>Date: ${new Date().toLocaleString()}</p>`);
+    w.document.write("</div>");
+  }
+  w.document.write('<script>setTimeout(()=>window.print(),350);<\/script>');
+}
+
+/* ============================
+   Start
+   ============================ */
 loadDashboard();
 </script>
-
 </body>
 </html>
