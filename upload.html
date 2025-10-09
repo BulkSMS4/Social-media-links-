@@ -3,255 +3,217 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Upload Emergency Files — Admin</title>
+<title>🚀 File Uploader</title>
 <style>
-body {
-  font-family: "Segoe UI", sans-serif;
-  background: #0b0b0b;
-  color: #e0ffe0;
-  padding: 25px;
-}
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  background: #111;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 0 15px rgba(0,255,0,0.2);
-}
-h1 {
-  color: #00ff6a;
-  text-align: center;
-  margin-bottom: 20px;
-}
-label {
-  display: block;
-  margin-top: 10px;
-  font-weight: 600;
-  color: #adff2f;
-}
-input, textarea, select {
-  width: 100%;
-  padding: 10px;
-  background: #000;
-  color: #0f0;
-  border: 1px solid #0f0;
-  border-radius: 8px;
-  font-size: 15px;
-  box-sizing: border-box;
-}
-button {
-  background: lime;
-  color: #000;
-  font-weight: bold;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-button:hover { background: #00e600; }
+  body {
+    font-family: "Poppins", sans-serif;
+    background: #f3f5ff;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
 
-.file-card {
-  background: #151515;
-  border: 1px solid #222;
-  padding: 12px;
-  border-radius: 10px;
-  margin-top: 12px;
-  color: #fff;
-}
-.file-card strong { color: #adff2f; }
-.deleteBtn {
-  background: #ff3333;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  margin-top: 8px;
-  cursor: pointer;
-}
-.deleteBtn:hover { background: #ff0000; }
+  .uploader {
+    max-width: 500px;
+    margin: auto;
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
 
-.progress {
-  background: #333;
-  border-radius: 8px;
-  overflow: hidden;
-  height: 10px;
-  margin-top: 5px;
-}
-.progress-bar {
-  height: 100%;
-  width: 0%;
-  background: lime;
-  transition: width 0.3s;
-}
-.preview-images img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-right: 8px;
-  border: 1px solid #333;
-}
+  .title {
+    font-size: 1.3em;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .drop-zone {
+    border: 3px dashed #4a90e2;
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .drop-zone.dragover {
+    background: rgba(74,144,226,0.1);
+  }
+
+  .drop-zone p {
+    margin: 0;
+    font-size: 0.95em;
+  }
+
+  .color-picker, .mask-input {
+    width: 100%;
+    margin-top: 15px;
+  }
+
+  input[type="color"], input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+  }
+
+  .file-list {
+    margin-top: 15px;
+  }
+
+  .file-card {
+    background: #f9fafc;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .progress {
+    width: 60%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 10px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    width: 0%;
+    background: #4a90e2;
+    border-radius: 5px;
+    transition: width 0.3s;
+  }
+
+  button.delete-btn {
+    background: #ff4a4a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 8px;
+    cursor: pointer;
+  }
+
+  button.delete-btn:hover {
+    opacity: 0.8;
+  }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1>💻 Upload Emergency Files</h1>
-    <label>Select Files (PDF, ZIP, RAR, APK, etc.)</label>
-    <input type="file" id="fileInput" multiple>
 
-    <label>Upload Images (Icons, Screenshots, etc.)</label>
-    <input type="file" id="imageInput" accept="image/*" multiple>
+<div class="uploader">
+  <div class="title">📁 Drag & Drop Uploader</div>
 
-    <label>File Name (Optional)</label>
-    <input type="text" id="fileName" placeholder="Display Name">
-
-    <label>Custom Masked Link Text</label>
-    <input type="text" id="maskedText" placeholder="e.g. Download / Install / Open">
-
-    <label>Custom Color</label>
-    <input type="color" id="customColor" value="#00ff6a">
-
-    <label>Description</label>
-    <textarea id="fileDesc" placeholder="Short description or warning"></textarea>
-
-    <button id="uploadBtn">Upload All Files</button>
-    <div id="uploadStatus"></div>
-
-    <h2>Uploaded Files</h2>
-    <div id="uploadedFiles"></div>
+  <div class="drop-zone" id="dropZone">
+    <p>Drop files here or click to upload (images, APK, ZIP, RAR, PDF, HTML, etc.)</p>
+    <input type="file" id="fileInput" multiple style="display:none;">
   </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <div class="mask-input">
+    <label>Masked Button Name (e.g. Download / Install):</label>
+    <input type="text" id="maskName" placeholder="Enter masked name...">
+  </div>
+
+  <div class="color-picker">
+    <label>Choose Custom Color:</label>
+    <input type="color" id="customColor" value="#4a90e2">
+  </div>
+
+  <div class="file-list" id="fileList"></div>
+</div>
 
 <script>
-// Firebase setup
-const firebaseConfig = {
-  apiKey: "AIzaSyBLYDpP68NlfYGE1O9DafgrmFBUlgpoYeI",
-  authDomain: "x-cargo-exprees.firebaseapp.com",
-  projectId: "x-cargo-exprees",
-  storageBucket: "x-cargo-exprees.appspot.com",
-  messagingSenderId: "1082201867958",
-  appId: "1:1082201867958:web:d6600fbc82085b0b62c817",
-};
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// Cloudinary credentials
-const cloudName = "dymwisuau";
+const cloudName = "xportbox";
 const uploadPreset = "xportbox";
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileList = document.getElementById('fileList');
 
-// Elements
-const fileInput = document.getElementById("fileInput");
-const imageInput = document.getElementById("imageInput");
-const fileName = document.getElementById("fileName");
-const maskedText = document.getElementById("maskedText");
-const customColor = document.getElementById("customColor");
-const fileDesc = document.getElementById("fileDesc");
-const uploadBtn = document.getElementById("uploadBtn");
-const uploadedFilesDiv = document.getElementById("uploadedFiles");
-const uploadStatus = document.getElementById("uploadStatus");
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('dragover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
 
-// Upload to Cloudinary
-async function uploadToCloudinary(file, onProgress) {
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  [...files].forEach(uploadFile);
+}
+
+async function uploadFile(file) {
+  const card = document.createElement('div');
+  card.className = 'file-card';
+  card.innerHTML = `
+    <span>${file.name}</span>
+    <div class="progress"><div class="progress-bar"></div></div>
+    <button class="delete-btn">✖</button>
+  `;
+  fileList.appendChild(card);
+
+  const progressBar = card.querySelector('.progress-bar');
+  const deleteBtn = card.querySelector('.delete-btn');
+
+  deleteBtn.onclick = () => fileList.removeChild(card);
+
+  try {
+    const res = await uploadToCloudinary(file, progress => {
+      progressBar.style.width = progress + '%';
+    });
+    const color = document.getElementById('customColor').value;
+    const maskName = document.getElementById('maskName').value || 'Download';
+    const maskedLink = `<a href="${res.secure_url}" target="_blank" style="color:${color};text-decoration:none;font-weight:600;">${maskName}</a>`;
+    
+    card.innerHTML = `
+      <span>${file.name}</span>
+      <div>${maskedLink}</div>
+      <button class="delete-btn">✖</button>
+    `;
+    card.querySelector('.delete-btn').onclick = () => fileList.removeChild(card);
+    alert("✅ Upload successful! File will appear on your dashboard.");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Upload failed: " + err);
+    fileList.removeChild(card);
+  }
+}
+
+function uploadToCloudinary(file, onProgress) {
   const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
   const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", uploadPreset);
+  formData.append('file', file);
+  formData.append('upload_preset', uploadPreset);
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", url);
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const percent = (e.loaded / e.total) * 100;
-        onProgress(percent);
-      }
+    xhr.open('POST', url);
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable && onProgress) onProgress((e.loaded / e.total) * 100);
     };
     xhr.onload = () => {
-      if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
-      else reject(xhr.statusText);
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (res.secure_url) resolve(res);
+        else reject(res.error?.message || "Unknown Cloudinary error");
+      } catch (e) { reject("Invalid Cloudinary response"); }
     };
-    xhr.onerror = () => reject("Upload failed");
+    xhr.onerror = () => reject("Network or upload error");
     xhr.send(formData);
   });
 }
-
-// Upload process
-uploadBtn.addEventListener("click", async () => {
-  const files = Array.from(fileInput.files);
-  if (files.length === 0) return alert("Select at least one file!");
-  
-  uploadStatus.innerHTML = `<p style="color:orange;">Uploading...</p>`;
-  
-  for (const file of files) {
-    const progressBar = document.createElement("div");
-    progressBar.className = "progress";
-    const bar = document.createElement("div");
-    bar.className = "progress-bar";
-    progressBar.appendChild(bar);
-    uploadStatus.appendChild(progressBar);
-
-    try {
-      const uploaded = await uploadToCloudinary(file, (percent) => bar.style.width = percent + "%");
-
-      // Upload images
-      const imageFiles = Array.from(imageInput.files);
-      const imageUrls = [];
-      for (const img of imageFiles) {
-        const imgUpload = await uploadToCloudinary(img, () => {});
-        imageUrls.push(imgUpload.secure_url);
-      }
-
-      const data = {
-        name: fileName.value || file.name,
-        desc: fileDesc.value,
-        color: customColor.value,
-        maskedText: maskedText.value || "Download",
-        fileUrl: uploaded.secure_url,
-        images: imageUrls,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      await db.collection("emergencyFiles").add(data);
-      uploadStatus.innerHTML = `<p style="color:lime;">✅ Upload successful! It will appear on the dashboard.</p>`;
-      loadFiles();
-    } catch (err) {
-      console.error(err);
-      uploadStatus.innerHTML = `<p style="color:red;">Upload failed: ${err}</p>`;
-    }
-  }
-});
-
-// Load uploaded files
-async function loadFiles() {
-  uploadedFilesDiv.innerHTML = "";
-  const snap = await db.collection("emergencyFiles").orderBy("createdAt", "desc").get();
-  snap.forEach(doc => {
-    const d = doc.data();
-    const div = document.createElement("div");
-    div.className = "file-card";
-    div.innerHTML = `
-      <strong style="color:${d.color}">${d.name}</strong><br>
-      <span>${d.desc || ""}</span><br>
-      <a href="${d.fileUrl}" target="_blank" style="color:${d.color};text-decoration:none;">⬇ ${d.maskedText}</a>
-      <div class="preview-images">
-        ${(d.images||[]).map(img=>`<img src="${img}">`).join('')}
-      </div>
-      <button class="deleteBtn" data-id="${doc.id}">Delete</button>
-    `;
-    div.querySelector(".deleteBtn").addEventListener("click", async () => {
-      if (confirm("Delete this file?")) {
-        await db.collection("emergencyFiles").doc(doc.id).delete();
-        div.remove();
-      }
-    });
-    uploadedFilesDiv.appendChild(div);
-  });
-}
-
-loadFiles();
 </script>
 </body>
 </html>
