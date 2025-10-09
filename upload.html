@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>📁 File Uploader & Dashboard (Firebase + Upload.io)</title>
+<title>📁 File Uploader & Dashboard (Firebase + Upload.io + Cloudinary)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600;800&display=swap">
 <style>
-/* (Styles unchanged from your requested theme) */
+/* --- Styles same theme you requested --- */
 body { font-family:"Poppins",sans-serif; background:#f3f5ff; margin:0; padding:20px; color:#333; }
 .uploader { max-width:760px; margin:18px auto; background:#fff; border-radius:20px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
 .title { font-size:1.25em; font-weight:600; text-align:center; margin-bottom:12px;}
@@ -64,7 +64,6 @@ button.delete-btn { background:#ff4a4a; color:white; }
   <div class="top-row">
     <div class="small-muted">Supports images, pdf, zip, rar, docx, xlsx, txt, apk and more.</div>
     <div class="right-actions">
-      <button id="openWidget" class="primary small">Upload via Upload.io Widget</button>
       <button id="refreshBtn" class="small">Refresh Dashboard</button>
     </div>
   </div>
@@ -95,7 +94,6 @@ button.delete-btn { background:#ff4a4a; color:white; }
 
 <!-- libraries -->
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://js.bytescale.com/upload-widget/v4"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -103,14 +101,12 @@ button.delete-btn { background:#ff4a4a; color:white; }
 /* ============================
    CONFIG - update if needed
    ============================ */
-// API path is proxied via firebase hosting rewrites to the Cloud Function
-const SIGN_UPLOAD_ENDPOINT = "/api/sign-upload"; // POST -> returns uploadUrl + headers
 
-// Optional Cloudinary for image optimization (keeps as before)
+// Cloudinary config (you provided)
 const CLOUD_NAME = "dymwisuau";
-const CLOUDINARY_UPLOAD_PRESET = "xportbox";
+const CLOUDINARY_UPLOAD_PRESET = "xportbox"; // must accept raw if you want apk/exe to work
 
-// Firebase config (same you provided earlier)
+// Firebase config (confirm you want to keep these)
 const firebaseConfig = {
   apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain:"usahackersland.firebaseapp.com",
@@ -119,17 +115,23 @@ const firebaseConfig = {
   messagingSenderId:"588407428267",
   appId:"1:588407428267:web:7c4898cbb62efd3d5953ee"
 };
+
+// Endpoint (proxied to Cloud Function via firebase.json)
+const SIGN_UPLOAD_ENDPOINT = "/api/sign-upload";
+
+/* ============================
+   Init Firebase
+   ============================ */
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 /* ============================
-   UI Elements
+   UI elements
    ============================ */
 const dropZone = document.getElementById("dropZone");
 const fileInput = document.getElementById("fileInput");
 const fileList = document.getElementById("fileList");
 const toolsPostsList = document.getElementById("toolsPostsList");
-const openWidgetBtn = document.getElementById("openWidget");
 const refreshBtn = document.getElementById("refreshBtn");
 
 const toastContainer = document.getElementById("toast-container");
@@ -137,10 +139,13 @@ const queueBox = document.getElementById("queueBox");
 const queueList = document.getElementById("queueList");
 
 let selectedFiles = [];
-let uploadQueue = []; // queue of fileObjs being uploaded
+let uploadQueue = [];
+
+/* blocked list for Upload.io (executables that Bytescale blocks) */
+const blockedForBytescale = ["apk","exe","msi","sh","bat","bin","cmd","com","jar","scr"];
 
 /* ============================
-   Toast helper
+   Toast helpers
    ============================ */
 function showToast(text, bg="#1f6feb", timeout=3500) {
   const t = document.createElement("div");
@@ -184,37 +189,10 @@ dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classL
 dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
 dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("dragover"); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener("change", e => handleFiles(e.target.files));
-
-openWidgetBtn.addEventListener("click", () => {
-  Bytescale.UploadWidget.open({ apiKey: "public_G22nhxs8iFCQLLuVRmpLaaYggHwx", maxFileCount: 5 }).then(files => {
-    if (!files || files.length === 0) return showToast("No files uploaded.", "#ffb020");
-    files.forEach(f => {
-      const meta = {
-        author: "Admin",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        color: "#33ff33",
-        files: [{
-          name: f.filename || f.fileName || f.name || "file",
-          fileURL: f.fileUrl,
-          type: (f.filename||f.name||"").split(".").pop().toLowerCase(),
-          image: "",
-          description: ""
-        }]
-      };
-      db.collection("emergencyFiles").add(meta).catch(e => console.error(e));
-    });
-    showToast("Upload.io widget: files saved to dashboard");
-    setTimeout(loadDashboard, 800);
-  }).catch(err => {
-    console.error(err);
-    showToast("Widget error", "#ff4a4a");
-  });
-});
-
 refreshBtn.addEventListener("click", loadDashboard);
 
 /* ============================
-   Handle files & render file card
+   File handling & UI cards
    ============================ */
 function handleFiles(files) {
   [...files].forEach(file => {
@@ -262,11 +240,11 @@ function renderFileCard(fileObj) {
   });
   saveBtn.addEventListener("click", () => startUpload(fileObj, card, progressBar, progressFill));
 
-  // Preview
+  // preview
   const ext = fileObj.file.name.split(".").pop().toLowerCase();
   if (["png","jpg","jpeg","gif","webp"].includes(ext)) {
     previewEl.innerHTML = `<img src="${URL.createObjectURL(fileObj.file)}" alt="${fileObj.file.name}">`;
-  } else if (ext === "apk") {
+  } else if (ext === "apk" || ext === "xapk") {
     extractApkIcon(fileObj).then(iconUrl => {
       previewEl.innerHTML = iconUrl ? `<img src="${iconUrl}">` : `<div>📱 APK</div>`;
     }).catch(()=> previewEl.innerHTML = `<div>📱 APK</div>`);
@@ -310,152 +288,182 @@ function extractApkIcon(fileObj) {
 }
 
 /* ============================
-   Upload helpers
-   - 1) get signed upload URL from backend (/api/sign-upload)
-   - 2) POST the file to that uploadUrl using XHR (so we can track progress)
-   - 3) Save metadata in Firestore
+   Upload helpers - hybrid:
+   - if blockedForBytescale => upload to Cloudinary (raw)
+   - else => obtain signed Upload.io upload URL by POSTing to /api/sign-upload (Firebase Function)
    ============================ */
 
-async function getSignedUploadUrl(filename) {
-  const res = await fetch(SIGN_UPLOAD_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename })
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(()=> "");
-    throw new Error("Failed to sign upload: " + (txt || res.statusText));
-  }
-  return res.json();
-}
+async function uploadToCloudinaryRaw(file, onProgress) {
+  // Cloudinary raw upload (unsigned preset must be configured to accept raw files)
+  const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`;
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  // optional: folder
+  // fd.append('folder', 'xportbox_assets');
 
-async function uploadFileToSignedUrl(uploadUrl, headers, file, onProgress) {
+  // XHR to get progress
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("POST", uploadUrl, true);
-    // set any returned headers required by Upload.io
-    if (headers && typeof headers === "object") {
-      for (const k in headers) xhr.setRequestHeader(k, headers[k]);
-    }
-    xhr.upload.onprogress = e => {
-      if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
-    };
+    xhr.open('POST', url, true);
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100)); };
     xhr.onload = () => {
       try {
-        const json = JSON.parse(xhr.responseText);
-        // different Upload.io responses exist; common property: fileUrl
-        const fileUrl = json.fileUrl || json.data?.url || json.data?.fileUrl || json.url || json.data?.url;
-        if (fileUrl) resolve({ fileUrl, raw: json });
-        else reject(new Error("Upload failed: invalid upload response"));
+        const j = JSON.parse(xhr.responseText);
+        // Cloudinary returns secure_url for raw uploads
+        if (j.secure_url) resolve({ fileUrl: j.secure_url, raw: j });
+        else reject(new Error('Cloudinary: invalid response'));
       } catch (err) { reject(err); }
     };
-    xhr.onerror = () => reject(new Error("Network error during upload"));
-    const fd = new FormData();
-    fd.append("file", file);
+    xhr.onerror = () => reject(new Error('Network error uploading to Cloudinary'));
     xhr.send(fd);
   });
 }
 
-async function uploadImageToCloudinary(imageFile) {
-  if (!CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) return null;
-  try {
-    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
-    const fd = new FormData();
-    fd.append("file", imageFile);
-    fd.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-    const res = await fetch(url, { method: "POST", body: fd });
-    const json = await res.json();
-    if (json.secure_url) return json.secure_url;
-    return null;
-  } catch (e) {
-    console.warn("Cloudinary image upload failed", e);
-    return null;
+async function getSignedUpload() {
+  // Ask the Cloud Function to create a signed Upload.io upload
+  const res = await fetch(SIGN_UPLOAD_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
+  if (!res.ok) {
+    const txt = await res.text().catch(()=>"");
+    throw new Error('Sign endpoint failed: ' + (txt || res.statusText));
   }
+  return res.json(); // { uploadUrl, headers, raw }
+}
+
+async function uploadToSignedUrl(uploadUrl, headers, file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', uploadUrl, true);
+    if (headers && typeof headers === 'object') {
+      for (const k in headers) xhr.setRequestHeader(k, headers[k]);
+    }
+    xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100)); };
+    xhr.onload = () => {
+      try {
+        const j = JSON.parse(xhr.responseText);
+        // Upload.io commonly returns fileUrl or similar - try a few keys
+        const fileUrl = j.fileUrl || j.data?.url || j.url || j.data?.fileUrl || j.data?.fileUrl;
+        if (fileUrl) resolve({ fileUrl, raw: j });
+        else reject(new Error('Signed upload: invalid response'));
+      } catch (err) { reject(err); }
+    };
+    xhr.onerror = () => reject(new Error('Network error during signed upload'));
+    const fd = new FormData();
+    fd.append('file', file);
+    xhr.send(fd);
+  });
 }
 
 /* ============================
-   Upload queue management
+   Main queue upload flow
    ============================ */
 async function startUpload(fileObj, card, progressBar, progressFill) {
-  // Add to queue UI
   addToQueueDisplay(fileObj.id, fileObj.file.name);
   uploadQueue.push(fileObj);
-
   try {
-    // 1) Request signed URL from Firebase Function
-    const sign = await getSignedUploadUrl(fileObj.file.name);
-    const uploadUrl = sign.uploadUrl;
-    const headers = sign.headers || {};
+    const ext = (fileObj.file.name.split('.').pop() || '').toLowerCase();
+    let uploadedUrl = null;
 
-    // 2) Upload file to Upload.io using the signed uploadUrl
-    const uploadResult = await uploadFileToSignedUrl(uploadUrl, headers, fileObj.file, pct => {
-      progressBar.style.display = "block";
-      progressFill.style.width = pct + "%";
-      updateQueueProgress(fileObj.id, pct);
-    });
-
-    showToast(`${fileObj.file.name} uploaded`, "#16a34a");
-
-    // 3) If user provided an image, try to put it to Cloudinary for preview, otherwise use Upload.io fileUrl
-    let imageURL = "";
-    if (fileObj.imageFile) {
-      const cloudImg = await uploadImageToCloudinary(fileObj.imageFile);
-      imageURL = cloudImg || uploadResult.fileUrl;
+    // Choose host:
+    if (blockedForBytescale.includes(ext)) {
+      // Cloudinary raw (for APK/EXE and other executables)
+      showToast(`Uploading ${fileObj.file.name} to Cloudinary (raw)`, "#334155");
+      const clRes = await uploadToCloudinaryRaw(fileObj.file, pct => {
+        progressBar.style.display = 'block';
+        progressFill.style.width = pct + '%';
+        updateQueueProgress(fileObj.id, pct);
+      });
+      uploadedUrl = clRes.fileUrl;
+      showToast(`${fileObj.file.name} uploaded (Cloudinary)`, "#16a34a");
     } else {
-      const ext = (fileObj.file.name.split(".").pop() || "").toLowerCase();
-      if (["png","jpg","jpeg","webp","gif"].includes(ext)) {
-        const cloudImg = await uploadImageToCloudinary(fileObj.file);
-        imageURL = cloudImg || uploadResult.fileUrl;
-      } else {
-        imageURL = "";
+      // Use Upload.io signed flow via Cloud Function
+      showToast(`Requesting signed upload for ${fileObj.file.name}`, "#334155");
+      const sign = await getSignedUpload();
+      const uploadUrl = sign.uploadUrl;
+      const headers = sign.headers || {};
+      const upRes = await uploadToSignedUrl(uploadUrl, headers, fileObj.file, pct => {
+        progressBar.style.display = 'block';
+        progressFill.style.width = pct + '%';
+        updateQueueProgress(fileObj.id, pct);
+      });
+      uploadedUrl = upRes.fileUrl;
+      showToast(`${fileObj.file.name} uploaded (Upload.io)`, "#16a34a");
+    }
+
+    // upload optional preview image (Cloudinary image upload preferred)
+    let previewImageUrl = '';
+    if (fileObj.imageFile) {
+      const cloudImg = await uploadImageToCloudinary(fileObj.imageFile).catch(()=>null);
+      previewImageUrl = cloudImg || uploadedUrl;
+    } else {
+      const ext2 = (fileObj.file.name.split('.').pop() || '').toLowerCase();
+      if (['png','jpg','jpeg','webp','gif'].includes(ext2)) {
+        // For images, try upload to Cloudinary to get optimized preview; fallback to uploadedUrl
+        const cloudImg = await uploadImageToCloudinary(fileObj.file).catch(()=>null);
+        previewImageUrl = cloudImg || uploadedUrl;
       }
     }
 
-    // 4) Save metadata to Firestore
+    // Save metadata to Firestore
     const doc = {
-      author: "Admin",
+      author: 'Admin',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      color: "#33ff33",
+      color: '#33ff33',
       files: [{
         name: fileObj.file.name,
-        fileURL: uploadResult.fileUrl,
-        type: (fileObj.file.name.split(".").pop() || "").toLowerCase(),
-        image: imageURL,
-        description: fileObj.description || ""
+        fileURL: uploadedUrl,
+        type: (fileObj.file.name.split('.').pop() || '').toLowerCase(),
+        image: previewImageUrl,
+        description: fileObj.description || ''
       }]
     };
-    await db.collection("emergencyFiles").add(doc);
+    await db.collection('emergencyFiles').add(doc);
 
     showToast(`${fileObj.file.name} saved to dashboard`, "#1f6feb");
-    // remove card & queue
+    // ui cleanup
     card.remove();
     removeFromQueueDisplay(fileObj.id);
     uploadQueue = uploadQueue.filter(f => f !== fileObj);
     loadDashboard();
   } catch (err) {
-    console.error("Upload error", err);
-    showToast("Upload failed: " + (err.message || err), "#ff4a4a");
+    console.error('Upload error', err);
+    showToast('Upload failed: ' + (err.message || err), "#ff4a4a");
     removeFromQueueDisplay(fileObj.id);
   } finally {
-    try { progressBar.style.display = "none"; progressFill.style.width = "0%"; } catch(e){}
+    try { progressBar.style.display='none'; progressFill.style.width='0%'; } catch(e){}
+  }
+}
+
+/* Cloudinary image upload helper for previews */
+async function uploadImageToCloudinary(imageFile) {
+  if (!CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) return null;
+  try {
+    const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+    const fd = new FormData();
+    fd.append('file', imageFile);
+    fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    const r = await fetch(url, { method: 'POST', body: fd });
+    const j = await r.json();
+    return j.secure_url || null;
+  } catch (e) {
+    console.warn('Cloudinary preview upload failed', e);
+    return null;
   }
 }
 
 /* ============================
-   Dashboard loader / controls
+   Dashboard loader & UI helpers
    ============================ */
 function escapeHtml(str) {
-  if (!str) return "";
+  if (!str) return '';
   return String(str).replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[s]);
 }
 
 function createPostElement(file, docData) {
-  const post = document.createElement("div");
-  post.className = "post";
-
+  const post = document.createElement('div');
+  post.className = 'post';
   const ts = docData.createdAt?.seconds ? new Date(docData.createdAt.seconds * 1000).toLocaleString() : new Date().toLocaleString();
-
-  let html = `
+  const html = `
     <div class="meta">
       <span style="max-width:68%;">${escapeHtml(file.name)}</span>
       <span>${ts}</span>
@@ -471,25 +479,19 @@ function createPostElement(file, docData) {
     </div>
   `;
   post.innerHTML = html;
-
-  const printBtn = post.querySelector(".print-btn");
-  const openBtn = post.querySelector(".open-btn");
-  const copyBtn = post.querySelector(".copy-btn");
-
-  printBtn.addEventListener("click", () => printFile(file));
-  openBtn.addEventListener("click", () => window.open(file.fileURL, "_blank"));
-  copyBtn.addEventListener("click", async () => {
-    try { await navigator.clipboard.writeText(file.fileURL); showToast("Link copied"); }
-    catch(e) { prompt("Copy link", file.fileURL); }
+  post.querySelector('.print-btn').addEventListener('click', ()=> printFile(file));
+  post.querySelector('.open-btn').addEventListener('click', ()=> window.open(file.fileURL, '_blank'));
+  post.querySelector('.copy-btn').addEventListener('click', async ()=> {
+    try { await navigator.clipboard.writeText(file.fileURL); showToast('Link copied'); }
+    catch(e) { prompt('Copy link', file.fileURL); }
   });
-
   return post;
 }
 
 function loadDashboard() {
   toolsPostsList.innerHTML = '<div class="notice">Loading files...</div>';
-  db.collection("emergencyFiles").orderBy("createdAt", "desc").get().then(snapshot => {
-    toolsPostsList.innerHTML = "";
+  db.collection('emergencyFiles').orderBy('createdAt','desc').get().then(snapshot => {
+    toolsPostsList.innerHTML = '';
     if (snapshot.empty) {
       toolsPostsList.innerHTML = '<div class="notice">No files uploaded yet.</div>';
       return;
@@ -502,30 +504,30 @@ function loadDashboard() {
       });
     });
   }).catch(err => {
-    console.error("Failed loading dashboard", err);
+    console.error('Failed loading dashboard', err);
     toolsPostsList.innerHTML = '<div class="notice">Failed to load files.</div>';
   });
 }
 
-/* print helper - same as previous */
+/* simple print helper */
 function printFile(file) {
-  const ext = (file.name.split(".").pop() || "").toLowerCase();
-  const w = window.open("", "_blank");
-  w.document.write("<title>Print file</title>");
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const w = window.open('', '_blank');
+  w.document.write('<title>Print file</title>');
   w.document.write('<style>body{font-family:Arial,Helvetica,sans-serif;padding:20px;color:#111} img{max-width:100%;height:auto} .meta{font-size:14px;color:#555;margin-bottom:8px}</style>');
   w.document.write(`<div class="meta">File: <strong>${escapeHtml(file.name)}</strong></div>`);
-  if (["png","jpg","jpeg","gif","webp"].includes(ext)) {
+  if (['png','jpg','jpeg','gif','webp'].includes(ext)) {
     w.document.write(`<img src="${file.fileURL}" alt="${escapeHtml(file.name)}">`);
-  } else if (ext === "pdf") {
+  } else if (ext === 'pdf') {
     w.document.write(`<iframe src="${file.fileURL}" style="width:100%;height:90vh;border:none"></iframe>`);
   } else {
     w.document.write('<div style="padding:12px;border:1px solid #eee;border-radius:8px;">');
     w.document.write(`<p>Download link: <a href="${file.fileURL}" target="_blank">${file.fileURL}</a></p>`);
-    w.document.write("<h3>Invoice</h3>");
-    w.document.write("<p>Item: File Upload</p>");
+    w.document.write('<h3>Invoice</h3>');
+    w.document.write('<p>Item: File Upload</p>');
     w.document.write(`<p>Name: ${escapeHtml(file.name)}</p>`);
     w.document.write(`<p>Date: ${new Date().toLocaleString()}</p>`);
-    w.document.write("</div>");
+    w.document.write('</div>');
   }
   w.document.write('<script>setTimeout(()=>window.print(),350);<\/script>');
 }
