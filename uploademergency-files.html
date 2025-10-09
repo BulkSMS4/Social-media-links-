@@ -5,17 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Upload Emergency Files — Admin</title>
 <style>
-body { font-family: Arial,sans-serif; background:#000; color:lime; padding:20px; }
+body { font-family: Arial, sans-serif; background:#0b0b0b; color:lime; margin:0; padding:20px; }
 h1 { color:#ff3333; text-align:center; margin-bottom:20px; }
-.container { max-width:700px; margin:0 auto; background:#111; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.6); }
+.container { max-width:750px; margin:0 auto; background:#111; padding:20px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.7); }
 label { display:block; margin-top:12px; margin-bottom:6px; color:#adff2f; font-weight:bold; }
 input, select, textarea, button { width:100%; padding:10px; border-radius:8px; border:1px solid lime; margin-bottom:12px; background:#000; color:lime; box-sizing:border-box; }
-button { cursor:pointer; background:lime; color:black; font-weight:700; }
-.progress-bar { width:0%; height:20px; background:lime; margin-bottom:12px; border-radius:8px; transition: width 0.3s; }
+button { cursor:pointer; background:lime; color:black; font-weight:700; transition:0.2s; }
+button:hover { background:#32cd32; }
+.progress-bar { width:0%; height:20px; background:lime; margin-bottom:12px; border-radius:8px; transition: width 0.2s; }
 .note { font-size:13px; color:#adff2f; margin-bottom:12px; }
-.post { background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:10px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6); }
-.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-.post a.download, .post a.install { display:inline-block; margin:4px 6px 4px 0; padding:6px 12px; border-radius:6px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
+.post { background:#111; border-radius:12px; padding:12px; margin-bottom:12px; color:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.7); }
+.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; }
+.post a.download, .post a.install { display:inline-block; margin:4px 6px 4px 0; padding:6px 12px; border-radius:6px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; transition:0.2s; }
+.post a.download:hover, .post a.install:hover { background:#32cd32; }
+.post .deleteBtn { background:#ff3333; color:#fff; padding:6px 10px; border:none; border-radius:6px; cursor:pointer; margin-left:6px; }
 .mask-link-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; }
 .mask-link-row input { flex:1; margin-bottom:0; }
 .mask-link-row input.color-picker { width:50px; padding:0; height:32px; }
@@ -44,7 +47,7 @@ button { cursor:pointer; background:lime; color:black; font-weight:700; }
   <textarea id="fileDesc" placeholder="Enter description or warning message"></textarea>
 
   <label for="fileBg">Post Background Color</label>
-  <input type="color" id="fileBg" value="#000000">
+  <input type="color" id="fileBg" value="#111111">
 
   <label for="fileSpeed">Ticker Scroll Speed (Seconds, default 12)</label>
   <input type="number" id="fileSpeed" placeholder="12">
@@ -127,7 +130,7 @@ previewBtn.addEventListener('click', ()=>{
     const text = r.querySelector('.maskText').value;
     const color = r.querySelector('.maskColor').value;
     if(url && text) html += `<a href="${url}" target="_blank" style="color:${color};" class="download">⬇ ${text}</a>
-                              <a href="${url}" target="_blank" style="color:${color}; background:green;" class="install">Install</a>`;
+                              <a href="${url}" target="_blank" style="color:#fff; background:${color};" class="install">Install</a>`;
   });
   html += `</div>`;
   previewArea.innerHTML = html;
@@ -142,35 +145,27 @@ uploadBtn.addEventListener('click', ()=>{
   const bg = fileBgInput.value;
 
   const storageRef = storage.ref('emergencyFiles/'+Date.now()+'-'+file.name);
-  const uploadTask = storageRef.put(file);
-
-  uploadTask.on('state_changed', snapshot=>{
-    const progress = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
-    progressBar.style.width = progress+'%';
-    statusNote.textContent = `Uploading: ${Math.round(progress)}%`;
-  }, error=>{
-    statusNote.textContent = 'Upload failed: '+error;
-  }, ()=>{
-    uploadTask.snapshot.ref.getDownloadURL().then(url=>{
-      const maskedLinks = [];
-      maskedLinksContainer.querySelectorAll('.mask-link-row').forEach(r=>{
-        const u = r.querySelector('.maskUrl').value;
-        const t = r.querySelector('.maskText').value;
-        const c = r.querySelector('.maskColor').value;
-        if(u && t) maskedLinks.push({url:u,text:t,color:c});
-      });
-      db.collection('emergencyFiles').add({
-        name, nameColor, desc, bg, url, maskedLinks,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(()=>{
-        statusNote.textContent = 'File uploaded successfully!';
-        progressBar.style.width='0%';
-        fileInput.value=''; fileNameInput.value=''; fileDescInput.value='';
-        maskedLinksContainer.innerHTML=''; previewArea.innerHTML='';
-        loadUploadedFiles();
-      });
+  // Instant upload with getDownloadURL immediately
+  storageRef.put(file).then(snapshot=>{
+    return snapshot.ref.getDownloadURL();
+  }).then(url=>{
+    const maskedLinks = [];
+    maskedLinksContainer.querySelectorAll('.mask-link-row').forEach(r=>{
+      const u = r.querySelector('.maskUrl').value;
+      const t = r.querySelector('.maskText').value;
+      const c = r.querySelector('.maskColor').value;
+      if(u && t) maskedLinks.push({url:u,text:t,color:c});
     });
-  });
+    return db.collection('emergencyFiles').add({
+      name, nameColor, desc, bg, url, maskedLinks,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }).then(()=>{
+    statusNote.textContent = 'File uploaded successfully!';
+    fileInput.value=''; fileNameInput.value=''; fileDescInput.value='';
+    maskedLinksContainer.innerHTML=''; previewArea.innerHTML='';
+    loadUploadedFiles();
+  }).catch(err=>statusNote.textContent='Upload failed: '+err);
 });
 
 function loadUploadedFiles(){
@@ -184,8 +179,14 @@ function loadUploadedFiles(){
       div.innerHTML=`<strong style="color:${data.nameColor}">${data.name}</strong> - ${data.desc||''} 
       <a href="${data.url}" target="_blank" class="download">⬇ Download</a>`;
       data.maskedLinks.forEach(ml=>{
-        div.innerHTML += ` <a href="${ml.url}" target="_blank" style="color:${ml.color};" class="download">⬇ ${ml.text}</a>`;
+        div.innerHTML += ` <a href="${ml.url}" target="_blank" style="color:${ml.color};" class="download">⬇ ${ml.text}</a>
+        <a href="${ml.url}" target="_blank" style="color:#fff; background:${ml.color};" class="install">Install</a>`;
       });
+      const delBtn = document.createElement('button');
+      delBtn.className='deleteBtn';
+      delBtn.innerText='Delete';
+      delBtn.onclick=()=>doc.ref.delete().then(()=>loadUploadedFiles());
+      div.appendChild(delBtn);
       uploadedFilesDiv.appendChild(div);
     });
   });
@@ -194,6 +195,5 @@ function loadUploadedFiles(){
 // Initial load
 loadUploadedFiles();
 </script>
-
 </body>
 <html>
