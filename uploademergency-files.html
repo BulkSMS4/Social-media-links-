@@ -6,41 +6,56 @@
 <title>Upload Emergency Files — Admin</title>
 <style>
 body { font-family: Arial,sans-serif; background:#000; color:lime; padding:20px; }
-h1 { color:#ff3333; text-align:center; }
-.container { max-width:600px; margin:0 auto; background:#111; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.6); }
-label { display:block; margin-top:12px; margin-bottom:6px; color:#adff2f; }
-input, select, textarea, button { width:100%; padding:10px; border-radius:8px; border:1px solid lime; margin-bottom:12px; background:#000; color:lime; }
+h1 { color:#ff3333; text-align:center; margin-bottom:20px; }
+.container { max-width:700px; margin:0 auto; background:#111; padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.6); }
+label { display:block; margin-top:12px; margin-bottom:6px; color:#adff2f; font-weight:bold; }
+input, select, textarea, button { width:100%; padding:10px; border-radius:8px; border:1px solid lime; margin-bottom:12px; background:#000; color:lime; box-sizing:border-box; }
 button { cursor:pointer; background:lime; color:black; font-weight:700; }
 .progress-bar { width:0%; height:20px; background:lime; margin-bottom:12px; border-radius:8px; transition: width 0.3s; }
 .note { font-size:13px; color:#adff2f; margin-bottom:12px; }
-a.download-link { color:#1e90ff; text-decoration:none; font-weight:700; }
+.post { background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:10px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6); }
+.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+.post a.download, .post a.install { display:inline-block; margin:4px 6px 4px 0; padding:6px 12px; border-radius:6px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
+.mask-link-row { display:flex; gap:8px; margin-bottom:6px; align-items:center; }
+.mask-link-row input { flex:1; margin-bottom:0; }
+.mask-link-row input.color-picker { width:50px; padding:0; height:32px; }
+.mask-link-row button { width:auto; padding:6px 10px; }
+.preview-area { margin-top:12px; padding:12px; border:1px solid lime; border-radius:8px; background:#111; color:#fff; }
 </style>
 </head>
 <body>
 
 <h1>Upload Emergency Files</h1>
 <div class="container">
+
   <label for="fileInput">Select File (APK, ZIP, RAR, PDF, HTML, Images)</label>
   <input type="file" id="fileInput" accept=".apk,.zip,.rar,.pdf,.html,image/*">
 
   <label for="fileName">File Name (Optional)</label>
   <input type="text" id="fileName" placeholder="Custom display name">
+  <label for="fileNameColor">File Name Color</label>
+  <input type="color" id="fileNameColor" value="#ff3333">
+
+  <label>Custom Masked Links (one per line: URL | Masked Text)</label>
+  <div id="maskedLinksContainer"></div>
+  <button type="button" id="addMaskedLinkBtn">+ Add Masked Link</button>
 
   <label for="fileDesc">Description (Optional)</label>
   <textarea id="fileDesc" placeholder="Enter description or warning message"></textarea>
 
-  <label for="fileColor">Text Color (Optional)</label>
-  <input type="color" id="fileColor" value="#ff3333">
-
-  <label for="fileBg">Background Color (Optional)</label>
+  <label for="fileBg">Post Background Color</label>
   <input type="color" id="fileBg" value="#000000">
 
   <label for="fileSpeed">Ticker Scroll Speed (Seconds, default 12)</label>
   <input type="number" id="fileSpeed" placeholder="12">
 
   <div class="progress-bar" id="progressBar"></div>
+  <button id="previewBtn">Preview</button>
   <button id="uploadBtn">Upload File</button>
   <div class="note" id="statusNote">Select a file to upload.</div>
+
+  <h3>Preview:</h3>
+  <div id="previewArea" class="preview-area"></div>
 
   <h3>Uploaded Emergency Files:</h3>
   <div id="uploadedFiles"></div>
@@ -66,70 +81,111 @@ const storage = firebase.storage();
 
 const fileInput = document.getElementById('fileInput');
 const fileNameInput = document.getElementById('fileName');
+const fileNameColor = document.getElementById('fileNameColor');
 const fileDescInput = document.getElementById('fileDesc');
-const fileColorInput = document.getElementById('fileColor');
 const fileBgInput = document.getElementById('fileBg');
 const fileSpeedInput = document.getElementById('fileSpeed');
 const uploadBtn = document.getElementById('uploadBtn');
+const previewBtn = document.getElementById('previewBtn');
 const progressBar = document.getElementById('progressBar');
 const statusNote = document.getElementById('statusNote');
 const uploadedFilesDiv = document.getElementById('uploadedFiles');
+const previewArea = document.getElementById('previewArea');
 
-// Upload file
-uploadBtn.addEventListener('click', () => {
+const maskedLinksContainer = document.getElementById('maskedLinksContainer');
+const addMaskedLinkBtn = document.getElementById('addMaskedLinkBtn');
+
+function createMaskedLinkRow(url='', text='', color='#ff3333'){
+  const row = document.createElement('div');
+  row.className = 'mask-link-row';
+  row.innerHTML = `
+    <input type="text" class="maskUrl" placeholder="URL" value="${url}">
+    <input type="text" class="maskText" placeholder="Masked Text" value="${text}">
+    <input type="color" class="maskColor" value="${color}">
+    <button type="button" class="deleteLinkBtn">Delete</button>
+  `;
+  row.querySelector('.deleteLinkBtn').addEventListener('click',()=>row.remove());
+  maskedLinksContainer.appendChild(row);
+}
+addMaskedLinkBtn.addEventListener('click', ()=>createMaskedLinkRow());
+
+previewBtn.addEventListener('click', ()=>{
   const file = fileInput.files[0];
-  if(!file) return alert('Please select a file!');
-  
-  const displayName = fileNameInput.value || file.name;
-  const description = fileDescInput.value || '';
-  const color = fileColorInput.value || '#ff3333';
-  const bgColor = fileBgInput.value || '#000';
-  const speedSec = Number(fileSpeedInput.value) || 12;
+  if(!file) return alert('Select a file for preview!');
+  const name = fileNameInput.value || file.name;
+  const nameColor = fileNameColor.value;
+  const desc = fileDescInput.value;
+  const bg = fileBgInput.value;
 
-  const storageRef = storage.ref('emergencyFiles/' + Date.now() + '-' + file.name);
-  const uploadTask = storageRef.put(file);
+  let html = `<div class="post" style="border:2px solid ${nameColor}; background:${bg};">
+  <div class="meta">Admin | ${new Date().toLocaleString()}</div>
+  <strong style="color:${nameColor}">${name}</strong><br>`;
+  if(desc) html += `<div style="color:${nameColor}; margin-top:6px;">${desc}</div>`;
 
-  uploadTask.on('state_changed',
-    snapshot => {
-      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      progressBar.style.width = progress + '%';
-      statusNote.textContent = `Uploading: ${Math.round(progress)}%`;
-    },
-    error => { statusNote.textContent = 'Upload failed: ' + error; },
-    () => {
-      uploadTask.snapshot.ref.getDownloadURL().then(url => {
-        // Save metadata in Firestore
-        db.collection('emergencyFiles').add({
-          name: displayName,
-          url: url,
-          type: file.type,
-          description: description,
-          color: color,
-          bgColor: bgColor,
-          speedSec: speedSec,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(()=>{
-          statusNote.textContent = 'File uploaded successfully!';
-          progressBar.style.width = '0%';
-          fileInput.value = '';
-          fileNameInput.value = '';
-          fileDescInput.value = '';
-          loadUploadedFiles();
-        });
-      });
-    }
-  );
+  maskedLinksContainer.querySelectorAll('.mask-link-row').forEach(r=>{
+    const url = r.querySelector('.maskUrl').value;
+    const text = r.querySelector('.maskText').value;
+    const color = r.querySelector('.maskColor').value;
+    if(url && text) html += `<a href="${url}" target="_blank" style="color:${color};" class="download">⬇ ${text}</a>
+                              <a href="${url}" target="_blank" style="color:${color}; background:green;" class="install">Install</a>`;
+  });
+  html += `</div>`;
+  previewArea.innerHTML = html;
 });
 
-// Load uploaded files
-function loadUploadedFiles() {
-  uploadedFilesDiv.innerHTML = 'Loading...';
+uploadBtn.addEventListener('click', ()=>{
+  const file = fileInput.files[0];
+  if(!file) return alert('Select a file to upload!');
+  const name = fileNameInput.value || file.name;
+  const nameColor = fileNameColor.value;
+  const desc = fileDescInput.value;
+  const bg = fileBgInput.value;
+
+  const storageRef = storage.ref('emergencyFiles/'+Date.now()+'-'+file.name);
+  const uploadTask = storageRef.put(file);
+
+  uploadTask.on('state_changed', snapshot=>{
+    const progress = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+    progressBar.style.width = progress+'%';
+    statusNote.textContent = `Uploading: ${Math.round(progress)}%`;
+  }, error=>{
+    statusNote.textContent = 'Upload failed: '+error;
+  }, ()=>{
+    uploadTask.snapshot.ref.getDownloadURL().then(url=>{
+      const maskedLinks = [];
+      maskedLinksContainer.querySelectorAll('.mask-link-row').forEach(r=>{
+        const u = r.querySelector('.maskUrl').value;
+        const t = r.querySelector('.maskText').value;
+        const c = r.querySelector('.maskColor').value;
+        if(u && t) maskedLinks.push({url:u,text:t,color:c});
+      });
+      db.collection('emergencyFiles').add({
+        name, nameColor, desc, bg, url, maskedLinks,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(()=>{
+        statusNote.textContent = 'File uploaded successfully!';
+        progressBar.style.width='0%';
+        fileInput.value=''; fileNameInput.value=''; fileDescInput.value='';
+        maskedLinksContainer.innerHTML=''; previewArea.innerHTML='';
+        loadUploadedFiles();
+      });
+    });
+  });
+});
+
+function loadUploadedFiles(){
+  uploadedFilesDiv.innerHTML='Loading...';
   db.collection('emergencyFiles').orderBy('createdAt','desc').get().then(snapshot=>{
-    uploadedFilesDiv.innerHTML = '';
+    uploadedFilesDiv.innerHTML='';
     snapshot.forEach(doc=>{
       const data = doc.data();
       const div = document.createElement('div');
-      div.innerHTML = `<a class="download-link" href="${data.url}" target="_blank">${data.name}</a> - <span style="color:${data.color}">${data.description || ''}</span>`;
+      div.className='post';
+      div.innerHTML=`<strong style="color:${data.nameColor}">${data.name}</strong> - ${data.desc||''} 
+      <a href="${data.url}" target="_blank" class="download">⬇ Download</a>`;
+      data.maskedLinks.forEach(ml=>{
+        div.innerHTML += ` <a href="${ml.url}" target="_blank" style="color:${ml.color};" class="download">⬇ ${ml.text}</a>`;
+      });
       uploadedFilesDiv.appendChild(div);
     });
   });
@@ -140,4 +196,4 @@ loadUploadedFiles();
 </script>
 
 </body>
-</html>
+<html>
