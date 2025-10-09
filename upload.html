@@ -3,220 +3,185 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚀 File Uploader</title>
+<title>🚀 File Uploader & Dashboard</title>
 <style>
-  body {
-    font-family: "Poppins", sans-serif;
-    background: #f3f5ff;
-    margin: 0;
-    padding: 20px;
-    color: #333;
-  }
+body { font-family:"Poppins",sans-serif; background:#f3f5ff; margin:0; padding:20px; color:#333; }
+.uploader { max-width:500px; margin:auto; background:#fff; border-radius:20px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1);}
+.title { font-size:1.3em; font-weight:600; text-align:center; margin-bottom:15px;}
+.drop-zone { border:3px dashed #4a90e2; border-radius:15px; padding:40px; text-align:center; cursor:pointer; transition:background 0.3s; }
+.drop-zone.dragover { background: rgba(74,144,226,0.1); }
+.drop-zone p { margin:0; font-size:0.95em; }
+input[type="color"], input[type="text"] { width:100%; padding:8px; border-radius:10px; border:1px solid #ccc; margin-top:5px; }
+.file-list { margin-top:15px; }
+.file-card { background:#f9fafc; border:1px solid #ddd; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
+.progress { width:60%; height:6px; background:#ddd; border-radius:5px; overflow:hidden; margin:0 10px; }
+.progress-bar { height:6px; width:0%; background:#4a90e2; border-radius:5px; transition:width 0.3s; }
+button.delete-btn { background:#ff4a4a; color:white; border:none; border-radius:8px; padding:5px 8px; cursor:pointer; }
+button.delete-btn:hover { opacity:0.8; }
 
-  .uploader {
-    max-width: 500px;
-    margin: auto;
-    background: #fff;
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  }
-
-  .title {
-    font-size: 1.3em;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 15px;
-  }
-
-  .drop-zone {
-    border: 3px dashed #4a90e2;
-    border-radius: 15px;
-    padding: 40px;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-
-  .drop-zone.dragover {
-    background: rgba(74,144,226,0.1);
-  }
-
-  .drop-zone p {
-    margin: 0;
-    font-size: 0.95em;
-  }
-
-  .color-picker, .mask-input {
-    width: 100%;
-    margin-top: 15px;
-  }
-
-  input[type="color"], input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    margin-top: 5px;
-  }
-
-  .file-list {
-    margin-top: 15px;
-  }
-
-  .file-card {
-    background: #f9fafc;
-    border: 1px solid #ddd;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .progress {
-    width: 60%;
-    height: 6px;
-    background: #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 0 10px;
-  }
-
-  .progress-bar {
-    height: 6px;
-    width: 0%;
-    background: #4a90e2;
-    border-radius: 5px;
-    transition: width 0.3s;
-  }
-
-  button.delete-btn {
-    background: #ff4a4a;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 5px 8px;
-    cursor: pointer;
-  }
-
-  button.delete-btn:hover {
-    opacity: 0.8;
-  }
+/* Dashboard section */
+.top-mobile { position:relative; width:90%; max-width:1200px; margin:20px auto; border-radius:18px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
+.mobile-screen { background:#111; color:#33ff33; padding:16px; height:280px; overflow:auto; border:3px solid rgba(0,255,0,0.25); border-radius:14px; }
+.mobile-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
+.mobile-title { font-weight:900; font-size:20px; color:#33ff33; text-shadow:0 0 10px green; }
+.post { background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:10px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6); }
+.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+.post img { max-width:100%; border-radius:8px; margin-top:8px; border:1px solid #333; }
+.post .download { display:inline-block; margin-top:8px; padding:8px 12px; border-radius:8px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
 </style>
 </head>
 <body>
 
 <div class="uploader">
-  <div class="title">📁💕 Drag & Drop Uploader</div>
-
+  <div class="title">📁 Drag & Drop Uploader</div>
   <div class="drop-zone" id="dropZone">
-    <p>Drop files here or click to upload (images, APK, ZIP, RAR, PDF, HTML, etc.)</p>
+    <p>Drop files here or click to upload (APK, ZIP, PDF, DOCX, etc.)</p>
     <input type="file" id="fileInput" multiple style="display:none;">
   </div>
-
-  <div class="mask-input">
-    <label>Masked Button Name (e.g. Download / Install):</label>
-    <input type="text" id="maskName" placeholder="Enter masked name...">
+  <div>
+    <label>Masked Button Name:</label>
+    <input type="text" id="maskName" placeholder="Download / Install">
   </div>
-
-  <div class="color-picker">
+  <div>
     <label>Choose Custom Color:</label>
     <input type="color" id="customColor" value="#4a90e2">
   </div>
-
   <div class="file-list" id="fileList"></div>
 </div>
 
+<!-- Dashboard -->
+<div class="top-mobile">
+  <div class="mobile-screen" id="toolsPostsScreen">
+    <div class="mobile-header">
+      <div class="mobile-title">🛠️ Files / Tools ⚡</div>
+    </div>
+    <div id="toolsPostsList">
+      <div style="color:#999;text-align:center;padding:30px 0;">Loading files...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
 <script>
-const cloudName = "dymwisuau";      // Your Cloudinary cloud name
-const uploadPreset = "xportbox";     // Your unsigned upload preset
-const folderName = "xportbox_assets"; // Asset folder for uploads
+// Cloudinary config
+const cloudName="dymwisuau";
+const uploadPreset="xportbox";
+const folderName="xportbox_assets";
 
-const dropZone = document.getElementById('dropZone');
-const fileInput = document.getElementById('fileInput');
-const fileList = document.getElementById('fileList');
+// Firebase config
+const firebaseConfig = {
+  apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain:"usahackersland.firebaseapp.com",
+  projectId:"usahackersland",
+  storageBucket:"usahackersland.appspot.com",
+  messagingSenderId:"588407428267",
+  appId:"1:588407428267:web:7c4898cbb62efd3d5953ee"
+};
+if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
 
-dropZone.addEventListener('click', () => fileInput.click());
-dropZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropZone.classList.add('dragover');
-});
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  handleFiles(e.dataTransfer.files);
-});
+// Dashboard element
+const toolsPostsList=document.getElementById('toolsPostsList');
 
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
+// --- Drag & Drop ---
+const dropZone=document.getElementById('dropZone');
+const fileInput=document.getElementById('fileInput');
+const fileList=document.getElementById('fileList');
 
-function handleFiles(files) {
-  [...files].forEach(uploadFile);
-}
+dropZone.addEventListener('click',()=>fileInput.click());
+dropZone.addEventListener('dragover',e=>{e.preventDefault(); dropZone.classList.add('dragover');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop',e=>{ e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change',e=>handleFiles(e.target.files));
 
-async function uploadFile(file) {
-  const card = document.createElement('div');
-  card.className = 'file-card';
-  card.innerHTML = `
-    <span>${file.name}</span>
-    <div class="progress"><div class="progress-bar"></div></div>
-    <button class="delete-btn">✖</button>
-  `;
+function handleFiles(files){ [...files].forEach(uploadFile); }
+
+// --- Upload to Cloudinary & Save Firestore ---
+async function uploadFile(file){
+  const card=document.createElement('div');
+  card.className='file-card';
+  card.innerHTML=`<span>${file.name}</span>
+  <div class="progress"><div class="progress-bar"></div></div>
+  <button class="delete-btn">✖</button>`;
   fileList.appendChild(card);
+  const progressBar=card.querySelector('.progress-bar');
+  const deleteBtn=card.querySelector('.delete-btn');
+  deleteBtn.onclick=()=>fileList.removeChild(card);
 
-  const progressBar = card.querySelector('.progress-bar');
-  const deleteBtn = card.querySelector('.delete-btn');
+  try{
+    const res=await uploadToCloudinary(file,progress=>progressBar.style.width=progress+'%');
+    const color=document.getElementById('customColor').value;
+    const maskName=document.getElementById('maskName').value||'Download';
+    const maskedLink=`<a href="${res.secure_url}" target="_blank" style="color:${color};text-decoration:none;font-weight:600;">${maskName}</a>`;
 
-  deleteBtn.onclick = () => fileList.removeChild(card);
+    card.innerHTML=`<span>${file.name}</span>
+    <div>${maskedLink}</div>
+    <button class="delete-btn">✖</button>`;
+    card.querySelector('.delete-btn').onclick=()=>fileList.removeChild(card);
 
-  try {
-    const res = await uploadToCloudinary(file, progress => {
-      progressBar.style.width = progress + '%';
+    // --- Save to Firestore ---
+    await db.collection('emergencyFiles').add({
+      author:'Admin',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      color:color,
+      files:[{
+        name:file.name,
+        fileURL:res.secure_url,
+        type:file.name.split('.').pop().toLowerCase()
+      }]
     });
-    const color = document.getElementById('customColor').value;
-    const maskName = document.getElementById('maskName').value || 'Download';
-    const maskedLink = `<a href="${res.secure_url}" target="_blank" style="color:${color};text-decoration:none;font-weight:600;">${maskName}</a>`;
-    
-    card.innerHTML = `
-      <span>${file.name}</span>
-      <div>${maskedLink}</div>
-      <button class="delete-btn">✖</button>
-    `;
-    card.querySelector('.delete-btn').onclick = () => fileList.removeChild(card);
-    alert("✅ Upload successful! File will appear on your dashboard.");
-  } catch (err) {
-    console.error(err);
-    alert("❌ Upload failed: " + err);
-    fileList.removeChild(card);
-  }
+
+    alert("✅ Upload successful! File will appear on the dashboard.");
+  }catch(err){ console.error(err); alert("❌ Upload failed: "+err); fileList.removeChild(card); }
 }
 
-function uploadToCloudinary(file, onProgress) {
-  const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('upload_preset', uploadPreset);
-  formData.append('folder', folderName); // ← All files go here
-
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url);
-    xhr.upload.onprogress = e => {
-      if (e.lengthComputable && onProgress) onProgress((e.loaded / e.total) * 100);
-    };
-    xhr.onload = () => {
-      try {
-        const res = JSON.parse(xhr.responseText);
-        if (res.secure_url) resolve(res);
-        else reject(res.error?.message || "Unknown Cloudinary error");
-      } catch (e) { reject("Invalid Cloudinary response"); }
-    };
-    xhr.onerror = () => reject("Network or upload error");
+// --- Upload to Cloudinary ---
+function uploadToCloudinary(file,onProgress){
+  const url=`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+  const formData=new FormData();
+  formData.append('file',file);
+  formData.append('upload_preset',uploadPreset);
+  formData.append('folder',folderName);
+  return new Promise((resolve,reject)=>{
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',url);
+    xhr.upload.onprogress=e=>{ if(e.lengthComputable && onProgress) onProgress((e.loaded/e.total)*100); }
+    xhr.onload=()=>{ try{ const res=JSON.parse(xhr.responseText); if(res.secure_url) resolve(res); else reject(res.error?.message||"Cloudinary error"); }catch(e){ reject("Invalid response"); } }
+    xhr.onerror=()=>reject("Network error");
     xhr.send(formData);
   });
 }
+
+// --- Show dashboard files dynamically ---
+const allowedTypes=['apk','zip','rar','pdf','docx','xlsx','txt','html'];
+db.collection('emergencyFiles').orderBy('createdAt','desc').onSnapshot(snapshot=>{
+  toolsPostsList.innerHTML='';
+  snapshot.forEach(doc=>{
+    const d=doc.data();
+    const div=document.createElement('div'); div.className='post';
+    div.style.border=`2px solid ${d.color||'#33ff33'}`;
+    div.innerHTML=`<div class='meta'><div>${d.author||'Admin'}</div><div>${new Date(d.createdAt?.seconds*1000||Date.now()).toLocaleString()}</div></div>`;
+    if(Array.isArray(d.files)){
+      d.files.forEach(f=>{
+        if(!allowedTypes.includes(f.type)) return;
+        const a=document.createElement('a'); a.href=f.fileURL; a.target='_blank'; a.className='download';
+        let icon='⬇️';
+        if(f.type==='apk') icon='📱';
+        else if(['zip','rar'].includes(f.type)) icon='🗜️';
+        else if(f.type==='pdf') icon='📄';
+        else if(f.type==='docx'||f.type==='txt') icon='📑';
+        else if(f.type==='html') icon='🌐';
+        a.innerText=`${icon} Download ${f.type.toUpperCase()}`;
+        div.appendChild(a);
+      });
+    }
+    toolsPostsList.prepend(div);
+  });
+});
 </script>
 </body>
 </html>
