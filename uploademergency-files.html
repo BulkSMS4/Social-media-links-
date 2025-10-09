@@ -5,200 +5,253 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Upload Emergency Files — Admin</title>
 <style>
-body { font-family: Arial,sans-serif; background:#0b0b0b; color:lime; padding:20px; }
-h1 { color:#ff3333; text-align:center; margin-bottom:20px; }
-.card { background:#111; padding:20px; border-radius:12px; max-width:800px; margin:0 auto; box-shadow:0 4px 12px rgba(0,0,0,0.7); }
-.card label { display:block; margin-top:12px; font-weight:bold; color:#adff2f; }
-.card input, .card textarea { width:100%; margin-bottom:12px; padding:12px; border-radius:8px; border:1px solid lime; background:#000; color:lime; box-sizing:border-box; font-size:16px; }
-.card button { background:lime; color:black; font-weight:700; cursor:pointer; transition:0.2s; border-radius:6px; padding:6px 12px; font-size:14px; }
-.card button:hover { background:#32cd32; }
-.mask-link-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
-.mask-link-row input { flex:1; padding:12px; font-size:16px; }
-.mask-link-row button { padding:4px 8px; font-size:14px; }
-.preview-area { border:1px solid lime; border-radius:8px; padding:12px; margin-top:12px; background:#111; color:#fff; font-size:14px; max-height:300px; overflow:auto; }
-.post { background:#111; border-radius:12px; padding:12px; margin-bottom:12px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.7); font-size:14px; }
-.post a.download, .post a.install, .post a.open { display:inline-block; margin:4px 6px 4px 0; padding:6px 10px; border-radius:8px; font-weight:600; text-decoration:none; font-size:14px; }
-.post a.download { background:#28a745; color:#fff; }
-.post a.install { background:#007bff; color:#fff; }
-.post a.open { background:#ff8c00; color:#fff; }
-.post .deleteBtn { background:#ff3333; color:#fff; padding:6px 10px; border:none; border-radius:8px; cursor:pointer; font-size:14px; margin-left:6px; }
-#messageBox { margin-top:10px; text-align:center; font-weight:bold; font-size:16px; }
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #0b0b0b;
+  color: #e0ffe0;
+  padding: 25px;
+}
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #111;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0,255,0,0.2);
+}
+h1 {
+  color: #00ff6a;
+  text-align: center;
+  margin-bottom: 20px;
+}
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 600;
+  color: #adff2f;
+}
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  background: #000;
+  color: #0f0;
+  border: 1px solid #0f0;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+button {
+  background: lime;
+  color: #000;
+  font-weight: bold;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+button:hover { background: #00e600; }
+
+.file-card {
+  background: #151515;
+  border: 1px solid #222;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 12px;
+  color: #fff;
+}
+.file-card strong { color: #adff2f; }
+.deleteBtn {
+  background: #ff3333;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+.deleteBtn:hover { background: #ff0000; }
+
+.progress {
+  background: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  height: 10px;
+  margin-top: 5px;
+}
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: lime;
+  transition: width 0.3s;
+}
+.preview-images img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 8px;
+  border: 1px solid #333;
+}
 </style>
 </head>
 <body>
+  <div class="container">
+    <h1>💻 Upload Emergency Files</h1>
+    <label>Select Files (PDF, ZIP, RAR, APK, etc.)</label>
+    <input type="file" id="fileInput" multiple>
 
-<h1>🛠️ Upload Emergency Files</h1>
-<div class="card">
-  <label>File</label>
-  <input type="file" id="fileInput">
+    <label>Upload Images (Icons, Screenshots, etc.)</label>
+    <input type="file" id="imageInput" accept="image/*" multiple>
 
-  <label>File Name (Optional)</label>
-  <input type="text" id="fileName" placeholder="Display Name">
-  <input type="color" id="fileNameColor" value="#ff3333">
+    <label>File Name (Optional)</label>
+    <input type="text" id="fileName" placeholder="Display Name">
 
-  <label>Custom Masked Links (one per line)</label>
-  <div id="maskedLinksContainer"></div>
-  <button type="button" id="addMaskedLinkBtn">+ Add Masked Link</button>
+    <label>Custom Masked Link Text</label>
+    <input type="text" id="maskedText" placeholder="e.g. Download / Install / Open">
 
-  <label>Description (Optional)</label>
-  <textarea id="fileDesc" placeholder="Warning or description"></textarea>
+    <label>Custom Color</label>
+    <input type="color" id="customColor" value="#00ff6a">
 
-  <label>Post Background</label>
-  <input type="color" id="fileBg" value="#111111">
+    <label>Description</label>
+    <textarea id="fileDesc" placeholder="Short description or warning"></textarea>
 
-  <div style="display:flex; gap:10px; justify-content:flex-start; margin-top:8px;">
-    <button id="previewBtn">Preview</button>
-    <button id="uploadBtn">Upload</button>
+    <button id="uploadBtn">Upload All Files</button>
+    <div id="uploadStatus"></div>
+
+    <h2>Uploaded Files</h2>
+    <div id="uploadedFiles"></div>
   </div>
-
-  <div id="messageBox"></div>
-  <div class="preview-area" id="previewArea">Preview will appear here...</div>
-  <h3>Uploaded Files:</h3>
-  <div id="uploadedFiles"></div>
-</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-// Firebase config
+// Firebase setup
 const firebaseConfig = {
-  apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain:"usahackersland.firebaseapp.com",
-  projectId:"usahackersland",
-  storageBucket:"usahackersland.appspot.com",
-  messagingSenderId:"588407428267",
-  appId:"1:588407428267:web:7c4898cbb62efd3d5953ee"
+  apiKey: "AIzaSyBLYDpP68NlfYGE1O9DafgrmFBUlgpoYeI",
+  authDomain: "x-cargo-exprees.firebaseapp.com",
+  projectId: "x-cargo-exprees",
+  storageBucket: "x-cargo-exprees.appspot.com",
+  messagingSenderId: "1082201867958",
+  appId: "1:1082201867958:web:d6600fbc82085b0b62c817",
 };
-if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
+
+// Cloudinary credentials
+const cloudName = "dymwisuau";
+const uploadPreset = "xportbox";
 
 // Elements
-const fileInput = document.getElementById('fileInput');
-const fileNameInput = document.getElementById('fileName');
-const fileNameColor = document.getElementById('fileNameColor');
-const fileDescInput = document.getElementById('fileDesc');
-const fileBgInput = document.getElementById('fileBg');
-const uploadBtn = document.getElementById('uploadBtn');
-const previewBtn = document.getElementById('previewBtn');
-const previewArea = document.getElementById('previewArea');
-const uploadedFilesDiv = document.getElementById('uploadedFiles');
-const maskedLinksContainer = document.getElementById('maskedLinksContainer');
-const addMaskedLinkBtn = document.getElementById('addMaskedLinkBtn');
-const messageBox = document.getElementById('messageBox');
+const fileInput = document.getElementById("fileInput");
+const imageInput = document.getElementById("imageInput");
+const fileName = document.getElementById("fileName");
+const maskedText = document.getElementById("maskedText");
+const customColor = document.getElementById("customColor");
+const fileDesc = document.getElementById("fileDesc");
+const uploadBtn = document.getElementById("uploadBtn");
+const uploadedFilesDiv = document.getElementById("uploadedFiles");
+const uploadStatus = document.getElementById("uploadStatus");
 
-function createMaskedLinkRow(url='', text='', color='#ff3333'){
-  const row = document.createElement('div');
-  row.className = 'mask-link-row';
-  row.innerHTML = `
-    <input type="text" class="maskUrl" placeholder="URL" value="${url}">
-    <input type="text" class="maskText" placeholder="Masked Text" value="${text}">
-    <input type="color" class="maskColor" value="${color}">
-    <button type="button" class="deleteLinkBtn">X</button>
-  `;
-  row.querySelector('.deleteLinkBtn').addEventListener('click',()=>row.remove());
-  maskedLinksContainer.appendChild(row);
-}
-addMaskedLinkBtn.addEventListener('click', ()=>createMaskedLinkRow());
+// Upload to Cloudinary
+async function uploadToCloudinary(file, onProgress) {
+  const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", uploadPreset);
 
-function getFileType(fileName){
-  const ext = fileName.split('.').pop().toLowerCase();
-  if(ext==='apk') return 'apk';
-  if(ext==='zip'||ext==='rar') return 'archive';
-  if(ext==='pdf'||ext==='html'||ext==='htm'||ext==='jpg'||ext==='png'||ext==='jpeg'||ext==='gif') return 'open';
-  return 'download';
-}
-
-function buildPostHTML(name,nameCol,desc,bg,url,maskedLinks,fileType){
-  let html=`<div class="post" style="border:2px solid ${nameCol}; background:${bg}">
-    <div class="meta">Admin | ${new Date().toLocaleString()}</div>
-    <strong style="color:${nameCol}">${name}</strong><br>`;
-  if(desc) html+=`<div style="color:${nameCol}">${desc}</div>`;
-  maskedLinks.forEach(ml=>{
-    html+=` <a href="${ml.url}" target="_blank" style="color:${ml.color}" class="download">⬇ ${ml.text}</a>`;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const percent = (e.loaded / e.total) * 100;
+        onProgress(percent);
+      }
+    };
+    xhr.onload = () => {
+      if (xhr.status === 200) resolve(JSON.parse(xhr.responseText));
+      else reject(xhr.statusText);
+    };
+    xhr.onerror = () => reject("Upload failed");
+    xhr.send(formData);
   });
-  if(fileType==='apk') html+=` <a href="${url}" target="_blank" class="install">Install</a> <a href="${url}" target="_blank" class="download">Download</a>`;
-  else if(fileType==='archive') html+=` <a href="${url}" target="_blank" class="download">Download</a>`;
-  else html+=` <a href="${url}" target="_blank" class="open">Open</a> <a href="${url}" target="_blank" class="download">Download</a>`;
-  html+=` <button class="deleteBtn">Delete</button></div>`;
-  return html;
 }
 
-// Upload & Add to Dashboard
-uploadBtn.addEventListener('click', ()=>{
-  const file = fileInput.files[0];
-  if(!file) return alert('Select file!');
-  messageBox.style.color = 'yellow';
-  messageBox.textContent = '⏳ Uploading... Please wait...';
+// Upload process
+uploadBtn.addEventListener("click", async () => {
+  const files = Array.from(fileInput.files);
+  if (files.length === 0) return alert("Select at least one file!");
   
-  const name = fileNameInput.value || file.name;
-  const nameCol = fileNameColor.value;
-  const desc = fileDescInput.value;
-  const bg = fileBgInput.value;
+  uploadStatus.innerHTML = `<p style="color:orange;">Uploading...</p>`;
+  
+  for (const file of files) {
+    const progressBar = document.createElement("div");
+    progressBar.className = "progress";
+    const bar = document.createElement("div");
+    bar.className = "progress-bar";
+    progressBar.appendChild(bar);
+    uploadStatus.appendChild(progressBar);
 
-  const storageRef = storage.ref('emergencyFiles/'+Date.now()+'-'+file.name);
-  storageRef.put(file).then(snap=>snap.ref.getDownloadURL()).then(url=>{
-    const maskedLinks=[];
-    maskedLinksContainer.querySelectorAll('.mask-link-row').forEach(r=>{
-      const u=r.querySelector('.maskUrl').value;
-      const t=r.querySelector('.maskText').value;
-      const c=r.querySelector('.maskColor').value;
-      if(u && t) maskedLinks.push({url:u,text:t,color:c});
-    });
-    const fileType = getFileType(file.name);
-    return db.collection('emergencyFiles').add({name,nameCol,desc,bg,url,maskedLinks,fileType,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  }).then(()=>{
-    messageBox.style.color = 'lime';
-    messageBox.textContent = '✅ Uploaded successfully! It will appear on the dashboard.';
-    fileInput.value='';fileNameInput.value='';fileDescInput.value='';maskedLinksContainer.innerHTML='';previewArea.innerHTML='';
-    loadFiles();
-  }).catch(err=>{
-    console.error(err);
-    messageBox.style.color = 'red';
-    messageBox.textContent = '❌ Upload failed. Please try again.';
-  });
+    try {
+      const uploaded = await uploadToCloudinary(file, (percent) => bar.style.width = percent + "%");
+
+      // Upload images
+      const imageFiles = Array.from(imageInput.files);
+      const imageUrls = [];
+      for (const img of imageFiles) {
+        const imgUpload = await uploadToCloudinary(img, () => {});
+        imageUrls.push(imgUpload.secure_url);
+      }
+
+      const data = {
+        name: fileName.value || file.name,
+        desc: fileDesc.value,
+        color: customColor.value,
+        maskedText: maskedText.value || "Download",
+        fileUrl: uploaded.secure_url,
+        images: imageUrls,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      await db.collection("emergencyFiles").add(data);
+      uploadStatus.innerHTML = `<p style="color:lime;">✅ Upload successful! It will appear on the dashboard.</p>`;
+      loadFiles();
+    } catch (err) {
+      console.error(err);
+      uploadStatus.innerHTML = `<p style="color:red;">Upload failed: ${err}</p>`;
+    }
+  }
 });
 
-// Load files to toolsPostsList in home.html
-function loadFiles(){
-  const toolsPostsList = window.parent?.document?.getElementById('toolsPostsList') || uploadedFilesDiv;
-  toolsPostsList.innerHTML='';
-  db.collection('emergencyFiles').orderBy('createdAt','desc').get().then(snapshot=>{
-    snapshot.forEach(doc=>{
-      const d = doc.data();
-      const postHTML = buildPostHTML(d.name,d.nameCol,d.desc,d.bg,d.url,d.maskedLinks,d.fileType);
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = postHTML;
-      tempDiv.querySelector('.deleteBtn').addEventListener('click', ()=>{
-        doc.ref.delete().then(()=>loadFiles());
-      });
-      toolsPostsList.appendChild(tempDiv.firstChild);
+// Load uploaded files
+async function loadFiles() {
+  uploadedFilesDiv.innerHTML = "";
+  const snap = await db.collection("emergencyFiles").orderBy("createdAt", "desc").get();
+  snap.forEach(doc => {
+    const d = doc.data();
+    const div = document.createElement("div");
+    div.className = "file-card";
+    div.innerHTML = `
+      <strong style="color:${d.color}">${d.name}</strong><br>
+      <span>${d.desc || ""}</span><br>
+      <a href="${d.fileUrl}" target="_blank" style="color:${d.color};text-decoration:none;">⬇ ${d.maskedText}</a>
+      <div class="preview-images">
+        ${(d.images||[]).map(img=>`<img src="${img}">`).join('')}
+      </div>
+      <button class="deleteBtn" data-id="${doc.id}">Delete</button>
+    `;
+    div.querySelector(".deleteBtn").addEventListener("click", async () => {
+      if (confirm("Delete this file?")) {
+        await db.collection("emergencyFiles").doc(doc.id).delete();
+        div.remove();
+      }
     });
+    uploadedFilesDiv.appendChild(div);
   });
 }
-
-// Preview
-previewBtn.addEventListener('click', ()=>{
-  const name = fileNameInput.value || (fileInput.files[0]?.name || 'File');
-  const nameCol = fileNameColor.value;
-  const desc = fileDescInput.value;
-  const bg = fileBgInput.value;
-  const maskedLinks=[];
-  maskedLinksContainer.querySelectorAll('.mask-link-row').forEach(r=>{
-    const u=r.querySelector('.maskUrl').value;
-    const t=r.querySelector('.maskText').value;
-    const c=r.querySelector('.maskColor').value;
-    if(u && t) maskedLinks.push({url:u,text:t,color:c});
-  });
-  const fileType = fileInput.files[0] ? getFileType(fileInput.files[0].name) : 'open';
-  const url = fileInput.files[0] ? URL.createObjectURL(fileInput.files[0]) : '#';
-  previewArea.innerHTML = buildPostHTML(name,nameCol,desc,bg,url,maskedLinks,fileType);
-});
 
 loadFiles();
 </script>
-
 </body>
 </html>
