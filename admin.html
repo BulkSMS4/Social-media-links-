@@ -8,11 +8,11 @@
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    overflow: hidden;
     background: #f0f2f7;
+    overflow: hidden;
   }
 
-  /* Menu button */
+  /* Toggle Button */
   #menuToggle {
     position: fixed;
     top: 12px;
@@ -26,6 +26,11 @@
     cursor: pointer;
     z-index: 2100;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background 0.2s;
+  }
+
+  #menuToggle:hover {
+    background: #ccffcc;
   }
 
   /* Sidebar */
@@ -42,9 +47,11 @@
     flex-direction: column;
     z-index: 2200;
   }
-  #sidebar.active { left: 0; }
 
-  /* Sidebar content (scrollable area) */
+  #sidebar.active {
+    left: 0;
+  }
+
   #sidebar .menu-content {
     flex: 1;
     overflow-y: auto;
@@ -58,7 +65,8 @@
     font-size: 20px;
   }
 
-  #sidebar a, #sidebar .submenu-toggle {
+  #sidebar a,
+  #sidebar .submenu-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -71,7 +79,8 @@
     transition: background 0.2s, color 0.2s;
   }
 
-  #sidebar a:hover, #sidebar .submenu-toggle:hover {
+  #sidebar a:hover,
+  #sidebar .submenu-toggle:hover {
     background: #003300;
     color: #fff;
   }
@@ -81,21 +90,15 @@
     color: #fff;
   }
 
-  /* Submenu styling */
   .submenu {
     display: none;
     flex-direction: column;
     background: #001a00;
-    transition: max-height 0.3s ease;
   }
 
   .submenu a {
     padding-left: 40px;
     border-bottom: none;
-  }
-
-  .submenu-toggle {
-    position: relative;
   }
 
   .submenu-toggle .arrow {
@@ -106,7 +109,6 @@
     transform: rotate(90deg);
   }
 
-  /* Logout stays at bottom */
   #sidebar .logout {
     color: red;
     text-align: center;
@@ -122,16 +124,16 @@
     color: #fff;
   }
 
-  /* Scrollbar styling */
   #sidebar .menu-content::-webkit-scrollbar {
     width: 8px;
   }
+
   #sidebar .menu-content::-webkit-scrollbar-thumb {
     background: lime;
     border-radius: 4px;
   }
 
-  /* Iframe */
+  /* Dashboard Frame */
   #dashboardFrame {
     position: absolute;
     top: 0;
@@ -151,7 +153,7 @@
   <div class="menu-content">
     <h2>⚡ Admin Panel</h2>
 
-    <a href="#" data-page="home.html" class="active">🏠 Home</a>
+    <a href="#" data-page="home.html">🏠 Home</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/notifications.html">🔔 Notifications</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
 
@@ -161,7 +163,7 @@
       <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/all-invoices.html">📜 All Invoices</a>
     </div>
 
-    <a href="#" onclick="trackPackage()">🔎 Track Package</a>
+    <a href="#" id="trackPackageLink">🔎 Track Package</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Status</a>
 
     <div class="submenu-toggle">📝 Forms <span class="arrow">▸</span></div>
@@ -177,74 +179,102 @@
     <a href="#" data-page="generate.html">⚙️ Generate</a>
     <a href="#" data-page="upload.html">📂 Upload Files</a>
     <a href="#" data-page="https://whatsapp-auto-sender-orst.onrender.com/admin.html">🟢 WhatsApp Auto Send</a>
-
-    <!-- New menu items -->
     <a href="#" data-page="cornerticker.html">🔄 Corner Ticker</a>
     <a href="#" data-page="ticker-settings.html">⚙️ Ticker Settings</a>
     <a href="#" data-page="emergency-broadcast-settings.html">📡 Emergency Broadcast Settings</a>
     <a href="#" data-page="admin-emergency-control.html">🚨 Admin Emergency Control</a>
     <a href="#" data-page="admin-emergency-control-panel.html">🛄 Admin Emergency Control Panel</a>
     <a href="#" data-page="emergency-settings.html">⚠️ Emergency Settings</a>
-    
     <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
   </div>
 
   <div class="logout" id="logoutBtn">🚪 Logout</div>
 </div>
 
-<iframe id="dashboardFrame" src="home.html"></iframe>
+<iframe id="dashboardFrame"></iframe>
 
 <script>
-const menuToggle = document.getElementById('menuToggle');
 const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+const iframe = document.getElementById('dashboardFrame');
+const links = document.querySelectorAll('#sidebar a[data-page]');
 
-// Toggle sidebar open/close
+// ✅ Load last visited page
+const savedPage = localStorage.getItem('currentPage') || 'home.html';
+iframe.src = savedPage;
+
+// Highlight the active link on reload
+links.forEach(link => {
+  if (link.getAttribute('data-page') === savedPage) link.classList.add('active');
+});
+
+// ✅ Menu toggle
 menuToggle.addEventListener('click', () => {
   sidebar.classList.toggle('active');
 });
 
-// Page navigation
-document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
+// ✅ Close menu by clicking outside (on iframe area)
+document.addEventListener('click', e => {
+  if (
+    sidebar.classList.contains('active') &&
+    !sidebar.contains(e.target) &&
+    e.target !== menuToggle
+  ) {
+    sidebar.classList.remove('active');
+  }
+});
+
+// ✅ Close menu with ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+    sidebar.classList.remove('active');
+  }
+});
+
+// ✅ Page navigation & memory
+links.forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
-    const iframe = document.getElementById('dashboardFrame');
-    iframe.src = link.getAttribute('data-page');
+    const page = link.getAttribute('data-page');
+    iframe.src = page;
+    localStorage.setItem('currentPage', page);
 
-    // Highlight active link
-    document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
+    links.forEach(a => a.classList.remove('active'));
     link.classList.add('active');
     sidebar.classList.remove('active');
   });
 });
 
-// Submenu toggle
+// ✅ Submenu toggle
 document.querySelectorAll('.submenu-toggle').forEach(toggle => {
   toggle.addEventListener('click', () => {
     const submenu = toggle.nextElementSibling;
-    if (submenu.style.display === 'flex') {
-      submenu.style.display = 'none';
-      toggle.classList.remove('open');
-    } else {
+    const isOpen = submenu.style.display === 'flex';
+    document.querySelectorAll('.submenu').forEach(sm => sm.style.display = 'none');
+    document.querySelectorAll('.submenu-toggle').forEach(t => t.classList.remove('open'));
+    if (!isOpen) {
       submenu.style.display = 'flex';
       toggle.classList.add('open');
     }
   });
 });
 
-// Track Package
-function trackPackage() {
+// ✅ Track Package
+document.getElementById('trackPackageLink').addEventListener('click', () => {
   const packageId = prompt("Enter Package ID to track:", "XCE123456");
   if (packageId) {
-    document.getElementById('dashboardFrame').src =
-      `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
+    const page = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
+    iframe.src = page;
+    localStorage.setItem('currentPage', page);
     sidebar.classList.remove('active');
   }
-}
+});
 
-// Logout
+// ✅ Logout
 document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem('currentPage');
   window.location.href = "logout.html";
 });
 </script>
 </body>
-</html>
+      </html>
