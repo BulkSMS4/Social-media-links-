@@ -6,24 +6,21 @@
 <title>Admin Dashboard — X-Cargo Express</title>
 <style>
 :root { --em-color:#ff3333; }
-body { font-family:Arial,sans-serif; margin:0; padding:20px; background:#000; color:lime; }
-
-/* --- Background overlay --- */
+body { font-family:Arial,sans-serif; margin:0; padding:20px; background:#000; color:lime; overflow-x:hidden; }
 body::before { content:""; position:fixed; inset:0; background:#111; opacity:0.45; z-index:0; }
 
-/* --- Mobile Screens --- */
+/* --- Main layout --- */
 .top-mobile { position:relative; z-index:1; width:90%; max-width:1200px; margin:20px auto; border-radius:18px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
 .mobile-screen { background:#111; color:var(--em-color); padding:16px; height:280px; overflow:auto; border:3px solid rgba(255,0,0,0.25); border-radius:14px; }
 .mobile-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px; }
 .mobile-title { font-weight:900; font-size:20px; color:var(--em-color); text-shadow:0 0 10px red; }
 
 .post { background:#0b0b0b; border-radius:12px; padding:10px; margin-bottom:10px; color:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.6); }
-.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+.post .meta { font-size:12px; color:#9fd89f; margin-bottom:6px; text-align:right; }
 .post img { max-width:100%; border-radius:8px; margin-top:8px; border:1px solid #333; }
 .post .download { display:inline-block; margin-top:8px; padding:8px 12px; border-radius:8px; background:#28a745; color:#fff; text-decoration:none; font-weight:700; }
-.mask-link { font-weight:bold; text-decoration:underline; cursor:pointer; margin-right:6px; }
 
-/* --- Dashboard Grid --- */
+/* --- Dashboard --- */
 .dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:18px; position:relative; z-index:1; }
 .dashboard-section { background:#111; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.4); color:lime; text-align:center; }
 .link-box { background:#000; padding:8px; border:1px solid lime; border-radius:6px; margin-bottom:5px; font-size:14px; word-break:break-all; color:lime; }
@@ -32,7 +29,7 @@ body::before { content:""; position:fixed; inset:0; background:#111; opacity:0.4
 .btn-green { background:green; color:white; padding:10px 12px; border-radius:8px; border:none; cursor:pointer; margin-bottom:6px; }
 .btn-copy { background:#333; color:lime; border:1px solid lime; padding:8px 10px; border-radius:8px; cursor:pointer; margin-bottom:6px; }
 
-/* --- Animated Corner Ticker (different style) --- */
+/* --- Corner Ticker --- */
 #cornerTicker {
   position: fixed; top:20px; right:20px; width:370px; max-width:90%; height:54px;
   background: linear-gradient(90deg, #330000, #000, #330000);
@@ -47,15 +44,22 @@ body::before { content:""; position:fixed; inset:0; background:#111; opacity:0.4
   cursor:pointer;
   box-shadow:0 0 15px red;
   overflow:hidden;
+  opacity:1;
+  transition:opacity 1s ease;
 }
 @keyframes bgShift { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
 #cornerTickerInner {
   display:flex; align-items:center; white-space:nowrap;
   padding-left:100%; animation: cornerScroll 12s linear infinite;
 }
-#cornerTickerInner img { height:32px; width:32px; object-fit:cover; border-radius:6px; margin-right:6px; }
 @keyframes cornerScroll { 0%{transform:translateX(0%);} 100%{transform:translateX(-100%);} }
+
 .hidden { display:none!important; }
+
+@keyframes popupFade {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
 </style>
 </head>
 <body>
@@ -63,38 +67,28 @@ body::before { content:""; position:fixed; inset:0; background:#111; opacity:0.4
 <!-- Emergency Posts -->
 <div class="top-mobile">
   <div class="mobile-screen" id="mobileScreen">
-    <div class="mobile-header">
-      <div class="mobile-title">📣 Emergency Posts ⚡</div>
-    </div>
-    <div id="postsList">
-      <div style="color:#999;text-align:center;padding:30px 0;">Loading posts...</div>
-    </div>
+    <div class="mobile-header"><div class="mobile-title">📣 Emergency Posts ⚡</div></div>
+    <div id="postsList"><div style="color:#999;text-align:center;padding:30px 0;">Loading posts...</div></div>
   </div>
 </div>
 
 <!-- Emergency Files / Tools -->
 <div class="top-mobile">
   <div class="mobile-screen" id="toolsPostsScreen">
-    <div class="mobile-header">
-      <div class="mobile-title">🛠️ Files / Tools ⚡</div>
-    </div>
-    <div id="toolsPostsList">
-      <div style="color:#999;text-align:center;padding:30px 0;">Loading files...</div>
-    </div>
+    <div class="mobile-header"><div class="mobile-title">🛠️ Files / Tools ⚡</div></div>
+    <div id="toolsPostsList"><div style="color:#999;text-align:center;padding:30px 0;">Loading files...</div></div>
   </div>
 </div>
 
-<!-- Dashboard Sections -->
+<!-- Dashboard -->
 <div class="dashboard-grid">
   <div class="dashboard-section">
     <h2>🏛️ BANK 🏧</h2>
     <p class="link-desc">Copy this link and send to your client:</p>
     <div class="link-box" id="bankLink">https://bulksms4.github.io/BANKING/</div>
     <button class="btn-copy" data-copy="bankLink">📋 Copy</button>
-
     <p class="link-desc">Open account here:</p>
     <button class="btn-lime" data-url="https://sp0m.com">🌐 Open Account</button>
-
     <p class="link-desc">Credit bank account:</p>
     <button class="btn-green" data-url="https://bulksms4.github.io/BANKING/create-account.html">💵 Credit Account</button>
   </div>
@@ -104,27 +98,31 @@ body::before { content:""; position:fixed; inset:0; background:#111; opacity:0.4
     <p class="link-desc">Copy this link:</p>
     <div class="link-box" id="trackLink">https://x-cargo-exprees.web.app/</div>
     <button class="btn-copy" data-copy="trackLink">📋 Copy</button>
-
     <p class="link-desc">Create Packages:</p>
     <button class="btn-lime" data-url="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</button>
-
     <p class="link-desc">Update / Suspend:</p>
     <button class="btn-green" data-url="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update / Suspend</button>
   </div>
 </div>
 
-<!-- Animated Ticker -->
-<div id="cornerTicker" title="Click for emergency link" onclick="if(emergencyLink) window.open(emergencyLink,'_blank')">
-  <div id="cornerTickerInner">🚨 Loading emergency alerts...</div>
+<!-- Corner Ticker (Independent Info Display) -->
+<div id="cornerTicker">
+  <div id="cornerTickerInner">📢 Welcome to X-Cargo Admin Dashboard — Stay tuned for updates!</div>
 </div>
 
+<!-- 🔔 Sound Effect -->
+<audio id="alertSound" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+</audio>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 
 <script>
-// Firebase init
-const firebaseConfig = {
+// --- Firebase Config ---
+const firebaseConfig={
   apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain:"usahackersland.firebaseapp.com",
   projectId:"usahackersland",
@@ -134,22 +132,36 @@ const firebaseConfig = {
 };
 if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
+
+// --- Elements ---
 const postsList=document.getElementById('postsList');
 const toolsPostsList=document.getElementById('toolsPostsList');
+const cornerTicker=document.getElementById('cornerTicker');
 const cornerTickerInner=document.getElementById('cornerTickerInner');
-let emergencyLink='';
+const alertSound=document.getElementById('alertSound');
 
-// Copy link buttons
+// --- Popup ---
+function showPopup(message,color="#0f0"){
+  try{alertSound.currentTime=0;alertSound.play();}catch(e){}
+  const overlay=document.createElement('div');
+  overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);";
+  const popup=document.createElement('div');
+  popup.textContent=message;
+  popup.style.cssText=`background:#111;border:3px solid ${color};color:${color};padding:20px 30px;border-radius:14px;font-size:18px;font-weight:bold;text-align:center;box-shadow:0 0 20px ${color};max-width:80%;animation:popupFade 0.4s ease;`;
+  overlay.appendChild(popup);
+  document.body.appendChild(overlay);
+  setTimeout(()=>{overlay.style.opacity='0';overlay.style.transition='opacity 0.5s';setTimeout(()=>overlay.remove(),500);},4000);
+}
+
+// --- Copy and Open Buttons ---
 document.querySelectorAll('.btn-copy').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const id=btn.dataset.copy;
     const text=document.getElementById(id).textContent;
     navigator.clipboard.writeText(text);
-    alert('Copied!');
+    showPopup('✅ Copied to clipboard!','lime');
   });
 });
-
-// Open link buttons
 document.querySelectorAll('.btn-lime,.btn-green').forEach(btn=>{
   btn.addEventListener('click',()=>{
     const url=btn.dataset.url;
@@ -157,30 +169,25 @@ document.querySelectorAll('.btn-lime,.btn-green').forEach(btn=>{
   });
 });
 
-// Emergency Posts
+// --- Emergency Posts (no ticker updates) ---
+let firstLoad=true;
 db.collection('emergencyPosts').orderBy('createdAt','desc').onSnapshot(snapshot=>{
   postsList.innerHTML='';
-  cornerTickerInner.innerHTML='';
   snapshot.forEach(doc=>{
     const d=doc.data();
-    const div=document.createElement('div'); div.className='post';
+    const div=document.createElement('div');
+    div.className='post';
     div.style.border=`2px solid ${d.color||'#ff3333'}`;
-    div.innerHTML=`<div class='meta'><div>${d.author||'Admin'}</div><div>${new Date(d.createdAt?.seconds*1000||Date.now()).toLocaleString()}</div></div>
-                   <div>${d.text||''}</div>`;
-    if(d.imageURL){ const img=document.createElement('img'); img.src=d.imageURL; div.appendChild(img);}
+    const date=new Date(d.createdAt?.seconds*1000||Date.now()).toLocaleString();
+    div.innerHTML=`<div class='meta'>${date}</div><div>${d.text||''}</div>`;
+    if(d.imageURL){const img=document.createElement('img');img.src=d.imageURL;div.appendChild(img);}
     postsList.prepend(div);
-
-    // ticker
-    if(d.imageURL){ const img=document.createElement('img'); img.src=d.imageURL; cornerTickerInner.appendChild(img);}
-    const span=document.createElement('span');
-    span.textContent=` 🚨 ${d.text||''} 🚨 `;
-    span.style.color=d.color||'#ff3333';
-    cornerTickerInner.appendChild(span);
-    emergencyLink=d.link||'';
   });
+  if(!firstLoad) showPopup('🚨 New Emergency Alert Added!','#ff3333');
+  firstLoad=false;
 });
 
-// Emergency Files — Only apk, zip, rar, pdf, docx, xlsx, txt, html
+// --- Emergency Files ---
 const allowedTypes=['apk','zip','rar','pdf','docx','xlsx','txt','html'];
 db.collection('emergencyFiles').orderBy('createdAt','desc').onSnapshot(snapshot=>{
   toolsPostsList.innerHTML='';
@@ -189,16 +196,13 @@ db.collection('emergencyFiles').orderBy('createdAt','desc').onSnapshot(snapshot=
     const div=document.createElement('div');
     div.className='post';
     div.style.border=`2px solid ${d.color||'#33ff33'}`;
-    const meta=`<div class='meta'><div>${d.author||'Admin'}</div><div>${new Date(d.createdAt?.seconds*1000||Date.now()).toLocaleString()}</div></div>`;
-    div.innerHTML=meta;
-
+    const date=new Date(d.createdAt?.seconds*1000||Date.now()).toLocaleString();
+    div.innerHTML=`<div class='meta'>${date}</div>`;
     if(d.title) div.innerHTML+=`<div style="font-weight:bold;margin-bottom:6px;">${d.title}</div>`;
     if(d.description) div.innerHTML+=`<div style="margin-bottom:6px;">${d.description}</div>`;
-
     if(Array.isArray(d.files)){
       d.files.forEach(f=>{
-        if(!allowedTypes.includes(f.type)) return; // skip other types
-
+        if(!allowedTypes.includes(f.type)) return;
         const a=document.createElement('a');
         a.href=f.fileURL; a.target='_blank'; a.className='download';
         let icon='⬇️';
@@ -211,10 +215,39 @@ db.collection('emergencyFiles').orderBy('createdAt','desc').onSnapshot(snapshot=
         div.appendChild(a);
       });
     }
-
     toolsPostsList.prepend(div);
   });
 });
+
+// --- Independent Ticker Message ---
+const tickerMessages=[
+  "📦 X-Cargo Express — Delivering Fast & Secure!",
+  "💡 Tip: Keep your dashboard secure and up to date!",
+  "🚚 Need support? Visit our contact page anytime.",
+  "🌍 X-Cargo: Connecting destinations worldwide."
+];
+let currentTicker=0;
+function updateTicker(){
+  cornerTickerInner.textContent=tickerMessages[currentTicker];
+  currentTicker=(currentTicker+1)%tickerMessages.length;
+}
+setInterval(updateTicker,15000); // every 15s change message
+
+// --- Auto-hide ticker ---
+function startTickerCycle(){
+  cornerTicker.style.opacity='1'; cornerTicker.style.display='flex';
+  const hideTime=Math.floor(Math.random()*2)+3;
+  setTimeout(()=>{
+    cornerTicker.style.opacity='0';
+    setTimeout(()=>cornerTicker.style.display='none',1000);
+    setTimeout(()=>{
+      cornerTicker.style.display='flex';
+      setTimeout(()=>cornerTicker.style.opacity='1',100);
+    },60*1000);
+  },hideTime*60*1000);
+}
+startTickerCycle();
+setInterval(startTickerCycle,6*60*1000);
 </script>
 </body>
 </html>
