@@ -12,7 +12,7 @@
     overflow: hidden;
   }
 
-  /* Toggle Button */
+  /* Menu Toggle Button */
   #menuToggle {
     position: fixed;
     top: 12px;
@@ -151,7 +151,7 @@
 
 <div id="sidebar">
   <div class="menu-content">
-    <h2>⚡ Admin Panel</h2>
+    <h2>⚡ Admin Panel💀</h2>
 
     <a href="#" data-page="home.html">🏠 Home</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/notifications.html">🔔 Notifications</a>
@@ -199,21 +199,24 @@ const menuToggle = document.getElementById('menuToggle');
 const iframe = document.getElementById('dashboardFrame');
 const links = document.querySelectorAll('#sidebar a[data-page]');
 
-// ✅ Load last visited page
+// ✅ Load last visited page (don’t go home after refresh)
 const savedPage = localStorage.getItem('currentPage') || 'home.html';
 iframe.src = savedPage;
 
-// Highlight the active link on reload
+// Highlight correct menu item
 links.forEach(link => {
-  if (link.getAttribute('data-page') === savedPage) link.classList.add('active');
+  if (link.getAttribute('data-page') === savedPage) {
+    link.classList.add('active');
+  }
 });
 
-// ✅ Menu toggle
-menuToggle.addEventListener('click', () => {
+// ✅ Toggle sidebar open/close
+menuToggle.addEventListener('click', e => {
+  e.stopPropagation(); // Prevent closing immediately
   sidebar.classList.toggle('active');
 });
 
-// ✅ Close menu by clicking outside (on iframe area)
+// ✅ Close sidebar when clicking outside
 document.addEventListener('click', e => {
   if (
     sidebar.classList.contains('active') &&
@@ -224,14 +227,14 @@ document.addEventListener('click', e => {
   }
 });
 
-// ✅ Close menu with ESC key
+// ✅ Close sidebar when pressing ESC key
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && sidebar.classList.contains('active')) {
     sidebar.classList.remove('active');
   }
 });
 
-// ✅ Page navigation & memory
+// ✅ Handle menu navigation
 links.forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
@@ -245,9 +248,10 @@ links.forEach(link => {
   });
 });
 
-// ✅ Submenu toggle
+// ✅ Handle submenu open/close
 document.querySelectorAll('.submenu-toggle').forEach(toggle => {
-  toggle.addEventListener('click', () => {
+  toggle.addEventListener('click', e => {
+    e.stopPropagation();
     const submenu = toggle.nextElementSibling;
     const isOpen = submenu.style.display === 'flex';
     document.querySelectorAll('.submenu').forEach(sm => sm.style.display = 'none');
@@ -259,7 +263,7 @@ document.querySelectorAll('.submenu-toggle').forEach(toggle => {
   });
 });
 
-// ✅ Track Package
+// ✅ Track package
 document.getElementById('trackPackageLink').addEventListener('click', () => {
   const packageId = prompt("Enter Package ID to track:", "XCE123456");
   if (packageId) {
@@ -270,7 +274,7 @@ document.getElementById('trackPackageLink').addEventListener('click', () => {
   }
 });
 
-// ✅ Logout
+// ✅ Logout clears stored page
 document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.removeItem('currentPage');
   window.location.href = "logout.html";
