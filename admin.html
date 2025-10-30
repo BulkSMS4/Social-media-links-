@@ -123,27 +123,6 @@
     border: none;
     z-index: 1000;
   }
-
-  /* Corner ticker */
-  #cornerTicker {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: black;
-    color: lime;
-    border: 2px solid lime;
-    border-radius: 10px;
-    padding: 12px 18px;
-    font-weight: bold;
-    font-family: monospace;
-    z-index: 3000;
-    box-shadow: 0 0 10px lime;
-    transition: opacity 1s ease, visibility 1s ease;
-  }
-  #cornerTicker.hidden {
-    opacity: 0;
-    visibility: hidden;
-  }
 </style>
 </head>
 <body>
@@ -195,21 +174,18 @@
 
 <iframe id="dashboardFrame"></iframe>
 
-<div id="cornerTicker">📢 System Running Smoothly...</div>
-
 <script>
 const menuToggle = document.getElementById('menuToggle');
 const sidebar = document.getElementById('sidebar');
 const iframe = document.getElementById('dashboardFrame');
-const ticker = document.getElementById('cornerTicker');
 
 // --- MENU TOGGLE ---
 menuToggle.addEventListener('click', e => {
   e.stopPropagation();
-  sidebar.classList.toggle('active');i
+  sidebar.classList.toggle('active');
 });
 
-// CLOSE MENU WHEN CLICKING OUTSIDE
+// --- CLOSE MENU WHEN CLICKING OUTSIDE ---
 document.addEventListener('click', e => {
   if (sidebar.classList.contains('active') && 
       !sidebar.contains(e.target) && 
@@ -218,11 +194,18 @@ document.addEventListener('click', e => {
   }
 });
 
-// --- PAGE LOADING AND PERSISTENCE ---
+// --- CLOSE MENU WHEN CLICKING THE DASHBOARD (IFRAME AREA) ---
+iframe.addEventListener('load', () => {
+  iframe.contentWindow.addEventListener('focus', () => {
+    sidebar.classList.remove('active');
+  });
+});
+
+// --- PAGE PERSISTENCE ---
 const savedPage = localStorage.getItem('currentPage') || 'home.html';
 iframe.src = savedPage;
 
-// Page navigation links
+// --- PAGE NAVIGATION ---
 document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
@@ -265,16 +248,6 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   localStorage.clear();
   window.location.href = "logout.html";
 });
-
-// --- CORNER TICKER BEHAVIOR ---
-function handleTickerCycle() {
-  ticker.classList.remove('hidden');
-  setTimeout(() => {
-    ticker.classList.add('hidden');
-  }, 1000 * 60 * 3); // Hide after 3 minutes
-  setTimeout(handleTickerCycle, 1000 * 60 * 9); // Show again after 6 more minutes
-}
-handleTickerCycle();
 </script>
 </body>
-</html>
+        </html>
