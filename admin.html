@@ -12,7 +12,7 @@
     overflow: hidden;
   }
 
-  /* Menu Toggle Button */
+  /* Menu button */
   #menuToggle {
     position: fixed;
     top: 12px;
@@ -26,11 +26,6 @@
     cursor: pointer;
     z-index: 2100;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    transition: background 0.2s;
-  }
-
-  #menuToggle:hover {
-    background: #ccffcc;
   }
 
   /* Sidebar */
@@ -47,10 +42,7 @@
     flex-direction: column;
     z-index: 2200;
   }
-
-  #sidebar.active {
-    left: 0;
-  }
+  #sidebar.active { left: 0; }
 
   #sidebar .menu-content {
     flex: 1;
@@ -65,8 +57,7 @@
     font-size: 20px;
   }
 
-  #sidebar a,
-  #sidebar .submenu-toggle {
+  #sidebar a, #sidebar .submenu-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -79,8 +70,7 @@
     transition: background 0.2s, color 0.2s;
   }
 
-  #sidebar a:hover,
-  #sidebar .submenu-toggle:hover {
+  #sidebar a:hover, #sidebar .submenu-toggle:hover {
     background: #003300;
     color: #fff;
   }
@@ -90,6 +80,7 @@
     color: #fff;
   }
 
+  /* Submenu styling */
   .submenu {
     display: none;
     flex-direction: column;
@@ -104,7 +95,6 @@
   .submenu-toggle .arrow {
     transition: transform 0.3s ease;
   }
-
   .submenu-toggle.open .arrow {
     transform: rotate(90deg);
   }
@@ -118,22 +108,12 @@
     cursor: pointer;
     background: #000;
   }
-
   #sidebar .logout:hover {
     background: #330000;
     color: #fff;
   }
 
-  #sidebar .menu-content::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  #sidebar .menu-content::-webkit-scrollbar-thumb {
-    background: lime;
-    border-radius: 4px;
-  }
-
-  /* Dashboard Frame */
+  /* Iframe */
   #dashboardFrame {
     position: absolute;
     top: 0;
@@ -143,6 +123,27 @@
     border: none;
     z-index: 1000;
   }
+
+  /* Corner ticker */
+  #cornerTicker {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: black;
+    color: lime;
+    border: 2px solid lime;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-weight: bold;
+    font-family: monospace;
+    z-index: 3000;
+    box-shadow: 0 0 10px lime;
+    transition: opacity 1s ease, visibility 1s ease;
+  }
+  #cornerTicker.hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
 </style>
 </head>
 <body>
@@ -151,9 +152,9 @@
 
 <div id="sidebar">
   <div class="menu-content">
-    <h2>⚡ Admin Panel💀</h2>
+    <h2>⚡ Admin Panel</h2>
 
-    <a href="#" data-page="home.html">🏠 Home</a>
+    <a href="#" data-page="home.html" class="active">🏠 Home</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/notifications.html">🔔 Notifications</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/create.html">📦 Create Package</a>
 
@@ -163,7 +164,7 @@
       <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/all-invoices.html">📜 All Invoices</a>
     </div>
 
-    <a href="#" id="trackPackageLink">🔎 Track Package</a>
+    <a href="#" onclick="trackPackage()">🔎 Track Package</a>
     <a href="#" data-page="https://bulksms4.github.io/x-cargo-exprees/update-status.html">⚠️ Update Status</a>
 
     <div class="submenu-toggle">📝 Forms <span class="arrow">▸</span></div>
@@ -179,6 +180,7 @@
     <a href="#" data-page="generate.html">⚙️ Generate</a>
     <a href="#" data-page="upload.html">📂 Upload Files</a>
     <a href="#" data-page="https://whatsapp-auto-sender-orst.onrender.com/admin.html">🟢 WhatsApp Auto Send</a>
+
     <a href="#" data-page="cornerticker.html">🔄 Corner Ticker</a>
     <a href="#" data-page="ticker-settings.html">⚙️ Ticker Settings</a>
     <a href="#" data-page="emergency-broadcast-settings.html">📡 Emergency Broadcast Settings</a>
@@ -193,65 +195,50 @@
 
 <iframe id="dashboardFrame"></iframe>
 
-<script>
-const sidebar = document.getElementById('sidebar');
-const menuToggle = document.getElementById('menuToggle');
-const iframe = document.getElementById('dashboardFrame');
-const links = document.querySelectorAll('#sidebar a[data-page]');
+<div id="cornerTicker">📢 System Running Smoothly...</div>
 
-// ✅ Load last visited page (don’t go home after refresh)
+<script>
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const iframe = document.getElementById('dashboardFrame');
+const ticker = document.getElementById('cornerTicker');
+
+// --- MENU TOGGLE ---
+menuToggle.addEventListener('click', e => {
+  e.stopPropagation();
+  sidebar.classList.toggle('active');i
+});
+
+// CLOSE MENU WHEN CLICKING OUTSIDE
+document.addEventListener('click', e => {
+  if (sidebar.classList.contains('active') && 
+      !sidebar.contains(e.target) && 
+      e.target !== menuToggle) {
+    sidebar.classList.remove('active');
+  }
+});
+
+// --- PAGE LOADING AND PERSISTENCE ---
 const savedPage = localStorage.getItem('currentPage') || 'home.html';
 iframe.src = savedPage;
 
-// Highlight correct menu item
-links.forEach(link => {
-  if (link.getAttribute('data-page') === savedPage) {
-    link.classList.add('active');
-  }
-});
-
-// ✅ Toggle sidebar open/close
-menuToggle.addEventListener('click', e => {
-  e.stopPropagation(); // Prevent closing immediately
-  sidebar.classList.toggle('active');
-});
-
-// ✅ Close sidebar when clicking outside
-document.addEventListener('click', e => {
-  if (
-    sidebar.classList.contains('active') &&
-    !sidebar.contains(e.target) &&
-    e.target !== menuToggle
-  ) {
-    sidebar.classList.remove('active');
-  }
-});
-
-// ✅ Close sidebar when pressing ESC key
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && sidebar.classList.contains('active')) {
-    sidebar.classList.remove('active');
-  }
-});
-
-// ✅ Handle menu navigation
-links.forEach(link => {
+// Page navigation links
+document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
     const page = link.getAttribute('data-page');
     iframe.src = page;
     localStorage.setItem('currentPage', page);
 
-    links.forEach(a => a.classList.remove('active'));
+    document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
     link.classList.add('active');
     sidebar.classList.remove('active');
   });
 });
 
-// ✅ Handle submenu open/close
+// --- SUBMENU ---
 document.querySelectorAll('.submenu-toggle').forEach(toggle => {
-  toggle.addEventListener('click', e => {
-    e.stopPropagation();
+  toggle.addEventListener('click', () => {
     const submenu = toggle.nextElementSibling;
     const isOpen = submenu.style.display === 'flex';
     document.querySelectorAll('.submenu').forEach(sm => sm.style.display = 'none');
@@ -263,22 +250,31 @@ document.querySelectorAll('.submenu-toggle').forEach(toggle => {
   });
 });
 
-// ✅ Track package
-document.getElementById('trackPackageLink').addEventListener('click', () => {
-  const packageId = prompt("Enter Package ID to track:", "XCE123456");
-  if (packageId) {
-    const page = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${packageId}`;
-    iframe.src = page;
-    localStorage.setItem('currentPage', page);
+// --- TRACK PACKAGE ---
+function trackPackage() {
+  const id = prompt("Enter Package ID to track:", "XCE123456");
+  if (id) {
+    iframe.src = `https://bulksms4.github.io/x-cargo-exprees/track.html?id=${id}`;
+    localStorage.setItem('currentPage', iframe.src);
     sidebar.classList.remove('active');
   }
-});
+}
 
-// ✅ Logout clears stored page
+// --- LOGOUT ---
 document.getElementById('logoutBtn').addEventListener('click', () => {
-  localStorage.removeItem('currentPage');
+  localStorage.clear();
   window.location.href = "logout.html";
 });
+
+// --- CORNER TICKER BEHAVIOR ---
+function handleTickerCycle() {
+  ticker.classList.remove('hidden');
+  setTimeout(() => {
+    ticker.classList.add('hidden');
+  }, 1000 * 60 * 3); // Hide after 3 minutes
+  setTimeout(handleTickerCycle, 1000 * 60 * 9); // Show again after 6 more minutes
+}
+handleTickerCycle();
 </script>
 </body>
-      </html>
+</html>
