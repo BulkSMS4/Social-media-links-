@@ -447,11 +447,11 @@ function generateForm() {
 function renderStandaloneFormHTML(formData){
   // Escape a string for embedding
   function esc(s){ return (s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;"); }
-  const extraFieldsHTML = (formData.extraFields || []).map(f=>`<input placeholder="${esc(f)}" style="width:100%;padding:10px;margin:5px 0;">`).join("\n");
-  const customFieldsHTML = (formData.customFields || []).map(f=>`<input placeholder="${esc(f)}" style="width:100%;padding:10px;margin:5px 0;">`).join("\n");
+  const extraFieldsHTML = (formData.extraFields || []).map(f=>`<input name="${esc(f)}" placeholder="${esc(f)}">`).join("\n");
+  const customFieldsHTML = (formData.customFields || []).map(f=>`<input name="${esc(f)}" placeholder="${esc(f)}">`).join("\n");
   const authHTML = formData.addAuth ? `
-    <input placeholder="${esc(formData.usernamePlaceholder || 'Username')}" style="width:100%;padding:10px;margin:5px 0;">
-    <input placeholder="${esc(formData.passwordPlaceholder || 'Password')}" type="password" style="width:100%;padding:10px;margin:5px 0;">
+    <input name="username" placeholder="Username" style="width:100%;padding:10px;margin:5px 0;">
+<input name="password" type="password" placeholder="Password" style="width:100%;padding:10px;margin:5px 0;">
   ` : "";
 
   return `<!doctype html>
