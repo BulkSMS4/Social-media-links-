@@ -1,4 +1,4 @@
- <html>
+<html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -304,35 +304,35 @@ form.method = "GET";              // use GET so GitHub Pages works
 // no onsubmit preventing submission
 
   // auth fields
-if (isChecked("addAuth")) {
-  const u = document.createElement("input");
-  u.placeholder = get("usernamePlaceholder") || "Username";
-  u.name = "username";   // <-- important
-  form.appendChild(u);
+  if (isChecked("addAuth")) {
+    const u = document.createElement("input");
+    u.placeholder = get("usernamePlaceholder") || "Username";
+    u.style.width = "100%";
+    form.appendChild(u);
 
-  const p = document.createElement("input");
-  p.placeholder = get("passwordPlaceholder") || "Password";
-  p.type = "password";
-  p.name = "password";   // <-- important
-  form.appendChild(p);
-}
+    const p = document.createElement("input");
+    p.placeholder = get("passwordPlaceholder") || "Password";
+    p.type = "password";
+    p.style.width = "100%";
+    form.appendChild(p);
+  }
 
-// extra fields
-const extra = (get("extraFields") || "").split("\n").map(s => s.trim()).filter(Boolean);
-extra.forEach(line => {
-  const e = document.createElement("input");
-  e.placeholder = line;
-  e.name = line.replace(/\s+/g,'_'); // safe field name
-  form.appendChild(e);
-});
+  // extraFields lines
+  const extra = (get("extraFields") || "").split("\n").map(s=>s.trim()).filter(Boolean);
+  extra.forEach(line => {
+    const e = document.createElement("input");
+    e.placeholder = line;
+    e.style.width = "100%";
+    form.appendChild(e);
+  });
 
-// custom fields
-customFields.forEach(f => {
-  const cf = document.createElement("input");
-  cf.placeholder = f;
-  cf.name = f.replace(/\s+/g,'_');  // safe field name
-  form.appendChild(cf);
-});
+  // custom fields
+  customFields.forEach(f => {
+    const cf = document.createElement("input");
+    cf.placeholder = f;
+    cf.style.width = "100%";
+    form.appendChild(cf);
+  });
   // main button
   const btn = document.createElement("button");
   btn.textContent = get("buttonText") || "Continue";
