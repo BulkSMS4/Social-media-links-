@@ -1,4 +1,4 @@
-SafeCTYPE html>
+ <html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -476,7 +476,7 @@ function renderStandaloneFormHTML(formData){
     ${formData.bannerURL ? `<img src="${esc(formData.bannerURL)}" style="width:100%;border-radius:8px;margin:10px 0">` : ''}
     <p style="color:${esc(formData.textColor||'#222')}">${esc(formData.description||'')}</p>
     ${formData.enableWarning ? `<p style="color:${esc(formData.warningColor||'#b71c1c')};font-weight:bold">${esc(formData.warning||'')}</p>` : ''}
-    <form onsubmit="event.preventDefault(); alert('This is a preview; no data is sent.');">
+    <form action="dashboard.html" method="GET">
       ${authHTML}
       ${extraFieldsHTML}
       ${customFieldsHTML}
