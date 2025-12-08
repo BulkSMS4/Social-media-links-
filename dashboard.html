@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Details</title>
+</head>
+<body>
+
+<table border="1" id="output"></table>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const table = document.getElementById("output");
+
+if (params.toString()) {
+  table.innerHTML = "<tr><th>Field</th><th>Value</th></tr>";
+  params.forEach((value, key) => {
+    table.innerHTML += `<tr><td>${key}</td><td>${value}</td></tr>`;
+  });
+}
+</script>
+
+</body>
+</html>
