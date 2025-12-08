@@ -1,9 +1,9 @@
-Builderer>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>🎨 Safe Form Builder — Live Preview</title>
+  <title>Safe Form Builder — Live Preview</title>
   <style>
     body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
     .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
@@ -33,7 +33,7 @@ Builderer>
 <body>
   <div class="container">
     <div class="topbar">
-      <h2>👩Form 👩‍💻</h2>
+      <h2>🎨 Form Builder (Safe)</h2>
       <div class="muted">Live preview + add fields + local save & export — no data leaves your browser.</div>
     </div>
 
@@ -261,7 +261,7 @@ function updatePreview() {
 
   // title + subtitle
   const h2 = document.createElement("h2");
-  h2.textContBuilderet("title") || "";
+  h2.textContent = get("title") || "";
   h2.style.color = get("titleColor") || "#111";
   wrapper.appendChild(h2);
 
@@ -297,11 +297,9 @@ function updatePreview() {
     preview.appendChild(warn);
   }
 
-// form
-const form = document.createElement("form");
-form.action = "dashboard.html";   // submit to your dashboard page
-form.method = "GET";              // use GET so GitHub Pages works
-// no onsubmit preventing submission
+  // form
+  const form = document.createElement("form");
+  form.onsubmit = (e)=>{ e.preventDefault(); alert("This is a preview form — no data is submitted."); };
 
   // auth fields
   if (isChecked("addAuth")) {
@@ -333,6 +331,7 @@ form.method = "GET";              // use GET so GitHub Pages works
     cf.style.width = "100%";
     form.appendChild(cf);
   });
+
   // main button
   const btn = document.createElement("button");
   btn.textContent = get("buttonText") || "Continue";
@@ -477,7 +476,7 @@ function renderStandaloneFormHTML(formData){
     ${formData.bannerURL ? `<img src="${esc(formData.bannerURL)}" style="width:100%;border-radius:8px;margin:10px 0">` : ''}
     <p style="color:${esc(formData.textColor||'#222')}">${esc(formData.description||'')}</p>
     ${formData.enableWarning ? `<p style="color:${esc(formData.warningColor||'#b71c1c')};font-weight:bold">${esc(formData.warning||'')}</p>` : ''}
-    <form action="dashboard.html" method="GET">
+    <form onsubmit="event.preventDefault(); alert('This is a preview; no data is sent.');">
       ${authHTML}
       ${extraFieldsHTML}
       ${customFieldsHTML}
