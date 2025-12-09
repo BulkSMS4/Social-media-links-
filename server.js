@@ -1,29 +1,30 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const bodyParser = require("body-parser");
-const fetch = require("node-fetch");
-const nodemailer = require("nodemailer");
+import express from "express";
+import fs from "fs";
+import path from "path";
+import bodyParser from "body-parser";
+import fetch from "node-fetch";
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// File to store submissions locally
-const DATA_FILE = path.join(__dirname, "submission.json");
+const DATA_FILE = path.join(process.cwd(), "submission.json");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 /* ---------- Telegram CONFIG ---------- */
-const TELEGRAM_BOT_TOKEN = "7540369556:AAH7gDIVcjCRomnXQgLBGkbk5qF6BUdCjX4";
-const TELEGRAM_CHAT_ID = "7635429842";
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 /* ---------- Email CONFIG ---------- */
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "xportbox@gmail.com",
-    pass: "vjssrrrstoqqfnua"
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
   }
 });
 
@@ -39,29 +40,22 @@ function saveSubmission(data) {
 
 function sendTelegram(data) {
   let text = "📩 NEW FORM SUBMISSION\n\n";
-  for (let k in data) {
-    text += `${k}: ${data[k]}\n`;
-  }
+  for (let k in data) text += `${k}: ${data[k]}\n`;
 
   fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text
-    })
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text })
   }).catch(() => {});
 }
 
 function sendEmail(data) {
   let body = "";
-  for (let k in data) {
-    body += `${k}: ${data[k]}\n`;
-  }
+  for (let k in data) body += `${k}: ${data[k]}\n`;
 
   transporter.sendMail({
-    from: "Form Alert <yourgmail@gmail.com>",
-    to: "youremail@gmail.com",
+    from: `"Form Alert" <${process.env.GMAIL_USER}>`,
+    to: process.env.RECEIVER_EMAIL,
     subject: "New Form Submission",
     text: body
   }).catch(() => {});
@@ -69,15 +63,10 @@ function sendEmail(data) {
 
 /* ---------- Submit Endpoint ---------- */
 app.post("/submit", (req, res) => {
-  const submission = {
-    time: new Date().toISOString(),
-    ...req.body
-  };
-
+  const submission = { time: new Date().toISOString(), ...req.body };
   saveSubmission(submission);
   sendTelegram(submission);
   sendEmail(submission);
-
   res.redirect("/dashboard.html");
 });
 
@@ -87,6 +76,4 @@ app.get("/api/submissions", (req, res) => {
   res.json(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
 });
 
-app.listen(PORT, () => {
-  console.log("✅ Server running on port", PORT);
-});
+app.listen(PORT, () => console.log("✅ Server running on port", PORT));
