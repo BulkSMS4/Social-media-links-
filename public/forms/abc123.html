@@ -1,1 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    form {
+      background-color: #222;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+    }
+    button {
+      background-color: #0a84ff;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #006edc;
+    }
+  </style>
+</head>
+<body>
+  <form id="victimForm">
+    <h2>Login</h2>
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="text" name="extra" placeholder="Extra Info">
+    <button type="submit">Submit</button>
+  </form>
 
+  <script>
+    const form = document.getElementById('victimForm');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Collect form data
+      const data = new FormData(form);
+      const params = new URLSearchParams(data);
+
+      // Redirect with form data in URL (public link)
+      window.location.href = `/dashboard.html?${params.toString()}`;
+    });
+  </script>
+</body>
+</html>
