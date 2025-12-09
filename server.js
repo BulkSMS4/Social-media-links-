@@ -15,8 +15,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 /* ---------- Telegram CONFIG ---------- */
-const TELEGRAM_BOT_TOKEN = "PUT_YOUR_TELEGRAM_BOT_TOKEN";
-const TELEGRAM_CHAT_ID = "PUT_YOUR_CHAT_ID";
+const TELEGRAM_BOT_TOKEN = "7540369556:AAH7gDIVcjCRomnXQgLBGkbk5qF6BUdCjX4";
+const TELEGRAM_CHAT_ID = "7635429842";
 
 /* ---------- Email CONFIG ---------- */
 const transporter = nodemailer.createTransport({
