@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import fs from "fs";
 import path from "path";
@@ -6,11 +7,11 @@ import fetch from "node-fetch";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config(); // load .env variables
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const DATA_FILE = path.join(process.cwd(), "submission.json");
+const DATA_FILE = path.resolve("submission.json"); // safe path
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -38,35 +39,51 @@ function saveSubmission(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(all, null, 2));
 }
 
-function sendTelegram(data) {
+async function sendTelegram(data) {
+  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
+
   let text = "📩 NEW FORM SUBMISSION\n\n";
   for (let k in data) text += `${k}: ${data[k]}\n`;
 
-  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text })
-  }).catch(() => {});
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text
+      })
+    });
+  } catch (err) {
+    console.error("Telegram send failed:", err.message);
+  }
 }
 
 function sendEmail(data) {
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) return;
+
   let body = "";
   for (let k in data) body += `${k}: ${data[k]}\n`;
 
   transporter.sendMail({
-    from: `"Form Alert" <${process.env.GMAIL_USER}>`,
-    to: process.env.RECEIVER_EMAIL,
+    from: `Form Alert <${process.env.GMAIL_USER}>`,
+    to: process.env.GMAIL_TO,
     subject: "New Form Submission",
     text: body
-  }).catch(() => {});
+  }).catch(err => console.error("Email send failed:", err.message));
 }
 
 /* ---------- Submit Endpoint ---------- */
 app.post("/submit", (req, res) => {
-  const submission = { time: new Date().toISOString(), ...req.body };
+  const submission = {
+    time: new Date().toISOString(),
+    ...req.body
+  };
+
   saveSubmission(submission);
   sendTelegram(submission);
   sendEmail(submission);
+
   res.redirect("/dashboard.html");
 });
 
@@ -76,4 +93,6 @@ app.get("/api/submissions", (req, res) => {
   res.json(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
 });
 
-app.listen(PORT, () => console.log("✅ Server running on port", PORT));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
