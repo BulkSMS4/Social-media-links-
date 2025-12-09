@@ -22,8 +22,8 @@ const TELEGRAM_CHAT_ID = "7635429842";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "yourgmail@gmail.com",
-    pass: "APP_PASSWORD_ONLY"
+    user: "xportbox@gmail.com",
+    pass: "vjss rrrs toqq fnua"
   }
 });
 
