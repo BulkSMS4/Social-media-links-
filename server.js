@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// File to store submissions locally
 const DATA_FILE = path.join(__dirname, "submission.json");
 
 app.use(bodyParser.urlencoded({ extended: true }));
