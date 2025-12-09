@@ -5,22 +5,41 @@
   <title>Saved Forms</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
   <style>
     body { font-family: Arial; padding: 20px; background: #f9f9f9; }
     h2 { text-align: center; }
+
     .form-card {
-      background: white; padding: 15px; margin: 10px auto;
-      max-width: 700px; border-radius: 8px; box-shadow: 0 0 5px #ccc;
+      background: white;
+      padding: 15px;
+      margin: 10px auto;
+      max-width: 700px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px #ccc;
     }
+
     .actions button {
-      margin: 5px; padding: 6px 12px; border: none; border-radius: 5px;
+      margin: 5px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
       cursor: pointer;
     }
+
     .actions button:hover { opacity: 0.8; }
-    .preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; margin-top: 10px; }
+
+    .preview-img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
+
   <h2>💾 Saved Forms</h2>
   <div id="formsList"></div>  
 
@@ -30,55 +49,72 @@
       authDomain: "usahackersland.firebaseapp.com",
       projectId: "usahackersland",
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
     function loadForms() {
-      db.collection("forms").orderBy("createdAt", "desc").get().then(snapshot => {
-        const list = document.getElementById("formsList");
-        list.innerHTML = "";
-        snapshot.forEach(doc => renderForm(doc));
-      });
+      db.collection("forms")
+        .orderBy("createdAt", "desc")
+        .get()
+        .then(snapshot => {
+          const list = document.getElementById("formsList");
+          list.innerHTML = "";
+
+          snapshot.forEach(doc => renderForm(doc));
+        });
     }
 
     function renderForm(doc) {
       const form = doc.data();
-      const link = `${location.origin}/Social-media-links/form.html?id=${doc.id}`; // ✅ FIXED VIEW LINK
-      const editLink = `${location.origin}/Social-media-links/build.html?edit=${doc.id}`; // ✅ FIXED EDIT LINK
+
+      // ✅ CORRECT WORKING PATH FOR GITHUB PAGES
+      const viewLink = `${location.origin}/Social-media-links-/form.html?id=${doc.id}`;
+      const editLink = `${location.origin}/Social-media-links-/build.html?edit=${doc.id}`;
+
       const div = document.createElement("div");
       div.className = "form-card";
+
       div.innerHTML = `
-        <input value="${form.title || "Untitled Form"}" onchange="saveTitle(this, '${doc.id}')" style="font-size:18px; width:100%; font-weight:bold; padding:5px; border:none; background:#eef;">
+        <input value="${form.title || "Untitled Form"}"
+               onchange="saveTitle(this, '${doc.id}')"
+               style="font-size:18px; width:100%; font-weight:bold; padding:5px; border:none; background:#eef;">
+
         <p><strong>Created:</strong> ${new Date(form.createdAt).toLocaleString()}</p>
-        <p><strong>Link:</strong> <input type="text" value="${link}" readonly style="width:80%;"> 
-          <button onclick="copyLink('${link}')">📋 Copy</button>
+
+        <p>
+          <strong>Link:</strong>
+          <input type="text" value="${viewLink}" readonly style="width:80%;">
+          <button onclick="copyLink('${viewLink}')">📋 Copy</button>
         </p>
+
         ${form.bannerURL ? `<img src="${form.bannerURL}" class="preview-img" />` : ""}
+
         <div class="actions">
-          <button onclick="viewForm('${link}')">👁️ View</button>
+          <button onclick="viewForm('${viewLink}')">👁️ View</button>
           <button onclick="editForm('${editLink}')">✏️ Edit</button>
           <button onclick="deleteForm('${doc.id}', this)">🗑️ Delete</button>
           <button onclick="downloadForm('${doc.id}')">⬇️ Download</button>
           <button onclick="saveForm('${doc.id}')">💾 Save</button>
         </div>
       `;
+
       document.getElementById("formsList").appendChild(div);
     }
 
     function saveTitle(input, id) {
-      const title = input.value;
-      db.collection("forms").doc(id).update({ title })
-        .then(() => console.log("✅ Title saved."))
-        .catch(err => alert("❌ Failed to save title: " + err));
+      db.collection("forms").doc(id).update({ title: input.value })
+        .then(() => console.log("Title saved"))
+        .catch(err => alert("Failed to save: " + err));
     }
 
-    function saveForm(id) {
-      alert("✅ Form saved!");
+    function saveForm() {
+      alert("Form saved.");
     }
 
     function copyLink(link) {
       navigator.clipboard.writeText(link);
-      alert("Copied link!");
+      alert("Copied!");
     }
 
     function viewForm(link) {
@@ -90,25 +126,30 @@
     }
 
     function deleteForm(id, btn) {
-      if (confirm("Are you sure you want to delete this form?")) {
-        db.collection("forms").doc(id).delete().then(() => {
-          btn.closest(".form-card").remove();
-        });
-      }
+      if (!confirm("Delete this form?")) return;
+
+      db.collection("forms").doc(id).delete()
+        .then(() => btn.closest(".form-card").remove());
     }
 
     function downloadForm(id) {
       db.collection("forms").doc(id).get().then(doc => {
         const data = doc.data();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `form_${id}.json`;
-        link.click();
+
+        const blob = new Blob(
+          [JSON.stringify(data, null, 2)],
+          { type: 'application/json' }
+        );
+
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `form_${id}.json`;
+        a.click();
       });
     }
 
     loadForms();
   </script>
+
 </body>
 </html>
