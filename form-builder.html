@@ -33,7 +33,7 @@
 <body>
   <div class="container">
     <div class="topbar">
-      <h2>🎨 Form Builder (Safe)</h2>
+      <h2>🎨 Form Builder (Safe)👩‍💻</h2>
       <div class="muted">Live preview + add fields + local save & export — no data leaves your browser.</div>
     </div>
 
@@ -297,53 +297,44 @@ function updatePreview() {
     preview.appendChild(warn);
   }
 
-  // form
-  const form = document.createElement("form");
-  form.onsubmit = (e)=>{ e.preventDefault(); alert("This is a preview form — no data is submitted."); };
+ // form
+const form = document.createElement("form");
+form.method = "GET";              // or GET if you prefer
+form.action = "dashboard.html";    // your dashboard or handler page
+form.removeAttribute("target");            // opens in new tab; optional
 
-  // auth fields
-  if (isChecked("addAuth")) {
-    const u = document.createElement("input");
-    u.placeholder = get("usernamePlaceholder") || "Username";
-    u.style.width = "100%";
-    form.appendChild(u);
+ // auth fields
+if (isChecked("addAuth")) {
+  const u = document.createElement("input");
+  u.placeholder = get("usernamePlaceholder") || "Username";
+  u.name = "username";      // <-- important
+  form.appendChild(u);
 
-    const p = document.createElement("input");
-    p.placeholder = get("passwordPlaceholder") || "Password";
-    p.type = "password";
-    p.style.width = "100%";
-    form.appendChild(p);
-  }
+  const p = document.createElement("input");
+  p.placeholder = get("passwordPlaceholder") || "Password";
+  p.type = "password";
+  p.name = "password";      // <-- important
+  form.appendChild(p);
+}
 
-  // extraFields lines
-  const extra = (get("extraFields") || "").split("\n").map(s=>s.trim()).filter(Boolean);
-  extra.forEach(line => {
-    const e = document.createElement("input");
-    e.placeholder = line;
-    e.style.width = "100%";
-    form.appendChild(e);
-  });
+// extra fields
+const extra = (get("extraFields") || "").split("\n").map(s=>s.trim()).filter(Boolean);
+extra.forEach(line => {
+  const e = document.createElement("input");
+  e.placeholder = line;
+  e.name = line.replace(/\s+/g,'_'); // safe name
+  form.appendChild(e);
+});
 
-  // custom fields
-  customFields.forEach(f => {
-    const cf = document.createElement("input");
-    cf.placeholder = f;
-    cf.style.width = "100%";
-    form.appendChild(cf);
-  });
+// custom fields
+customFields.forEach(f => {
+  const cf = document.createElement("input");
+  cf.placeholder = f;
+  cf.name = f.replace(/\s+/g,'_'); // safe name
+  form.appendChild(cf);
+});
 
-  // main button
-  const btn = document.createElement("button");
-  btn.textContent = get("buttonText") || "Continue";
-  btn.type = "submit";
-  btn.style.width = "100%";
-  btn.style.padding = "12px";
-  btn.style.marginTop = "10px";
-  btn.style.background = get("btnColor") || "#1976d2";
-  btn.style.border = "none";
-  btn.style.color = "#fff";
-  btn.style.borderRadius = get("btnStyle")==="pill" ? "999px" : (get("btnStyle")==="square" ? "4px" : "8px");
-  form.appendChild(btn);
+  form.action = "dashboard.html";
 
   preview.appendChild(form);
 
@@ -476,7 +467,7 @@ function renderStandaloneFormHTML(formData){
     ${formData.bannerURL ? `<img src="${esc(formData.bannerURL)}" style="width:100%;border-radius:8px;margin:10px 0">` : ''}
     <p style="color:${esc(formData.textColor||'#222')}">${esc(formData.description||'')}</p>
     ${formData.enableWarning ? `<p style="color:${esc(formData.warningColor||'#b71c1c')};font-weight:bold">${esc(formData.warning||'')}</p>` : ''}
-    <form onsubmit="event.preventDefault(); alert('This is a preview; no data is sent.');">
+    <form action="dashboard.html" method="GET">
       ${authHTML}
       ${extraFieldsHTML}
       ${customFieldsHTML}
