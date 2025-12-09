@@ -1,99 +1,91 @@
-// server.js
-const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch'); // For Telegram alerts
-const nodemailer = require('nodemailer'); // For email alerts
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const bodyParser = require("body-parser");
+const fetch = require("node-fetch");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Parse JSON and URL-encoded bodies
+const DATA_FILE = path.join(__dirname, "submission.json");
+
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.static("public"));
 
-// Serve static files from /public
-app.use(express.static(path.join(__dirname, 'public')));
+/* ---------- Telegram CONFIG ---------- */
+const TELEGRAM_BOT_TOKEN = "PUT_YOUR_TELEGRAM_BOT_TOKEN";
+const TELEGRAM_CHAT_ID = "PUT_YOUR_CHAT_ID";
 
-// File to save submissions
-const submissionsFile = path.join(__dirname, 'submissions.json');
+/* ---------- Email CONFIG ---------- */
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "yourgmail@gmail.com",
+    pass: "APP_PASSWORD_ONLY"
+  }
+});
 
-// Helper to save data
+/* ---------- Helpers ---------- */
 function saveSubmission(data) {
-    let submissions = [];
-    if (fs.existsSync(submissionsFile)) {
-        submissions = JSON.parse(fs.readFileSync(submissionsFile));
-    }
-    submissions.push(data);
-    fs.writeFileSync(submissionsFile, JSON.stringify(submissions, null, 2));
+  let all = [];
+  if (fs.existsSync(DATA_FILE)) {
+    all = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+  }
+  all.push(data);
+  fs.writeFileSync(DATA_FILE, JSON.stringify(all, null, 2));
 }
 
-// Replace with your Telegram Bot Token and Chat ID
-const TELEGRAM_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN';
-const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID';
+function sendTelegram(data) {
+  let text = "📩 NEW FORM SUBMISSION\n\n";
+  for (let k in data) {
+    text += `${k}: ${data[k]}\n`;
+  }
 
-// Replace with your email SMTP settings
-const transporter = nodemailer.createTransport({
-    host: "smtp.example.com",
-    port: 587,
-    secure: false,
-    auth: {
-        user: "you@example.com",
-        pass: "yourpassword"
-    }
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text
+    })
+  }).catch(() => {});
+}
+
+function sendEmail(data) {
+  let body = "";
+  for (let k in data) {
+    body += `${k}: ${data[k]}\n`;
+  }
+
+  transporter.sendMail({
+    from: "Form Alert <yourgmail@gmail.com>",
+    to: "youremail@gmail.com",
+    subject: "New Form Submission",
+    text: body
+  }).catch(() => {});
+}
+
+/* ---------- Submit Endpoint ---------- */
+app.post("/submit", (req, res) => {
+  const submission = {
+    time: new Date().toISOString(),
+    ...req.body
+  };
+
+  saveSubmission(submission);
+  sendTelegram(submission);
+  sendEmail(submission);
+
+  res.redirect("/dashboard.html");
 });
 
-// Form submission endpoint
-app.post('/submit', async (req, res) => {
-    const { formId, redirectUrl, ...fields } = req.body;
-
-    const submission = {
-        formId,
-        fields,
-        timestamp: new Date().toISOString()
-    };
-
-    // Save locally
-    saveSubmission(submission);
-
-    // Telegram alert
-    try {
-        if (TELEGRAM_TOKEN && TELEGRAM_CHAT_ID) {
-            const message = `New submission:\n${JSON.stringify(fields, null, 2)}`;
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
-            });
-        }
-    } catch (err) {
-        console.log("Telegram error:", err);
-    }
-
-    // Email alert
-    try {
-        if (transporter) {
-            await transporter.sendMail({
-                from: '"Form Alerts" <you@example.com>',
-                to: 'recipient@example.com',
-                subject: `New submission for ${formId}`,
-                text: JSON.stringify(fields, null, 2)
-            });
-        }
-    } catch (err) {
-        console.log("Email error:", err);
-    }
-
-    // Redirect
-    if (redirectUrl) {
-        return res.redirect(redirectUrl);
-    }
-
-    res.send({ status: 'success' });
+/* ---------- Dashboard API ---------- */
+app.get("/api/submissions", (req, res) => {
+  if (!fs.existsSync(DATA_FILE)) return res.json([]);
+  res.json(JSON.parse(fs.readFileSync(DATA_FILE, "utf8")));
 });
 
-// Start server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log("✅ Server running on port", PORT);
 });
