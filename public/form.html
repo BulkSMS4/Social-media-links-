@@ -5,20 +5,19 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Dynamic Form</title>
 <style>
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;color:#222;}
-#formContainer{max-width:600px;margin:20px auto;background:#fff;padding:20px;border-radius:10px;position:relative;}
-.draggableBtn{position:absolute;cursor:move;color:#fff;border:none;border-radius:8px;}
-.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;}
-input,textarea,select,button{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
-button.mainBtn{padding:10px;border:none;border-radius:8px;color:#fff;cursor:pointer;}
-.gallery img{margin:4px;width:calc(50% - 8px);border-radius:6px;}
-.video iframe{width:100%;height:200px;margin-top:8px;border-radius:6px;}
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px}
+.wrap{max-width:800px;margin:auto;background:#fff;padding:18px;border-radius:10px}
+input,textarea,select,button{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
+textarea{min-height:70px}
+.draggableBtn{position:absolute;cursor:move;color:#fff;border:none;border-radius:8px}
+.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
 </style>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
-<div id="formContainer"></div>
+<div class="wrap" id="formWrap"></div>
 
 <script>
 const firebaseConfig = {
@@ -28,153 +27,128 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const $ = id => document.getElementById(id);
-const formContainer = $("formContainer");
 
-const urlParams = new URLSearchParams(window.location.search);
-const formId = urlParams.get('id');
-
-if(!formId){
-  formContainer.innerHTML="<p>❌ Invalid form link</p>";
-} else {
-  db.collection("forms").doc(formId).get().then(doc=>{
-    if(!doc.exists){
-      formContainer.innerHTML="<p>❌ Form not found</p>";
-      return;
-    }
-    const data = doc.data();
-    renderForm(data);
-  }).catch(err=>{
-    console.error(err);
-    formContainer.innerHTML="<p>❌ Error loading form</p>";
-  });
+function getQueryParam(name) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
 }
 
 function renderForm(data){
-  formContainer.style.background = data.bgColor || "#fff";
+  const wrap = document.getElementById("formWrap");
+  wrap.innerHTML="";
+  wrap.style.background=data.bgColor||"#fff";
   if(data.bgImageURL){
-    formContainer.style.backgroundImage=`url(${data.bgImageURL})`;
-    formContainer.style.backgroundSize=data.bgSize || "cover";
-    formContainer.style.backgroundRepeat="no-repeat";
+    wrap.style.backgroundImage=`url(${data.bgImageURL})`;
+    wrap.style.backgroundSize=data.bgSize||"cover";
   }
 
-  let html = "";
-  if(data.avatarURL) html+=`<img src="${data.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if(data.logoURL) html+=`<img src="${data.logoURL}" style="width:140px;display:block;margin:auto">`;
-  html+=`<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
-  html+=`<p style="text-align:center;color:${data.subtitleColor}">${data.subtitle}</p>`;
-  html+=`<p>${data.description}</p>`;
+  if(data.avatarURL) wrap.innerHTML+=`<img src="${data.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+  if(data.logoURL) wrap.innerHTML+=`<img src="${data.logoURL}" style="width:140px;display:block;margin:auto">`;
 
-  // Warning
+  wrap.innerHTML+=`<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
+  wrap.innerHTML+=`<p style="text-align:center;color:${data.subtitleColor}">${data.subtitle}</p>`;
+  wrap.innerHTML+=`<p>${data.description}</p>`;
+
   if(data.enableWarning && data.warningPosition!=="none"){
-    html+=`<p style="color:#b71c1c;text-align:${data.warningPosition}">${data.warning}</p>`;
+    wrap.innerHTML+=`<p style="color:#b71c1c;text-align:${data.warningPosition}">${data.warning}</p>`;
   }
 
-  const formFields = document.createElement("div");
-  formFields.style.display="flex";
-  formFields.style.flexDirection="column";
-  formFields.style.gap="8px";
+  const formDiv=document.createElement("div");
+  formDiv.style.display="flex";
+  formDiv.style.flexDirection="column";
+  formDiv.style.alignItems=data.btnPosition==="left"?"flex-start":data.btnPosition==="right"?"flex-end":"center";
+  formDiv.style.gap="8px";
 
-  // Auth Fields
   if(data.addAuth){
-    formFields.innerHTML+=`<input placeholder="${data.usernamePlaceholder}">`;
-    formFields.innerHTML+=`<input type="password" placeholder="${data.passwordPlaceholder}">`;
+    formDiv.innerHTML+=`<input placeholder="${data.usernamePlaceholder}">`;
+    formDiv.innerHTML+=`<input type="password" placeholder="${data.passwordPlaceholder}">`;
   }
 
-  // Extra Fields
-  (data.extraFields||[]).forEach(f=>{
-    if(f) formFields.innerHTML+=`<input placeholder="${f}">`;
-  });
-
-  // Gallery Images
-  if(data.galleryImages && data.galleryImages.length){
-    const galleryDiv = document.createElement("div");
-    galleryDiv.className="gallery";
-    data.galleryImages.forEach(img=>{
-      const im=document.createElement("img");
-      im.src=img;
-      galleryDiv.appendChild(im);
+  if(data.extraFields && data.extraFields.length){
+    data.extraFields.forEach(v=>{
+      if(v.trim()) formDiv.innerHTML+=`<input placeholder="${v.trim()}">`;
     });
-    formFields.appendChild(galleryDiv);
   }
 
-  // Video Embeds
-  if(data.videoLinks && data.videoLinks.length){
-    const videoDiv = document.createElement("div");
-    videoDiv.className="video";
-    data.videoLinks.forEach(v=>{
-      const iframe=document.createElement("iframe");
-      iframe.src=v.replace("watch?v=","embed/");
-      iframe.frameBorder="0";
-      iframe.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-      iframe.allowFullscreen=true;
-      videoDiv.appendChild(iframe);
+  // Embed Links
+  if(data.embedLinks){
+    data.embedLinks.forEach(link=>{
+      if(!link.show) return;
+      const div=document.createElement("div");
+      div.className="embedLink";
+      div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
+      if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;
+      formDiv.appendChild(div);
     });
-    formFields.appendChild(videoDiv);
   }
 
-  // Embed Links above main button
-  (data.embedLinks||[]).forEach(link=>{
-    if(!link.show) return;
-    const div=document.createElement("div");
-    div.className="embedLink";
-    div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
-    if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;
-    formFields.appendChild(div);
-  });
+  // Generate Button
+  if(data.showGenerateBtn){
+    const genBtn=document.createElement("button");
+    genBtn.textContent=data.generateBtnText||"Generate";
+    genBtn.style.background="#1976d2";
+    genBtn.style.color="#fff";
+    genBtn.style.padding="10px";
+    genBtn.style.border="none";
+    genBtn.style.borderRadius="8px";
+    genBtn.onclick=()=>alert("Form Generated!");
+    formDiv.appendChild(genBtn);
+  }
 
   // Main Button
   if(data.showMainBtn){
-    const mainBtn = document.createElement("button");
-    mainBtn.className="mainBtn";
-    mainBtn.style.background=data.btnColor;
-    mainBtn.textContent=data.buttonText;
-    mainBtn.onclick = () => {
+    const mainBtn=document.createElement("button");
+    mainBtn.style.background=data.btnColor||"#1976d2";
+    mainBtn.style.color="#fff";
+    mainBtn.style.padding="10px";
+    mainBtn.style.border="none";
+    mainBtn.style.borderRadius="8px";
+    mainBtn.textContent=data.buttonText||"Submit";
+    mainBtn.onclick=()=>{
+      alert("Form submitted!");
       if(data.enableRedirect && data.redirectURL){
         window.location.href = data.redirectURL;
-      } else {
-        alert("Form submitted!");
       }
     };
-    formFields.appendChild(mainBtn);
+    formDiv.appendChild(mainBtn);
   }
 
-  formContainer.appendChild(formFields);
+  wrap.appendChild(formDiv);
 
   // Extra draggable buttons
-  (data.extraButtons||[]).forEach(b=>{
-    if(!b.show) return;
-    const btn = document.createElement("button");
-    btn.className="draggableBtn";
-    btn.textContent=b.text;
-    btn.style.background=b.color;
-    btn.style.width=b.size+"px";
-    btn.style.height=b.size+"px";
-    btn.style.left=b.x+"%";
-    btn.style.top=b.y+"%";
-    btn.style.position="absolute";
-    btn.onclick = ()=>window.open(b.link,"_blank");
-    let dragging = false, offsetX=0, offsetY=0;
-    btn.onmousedown = e => { dragging=true; offsetX=e.offsetX; offsetY=e.offsetY; };
-    document.onmousemove = e => {
-      if(!dragging) return;
-      const rect=formContainer.getBoundingClientRect();
-      let x=((e.clientX-rect.left-offsetX)/rect.width)*100;
-      let y=((e.clientY-rect.top-offsetY)/rect.height)*100;
-      btn.style.left=x+"%";
-      btn.style.top=y+"%";
-    };
-    document.onmouseup = ()=>dragging=false;
-    formContainer.appendChild(btn);
-  });
+  if(data.extraButtons){
+    data.extraButtons.forEach(b=>{
+      if(!b.show) return;
+      const btn=document.createElement("button");
+      btn.className="draggableBtn";
+      btn.textContent=b.text;
+      btn.style.background=b.color;
+      btn.style.width=b.size+"px";
+      btn.style.height=b.size+"px";
+      btn.style.left=b.x+"%";
+      btn.style.top=b.y+"%";
+      btn.onclick=()=>window.open(b.link,"_blank");
+      wrap.appendChild(btn);
+    });
+  }
 
-  // Footer
-  const footer = document.createElement("footer");
-  footer.style.textAlign="center";
-  footer.style.marginTop="10px";
-  footer.style.fontSize="12px";
-  footer.textContent = data.footerText;
-  formContainer.appendChild(footer);
+  wrap.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${data.footerText||""}</footer>`;
+}
+
+const formId = getQueryParam("id");
+if(formId){
+  db.collection("forms").doc(formId).get().then(doc=>{
+    if(doc.exists){
+      renderForm(doc.data());
+    } else {
+      document.getElementById("formWrap").textContent="Form not found!";
+    }
+  }).catch(err=>{
+    console.error(err);
+    document.getElementById("formWrap").textContent="Error loading form.";
+  });
+} else {
+  document.getElementById("formWrap").textContent="No form ID provided.";
 }
 </script>
 </body>
