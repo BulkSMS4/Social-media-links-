@@ -3,20 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Smart Drag Form Builder — COMPLETE FINAL</title>
-
+<title>Smart Drag Form Builder 🎨 COMPLETE FINAL</title>
 <style>
 body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px}
 .wrap{max-width:1200px;margin:auto;background:#fff;padding:18px;border-radius:10px}
 label{display:block;margin-top:10px;font-weight:700}
-input,textarea,select,button{
-  width:100%;
-  padding:8px;
-  margin-top:6px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  box-sizing:border-box
-}
+input,textarea,select,button{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
 textarea{min-height:70px}
 .row{display:flex;gap:10px}
 .col{flex:1}
@@ -32,7 +24,6 @@ textarea{min-height:70px}
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
-
 <body>
 <div class="wrap">
 <h2>Smart Drag Form Builder — COMPLETE</h2>
@@ -131,19 +122,14 @@ Address
 </select>
 
 <h3>Extra Smart Drag Buttons</h3>
-
 <label>New Button Text</label>
 <input id="newBtnText" value="WhatsApp Support">
-
 <label>New Button Link</label>
 <input id="newBtnLink" value="https://wa.me/123456789">
-
 <label>New Button Color</label>
 <input type="color" id="newBtnColor" value="#25D366">
-
 <label>New Button Size (px)</label>
 <input id="newBtnSize" value="44">
-
 <label><input type="checkbox" id="newBtnShow" checked> Show this button</label>
 
 <div class="row">
@@ -152,16 +138,12 @@ Address
 </div>
 
 <h3>Embed Links (Above Main Button)</h3>
-
 <label>Embed Link Text</label>
 <input id="embedText" placeholder="Custom Text">
-
 <label>Embed Link URL</label>
 <input id="embedURL" placeholder="https://example.com">
-
 <label>Embed Description (Optional)</label>
 <input id="embedDesc" placeholder="Short description">
-
 <label><input type="checkbox" id="embedShow" checked> Show this embed link</label>
 
 <div class="row">
@@ -172,6 +154,11 @@ Address
 <h3>Redirect Settings</h3>
 <label><input type="checkbox" id="enableRedirect"> Redirect after submission</label>
 <input id="redirectURL" placeholder="https://example.com">
+
+<h3>Generate Button Settings</h3>
+<label>Generate Button Text</label>
+<input id="generateBtnText" value="Generate" placeholder="Button Text">
+<label><input type="checkbox" id="showGenerateBtn" checked> Show this button in form</label>
 
 <label>Footer Text</label>
 <input id="footerText" value="© 2025 Secure Verification Portal">
@@ -196,13 +183,11 @@ Address
 const $ = id => document.getElementById(id);
 let extraButtons = [], embedLinks = [], dragging = null, dx = 0, dy = 0;
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
   projectId: "usahackersland"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -223,10 +208,6 @@ function addExtraButton(){
     show:$("newBtnShow").checked
   });
   renderPreview();
-  $("newBtnText").value="";
-  $("newBtnLink").value="";
-  $("newBtnSize").value="44";
-  $("newBtnShow").checked=true;
 }
 
 function clearExtraButtons(){extraButtons=[];renderPreview();}
@@ -239,10 +220,6 @@ function addEmbedLink(){
     show:$("embedShow").checked
   });
   renderPreview();
-  $("embedText").value="";
-  $("embedURL").value="";
-  $("embedDesc").value="";
-  $("embedShow").checked=true;
 }
 function clearEmbedLinks(){embedLinks=[];renderPreview();}
 
@@ -285,7 +262,7 @@ function renderPreview(){
     if(v.trim()) f.innerHTML+=`<input placeholder="${v.trim()}">`;
   });
 
-  // Embed Links Above Main Button
+  // Embed Links
   embedLinks.forEach(link=>{
     if(!link.show) return;
     const div=document.createElement("div");
@@ -295,7 +272,32 @@ function renderPreview(){
     f.appendChild(div);
   });
 
-  // Extra Smart Drag Buttons
+  // Generate Button
+  if($("showGenerateBtn").checked){
+    const genBtn = document.createElement("button");
+    genBtn.className="mainBtn";
+    genBtn.style.background="#1976d2";
+    genBtn.textContent = $("generateBtnText").value; // custom text
+    genBtn.onclick = ()=>alert("Form Generated!");
+    f.appendChild(genBtn);
+  }
+
+  // Main Button
+  if($("showMainBtn").checked){
+    const mainBtn = document.createElement("button");
+    mainBtn.style.background=$("btnColor").value;
+    mainBtn.style.color="#fff";
+    mainBtn.style.padding="10px";
+    mainBtn.style.border="none";
+    mainBtn.style.borderRadius="8px";
+    mainBtn.textContent=$("buttonText").value;
+    mainBtn.onclick=()=>alert("Form submitted!");
+    f.appendChild(mainBtn);
+  }
+
+  c.appendChild(f);
+
+  // Extra draggable buttons
   extraButtons.forEach(b=>{
     if(!b.show) return;
     const btn=document.createElement("button");
@@ -311,26 +313,6 @@ function renderPreview(){
     p.appendChild(btn);
   });
 
-  // Main Button
-  if($("showMainBtn").checked){
-    const mainBtn = document.createElement("button");
-    mainBtn.style.background=$("btnColor").value;
-    mainBtn.style.color="#fff";
-    mainBtn.style.padding="10px";
-    mainBtn.style.border="none";
-    mainBtn.style.borderRadius="8px";
-    mainBtn.textContent=$("buttonText").value;
-    mainBtn.onclick=()=>{
-      if($("enableRedirect").checked && $("redirectURL").value){
-        window.location.href=$("redirectURL").value;
-      } else {
-        alert("Form submitted!");
-      }
-    };
-    f.appendChild(mainBtn);
-  }
-
-  c.appendChild(f);
   c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
   p.appendChild(c);
 
@@ -344,7 +326,6 @@ function renderPreview(){
   document.onmouseup=()=>dragging=null;
 }
 
-// Save form to Firebase
 function generateForm(){
   const formData = {
     seoTitle: $("seoTitle").value,
@@ -374,6 +355,8 @@ function generateForm(){
     btnColor: $("btnColor").value,
     buttonText: $("buttonText").value,
     showMainBtn: $("showMainBtn").checked,
+    showGenerateBtn: $("showGenerateBtn").checked,
+    generateBtnText: $("generateBtnText").value,
     btnPosition: $("btnPosition").value,
     extraButtons: extraButtons,
     embedLinks: embedLinks,
