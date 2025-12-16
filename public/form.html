@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Preview</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f4f6f8; margin:0; padding:0; }
+  .container { max-width: 700px; margin: 40px auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 12px rgba(0,0,0,0.1);}
+  img { max-width: 100%; display: block; margin: 10px 0; border-radius: 6px;}
+  h2 { margin-top: 10px; }
+  p { margin: 8px 0; }
+  button { padding: 10px 16px; border:none; border-radius:6px; background:#1976d2; color:#fff; cursor:pointer; margin-top:10px; }
+  .warning { color:#b71c1c; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<div class="container" id="formContainer">
+  <p>Loading form...</p>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const container = document.getElementById("formContainer");
+
+// --- GET FORM ID FROM URL ---
+const urlParams = new URLSearchParams(window.location.search);
+let formId = urlParams.get("id");
+if(!formId) {
+  const pathParts = window.location.pathname.split('/');
+  formId = pathParts[pathParts.length - 1]; // support /f/<id>
+}
+
+if(!formId) {
+  container.innerHTML = "<p style='color:red'>Form ID not found in URL.</p>";
+} else {
+  // --- LIVE LISTENER FOR FORM DOCUMENT ---
+  db.collection("forms").doc(formId)
+    .onSnapshot(doc => {
+      if(!doc.exists) {
+        container.innerHTML = "<p style='color:red'>Form not found.</p>";
+        return;
+      }
+
+      const form = doc.data();
+      container.innerHTML = ""; // clear previous content
+
+      // --- RENDER FORM ---
+      if(form.avatarURL) {
+        const avatar = document.createElement("img");
+        avatar.src = form.avatarURL;
+        avatar.style.width = "90px";
+        avatar.style.borderRadius = "50%";
+        if(form.avatarClickable) avatar.onclick = ()=>window.open(form.avatarURL, "_blank");
+        container.appendChild(avatar);
+      }
+
+      if(form.logoURL) {
+        const logo = document.createElement("img");
+        logo.src = form.logoURL;
+        logo.style.width = "140px";
+        if(form.logoClickable) logo.onclick = ()=>window.open(form.logoURL, "_blank");
+        container.appendChild(logo);
+      }
+
+      if(form.title) {
+        const h2 = document.createElement("h2");
+        h2.textContent = form.title;
+        container.appendChild(h2);
+      }
+
+      if(form.subtitle) {
+        const sub = document.createElement("p");
+        sub.textContent = form.subtitle;
+        container.appendChild(sub);
+      }
+
+      if(form.description) {
+        const desc = document.createElement("p");
+        desc.innerHTML = (form.description||"").replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>');
+        container.appendChild(desc);
+      }
+
+      if(form.warning) {
+        const warn = document.createElement("p");
+        warn.className = "warning";
+        warn.innerHTML = (form.warning||"").replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>');
+        container.appendChild(warn);
+      }
+
+      const btn = document.createElement("button");
+      btn.textContent = form.buttonText || "Continue";
+      container.appendChild(btn);
+
+      // --- OPTIONAL: SEO ---
+      if(form.seo) {
+        if(form.seo.title) document.title = form.seo.title;
+        if(form.seo.desc) {
+          let metaDesc = document.querySelector('meta[name="description"]') || document.createElement('meta');
+          metaDesc.name = "description";
+          metaDesc.content = form.seo.desc;
+          document.head.appendChild(metaDesc);
+        }
+        if(form.seo.og) {
+          let ogImg = document.querySelector('meta[property="og:image"]') || document.createElement('meta');
+          ogImg.setAttribute("property","og:image");
+          ogImg.content = form.seo.og;
+          document.head.appendChild(ogImg);
+        }
+      }
+    }, err => {
+      console.error(err);
+      container.innerHTML = "<p style='color:red'>Error loading form.</p>";
+    });
+}
+</script>
+</body>
+</html>
