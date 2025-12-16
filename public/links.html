@@ -9,17 +9,23 @@
     h2 { text-align: center; }
 
     table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
       background: white;
     }
     th, td {
-      border: 1px solid #ccc; padding: 10px; text-align: left;
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
     }
     th { background: #e7e7e7; }
 
     button {
-      padding: 6px 12px; border-radius: 4px;
-      cursor: pointer; border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
     }
     .copy-btn { background: #007bff; color: white; }
     .delete-btn { background: red; color: white; }
@@ -51,6 +57,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script>
+    /* FIREBASE CONFIG — SAME AS BUILDER */
     const firebaseConfig = {
       apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
       authDomain: "usahackersland.firebaseapp.com",
@@ -64,32 +71,46 @@
     const selectAll = document.getElementById("selectAll");
 
     selectAll.addEventListener("change", () => {
-      document.querySelectorAll(".row-select").forEach(cb => cb.checked = selectAll.checked);
+      document.querySelectorAll(".row-select")
+        .forEach(cb => cb.checked = selectAll.checked);
     });
 
+    /* LOAD LINKS — MATCHES /f/{id} */
     function loadLinks() {
-      db.collection("forms").orderBy("createdAt", "desc").get().then(snapshot => {
-        table.innerHTML = "";
+      db.collection("forms")
+        .orderBy("createdAt", "desc")
+        .get()
+        .then(snapshot => {
+          table.innerHTML = "";
 
-        snapshot.forEach(doc => {
-          const id = doc.id;
+          snapshot.forEach(doc => {
+            const id = doc.id;
 
-          // 🔥 GENERATE CORRECT PUBLIC LINK  
-          const link = `${location.origin}/form.html?id=${id}`;
+            // ✅ CORRECT PUBLIC LINK
+            const link = `${location.origin}/f/${id}`;
 
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><input type="checkbox" class="row-select" data-id="${id}" data-link="${link}"></td>
-            <td><a href="${link}" target="_blank">${link}</a></td>
-            <td>
-              <button class="copy-btn small-btn" onclick="copyLink('${link}')">Copy</button>
-              <button class="delete-btn small-btn" onclick="deleteSingle('${id}', this)">Delete</button>
-            </td>
-          `;
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>
+                <input type="checkbox"
+                  class="row-select"
+                  data-id="${id}"
+                  data-link="${link}">
+              </td>
+              <td>
+                <a href="${link}" target="_blank">${link}</a>
+              </td>
+              <td>
+                <button class="copy-btn small-btn"
+                  onclick="copyLink('${link}')">Copy</button>
+                <button class="delete-btn small-btn"
+                  onclick="deleteSingle('${id}', this)">Delete</button>
+              </td>
+            `;
 
-          table.appendChild(row);
+            table.appendChild(row);
+          });
         });
-      });
     }
 
     function copyLink(link) {
@@ -99,7 +120,6 @@
 
     function deleteSingle(id, btn) {
       if (!confirm("Delete this form?")) return;
-
       db.collection("forms").doc(id).delete().then(() => {
         btn.closest("tr").remove();
       });
@@ -109,16 +129,14 @@
       const selected = [...document.querySelectorAll(".row-select:checked")]
         .map(cb => cb.dataset.link);
 
-      if (selected.length === 0) return alert("No links selected.");
-
+      if (!selected.length) return alert("No links selected.");
       navigator.clipboard.writeText(selected.join("\n"))
         .then(() => alert("Copied!"));
     }
 
     function deleteSelected() {
       const selected = [...document.querySelectorAll(".row-select:checked")];
-
-      if (selected.length === 0) return alert("No forms selected.");
+      if (!selected.length) return alert("No forms selected.");
       if (!confirm("Delete selected forms?")) return;
 
       selected.forEach(cb => {
