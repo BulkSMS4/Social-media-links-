@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>All Forms Links</title>
+<style>
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px}
+.wrap{max-width:1000px;margin:auto;background:#fff;padding:18px;border-radius:10px}
+h2{text-align:center;margin-bottom:10px}
+.controls{display:flex;justify-content:flex-end;margin-bottom:10px;gap:10px;flex-wrap:wrap}
+button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;background:#1976d2;color:#fff}
+button.deleteBtn{background:#dc3545}
+button.deleteAllBtn{background:#dc3545}
+.formLinkBox{padding:12px;margin:10px 0;border:1px solid #ddd;border-radius:6px;background:#f1f8ff;word-break:break-all;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.linkText a{text-decoration:none;color:#1976d2;font-weight:700}
+.checkboxWrapper{display:flex;align-items:center;gap:6px}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+<h2>All Generated Form Links</h2>
+<div class="controls">
+  <button onclick="copyAllLinks()">Copy All Links</button>
+  <button class="deleteAllBtn" onclick="deleteSelected()">Delete Selected</button>
+  <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"> Select All</label>
+</div>
+<div id="linksContainer"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const container = document.getElementById("linksContainer");
+
+function loadLinks(){
+  container.innerHTML="";
+  db.collection("forms").orderBy("createdAt","desc").get()
+  .then(snapshot=>{
+    if(snapshot.empty){
+      container.textContent = "No forms found!";
+      return;
+    }
+    snapshot.forEach(doc=>{
+      const data = doc.data();
+      const link = `${window.location.origin}/form.html?id=${doc.id}`;
+      const date = data.createdAt ? new Date(data.createdAt).toLocaleString() : "Unknown";
+      const div = document.createElement("div");
+      div.className="formLinkBox";
+      div.dataset.docId = doc.id;
+      div.innerHTML = `
+        <div class="checkboxWrapper">
+          <input type="checkbox" class="selectCheckbox">
+          <div class="linkText">
+            <strong>${data.title || "Untitled Form"}</strong> <br>
+            ${date} <br>
+            <a href="${link}" target="_blank">${link}</a>
+          </div>
+        </div>
+        <div class="linkActions">
+          <button onclick="copyLink('${link}')">Copy</button>
+          <button class="deleteBtn" onclick="deleteForm('${doc.id}')">Delete</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  })
+  .catch(err=>{
+    console.error(err);
+    container.textContent = "Error loading form links.";
+  });
+}
+
+function copyLink(link){
+  navigator.clipboard.writeText(link)
+    .then(()=>alert("Link copied!"))
+    .catch(err=>console.error(err));
+}
+
+function copyAllLinks(){
+  db.collection("forms").get().then(snapshot=>{
+    const allLinks = [];
+    snapshot.forEach(doc=>{
+      allLinks.push(`${window.location.origin}/form.html?id=${doc.id}`);
+    });
+    if(allLinks.length){
+      navigator.clipboard.writeText(allLinks.join("\n"))
+        .then(()=>alert("All links copied!"))
+        .catch(err=>console.error(err));
+    } else {
+      alert("No links to copy!");
+    }
+  });
+}
+
+function deleteForm(id){
+  if(confirm("Are you sure you want to delete this form?")){
+    db.collection("forms").doc(id).delete()
+      .then(()=> {
+        alert("Form deleted!");
+        loadLinks();
+      })
+      .catch(err=>console.error(err));
+  }
+}
+
+function toggleSelectAll(checkbox){
+  document.querySelectorAll(".selectCheckbox").forEach(cb=>{
+    cb.checked = checkbox.checked;
+  });
+}
+
+function deleteSelected(){
+  const selected = document.querySelectorAll(".selectCheckbox:checked");
+  if(selected.length===0){ alert("No forms selected!"); return; }
+  if(!confirm(`Are you sure you want to delete ${selected.length} selected form(s)?`)) return;
+
+  selected.forEach(cb=>{
+    const docId = cb.closest(".formLinkBox").dataset.docId;
+    db.collection("forms").doc(docId).delete().catch(err=>console.error(err));
+  });
+  alert("Selected forms deleted!");
+  setTimeout(loadLinks,500); // reload after deletion
+}
+
+// Initial load
+loadLinks();
+</script>
+</body>
+</html>
