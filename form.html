@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+<!-- SEO / OG (auto-filled) -->
+<title id="seoTitle">Loading…</title>
+<meta name="description" id="metaDesc" content="">
+<meta property="og:title" id="ogTitle" content="">
+<meta property="og:description" id="ogDesc" content="">
+<meta property="og:image" id="ogImage" content="">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f4f6f8;
+}
+.container{
+  max-width:480px;
+  margin:40px auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+img{max-width:100%}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+button{
+  background:#1976d2;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+.warning{color:#b71c1c;margin-top:10px}
+.gallery img{margin-top:8px;border-radius:6px}
+.video{margin-top:10px}
+.extraBtn{
+  display:block;
+  margin-top:10px;
+  padding:10px;
+  border-radius:8px;
+  color:#fff;
+  text-align:center;
+  text-decoration:none;
+}
+footer{
+  text-align:center;
+  font-size:12px;
+  margin-top:16px;
+  color:#666;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+<div class="container" id="app">Loading…</div>
+
+<script>
+/* FIREBASE CONFIG */
+firebase.initializeApp({
+  apiKey:"REPLACE",
+  authDomain:"REPLACE",
+  projectId:"REPLACE"
+});
+const db=firebase.firestore();
+
+/* UTIL */
+const $=q=>document.querySelector(q);
+const linkify=t=>(t||"").replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank">$1</a>');
+
+/* GET FORM ID */
+const id=location.pathname.split("/").pop();
+
+/* LOAD FORM */
+db.collection("forms").doc(id).get().then(d=>{
+if(!d.exists){$("#app").innerHTML="Form not found";return;}
+const f=d.data();
+
+/* SEO */
+if(f.seo){
+document.title=f.seo.title||"";
+$("#metaDesc").content=f.seo.desc||"";
+$("#ogTitle").content=f.seo.title||"";
+$("#ogDesc").content=f.seo.desc||"";
+$("#ogImage").content=f.seo.og||"";
+}
+
+/* BUILD */
+let html="";
+
+/* AVATAR */
+if(f.avatarURL){
+html+=`<img src="${f.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto" ${f.avatarClickable?'onclick="window.open(\''+f.avatarURL+'\')"':""}>`;
+}
+
+/* LOGO */
+if(f.logoURL){
+html+=`<img src="${f.logoURL}" style="width:140px;display:block;margin:10px auto" ${f.logoClickable?'onclick="window.open(\''+f.logoURL+'\')"':""}>`;
+}
+
+/* TITLE */
+if(f.title)html+=`<h2 style="text-align:center">${f.title}</h2>`;
+if(f.subtitle)html+=`<p style="text-align:center;color:#555">${f.subtitle}</p>`;
+
+/* DESCRIPTION */
+if(f.description)html+=`<p>${linkify(f.description)}</p>`;
+
+/* WARNING */
+if(f.warning){
+html+=`<p class="warning" style="text-align:${f.warningPosition||'left'}">${linkify(f.warning)}</p>`;
+}
+
+/* AUTH */
+html+=`<input placeholder="Username or Email">`;
+html+=`<input type="password" placeholder="Password">`;
+
+/* EXTRA FIELDS */
+if(f.extraFields){
+f.extraFields.split("\n").forEach(v=>{
+if(v.trim())html+=`<input placeholder="${v.trim()}">`;
+});
+}
+
+/* MAIN BUTTON */
+html+=`<button>${f.buttonText||"Continue"}</button>`;
+
+/* FOOTER */
+if(f.footerText)html+=`<footer>${f.footerText}</footer>`;
+
+$("#app").innerHTML=html;
+});
+</script>
+</body>
+</html>
