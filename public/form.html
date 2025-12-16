@@ -11,6 +11,8 @@ body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;color:#2
 .embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;}
 input,textarea,select,button{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
 button.mainBtn{padding:10px;border:none;border-radius:8px;color:#fff;cursor:pointer;}
+.gallery img{margin:4px;width:calc(50% - 8px);border-radius:6px;}
+.video iframe{width:100%;height:200px;margin-top:8px;border-radius:6px;}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -26,11 +28,9 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
 const $ = id => document.getElementById(id);
 const formContainer = $("formContainer");
 
-// Get form ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const formId = urlParams.get('id');
 
@@ -64,6 +64,8 @@ function renderForm(data){
   html+=`<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
   html+=`<p style="text-align:center;color:${data.subtitleColor}">${data.subtitle}</p>`;
   html+=`<p>${data.description}</p>`;
+
+  // Warning
   if(data.enableWarning && data.warningPosition!=="none"){
     html+=`<p style="color:#b71c1c;text-align:${data.warningPosition}">${data.warning}</p>`;
   }
@@ -73,16 +75,45 @@ function renderForm(data){
   formFields.style.flexDirection="column";
   formFields.style.gap="8px";
 
+  // Auth Fields
   if(data.addAuth){
     formFields.innerHTML+=`<input placeholder="${data.usernamePlaceholder}">`;
     formFields.innerHTML+=`<input type="password" placeholder="${data.passwordPlaceholder}">`;
   }
 
+  // Extra Fields
   (data.extraFields||[]).forEach(f=>{
     if(f) formFields.innerHTML+=`<input placeholder="${f}">`;
   });
 
-  // Embed links above main button
+  // Gallery Images
+  if(data.galleryImages && data.galleryImages.length){
+    const galleryDiv = document.createElement("div");
+    galleryDiv.className="gallery";
+    data.galleryImages.forEach(img=>{
+      const im=document.createElement("img");
+      im.src=img;
+      galleryDiv.appendChild(im);
+    });
+    formFields.appendChild(galleryDiv);
+  }
+
+  // Video Embeds
+  if(data.videoLinks && data.videoLinks.length){
+    const videoDiv = document.createElement("div");
+    videoDiv.className="video";
+    data.videoLinks.forEach(v=>{
+      const iframe=document.createElement("iframe");
+      iframe.src=v.replace("watch?v=","embed/");
+      iframe.frameBorder="0";
+      iframe.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+      iframe.allowFullscreen=true;
+      videoDiv.appendChild(iframe);
+    });
+    formFields.appendChild(videoDiv);
+  }
+
+  // Embed Links above main button
   (data.embedLinks||[]).forEach(link=>{
     if(!link.show) return;
     const div=document.createElement("div");
