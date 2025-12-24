@@ -1,7 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
   body {
     margin: 0;
     font-family: Arial, sans-serif;
+    background:#0d1117;
   }
 
   /* Sidebar */
@@ -19,11 +27,15 @@
     box-shadow: 4px 0 15px rgba(0,255,0,0.3);
   }
 
-  #sidebar.active {
-    left: 0;
+  #sidebar.active { left: 0; }
+
+  #sidebar h2 {
+    color: #0f0;
+    text-align: center;
+    margin: 0 0 20px;
+    font-size: 22px;
   }
 
-  /* Sidebar links */
   #sidebar a {
     display: flex;
     align-items: center;
@@ -33,7 +45,6 @@
     font-weight: bold;
     text-decoration: none;
     border-bottom: 1px solid #003300;
-    transition: background 0.2s, color 0.2s;
   }
 
   #sidebar a:hover {
@@ -41,36 +52,41 @@
     color: #fff;
   }
 
-  /* Logout link */
   #sidebar a.logout {
     color: red;
     border-top: 2px solid #003300;
     margin-top: 20px;
   }
 
-  #sidebar a.logout:hover {
-    background: #330000;
-    color: #fff;
+  #menuBtn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 3000;
+    background: #000;
+    color: #0f0;
+    border: 2px solid #0f0;
+    padding: 8px 12px;
+    cursor: pointer;
   }
 
-  /* Header */
-  #sidebar h2 {
-    color: #0f0;
-    text-align: center;
-    margin: 0 0 20px;
-    font-size: 22px;
-    letter-spacing: 1px;
+  #dashboardFrame {
+    width: 100%;
+    height: 100vh;
+    border: none;
   }
 </style>
+</head>
+
+<body>
+
+<button id="menuBtn" onclick="toggleMenu()">☰ Menu</button>
 
 <div id="sidebar">
-  <h2>⚡ Admin Panel</h2>
+  <h2>⚡ Admin Panel🔥</h2>
 
   <a href="#" data-page="home.html">🏠 Home</a>
-
-  <!-- FIXED: removed /public/ -->
   <a href="#" data-page="form_builder.html">📝 Form Builder</a>
-
   <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
   <a href="#" data-page="feedback.html">💬 Feedback</a>
   <a href="#" data-page="victims.html">👀 View Victims</a>
@@ -78,42 +94,41 @@
   <a href="#" data-page="links.html">🔗 Links</a>
   <a href="#" data-page="generate.html">⚙️ Generate</a>
   <a href="#" data-page="victim-form.html">🔗⛓️ Victim Form</a>
-
-  <!-- This also works because file is in root -->
   <a href="#" data-page="dashboard.html">🎊 Dashboard Logo</a>
-
   <a href="#" data-page="admin-emergency.html">🚨 Post Emergency</a>
   <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
 
-  <!-- Logout -->
   <a href="logout.html" class="logout">🚪 Logout</a>
 </div>
 
+<iframe id="dashboardFrame" src=""></iframe>
+
 <script>
-  // Toggle sidebar
+  // Detect GitHub Pages base path
+  const BASE_PATH = (() => {
+    const parts = location.pathname.split('/');
+    return parts.length > 2 ? '/' + parts[1] + '/' : '/';
+  })();
+
   function toggleMenu() {
     document.getElementById('sidebar').classList.toggle('active');
   }
 
-  // Handle menu clicks
+  function loadPage(page) {
+    document.getElementById('dashboardFrame').src = BASE_PATH + page;
+  }
+
+  // Default page
+  loadPage('home.html');
+
   document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
-    link.addEventListener('click', function (e) {
+    link.addEventListener('click', e => {
       e.preventDefault();
-
-      const page = this.getAttribute('data-page');
-
-      // Load page inside dashboard iframe
-      if (window.parent && typeof window.parent.loadPage === 'function') {
-        window.parent.loadPage(page);
-      } else if (
-        window.parent &&
-        window.parent.document.getElementById('dashboardFrame')
-      ) {
-        window.parent.document.getElementById('dashboardFrame').src = page;
-      }
-
-      // auto-close sidebar
+      loadPage(link.dataset.page);
       document.getElementById('sidebar').classList.remove('active');
     });
   });
 </script>
+
+</body>
+</html>
