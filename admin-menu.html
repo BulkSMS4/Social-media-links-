@@ -4,28 +4,28 @@
   <h2>⚡ Admin Panel</h2>
 
   <!-- Core dashboard -->
-  <a href="#" data-page="dashboard.html">🏠 Dashboard</a>
+  <a href="#" data-page="/dashboard.html">🏠 Dashboard</a>
 
   <!-- Form pages -->
-  <a href="#" data-page="form_builder.html">📝 Form Builder</a>
-  <a href="#" data-page="forms.html">💾 Forms</a>
-  <a href="#" data-page="generate.html">⚙️ Generate</a>
+  <a href="#" data-page="/form_builder.html">📝 Form Builder</a>
+  <a href="#" data-page="/forms.html">💾 Forms</a>
+  <a href="#" data-page="/generate.html">⚙️ Generate</a>
 
   <!-- Members / links -->
-  <a href="#" data-page="members.html">👥 Members</a>
-  <a href="#" data-page="links.html">🔗 Links</a>
+  <a href="#" data-page="/members.html">👥 Members</a>
+  <a href="#" data-page="/links.html">🔗 Links</a>
 
   <!-- Feedback / victims -->
-  <a href="#" data-page="feedback.html">💬 Feedback</a>
-  <a href="#" data-page="victims.html">👀 View Victims</a>
+  <a href="#" data-page="/feedback.html">💬 Feedback</a>
+  <a href="#" data-page="/victims.html">👀 View Victims</a>
 
   <!-- Payments / popups -->
-  <a href="#" data-page="payment.html">💰 Payment</a>
-  <a href="#" data-page="popup-emergency.html">🚨 Emergency Popup</a>
+  <a href="#" data-page="/payment.html">💰 Payment</a>
+  <a href="#" data-page="/popup-emergency.html">🚨 Emergency Popup</a>
 
   <!-- Authentication / admin -->
-  <a href="#" data-page="login.html">🔑 Login</a>
-  <a href="logout.html" class="logout">🚪 Logout</a>
+  <a href="#" data-page="/login.html">🔑 Login</a>
+  <a href="/logout.html" class="logout">🚪 Logout</a>
 
   <!-- Sidebar toggle button for mobile -->
   <a href="#" id="sidebarToggle" style="margin-top:20px;">☰ Toggle Menu</a>
@@ -36,26 +36,26 @@
   const links = document.querySelectorAll('#sidebar a[data-page]');
   const dashboardFrame = window.parent.document.getElementById('dashboardFrame');
 
-  // Load page into iframe
+  // Load a page into the parent iframe
   function loadPage(page) {
     if (!dashboardFrame) {
       console.error('dashboardFrame not found');
       return;
     }
-    dashboardFrame.src = page;
+    // Normalize path to absolute
+    dashboardFrame.src = '/' + page.replace(/^\/+/, '');
 
     // Highlight active link
     links.forEach(l => l.classList.remove('active'));
-    const active = Array.from(links).find(l => l.dataset.page === page);
+    const active = Array.from(links).find(l => l.dataset.page === page || l.dataset.page === '/' + page.replace(/^\/+/, ''));
     if (active) active.classList.add('active');
   }
 
-  // Click handling for menu links
+  // Menu click handling
   links.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
-      const page = link.dataset.page;
-      loadPage(page);
+      loadPage(link.dataset.page);
 
       // Close sidebar on mobile
       if (window.innerWidth < 768) sidebar.style.transform = 'translateX(-100%)';
@@ -73,11 +73,11 @@
     }
   });
 
-  // Apply mobile transform by default if small screen
+  // Mobile default transform
   if (window.innerWidth < 768) sidebar.style.transform = 'translateX(-100%)';
 
   // Optional: load default page
-  loadPage('dashboard.html');
+  loadPage('/dashboard.html');
 </script>
 
 <style>
@@ -105,4 +105,4 @@
     }
     #sidebarToggle { display: none; }
   }
-</style>
+    </style>
