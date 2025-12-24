@@ -1,15 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Admin Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
   body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background:#0d1117;
   }
 
   /* Sidebar */
@@ -27,15 +19,11 @@
     box-shadow: 4px 0 15px rgba(0,255,0,0.3);
   }
 
-  #sidebar.active { left: 0; }
-
-  #sidebar h2 {
-    color: #0f0;
-    text-align: center;
-    margin: 0 0 20px;
-    font-size: 22px;
+  #sidebar.active {
+    left: 0;
   }
 
+  /* Sidebar links */
   #sidebar a {
     display: flex;
     align-items: center;
@@ -45,6 +33,7 @@
     font-weight: bold;
     text-decoration: none;
     border-bottom: 1px solid #003300;
+    transition: background 0.2s, color 0.2s;
   }
 
   #sidebar a:hover {
@@ -52,38 +41,30 @@
     color: #fff;
   }
 
+  /* Logout */
   #sidebar a.logout {
     color: red;
     border-top: 2px solid #003300;
     margin-top: 20px;
   }
 
-  #menuBtn {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    z-index: 3000;
-    background: #000;
-    color: #0f0;
-    border: 2px solid #0f0;
-    padding: 8px 12px;
-    cursor: pointer;
+  #sidebar a.logout:hover {
+    background: #330000;
+    color: #fff;
   }
 
-  #dashboardFrame {
-    width: 100%;
-    height: 100vh;
-    border: none;
+  /* Header */
+  #sidebar h2 {
+    color: #0f0;
+    text-align: center;
+    margin: 0 0 20px;
+    font-size: 22px;
+    letter-spacing: 1px;
   }
 </style>
-</head>
-
-<body>
-
-<button id="menuBtn" onclick="toggleMenu()">☰ Menu</button>
 
 <div id="sidebar">
-  <h2>⚡ Admin Panel🔥</h2>
+  <h2>⚡ Admin Panel</h2>
 
   <a href="#" data-page="home.html">🏠 Home</a>
   <a href="#" data-page="form_builder.html">📝 Form Builder</a>
@@ -101,13 +82,11 @@
   <a href="logout.html" class="logout">🚪 Logout</a>
 </div>
 
-<iframe id="dashboardFrame" src=""></iframe>
-
 <script>
-  // Detect GitHub Pages base path
+  // GitHub Pages base-path fix
   const BASE_PATH = (() => {
-    const parts = location.pathname.split('/');
-    return parts.length > 2 ? '/' + parts[1] + '/' : '/';
+    const p = location.pathname.split('/');
+    return p.length > 2 ? '/' + p[1] + '/' : '/';
   })();
 
   function toggleMenu() {
@@ -115,12 +94,15 @@
   }
 
   function loadPage(page) {
-    document.getElementById('dashboardFrame').src = BASE_PATH + page;
+    const frame = document.getElementById('dashboardFrame');
+    if (!frame) {
+      console.error('dashboardFrame not found');
+      return;
+    }
+    frame.src = BASE_PATH + page;
   }
 
-  // Default page
-  loadPage('home.html');
-
+  // Menu click handling
   document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -128,7 +110,4 @@
       document.getElementById('sidebar').classList.remove('active');
     });
   });
-</script>
-
-</body>
-</html>
+      </script>
