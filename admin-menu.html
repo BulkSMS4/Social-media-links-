@@ -1,117 +1,108 @@
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-  }
-
-  /* Sidebar */
-  #sidebar {
-    position: fixed;
-    top: 0;
-    left: -260px;
-    width: 260px;
-    height: 100%;
-    background: linear-gradient(180deg, #000 0%, #001a00 100%);
-    border-right: 2px solid lime;
-    transition: left 0.3s ease-in-out;
-    padding-top: 60px;
-    z-index: 2000;
-    box-shadow: 4px 0 15px rgba(0,255,0,0.3);
-  }
-
-  #sidebar.active {
-    left: 0;
-  }
-
-  #sidebar h2 {
-    color: #0f0;
-    text-align: center;
-    margin: 0 0 20px;
-    font-size: 22px;
-    letter-spacing: 1px;
-  }
-
-  #sidebar a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 20px;
-    color: #0f0;
-    font-weight: bold;
-    text-decoration: none;
-    border-bottom: 1px solid #003300;
-    transition: background 0.2s, color 0.2s;
-  }
-
-  #sidebar a:hover {
-    background: #003300;
-    color: #fff;
-  }
-
-  #sidebar a.logout {
-    color: red;
-    border-top: 2px solid #003300;
-    margin-top: 20px;
-  }
-
-  #sidebar a.logout:hover {
-    background: #330000;
-    color: #fff;
-  }
-</style>
+<link rel="stylesheet" href="menu-style.css">
 
 <div id="sidebar">
-  <h2>⚡🔥 Admin Panel</h2>
+  <h2>⚡ Admin Panel</h2>
 
-  <a href="#" data-page="home.html">🏠 Home</a>
+  <!-- Core dashboard -->
+  <a href="#" data-page="dashboard.html">🏠 Dashboard</a>
+
+  <!-- Form pages -->
   <a href="#" data-page="form_builder.html">📝 Form Builder</a>
-  <a href="#" data-page="saved-forms.html">💾 Saved Forms</a>
-  <a href="#" data-page="feedback.html">💬 Feedback</a>
-  <a href="#" data-page="victims.html">👀 View Victims</a>
+  <a href="#" data-page="forms.html">💾 Forms</a>
+  <a href="#" data-page="generate.html">⚙️ Generate</a>
+
+  <!-- Members / links -->
   <a href="#" data-page="members.html">👥 Members</a>
   <a href="#" data-page="links.html">🔗 Links</a>
-  <a href="#" data-page="generate.html">⚙️ Generate</a>
-  <a href="#" data-page="victim-form.html">🔗⛓️ Victim Form</a>
-  <a href="#" data-page="dashboard.html">🎊 Dashboard Logo</a>
-  <a href="#" data-page="admin-emergency.html">🚨 Post Emergency</a>
-  <a href="#" data-page="upload-logo.html">🖼️ Upload Logo</a>
 
+  <!-- Feedback / victims -->
+  <a href="#" data-page="feedback.html">💬 Feedback</a>
+  <a href="#" data-page="victims.html">👀 View Victims</a>
+
+  <!-- Payments / popups -->
+  <a href="#" data-page="payment.html">💰 Payment</a>
+  <a href="#" data-page="popup-emergency.html">🚨 Emergency Popup</a>
+
+  <!-- Authentication / admin -->
+  <a href="#" data-page="login.html">🔑 Login</a>
   <a href="logout.html" class="logout">🚪 Logout</a>
+
+  <!-- Sidebar toggle button for mobile -->
+  <a href="#" id="sidebarToggle" style="margin-top:20px;">☰ Toggle Menu</a>
 </div>
 
 <script>
-  // 🔥 IMPORTANT: get base path from PARENT page (GitHub Pages fix)
-  const BASE_PATH = (() => {
-    try {
-      const path = window.parent.location.pathname.split('/');
-      return path.length > 2 ? '/' + path[1] + '/' : '/';
-    } catch (e) {
-      return '/';
-    }
-  })();
+  const sidebar = document.getElementById('sidebar');
+  const links = document.querySelectorAll('#sidebar a[data-page]');
+  const dashboardFrame = window.parent.document.getElementById('dashboardFrame');
 
-  function toggleMenu() {
-    document.getElementById('sidebar').classList.toggle('active');
-  }
-
+  // Load page into iframe
   function loadPage(page) {
-    const parentDoc = window.parent.document;
-    const frame = parentDoc.getElementById('dashboardFrame');
-
-    if (!frame) {
-      console.error('dashboardFrame not found in parent');
+    if (!dashboardFrame) {
+      console.error('dashboardFrame not found');
       return;
     }
+    dashboardFrame.src = page;
 
-    frame.src = BASE_PATH + page;
+    // Highlight active link
+    links.forEach(l => l.classList.remove('active'));
+    const active = Array.from(links).find(l => l.dataset.page === page);
+    if (active) active.classList.add('active');
   }
 
-  // Menu click handler
-  document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
+  // Click handling for menu links
+  links.forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
-      loadPage(link.dataset.page);
-      document.getElementById('sidebar').classList.remove('active');
+      const page = link.dataset.page;
+      loadPage(page);
+
+      // Close sidebar on mobile
+      if (window.innerWidth < 768) sidebar.style.transform = 'translateX(-100%)';
     });
   });
-    </script>
+
+  // Sidebar toggle button
+  const toggleBtn = document.getElementById('sidebarToggle');
+  toggleBtn.addEventListener('click', e => {
+    e.preventDefault();
+    if (sidebar.style.transform === 'translateX(0%)') {
+      sidebar.style.transform = 'translateX(-100%)';
+    } else {
+      sidebar.style.transform = 'translateX(0%)';
+    }
+  });
+
+  // Apply mobile transform by default if small screen
+  if (window.innerWidth < 768) sidebar.style.transform = 'translateX(-100%)';
+
+  // Optional: load default page
+  loadPage('dashboard.html');
+</script>
+
+<style>
+  /* Active link highlight */
+  #sidebar a.active {
+    background: #111;
+    color: lime;
+    font-weight: bold;
+  }
+
+  /* Mobile sidebar transition */
+  #sidebar {
+    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    overflow-y: auto;
+    z-index: 1000;
+  }
+
+  @media(min-width: 768px) {
+    #sidebar {
+      transform: translateX(0%) !important;
+    }
+    #sidebarToggle { display: none; }
+  }
+</style>
