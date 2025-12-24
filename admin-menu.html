@@ -23,7 +23,14 @@
     left: 0;
   }
 
-  /* Sidebar links */
+  #sidebar h2 {
+    color: #0f0;
+    text-align: center;
+    margin: 0 0 20px;
+    font-size: 22px;
+    letter-spacing: 1px;
+  }
+
   #sidebar a {
     display: flex;
     align-items: center;
@@ -41,7 +48,6 @@
     color: #fff;
   }
 
-  /* Logout */
   #sidebar a.logout {
     color: red;
     border-top: 2px solid #003300;
@@ -52,19 +58,10 @@
     background: #330000;
     color: #fff;
   }
-
-  /* Header */
-  #sidebar h2 {
-    color: #0f0;
-    text-align: center;
-    margin: 0 0 20px;
-    font-size: 22px;
-    letter-spacing: 1px;
-  }
 </style>
 
 <div id="sidebar">
-  <h2>⚡ Admin Panel 🔥</h2>
+  <h2>⚡ Admin Panel</h2>
 
   <a href="#" data-page="home.html">🏠 Home</a>
   <a href="#" data-page="form_builder.html">📝 Form Builder</a>
@@ -83,10 +80,14 @@
 </div>
 
 <script>
-  // GitHub Pages base-path fix
+  // 🔥 IMPORTANT: get base path from PARENT page (GitHub Pages fix)
   const BASE_PATH = (() => {
-    const p = location.pathname.split('/');
-    return p.length > 2 ? '/' + p[1] + '/' : '/';
+    try {
+      const path = window.parent.location.pathname.split('/');
+      return path.length > 2 ? '/' + path[1] + '/' : '/';
+    } catch (e) {
+      return '/';
+    }
   })();
 
   function toggleMenu() {
@@ -94,15 +95,18 @@
   }
 
   function loadPage(page) {
-    const frame = document.getElementById('dashboardFrame');
+    const parentDoc = window.parent.document;
+    const frame = parentDoc.getElementById('dashboardFrame');
+
     if (!frame) {
-      console.error('dashboardFrame not found');
+      console.error('dashboardFrame not found in parent');
       return;
     }
+
     frame.src = BASE_PATH + page;
   }
 
-  // Menu click handling
+  // Menu click handler
   document.querySelectorAll('#sidebar a[data-page]').forEach(link => {
     link.addEventListener('click', e => {
       e.preventDefault();
@@ -110,4 +114,4 @@
       document.getElementById('sidebar').classList.remove('active');
     });
   });
-      </script>
+    </script>
