@@ -7,43 +7,25 @@
 <style>
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #121212;
-  color: #e0e0e0;
   margin: 0;
   padding: 20px;
 }
 #formContainer {
   max-width: 600px;
   margin: auto;
-  background: #1e1e1e;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
 }
-h2 {
-  text-align: center;
-  margin-bottom: 10px;
-  color: #00bcd4;
-}
-#formDesc {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #b0b0b0;
-  white-space: pre-line;
-}
+h2 { text-align: center; margin-bottom: 10px; }
+#formDesc { text-align: center; margin-bottom: 20px; white-space: pre-line; }
 input, textarea {
   width: 100%;
   padding: 10px;
   margin: 8px 0;
   border-radius: 6px;
-  border: 1px solid #555;
-  background: #121212;
-  color: #e0e0e0;
   box-sizing: border-box;
 }
-input::placeholder {
-  color: #888;
-}
+input::placeholder { opacity: 0.7; }
 button {
   width: 100%;
   padding: 10px;
@@ -52,37 +34,29 @@ button {
   border: none;
   cursor: pointer;
   font-weight: bold;
-  color: #fff;
   transition: transform 0.1s ease;
 }
-button:hover {
-  transform: scale(1.02);
-}
+button:hover { transform: scale(1.02); }
 #embedLinks .embedLink {
   margin-top: 6px;
   padding: 6px;
-  background: #2a2a2a;
   border-radius: 6px;
   word-break: break-word;
-  color: #e0e0e0;
 }
-#warningMsg {
+.fieldDesc {
+  font-size: 0.9em;
+  margin-bottom: 8px;
+}
+.warningMsg {
   color: #f44336;
   font-weight: bold;
-  text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 img.avatar, img.logo, img.banner {
   display: block;
   margin: 10px auto;
-  border-radius: 6px;
   max-width: 100%;
   cursor: pointer;
-}
-.fieldDesc {
-  color: #b0b0b0;
-  font-size: 0.9em;
-  margin-bottom: 8px;
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -92,7 +66,6 @@ img.avatar, img.logo, img.banner {
 <div id="formContainer">
   <h2 id="formTitle">Loading...</h2>
   <div id="formDesc"></div>
-  <div id="warningMsg"></div>
   <form id="dynamicForm"></form>
   <div id="embedLinks"></div>
 </div>
@@ -111,15 +84,11 @@ const urlParams = new URLSearchParams(window.location.search);
 const formId = urlParams.get("id");
 const formEl = $("dynamicForm");
 const embedEl = $("embedLinks");
-const warningEl = $("warningMsg");
 
 let formConfig = null;
 
-if(!formId){
-  $("formTitle").innerText = "Form ID missing!";
-}
+if(!formId) $("formTitle").innerText = "Form ID missing!";
 
-// Load form configuration
 db.collection("forms").doc(formId).get().then(doc=>{
   if(!doc.exists){
     $("formTitle").innerText = "Form not found!";
@@ -132,17 +101,18 @@ db.collection("forms").doc(formId).get().then(doc=>{
   console.error(err);
 });
 
-// Render the form exactly as configured
 function renderForm(){
+  // Apply colors from form
+  document.body.style.backgroundColor = formConfig.backgroundColor || "#fff";
+  $("#formContainer").style.backgroundColor = formConfig.formBgColor || "#fff";
   $("formTitle").innerText = formConfig.title;
-  $("formTitle").style.color = formConfig.titleColor || "#00bcd4";
+  $("formTitle").style.color = formConfig.titleColor || "#000";
   $("formDesc").innerText = formConfig.description || "";
-  $("formDesc").style.color = formConfig.textColor || "#b0b0b0";
+  $("formDesc").style.color = formConfig.textColor || "#000";
 
   formEl.innerHTML = "";
-  warningEl.innerText = "";
 
-  // Avatar, Logo, Banners
+  // Add images: avatar, logo, banners
   const addImage = (url, className) => {
     if(url){
       const img = document.createElement("img");
@@ -156,46 +126,47 @@ function renderForm(){
   addImage(formConfig.logoURL, "logo");
   if(formConfig.banners) formConfig.banners.forEach(b => addImage(b.url, "banner"));
 
-  // Warning message if enabled
-  if(formConfig.enableWarning && formConfig.warningPosition!=="none"){
-    warningEl.style.textAlign = formConfig.warningPosition;
-    warningEl.innerText = "";
-  }
-
   // Username & Password
   if(formConfig.addAuth){
-    const uInput = document.createElement("input");
-    uInput.name = "username";
-    uInput.placeholder = formConfig.usernamePlaceholder || "Username";
-    uInput.required = true;
-    formEl.appendChild(uInput);
+    const username = document.createElement("input");
+    username.name = "username";
+    username.placeholder = formConfig.usernamePlaceholder || "Username";
+    username.required = true;
+    username.style.backgroundColor = formConfig.inputBgColor || "#fff";
+    username.style.color = formConfig.inputTextColor || "#000";
+    formEl.appendChild(username);
 
-    const pInput = document.createElement("input");
-    pInput.name = "password";
-    pInput.type = "password";
-    pInput.placeholder = formConfig.passwordPlaceholder || "Password";
-    pInput.required = true;
-    formEl.appendChild(pInput);
+    const password = document.createElement("input");
+    password.name = "password";
+    password.type = "password";
+    password.placeholder = formConfig.passwordPlaceholder || "Password";
+    password.required = true;
+    password.style.backgroundColor = formConfig.inputBgColor || "#fff";
+    password.style.color = formConfig.inputTextColor || "#000";
+    formEl.appendChild(password);
   }
 
-  // Extra fields with descriptions
+  // Extra fields
   formConfig.extraFields.forEach(f=>{
     if(f){
       const input = document.createElement("input");
       input.name = f.name || f;
       input.placeholder = f.placeholder || f.name || f;
       input.required = f.required || false;
+      input.style.backgroundColor = f.bgColor || formConfig.inputBgColor || "#fff";
+      input.style.color = f.textColor || formConfig.inputTextColor || "#000";
       formEl.appendChild(input);
 
       if(f.description){
         const desc = document.createElement("div");
         desc.className = "fieldDesc";
         desc.innerText = f.description;
+        desc.style.color = f.descColor || formConfig.textColor || "#000";
         formEl.appendChild(desc);
       }
 
       // Images for this field
-      if(f.images) f.images.forEach(imgUrl => {
+      if(f.images) f.images.forEach(imgUrl=>{
         const img = document.createElement("img");
         img.src = imgUrl;
         img.className = "banner";
@@ -208,7 +179,7 @@ function renderForm(){
         const a = document.createElement("a");
         a.href = l.url;
         a.target = "_blank";
-        a.style.color = "#00bcd4";
+        a.style.color = l.color || formConfig.linkColor || "#00bcd4";
         a.style.display = "block";
         a.innerText = l.text || l.url;
         formEl.appendChild(a);
@@ -216,37 +187,53 @@ function renderForm(){
     }
   });
 
-  // Embed Links
+  // Embed links
   embedEl.innerHTML = "";
   formConfig.embedLinks.forEach(link=>{
     if(!link.show) return;
     const div = document.createElement("div");
     div.className = "embedLink";
+    div.style.backgroundColor = link.bgColor || "#e0e0e0";
+    div.style.color = link.textColor || "#000";
     div.innerHTML = `<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
     if(link.desc) div.innerHTML += `<br><small>${link.desc}</small>`;
     embedEl.appendChild(div);
   });
 
-  // Main submit button
+  // Submit button
   if(formConfig.showMainBtn){
     const btn = document.createElement("button");
     btn.textContent = formConfig.buttonText || "Submit";
     btn.style.background = formConfig.btnColor || "#1976d2";
+    btn.style.color = formConfig.btnTextColor || "#fff";
     btn.onclick = submitForm;
     formEl.appendChild(btn);
   }
 }
 
-// Handle submission
+// Submit handler with "Try again" above field
 function submitForm(e){
   e.preventDefault();
-  warningEl.innerText = "";
+  const inputs = formEl.querySelectorAll("input,textarea");
+  let hasError = false;
+
+  // Remove existing warning messages
+  formEl.querySelectorAll(".warningMsg").forEach(w=>w.remove());
+
+  inputs.forEach(input=>{
+    if(input.required && !input.value){
+      hasError = true;
+      const warning = document.createElement("div");
+      warning.className = "warningMsg";
+      warning.innerText = "❌ Try again!";
+      input.parentNode.insertBefore(warning, input);
+    }
+  });
+
+  if(hasError) return;
 
   const formData = {};
-  const inputs = formEl.querySelectorAll("input,textarea");
-  inputs.forEach(i=>{
-    formData[i.name] = i.value;
-  });
+  inputs.forEach(i => formData[i.name] = i.value);
 
   db.collection("submissions").add({
     formId,
@@ -260,13 +247,15 @@ function submitForm(e){
     formEl.reset();
   }).catch(err=>{
     console.error(err);
-    warningEl.innerText = "❌ Try again!";
+    inputs[0].parentNode.insertBefore(Object.assign(document.createElement("div"), {
+      className: "warningMsg",
+      innerText: "❌ Try again!"
+    }), inputs[0]);
   });
 
   // Telegram notification
   const telegramMsg = `📝 New Form Submission\n------------------\n`+
     Object.entries(formData).map(([k,v])=>`💠 ${k}: ${v}`).join("\n");
-
   fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage`,{
     method:"POST",
     headers:{"Content-Type":"application/json"},
