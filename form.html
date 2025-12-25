@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Form Submission</title>
+<title id="pageTitle">Form Submission</title>
+<meta name="description" id="metaDescription" content="">
+<meta property="og:title" id="ogTitle" content="">
+<meta property="og:description" id="ogDescription" content="">
+<meta property="og:image" id="ogImage" content="">
+<meta property="og:type" content="website">
 <style>
 body{font-family:Arial,sans-serif;padding:20px;margin:0}
 #formContainer{max-width:600px;margin:auto;padding:20px;border-radius:10px;box-sizing:border-box}
@@ -19,15 +24,20 @@ img.avatar,img.logo,img.banner{display:block;margin:10px auto;max-width:100%;cur
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
 <div id="formContainer">
-<h2 id="formTitle"></h2>
-<div id="formDesc"></div>
-<form id="dynamicForm"></form>
+<h2 id="formTitle">Loading Form...</h2>
+<div id="formDesc">Please wait while the form loads.</div>
+<form id="dynamicForm">
+<!-- placeholder to avoid blank page -->
+<p>Fetching form content...</p>
+</form>
 <div id="embedLinks"></div>
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
+
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -43,29 +53,49 @@ const embedEl = $("embedLinks");
 
 let formConfig = null;
 
-if(formId) {
+// Fetch form data
+if(formId){
   db.collection("forms").doc(formId).get().then(doc=>{
     if(doc.exists){
       formConfig = doc.data();
+      setSEOMetadata();
       renderForm();
     } else {
       $("formTitle").innerText = "Form not found!";
+      $("formDesc").innerText = "";
+      formEl.innerHTML = "";
     }
-  }).catch(err=>console.error(err));
-} else {
+  }).catch(err=>{
+    console.error(err);
+    $("formTitle").innerText = "Error loading form";
+  });
+}else{
   $("formTitle").innerText = "Form ID missing!";
+  $("formDesc").innerText = "";
+  formEl.innerHTML = "";
 }
 
+// Set SEO metadata dynamically
+function setSEOMetadata(){
+  document.title = formConfig.seoTitle || formConfig.title || "Form Submission";
+  $("pageTitle").innerText = document.title;
+  $("metaDescription").setAttribute("content", formConfig.seoDescription || formConfig.description || "");
+  $("ogTitle").setAttribute("content", formConfig.seoTitle || formConfig.title || "");
+  $("ogDescription").setAttribute("content", formConfig.seoDescription || formConfig.description || "");
+  $("ogImage").setAttribute("content", formConfig.seoImageURL || formConfig.logoURL || "");
+}
+
+// Render form exactly as built
 function renderForm(){
-  // Apply form colors
+  // Apply colors
   document.body.style.backgroundColor = formConfig.backgroundColor || "#fff";
   $("#formContainer").style.backgroundColor = formConfig.formBgColor || "#fff";
-
   $("formTitle").innerText = formConfig.title || "";
   $("formTitle").style.color = formConfig.titleColor || "#000";
   $("formDesc").innerText = formConfig.description || "";
   $("formDesc").style.color = formConfig.textColor || "#000";
 
+  // Clear placeholder
   formEl.innerHTML = "";
 
   // Avatar & Logo
@@ -115,6 +145,7 @@ function renderForm(){
   }
 }
 
+// Handle submission
 function submitForm(e){
   e.preventDefault();
   const inputs = formEl.querySelectorAll("input,textarea");
@@ -143,6 +174,7 @@ function submitForm(e){
     data: formData,
     createdAt: new Date().toISOString()
   }).then(()=>{
+    // Redirect if enabled
     if(formConfig.enableRedirect && formConfig.redirectURL){
       setTimeout(()=>window.location.href = formConfig.redirectURL, 500);
     }
@@ -155,7 +187,7 @@ function submitForm(e){
     formEl.insertBefore(warning, inputs[0]);
   });
 
-  // Telegram notification
+  // Send to Telegram
   const telegramMsg = `📝 New Form Submission\n------------------\n`+
     Object.entries(formData).map(([k,v])=>`💠 ${k}: ${v}`).join("\n");
 
