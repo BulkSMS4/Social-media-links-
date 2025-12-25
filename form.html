@@ -3,12 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="pageTitle">Form Submission</title>
-<meta name="description" id="metaDescription" content="">
-<meta property="og:title" id="ogTitle" content="">
-<meta property="og:description" id="ogDescription" content="">
-<meta property="og:image" id="ogImage" content="">
-<meta property="og:type" content="website">
+<title>Form Submission</title>
 <style>
 body{font-family:Arial,sans-serif;padding:20px;margin:0}
 #formContainer{max-width:600px;margin:auto;padding:20px;border-radius:10px;box-sizing:border-box}
@@ -52,7 +47,6 @@ if(formId) {
   db.collection("forms").doc(formId).get().then(doc=>{
     if(doc.exists){
       formConfig = doc.data();
-      setSEOMetadata();
       renderForm();
     } else {
       $("formTitle").innerText = "Form not found!";
@@ -60,17 +54,6 @@ if(formId) {
   }).catch(err=>console.error(err));
 } else {
   $("formTitle").innerText = "Form ID missing!";
-}
-
-// Set SEO metadata dynamically
-function setSEOMetadata(){
-  document.title = formConfig.seoTitle || formConfig.title || "Form Submission";
-  $("pageTitle").innerText = document.title;
-
-  $("metaDescription").setAttribute("content", formConfig.seoDescription || formConfig.description || "");
-  $("ogTitle").setAttribute("content", formConfig.seoTitle || formConfig.title || "");
-  $("ogDescription").setAttribute("content", formConfig.seoDescription || formConfig.description || "");
-  $("ogImage").setAttribute("content", formConfig.seoImageURL || formConfig.logoURL || "");
 }
 
 function renderForm(){
