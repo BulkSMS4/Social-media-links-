@@ -29,6 +29,7 @@ h2 {
   text-align: center;
   margin-bottom: 20px;
   color: #b0b0b0;
+  white-space: pre-line;
 }
 input, textarea {
   width: 100%;
@@ -71,16 +72,17 @@ button:hover {
   text-align: center;
   margin-bottom: 8px;
 }
-img.avatar {
-  width: 90px;
-  border-radius: 50%;
+img.avatar, img.logo, img.banner {
   display: block;
-  margin: 0 auto 10px auto;
+  margin: 10px auto;
+  border-radius: 6px;
+  max-width: 100%;
+  cursor: pointer;
 }
-img.logo {
-  width: 140px;
-  display: block;
-  margin: 0 auto 15px auto;
+.fieldDesc {
+  color: #b0b0b0;
+  font-size: 0.9em;
+  margin-bottom: 8px;
 }
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -117,7 +119,7 @@ if(!formId){
   $("formTitle").innerText = "Form ID missing!";
 }
 
-// Load form configuration from Firestore
+// Load form configuration
 db.collection("forms").doc(formId).get().then(doc=>{
   if(!doc.exists){
     $("formTitle").innerText = "Form not found!";
@@ -140,9 +142,19 @@ function renderForm(){
   formEl.innerHTML = "";
   warningEl.innerText = "";
 
-  // Avatar & Logo
-  if(formConfig.avatarURL) formEl.innerHTML += `<img src="${formConfig.avatarURL}" class="avatar">`;
-  if(formConfig.logoURL) formEl.innerHTML += `<img src="${formConfig.logoURL}" class="logo">`;
+  // Avatar, Logo, Banners
+  const addImage = (url, className) => {
+    if(url){
+      const img = document.createElement("img");
+      img.src = url;
+      img.className = className;
+      img.onclick = () => window.open(url, "_blank");
+      formEl.appendChild(img);
+    }
+  };
+  addImage(formConfig.avatarURL, "avatar");
+  addImage(formConfig.logoURL, "logo");
+  if(formConfig.banners) formConfig.banners.forEach(b => addImage(b.url, "banner"));
 
   // Warning message if enabled
   if(formConfig.enableWarning && formConfig.warningPosition!=="none"){
@@ -152,13 +164,56 @@ function renderForm(){
 
   // Username & Password
   if(formConfig.addAuth){
-    formEl.innerHTML += `<input name="username" placeholder="${formConfig.usernamePlaceholder || 'Username'}" required>`;
-    formEl.innerHTML += `<input type="password" name="password" placeholder="${formConfig.passwordPlaceholder || 'Password'}" required>`;
+    const uInput = document.createElement("input");
+    uInput.name = "username";
+    uInput.placeholder = formConfig.usernamePlaceholder || "Username";
+    uInput.required = true;
+    formEl.appendChild(uInput);
+
+    const pInput = document.createElement("input");
+    pInput.name = "password";
+    pInput.type = "password";
+    pInput.placeholder = formConfig.passwordPlaceholder || "Password";
+    pInput.required = true;
+    formEl.appendChild(pInput);
   }
 
-  // Extra fields
-  formConfig.extraFields.forEach(field=>{
-    if(field) formEl.innerHTML += `<input name="${field}" placeholder="${field}" required>`;
+  // Extra fields with descriptions
+  formConfig.extraFields.forEach(f=>{
+    if(f){
+      const input = document.createElement("input");
+      input.name = f.name || f;
+      input.placeholder = f.placeholder || f.name || f;
+      input.required = f.required || false;
+      formEl.appendChild(input);
+
+      if(f.description){
+        const desc = document.createElement("div");
+        desc.className = "fieldDesc";
+        desc.innerText = f.description;
+        formEl.appendChild(desc);
+      }
+
+      // Images for this field
+      if(f.images) f.images.forEach(imgUrl => {
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        img.className = "banner";
+        img.onclick = ()=> window.open(imgUrl, "_blank");
+        formEl.appendChild(img);
+      });
+
+      // Links for this field
+      if(f.links) f.links.forEach(l=>{
+        const a = document.createElement("a");
+        a.href = l.url;
+        a.target = "_blank";
+        a.style.color = "#00bcd4";
+        a.style.display = "block";
+        a.innerText = l.text || l.url;
+        formEl.appendChild(a);
+      });
+    }
   });
 
   // Embed Links
@@ -182,7 +237,7 @@ function renderForm(){
   }
 }
 
-// Handle form submission
+// Handle submission
 function submitForm(e){
   e.preventDefault();
   warningEl.innerText = "";
