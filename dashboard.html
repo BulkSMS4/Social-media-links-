@@ -6,10 +6,10 @@
 <title>📊 Submissions Dashboard</title>
 <style>
 body{font-family:Arial,sans-serif;background:#f4f6f8;padding:20px}
-.container{max-width:1000px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
-h2{text-align:center}
+.container{max-width:1200px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
+h2{text-align:center;margin-bottom:20px}
 table{width:100%;border-collapse:collapse;margin-top:20px}
-th,td{border:1px solid #ccc;padding:10px;text-align:left}
+th,td{border:1px solid #ccc;padding:10px;text-align:left;vertical-align:top}
 th{background:#1976d2;color:#fff}
 tr:nth-child(even){background:#f1f1f1}
 button{padding:6px 10px;margin:2px;border:none;border-radius:5px;cursor:pointer}
@@ -33,8 +33,9 @@ button.deleteAll{background:#d32f2f;color:#fff}
 <tr>
 <th>Select</th>
 <th>Form ID</th>
-<th>Field Name</th>
-<th>Value</th>
+<th>Username / Email</th>
+<th>Phone</th>
+<th>Other Fields</th>
 <th>Time</th>
 <th>Actions</th>
 </tr>
@@ -55,103 +56,101 @@ const db = firebase.firestore();
 
 let selected = new Set();
 
+// Render submissions grouped by document
 function renderTable(submissions){
   const tbody = $("submissionBody");
   tbody.innerHTML = "";
 
   submissions.forEach(doc=>{
-    const data = doc.data();
-    const formId = data.formId;
-    const createdAt = new Date(data.createdAt).toLocaleString();
-
-    Object.entries(data.data).forEach(([field,value])=>{
-      const tr = document.createElement("tr");
-
-      const selectTd = document.createElement("td");
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.onchange = e=>{
-        if(e.target.checked) selected.add(doc.id+"_"+field);
-        else selected.delete(doc.id+"_"+field);
-      };
-      selectTd.appendChild(checkbox);
-      tr.appendChild(selectTd);
-
-      const formTd = document.createElement("td");
-      formTd.textContent = formId;
-      tr.appendChild(formTd);
-
-      const fieldTd = document.createElement("td");
-      fieldTd.textContent = field;
-      tr.appendChild(fieldTd);
-
-      const valueTd = document.createElement("td");
-      valueTd.textContent = value;
-      tr.appendChild(valueTd);
-
-      const timeTd = document.createElement("td");
-      timeTd.textContent = createdAt;
-      tr.appendChild(timeTd);
-
-      const actionTd = document.createElement("td");
-
-      const copyBtn = document.createElement("button");
-      copyBtn.textContent = "Copy 📋";
-      copyBtn.className="copy";
-      copyBtn.onclick = ()=>navigator.clipboard.writeText(value);
-      actionTd.appendChild(copyBtn);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Delete 🗑️";
-      deleteBtn.className="delete";
-      deleteBtn.onclick = ()=>deleteField(doc.id, field);
-      actionTd.appendChild(deleteBtn);
-
-      tr.appendChild(actionTd);
-
-      tbody.appendChild(tr);
-    });
-  });
-}
-
-// Delete single field
-function deleteField(docId, field){
-  const docRef = db.collection("submissions").doc(docId);
-  docRef.get().then(doc=>{
-    if(!doc.exists) return;
     const data = doc.data().data;
-    delete data[field];
-    // if no fields left, delete doc
-    if(Object.keys(data).length===0){
-      docRef.delete();
-    } else {
-      docRef.update({data});
-    }
+    const formId = doc.data().formId;
+    const createdAt = new Date(doc.data().createdAt).toLocaleString();
+
+    const username = data.username || data.email || "-";
+    const phone = data["Phone Number"] || "-";
+
+    // Other fields (exclude username/email/phone)
+    const otherFields = Object.entries(data)
+      .filter(([k,_])=>!["username","email","Phone Number"].includes(k))
+      .map(([k,v])=>`${k}: ${v}`).join("\n");
+
+    const tr = document.createElement("tr");
+
+    // Select checkbox
+    const selectTd = document.createElement("td");
+    const checkbox = document.createElement("input");
+    checkbox.type="checkbox";
+    checkbox.onchange = e=>{
+      if(e.target.checked) selected.add(doc.id);
+      else selected.delete(doc.id);
+    };
+    selectTd.appendChild(checkbox);
+    tr.appendChild(selectTd);
+
+    const formTd = document.createElement("td");
+    formTd.textContent = formId;
+    tr.appendChild(formTd);
+
+    const userTd = document.createElement("td");
+    userTd.textContent = username;
+    tr.appendChild(userTd);
+
+    const phoneTd = document.createElement("td");
+    phoneTd.textContent = phone;
+    tr.appendChild(phoneTd);
+
+    const otherTd = document.createElement("td");
+    otherTd.textContent = otherFields;
+    tr.appendChild(otherTd);
+
+    const timeTd = document.createElement("td");
+    timeTd.textContent = createdAt;
+    tr.appendChild(timeTd);
+
+    const actionTd = document.createElement("td");
+
+    // Copy all
+    const copyBtn = document.createElement("button");
+    copyBtn.textContent = "Copy All 📋";
+    copyBtn.className="copy";
+    copyBtn.onclick = ()=>{
+      let text = `Form ID: ${formId}\nUsername/Email: ${username}\nPhone: ${phone}\n${otherFields}\nTime: ${createdAt}`;
+      navigator.clipboard.writeText(text);
+    };
+    actionTd.appendChild(copyBtn);
+
+    // Delete submission
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "Delete 🗑️";
+    deleteBtn.className="delete";
+    deleteBtn.onclick = ()=>db.collection("submissions").doc(doc.id).delete();
+    actionTd.appendChild(deleteBtn);
+
+    tr.appendChild(actionTd);
+
+    tbody.appendChild(tr);
   });
 }
 
-// Select all checkboxes
+// Select all submissions
 function selectAll(){
   document.querySelectorAll("tbody input[type=checkbox]").forEach(cb=>{
     cb.checked=true;
     const tr = cb.closest("tr");
     const docId = tr.children[1].textContent;
-    const field = tr.children[2].textContent;
-    selected.add(docId+"_"+field);
+    selected.add(docId);
   });
 }
 
-// Delete all selected
+// Delete selected submissions
 function deleteSelected(){
-  const arr = Array.from(selected);
-  arr.forEach(idField=>{
-    const [docId, field] = idField.split("_");
-    deleteField(docId, field);
+  selected.forEach(docId=>{
+    db.collection("submissions").doc(docId).delete();
   });
   selected.clear();
 }
 
-// Listen to submissions
+// Listen live submissions
 db.collection("submissions").orderBy("createdAt","desc").onSnapshot(snap=>{
   const submissions = [];
   snap.forEach(doc=>submissions.push(doc));
