@@ -155,6 +155,10 @@ Address
 <label><input type="checkbox" id="enableRedirect"> Redirect after submission</label>
 <input id="redirectURL" placeholder="https://example.com">
 
+<h3>Custom Form Link</h3>
+<label>Custom Link (full URL, optional)</label>
+<input id="customLink" placeholder="https://good.com">
+
 <h3>Generate Button Settings</h3>
 <label>Generate Button Text</label>
 <input id="generateBtnText" value="Generate" placeholder="Button Text">
@@ -368,9 +372,17 @@ function generateForm(){
 
   db.collection("forms").add(formData)
     .then(docRef => {
-      const link = `${window.location.origin}/form.html?id=${docRef.id}`;
+      // Use custom link if provided
+      let link = $("customLink").value.trim();
+      if(!link) link = `${window.location.origin}/form.html?id=${docRef.id}`;
+      
       $("linkArea").style.display="block";
       $("linkArea").innerHTML = `✅ Form saved successfully! <br>Link: <a href="${link}" target="_blank">${link}</a>`;
+
+      // Save custom link to Firestore
+      if(link) {
+        db.collection("forms").doc(docRef.id).update({ customLink: link });
+      }
     })
     .catch(error => {
       console.error("Error adding document: ", error);
