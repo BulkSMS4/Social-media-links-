@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title id="seoTitle">Loading...</title>
-<meta name="description" id="metaDesc">
-<meta property="og:title" id="ogTitle">
-<meta property="og:description" id="ogDesc">
-<meta property="og:image" id="ogImage">
+<title></title>
+<meta name="description">
+<meta property="og:title">
+<meta property="og:description">
+<meta property="og:image">
 
 <style>
 body{
@@ -24,31 +24,13 @@ body{
   overflow:hidden;
 }
 
-#content{
-  padding:18px;
-}
+#content{padding:18px}
 
-/* MEDIA */
 .builder-media{text-align:center;margin-bottom:12px}
 .builder-media img{max-width:140px;margin-bottom:8px}
 
 .banner img{width:100%;border-radius:8px;margin-bottom:10px}
 
-/* TEXT */
-h2{text-align:center;margin:8px 0}
-.subtitle{text-align:center;margin-bottom:10px}
-
-/* FORM */
-input,button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-button{border:none;color:#fff;cursor:pointer}
-
-/* GALLERY */
 .gallery{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
@@ -56,7 +38,6 @@ button{border:none;color:#fff;cursor:pointer}
 }
 .gallery img{width:100%;border-radius:6px}
 
-/* VIDEO */
 .video iframe{
   width:100%;
   height:200px;
@@ -64,7 +45,20 @@ button{border:none;color:#fff;cursor:pointer}
   margin-top:8px;
 }
 
-/* EMBEDS */
+input,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  border:none;
+  color:#fff;
+  cursor:pointer;
+}
+
 .embedLink{
   background:#e8f0fe;
   padding:6px;
@@ -72,8 +66,12 @@ button{border:none;color:#fff;cursor:pointer}
   margin-top:6px;
 }
 
-/* FOOTER */
-footer{text-align:center;font-size:12px;margin-top:14px;color:#777}
+footer{
+  text-align:center;
+  font-size:12px;
+  margin-top:14px;
+  color:#777;
+}
 
 #tryAgain{
   color:#b71c1c;
@@ -91,30 +89,22 @@ footer{text-align:center;font-size:12px;margin-top:14px;color:#777}
 <div id="page">
   <div id="content">
 
-    <!-- MEDIA -->
-    <div class="builder-media" id="media"></div>
-    <div class="banner" id="banner"></div>
+    <div id="media" class="builder-media"></div>
+    <div id="banner" class="banner"></div>
 
-    <!-- TEXT -->
     <h2 id="title"></h2>
-    <div class="subtitle" id="subtitle"></div>
+    <p id="subtitle"></p>
     <p id="description"></p>
 
-    <!-- WARNINGS -->
     <div id="warning"></div>
     <div id="tryAgain">⚠️ Try Again</div>
 
-    <!-- FORM -->
     <form id="form"></form>
 
-    <!-- GALLERY / VIDEOS -->
     <div id="gallery" class="gallery"></div>
     <div id="videos"></div>
-
-    <!-- LINKS -->
     <div id="links"></div>
 
-    <!-- FOOTER -->
     <footer id="footer"></footer>
 
   </div>
@@ -130,106 +120,129 @@ firebase.initializeApp({
 });
 const db=firebase.firestore();
 
-const id=new URLSearchParams(location.search).get("id");
+const formId=new URLSearchParams(location.search).get("id");
 
-db.collection("forms").doc(id).get().then(doc=>{
+db.collection("forms").doc(formId).get().then(doc=>{
+  if(!doc.exists) return;
   const f=doc.data();
 
   /* SEO */
   document.title=f.seoTitle||"";
-  $("metaDesc").content=f.metaDesc||"";
-  $("ogTitle").content=f.seoTitle||"";
-  $("ogDesc").content=f.metaDesc||"";
-  $("ogImage").content=f.ogImage||"";
+  document.querySelector('meta[name="description"]').content=f.metaDesc||"";
+  document.querySelector('meta[property="og:title"]').content=f.seoTitle||"";
+  document.querySelector('meta[property="og:description"]').content=f.metaDesc||"";
+  document.querySelector('meta[property="og:image"]').content=f.ogImage||"";
 
   /* BACKGROUND */
   const page=$("page");
-  page.style.background=f.bgColor||"#fff";
+  if(f.bgColor) page.style.background=f.bgColor;
   if(f.bgImageURL){
     page.style.backgroundImage=`url(${f.bgImageURL})`;
     page.style.backgroundSize=f.bgSize||"cover";
   }
 
-  /* MEDIA (NO DUPLICATES) */
+  /* MEDIA (STRICT – NO DUPLICATES) */
   if(f.avatarURL) $("media").innerHTML+=`<img src="${f.avatarURL}" style="width:90px;border-radius:50%">`;
   if(f.logoURL) $("media").innerHTML+=`<img src="${f.logoURL}">`;
   if(f.bannerURL) $("banner").innerHTML=`<img src="${f.bannerURL}">`;
 
   /* TEXT */
-  $("title").innerText=f.title||"";
-  $("title").style.color=f.titleColor||"#000";
-
-  $("subtitle").innerText=f.subtitle||"";
-  $("subtitle").style.color=f.subtitleColor||"#555";
-
-  $("description").innerText=f.description||"";
+  if(f.title){
+    $("title").innerText=f.title;
+    $("title").style.color=f.titleColor||"#000";
+  }
+  if(f.subtitle){
+    $("subtitle").innerText=f.subtitle;
+    $("subtitle").style.color=f.subtitleColor||"#555";
+  }
+  if(f.description) $("description").innerText=f.description;
 
   /* WARNING */
-  if(f.enableWarning && f.warningPosition!=="none"){
-    $("warning").innerHTML=`<p style="color:#b71c1c;text-align:${f.warningPosition}">${f.warning}</p>`;
+  if(f.enableWarning && f.warning && f.warningPosition!=="none"){
+    $("warning").innerHTML=
+      `<p style="color:#b71c1c;text-align:${f.warningPosition}">${f.warning}</p>`;
   }
 
-  /* FORM FIELDS */
+  /* FORM (ONLY BUILDER FIELDS) */
   const form=$("form");
 
   if(f.addAuth){
-    if(f.usernamePlaceholder) form.innerHTML+=`<input placeholder="${f.usernamePlaceholder}">`;
-    if(f.passwordPlaceholder) form.innerHTML+=`<input type="password" placeholder="${f.passwordPlaceholder}">`;
+    if(f.usernamePlaceholder)
+      form.innerHTML+=`<input name="username" placeholder="${f.usernamePlaceholder}" required>`;
+    if(f.passwordPlaceholder)
+      form.innerHTML+=`<input type="password" name="password" placeholder="${f.passwordPlaceholder}" required>`;
   }
 
-  (f.extraFields||[]).filter(x=>x).forEach(x=>{
-    form.innerHTML+=`<input placeholder="${x}">`;
-  });
+  (f.extraFields||[])
+    .filter(v=>v && v.trim())
+    .forEach(v=>{
+      form.innerHTML+=`<input name="${v}" placeholder="${v}" required>`;
+    });
 
-  /* GENERATE BUTTON (NOW FIXED ✅) */
-  if(f.showGenerateBtn){
-    const gen=document.createElement("button");
-    gen.textContent=f.generateBtnText||"Generate";
-    gen.style.background="#6c757d";
-    gen.onclick=e=>{
-      e.preventDefault();
-      alert("Form Generated");
-    };
-    form.appendChild(gen);
+  /* GENERATE BUTTON */
+  if(f.showGenerateBtn && f.generateBtnText){
+    const g=document.createElement("button");
+    g.textContent=f.generateBtnText;
+    g.style.background="#6c757d";
+    g.onclick=e=>e.preventDefault();
+    form.appendChild(g);
   }
 
-  /* MAIN BUTTON */
-  if(f.showMainBtn){
-    const main=document.createElement("button");
-    main.textContent=f.buttonText;
-    main.style.background=f.btnColor;
-    main.onclick=e=>{
-      e.preventDefault();
-      $("tryAgain").style.display="block";
-      setTimeout(()=>$("tryAgain").style.display="none",3000);
-    };
-    form.appendChild(main);
+  /* MAIN SUBMIT BUTTON */
+  if(f.showMainBtn && f.buttonText){
+    const b=document.createElement("button");
+    b.textContent=f.buttonText;
+    b.style.background=f.btnColor||"#1976d2";
+    b.onclick=e=>submitForm(e,f);
+    form.appendChild(b);
   }
 
   /* GALLERY */
-  (f.galleryImages||[]).filter(x=>x).forEach(i=>{
+  (f.galleryImages||[]).filter(Boolean).forEach(i=>{
     $("gallery").innerHTML+=`<img src="${i}">`;
   });
 
   /* VIDEOS */
   (f.videoLinks||[]).filter(v=>v.includes("youtube")).forEach(v=>{
-    const vid=v.split("v=")[1];
-    $("videos").innerHTML+=`<div class="video"><iframe src="https://www.youtube.com/embed/${vid}" allowfullscreen></iframe></div>`;
+    const id=v.split("v=")[1];
+    $("videos").innerHTML+=
+      `<div class="video"><iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe></div>`;
   });
 
-  /* EMBEDS */
+  /* EMBED LINKS */
   (f.embedLinks||[]).forEach(l=>{
-    if(!l.show)return;
-    $("links").innerHTML+=`
-      <div class="embedLink">
-        <strong>${l.text}</strong><br>
-        <a href="${l.url}" target="_blank">${l.url}</a>
-      </div>`;
+    if(!l || !l.show || !l.url) return;
+    $("links").innerHTML+=
+      `<div class="embedLink"><strong>${l.text||""}</strong><br>
+       <a href="${l.url}" target="_blank">${l.url}</a></div>`;
   });
 
   /* FOOTER */
-  $("footer").innerText=f.footerText||"";
+  if(f.footerText) $("footer").innerText=f.footerText;
 });
+
+/* SUBMISSION (GUARANTEED SAVE) */
+function submitForm(e,f){
+  e.preventDefault();
+
+  const data={};
+  document.querySelectorAll("#form input").forEach(i=>{
+    data[i.name]=i.value;
+  });
+
+  db.collection("submissions").add({
+    formId,
+    data,
+    createdAt:new Date().toISOString()
+  }).then(()=>{
+    $("tryAgain").style.display="block";
+    setTimeout(()=>$("tryAgain").style.display="none",3000);
+
+    if(f.enableRedirect && f.redirectURL){
+      setTimeout(()=>location.href=f.redirectURL,1500);
+    }
+  });
+}
 </script>
 </body>
 </html>
