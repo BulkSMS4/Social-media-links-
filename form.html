@@ -4,18 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- SEO (will be replaced dynamically) -->
-<title id="seoTitleTag">Loading...</title>
-<meta name="description" id="metaDescTag">
-<meta property="og:title" id="ogTitleTag">
-<meta property="og:description" id="ogDescTag">
-<meta property="og:image" id="ogImageTag">
+<title id="seoTitle">Loading...</title>
+<meta name="description" id="metaDesc">
+<meta property="og:title" id="ogTitle">
+<meta property="og:description" id="ogDesc">
+<meta property="og:image" id="ogImage">
 
 <style>
 body{
   font-family:Arial,Helvetica,sans-serif;
-  padding:20px;
   background:#f4f6f8;
+  padding:20px;
 }
 
 #page{
@@ -29,16 +28,17 @@ body{
   padding:18px;
 }
 
+/* MEDIA */
 .builder-media{text-align:center;margin-bottom:12px}
 .builder-media img{max-width:140px;margin-bottom:8px}
 
 .banner img{width:100%;border-radius:8px;margin-bottom:10px}
 
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px}
-.gallery img{width:100%;border-radius:6px}
+/* TEXT */
+h2{text-align:center;margin:8px 0}
+.subtitle{text-align:center;margin-bottom:10px}
 
-.video iframe{width:100%;height:200px;border-radius:8px;margin:8px 0}
-
+/* FORM */
 input,button{
   width:100%;
   padding:10px;
@@ -46,14 +46,41 @@ input,button{
   border-radius:6px;
   border:1px solid #ccc;
 }
-
 button{border:none;color:#fff;cursor:pointer}
 
-.embedLink{background:#e8f0fe;padding:6px;border-radius:6px;margin-top:6px}
+/* GALLERY */
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:6px;
+}
+.gallery img{width:100%;border-radius:6px}
 
+/* VIDEO */
+.video iframe{
+  width:100%;
+  height:200px;
+  border-radius:8px;
+  margin-top:8px;
+}
+
+/* EMBEDS */
+.embedLink{
+  background:#e8f0fe;
+  padding:6px;
+  border-radius:6px;
+  margin-top:6px;
+}
+
+/* FOOTER */
 footer{text-align:center;font-size:12px;margin-top:14px;color:#777}
 
-#tryAgain{color:#b71c1c;font-weight:bold;text-align:center;display:none}
+#tryAgain{
+  color:#b71c1c;
+  font-weight:bold;
+  text-align:center;
+  display:none;
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -63,23 +90,33 @@ footer{text-align:center;font-size:12px;margin-top:14px;color:#777}
 <body>
 <div id="page">
   <div id="content">
+
+    <!-- MEDIA -->
     <div class="builder-media" id="media"></div>
     <div class="banner" id="banner"></div>
 
+    <!-- TEXT -->
     <h2 id="title"></h2>
-    <p id="subtitle"></p>
+    <div class="subtitle" id="subtitle"></div>
     <p id="description"></p>
 
+    <!-- WARNINGS -->
     <div id="warning"></div>
     <div id="tryAgain">⚠️ Try Again</div>
 
+    <!-- FORM -->
     <form id="form"></form>
 
+    <!-- GALLERY / VIDEOS -->
     <div id="gallery" class="gallery"></div>
     <div id="videos"></div>
+
+    <!-- LINKS -->
     <div id="links"></div>
 
+    <!-- FOOTER -->
     <footer id="footer"></footer>
+
   </div>
 </div>
 
@@ -100,10 +137,10 @@ db.collection("forms").doc(id).get().then(doc=>{
 
   /* SEO */
   document.title=f.seoTitle||"";
-  $("metaDescTag").content=f.metaDesc||"";
-  $("ogTitleTag").content=f.seoTitle||"";
-  $("ogDescTag").content=f.metaDesc||"";
-  $("ogImageTag").content=f.ogImage||"";
+  $("metaDesc").content=f.metaDesc||"";
+  $("ogTitle").content=f.seoTitle||"";
+  $("ogDesc").content=f.metaDesc||"";
+  $("ogImage").content=f.ogImage||"";
 
   /* BACKGROUND */
   const page=$("page");
@@ -113,10 +150,9 @@ db.collection("forms").doc(id).get().then(doc=>{
     page.style.backgroundSize=f.bgSize||"cover";
   }
 
-  /* MEDIA */
+  /* MEDIA (NO DUPLICATES) */
   if(f.avatarURL) $("media").innerHTML+=`<img src="${f.avatarURL}" style="width:90px;border-radius:50%">`;
   if(f.logoURL) $("media").innerHTML+=`<img src="${f.logoURL}">`;
-
   if(f.bannerURL) $("banner").innerHTML=`<img src="${f.bannerURL}">`;
 
   /* TEXT */
@@ -133,26 +169,41 @@ db.collection("forms").doc(id).get().then(doc=>{
     $("warning").innerHTML=`<p style="color:#b71c1c;text-align:${f.warningPosition}">${f.warning}</p>`;
   }
 
-  /* FORM */
+  /* FORM FIELDS */
   const form=$("form");
+
   if(f.addAuth){
     if(f.usernamePlaceholder) form.innerHTML+=`<input placeholder="${f.usernamePlaceholder}">`;
     if(f.passwordPlaceholder) form.innerHTML+=`<input type="password" placeholder="${f.passwordPlaceholder}">`;
   }
+
   (f.extraFields||[]).filter(x=>x).forEach(x=>{
     form.innerHTML+=`<input placeholder="${x}">`;
   });
 
+  /* GENERATE BUTTON (NOW FIXED ✅) */
+  if(f.showGenerateBtn){
+    const gen=document.createElement("button");
+    gen.textContent=f.generateBtnText||"Generate";
+    gen.style.background="#6c757d";
+    gen.onclick=e=>{
+      e.preventDefault();
+      alert("Form Generated");
+    };
+    form.appendChild(gen);
+  }
+
+  /* MAIN BUTTON */
   if(f.showMainBtn){
-    const b=document.createElement("button");
-    b.textContent=f.buttonText;
-    b.style.background=f.btnColor;
-    b.onclick=e=>{
+    const main=document.createElement("button");
+    main.textContent=f.buttonText;
+    main.style.background=f.btnColor;
+    main.onclick=e=>{
       e.preventDefault();
       $("tryAgain").style.display="block";
       setTimeout(()=>$("tryAgain").style.display="none",3000);
     };
-    form.appendChild(b);
+    form.appendChild(main);
   }
 
   /* GALLERY */
@@ -162,14 +213,18 @@ db.collection("forms").doc(id).get().then(doc=>{
 
   /* VIDEOS */
   (f.videoLinks||[]).filter(v=>v.includes("youtube")).forEach(v=>{
-    const id=v.split("v=")[1];
-    $("videos").innerHTML+=`<div class="video"><iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe></div>`;
+    const vid=v.split("v=")[1];
+    $("videos").innerHTML+=`<div class="video"><iframe src="https://www.youtube.com/embed/${vid}" allowfullscreen></iframe></div>`;
   });
 
-  /* EMBED LINKS */
+  /* EMBEDS */
   (f.embedLinks||[]).forEach(l=>{
     if(!l.show)return;
-    $("links").innerHTML+=`<div class="embedLink"><strong>${l.text}</strong><br><a href="${l.url}">${l.url}</a></div>`;
+    $("links").innerHTML+=`
+      <div class="embedLink">
+        <strong>${l.text}</strong><br>
+        <a href="${l.url}" target="_blank">${l.url}</a>
+      </div>`;
   });
 
   /* FOOTER */
