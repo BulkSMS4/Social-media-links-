@@ -22,9 +22,10 @@ body{
   margin:auto;
   border-radius:10px;
   overflow:hidden;
+  position:relative;
 }
 
-#content{padding:18px}
+#content{padding:18px;position:relative}
 
 .builder-media{text-align:center;margin-bottom:12px}
 .builder-media img{max-width:140px;margin-bottom:8px}
@@ -34,15 +35,18 @@ body{
 .gallery{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:6px;
+  gap:8px;
+  margin-bottom:12px;
 }
 .gallery img{width:100%;border-radius:6px}
 
-.video iframe{
-  width:100%;
-  height:200px;
-  border-radius:8px;
-  margin-top:8px;
+.embedLink{
+  background:#e8f0fe;
+  padding:8px;
+  border-radius:6px;
+  margin:8px 0;
+  cursor:move;
+  position:relative;
 }
 
 input,button{
@@ -57,13 +61,6 @@ button{
   border:none;
   color:#fff;
   cursor:pointer;
-}
-
-.embedLink{
-  background:#e8f0fe;
-  padding:6px;
-  border-radius:6px;
-  margin-top:6px;
 }
 
 footer{
@@ -90,20 +87,23 @@ footer{
   <div id="content">
 
     <div id="media" class="builder-media"></div>
-    <div id="banner" class="banner"></div>
+    <div id="banner"></div>
 
     <h2 id="title"></h2>
     <p id="subtitle"></p>
+
+    <!-- GALLERY MOVED UP -->
+    <div id="gallery" class="gallery"></div>
+
     <p id="description"></p>
+
+    <!-- DRAGGABLE LINKS -->
+    <div id="links"></div>
 
     <div id="warning"></div>
     <div id="tryAgain">⚠️ Try Again</div>
 
     <form id="form"></form>
-
-    <div id="gallery" class="gallery"></div>
-    <div id="videos"></div>
-    <div id="links"></div>
 
     <footer id="footer"></footer>
 
@@ -121,9 +121,9 @@ firebase.initializeApp({
 const db=firebase.firestore();
 
 const formId=new URLSearchParams(location.search).get("id");
+let dragging=null,dx=0,dy=0;
 
 db.collection("forms").doc(formId).get().then(doc=>{
-  if(!doc.exists) return;
   const f=doc.data();
 
   /* SEO */
@@ -133,102 +133,90 @@ db.collection("forms").doc(formId).get().then(doc=>{
   document.querySelector('meta[property="og:description"]').content=f.metaDesc||"";
   document.querySelector('meta[property="og:image"]').content=f.ogImage||"";
 
-  /* BACKGROUND */
-  const page=$("page");
-  if(f.bgColor) page.style.background=f.bgColor;
-  if(f.bgImageURL){
-    page.style.backgroundImage=`url(${f.bgImageURL})`;
-    page.style.backgroundSize=f.bgSize||"cover";
-  }
-
-  /* MEDIA (STRICT – NO DUPLICATES) */
+  /* MEDIA */
   if(f.avatarURL) $("media").innerHTML+=`<img src="${f.avatarURL}" style="width:90px;border-radius:50%">`;
   if(f.logoURL) $("media").innerHTML+=`<img src="${f.logoURL}">`;
-  if(f.bannerURL) $("banner").innerHTML=`<img src="${f.bannerURL}">`;
+  if(f.bannerURL) $("banner").innerHTML=`<img src="${f.bannerURL}" style="width:100%;border-radius:8px">`;
 
   /* TEXT */
-  if(f.title){
-    $("title").innerText=f.title;
-    $("title").style.color=f.titleColor||"#000";
-  }
-  if(f.subtitle){
-    $("subtitle").innerText=f.subtitle;
-    $("subtitle").style.color=f.subtitleColor||"#555";
-  }
-  if(f.description) $("description").innerText=f.description;
+  $("title").innerText=f.title||"";
+  $("subtitle").innerText=f.subtitle||"";
+  $("description").innerText=f.description||"";
 
-  /* WARNING */
-  if(f.enableWarning && f.warning && f.warningPosition!=="none"){
-    $("warning").innerHTML=
-      `<p style="color:#b71c1c;text-align:${f.warningPosition}">${f.warning}</p>`;
-  }
-
-  /* FORM (ONLY BUILDER FIELDS) */
-  const form=$("form");
-
-  if(f.addAuth){
-    if(f.usernamePlaceholder)
-      form.innerHTML+=`<input name="username" placeholder="${f.usernamePlaceholder}" required>`;
-    if(f.passwordPlaceholder)
-      form.innerHTML+=`<input type="password" name="password" placeholder="${f.passwordPlaceholder}" required>`;
-  }
-
-  (f.extraFields||[])
-    .filter(v=>v && v.trim())
-    .forEach(v=>{
-      form.innerHTML+=`<input name="${v}" placeholder="${v}" required>`;
-    });
-
-  /* GENERATE BUTTON */
-  if(f.showGenerateBtn && f.generateBtnText){
-    const g=document.createElement("button");
-    g.textContent=f.generateBtnText;
-    g.style.background="#6c757d";
-    g.onclick=e=>e.preventDefault();
-    form.appendChild(g);
-  }
-
-  /* MAIN SUBMIT BUTTON */
-  if(f.showMainBtn && f.buttonText){
-    const b=document.createElement("button");
-    b.textContent=f.buttonText;
-    b.style.background=f.btnColor||"#1976d2";
-    b.onclick=e=>submitForm(e,f);
-    form.appendChild(b);
-  }
-
-  /* GALLERY */
+  /* GALLERY (ABOVE DESCRIPTION ✔) */
   (f.galleryImages||[]).filter(Boolean).forEach(i=>{
     $("gallery").innerHTML+=`<img src="${i}">`;
   });
 
-  /* VIDEOS */
-  (f.videoLinks||[]).filter(v=>v.includes("youtube")).forEach(v=>{
-    const id=v.split("v=")[1];
-    $("videos").innerHTML+=
-      `<div class="video"><iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe></div>`;
+  /* DRAGGABLE LINKS */
+  (f.embedLinks||[]).forEach((l,i)=>{
+    if(!l.show || !l.url) return;
+
+    const div=document.createElement("div");
+    div.className="embedLink";
+    div.innerHTML=`<strong>${l.text||""}</strong><br><a href="${l.url}" target="_blank">${l.url}</a>`;
+
+    if(l.x!=null && l.y!=null){
+      div.style.position="absolute";
+      div.style.left=l.x+"px";
+      div.style.top=l.y+"px";
+    }
+
+    div.onmousedown=e=>{
+      dragging={el:div,index:i};
+      dx=e.offsetX;
+      dy=e.offsetY;
+    };
+
+    $("links").appendChild(div);
   });
 
-  /* EMBED LINKS */
-  (f.embedLinks||[]).forEach(l=>{
-    if(!l || !l.show || !l.url) return;
-    $("links").innerHTML+=
-      `<div class="embedLink"><strong>${l.text||""}</strong><br>
-       <a href="${l.url}" target="_blank">${l.url}</a></div>`;
+  /* FORM */
+  const form=$("form");
+
+  if(f.addAuth){
+    if(f.usernamePlaceholder) form.innerHTML+=`<input name="username" placeholder="${f.usernamePlaceholder}" required>`;
+    if(f.passwordPlaceholder) form.innerHTML+=`<input type="password" name="password" placeholder="${f.passwordPlaceholder}" required>`;
+  }
+
+  (f.extraFields||[]).filter(Boolean).forEach(v=>{
+    form.innerHTML+=`<input name="${v}" placeholder="${v}" required>`;
   });
 
-  /* FOOTER */
+  if(f.showMainBtn){
+    const b=document.createElement("button");
+    b.textContent=f.buttonText;
+    b.style.background=f.btnColor;
+    b.onclick=e=>submitForm(e,f);
+    form.appendChild(b);
+  }
+
   if(f.footerText) $("footer").innerText=f.footerText;
 });
 
-/* SUBMISSION (GUARANTEED SAVE) */
+/* DRAG SAVE */
+document.onmousemove=e=>{
+  if(!dragging) return;
+  const c=$("content").getBoundingClientRect();
+  dragging.el.style.left=(e.clientX-c.left-dx)+"px";
+  dragging.el.style.top=(e.clientY-c.top-dy)+"px";
+};
+document.onmouseup=()=>{
+  if(dragging){
+    const el=dragging.el;
+    db.collection("forms").doc(formId).update({
+      [`embedLinks.${dragging.index}.x`]:parseInt(el.style.left),
+      [`embedLinks.${dragging.index}.y`]:parseInt(el.style.top)
+    });
+  }
+  dragging=null;
+};
+
+/* SUBMIT */
 function submitForm(e,f){
   e.preventDefault();
-
   const data={};
-  document.querySelectorAll("#form input").forEach(i=>{
-    data[i.name]=i.value;
-  });
+  document.querySelectorAll("#form input").forEach(i=>data[i.name]=i.value);
 
   db.collection("submissions").add({
     formId,
@@ -237,10 +225,6 @@ function submitForm(e,f){
   }).then(()=>{
     $("tryAgain").style.display="block";
     setTimeout(()=>$("tryAgain").style.display="none",3000);
-
-    if(f.enableRedirect && f.redirectURL){
-      setTimeout(()=>location.href=f.redirectURL,1500);
-    }
   });
 }
 </script>
