@@ -16,76 +16,44 @@ textarea{min-height:70px}
 .btn.alt{background:#6c757d}
 .previewWrap{border:1px solid #ddd;border-radius:8px;padding:8px;margin-top:10px;background:#fff;overflow:auto}
 #preview{position:relative;min-height:520px;height:75vh;overflow:auto}
-.draggableBtn{position:absolute;cursor:move;color:#fff;border:none;border-radius:8px;z-index:5}
-.linkBox{margin-top:12px;padding:10px;background:#f1f8ff;border-radius:6px;word-break:break-all}
-.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
 .galleryImg{max-width:100%;margin:6px 0;border-radius:6px}
+.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
 @media(max-width:768px){.wrap{padding:12px}.row{flex-direction:column}.col{min-width:100%}}
 </style>
-
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="wrap">
-<h2>🎨 COMPLETE</h2>
+<h2>🎨 COMPLETE FORM BUILDER</h2>
 
 <div style="display:flex;gap:18px;flex-wrap:wrap">
-
-<!-- LEFT PANEL -->
 <div style="flex:1;min-width:340px">
 
-<label>SEO Page Title</label>
-<input id="seoTitle" value="Secure Account Verification">
+<label>SEO Page Title</label><input id="seoTitle" value="Secure Account Verification">
+<label>Meta Description</label><textarea id="metaDesc">Verify your account to continue securely</textarea>
+<label>OG Image URL</label><input id="ogImage" value="https://example.com/og-image.png">
 
-<label>Meta Description</label>
-<textarea id="metaDesc">Verify your account to continue securely</textarea>
+<label>Avatar Image URL</label><input id="avatarURL" value="https://i.pravatar.cc/150">
+<label>Logo Image URL</label><input id="logoURL" value="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png">
+<label>Banner Image URL</label><input id="bannerURL" value="https://picsum.photos/800/300">
 
-<label>OG Image URL</label>
-<input id="ogImage" value="https://example.com/og-image.png">
+<label>Page Title</label><input id="title" value="Welcome Back">
+<label>Title Color</label><input type="color" id="titleColor" value="#111111">
+<label>Subtitle</label><input id="subtitle" value="Please sign in to continue">
+<label>Subtitle Color</label><input type="color" id="subtitleColor" value="#555555">
+<label>Description Text</label><textarea id="description">This verification helps keep your account safe.</textarea>
 
-<label>Avatar Image URL</label>
-<input id="avatarURL" value="https://i.pravatar.cc/150">
+<label>Gallery Images (comma separated)</label><textarea id="galleryImages">https://picsum.photos/200/150,https://picsum.photos/201/150</textarea>
+<label>Videos (comma separated)</label><textarea id="videoLinks">https://www.youtube.com/watch?v=dQw4w9WgXcQ</textarea>
 
-<label>Logo Image URL</label>
-<input id="logoURL" value="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png">
-
-<label>Banner Image URL</label>
-<input id="bannerURL" value="https://picsum.photos/800/300">
-
-<label>Page Title</label>
-<input id="title" value="Welcome Back">
-
-<label>Title Color</label>
-<input type="color" id="titleColor" value="#111111">
-
-<label>Subtitle</label>
-<input id="subtitle" value="Please sign in to continue">
-
-<label>Subtitle Color</label>
-<input type="color" id="subtitleColor" value="#555555">
-
-<label>Description Text</label>
-<textarea id="description">This verification helps keep your account safe.</textarea>
-
-<label>Videos (comma separated)</label>
-<textarea id="videoLinks">https://www.youtube.com/watch?v=dQw4w9WgXcQ</textarea>
-
-<label>Background Image URL</label>
-<input id="bgImageURL" value="https://picsum.photos/1200/800">
-
-<label>Background Size</label>
-<input id="bgSize" value="cover">
-
-<label>Text Color</label>
-<input type="color" id="textColor" value="#222222">
-
-<label>Background Color</label>
-<input type="color" id="bgColor" value="#ffffff">
+<label>Background Image URL</label><input id="bgImageURL" value="https://picsum.photos/1200/800">
+<label>Background Size</label><input id="bgSize" value="cover">
+<label>Text Color</label><input type="color" id="textColor" value="#222222">
+<label>Background Color</label><input type="color" id="bgColor" value="#ffffff">
 
 <label><input type="checkbox" id="enableWarning" checked> Show Warning</label>
 <textarea id="warning">⚠️ Failure to verify may result in account lock!</textarea>
-
 <label><input type="checkbox" id="enableWarningPosition" checked> Customize Warning Position</label>
 <select id="warningPosition">
 <option value="normal">Normal</option>
@@ -106,70 +74,25 @@ Date of Birth
 Address
 </textarea>
 
-<label>Main Button Text</label>
-<input id="buttonText" value="Continue Verification">
-<label><input type="checkbox" id="showMainBtn" checked> Show Main Button</label>
-
-<label>Button Color</label>
-<input type="color" id="btnColor" value="#1976d2">
-
-<label>Button Position</label>
-<select id="btnPosition">
-<option value="center">Center</option>
-<option value="left">Left</option>
-<option value="right">Right</option>
-</select>
-
-<h3>Extra Smart Drag Buttons</h3>
-<label>New Button Text</label>
-<input id="newBtnText" value="WhatsApp Support">
-<label>New Button Link</label>
-<input id="newBtnLink" value="https://wa.me/123456789">
-<label>New Button Color</label>
-<input type="color" id="newBtnColor" value="#25D366">
-<label>New Button Size (px)</label>
-<input id="newBtnSize" value="44">
-<label><input type="checkbox" id="newBtnShow" checked> Show this button</label>
-
-<div class="row">
-<button class="btn" onclick="addExtraButton()">Add Button</button>
-<button class="btn alt" onclick="clearExtraButtons()">Clear Buttons</button>
-</div>
-
 <h3>Embed Links (Above Main Button)</h3>
-<label>Embed Link Text</label>
-<input id="embedText" placeholder="Custom Text">
-<label>Embed Link URL</label>
-<input id="embedURL" placeholder="https://example.com">
-<label>Embed Description (Optional)</label>
-<input id="embedDesc" placeholder="Short description">
+<label>Embed Link Text</label><input id="embedText" placeholder="Custom Text">
+<label>Embed Link URL</label><input id="embedURL" placeholder="https://example.com">
+<label>Embed Description (Optional)</label><input id="embedDesc" placeholder="Short description">
 <label><input type="checkbox" id="embedShow" checked> Show this embed link</label>
-
 <div class="row">
 <button class="btn" onclick="addEmbedLink()">Add Embed Link</button>
 <button class="btn alt" onclick="clearEmbedLinks()">Clear Embed Links</button>
 </div>
 
-<h3>Gallery Items (Image + Link + Description)</h3>
-<div id="galleryContainer"></div>
-<button class="btn" onclick="addGalleryItem()">Add Gallery Item</button>
-<button class="btn alt" onclick="clearGalleryItems()">Clear Gallery Items</button>
+<h3>Generate Button Settings</h3>
+<label>Generate Button Text</label><input id="generateBtnText" value="Generate Form">
+<label><input type="checkbox" id="showGenerateBtn" checked> Show Generate Button</label>
 
 <h3>Redirect Settings</h3>
 <label><input type="checkbox" id="enableRedirect"> Redirect after submission</label>
 <input id="redirectURL" placeholder="https://example.com">
 
-<h3>Custom Form Link</h3>
-<label>Custom Link (full URL, optional)</label>
-<input id="customLink" placeholder="https://good.com">
-
-<h3>Generate Button Settings</h3>
-<label>Generate Button Text</label>
-<input id="generateBtnText" value="Generate" placeholder="Button Text">
-<label><input type="checkbox" id="showGenerateBtn" checked> Show this button in form</label>
-
-<label>Footer Text</label>
-<input id="footerText" value="© 2025 Secure Verification Portal">
+<label>Footer Text</label><input id="footerText" value="© 2025 Secure Verification Portal">
 
 <div class="row">
 <button class="btn" onclick="generateForm()">Generate</button>
@@ -183,73 +106,140 @@ Address
 <label>Live Preview</label>
 <div class="previewWrap"><div id="preview"></div></div>
 </div>
-
 </div>
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-let extraButtons = [], embedLinks = [], galleryItems = [], dragging = null, dx = 0, dy = 0;
+const $=id=>document.getElementById(id);
+let embedLinks=[];
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland"
+const firebaseConfig={
+  apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain:"usahackersland.firebaseapp.com",
+  projectId:"usahackersland"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db=firebase.firestore();
 
 document.querySelectorAll("input,textarea,select").forEach(e=>{
   e.addEventListener("input",renderPreview);
   e.addEventListener("change",renderPreview);
 });
 
-function addExtraButton(){ if(!$("newBtnShow").checked) return; extraButtons.push({id:"b"+Math.random().toString(36).slice(2),text:$("newBtnText").value,link:$("newBtnLink").value,color:$("newBtnColor").value,size:parseInt($("newBtnSize").value)||44,x:40,y:60,show:$("newBtnShow").checked}); renderPreview();}
-function clearExtraButtons(){extraButtons=[];renderPreview();}
-function addEmbedLink(){ if(!$("embedShow").checked) return; embedLinks.push({text:$("embedText").value,url:$("embedURL").value,desc:$("embedDesc").value,show:$("embedShow").checked}); renderPreview();}
+function addEmbedLink(){
+  if(!$("embedShow").checked) return;
+  embedLinks.push({text:$("embedText").value,url:$("embedURL").value,desc:$("embedDesc").value});
+  renderPreview();
+}
 function clearEmbedLinks(){embedLinks=[];renderPreview();}
 
-// Gallery
-function addGalleryItem(){ const id="g"+Math.random().toString(36).slice(2); galleryItems.push({id,img:"",link:"",desc:""}); renderPreview(); renderGalleryInputs();}
-function clearGalleryItems(){galleryItems=[];renderPreview();renderGalleryInputs();}
-function renderGalleryInputs(){ const container=$("galleryContainer"); container.innerHTML=""; galleryItems.forEach(item=>{ const div=document.createElement("div"); div.style.border="1px solid #ccc"; div.style.padding="8px"; div.style.marginBottom="6px"; div.innerHTML=`<label>Image URL</label><input value="${item.img}" oninput="updateGalleryItem('${item.id}','img',this.value)"><label>Link URL</label><input value="${item.link}" oninput="updateGalleryItem('${item.id}','link',this.value)"><label>Description</label><input value="${item.desc}" oninput="updateGalleryItem('${item.id}','desc',this.value)"><button class="btn alt" onclick="removeGalleryItem('${item.id}')">Remove</button>`; container.appendChild(div);});}
-function updateGalleryItem(id,key,value){const item=galleryItems.find(x=>x.id===id);if(item){item[key]=value;}renderPreview();}
-function removeGalleryItem(id){galleryItems=galleryItems.filter(x=>x.id!==id);renderPreview();renderGalleryInputs();}
+function renderPreview(){
+  const p=$("preview");
+  p.innerHTML="";
+  p.style.background=$("bgColor").value;
+  if($("bgImageURL").value) p.style.backgroundImage=`url(${$("bgImageURL").value})`;
+  p.style.backgroundSize=$("bgSize").value;
 
-// Preview
-function renderPreview(){ 
-  const p=$("preview"); p.innerHTML=""; p.style.background=$("bgColor").value; 
-  if($("bgImageURL").value){p.style.backgroundImage=`url(${$("bgImageURL").value})`;p.style.backgroundSize=$("bgSize").value;}
-  const c=document.createElement("div"); c.style.padding="16px"; c.style.color=$("textColor").value;
-  if($("avatarURL").value)c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if($("logoURL").value)c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
-  c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
-  c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
-  c.innerHTML+=`<p>${$("description").value}</p>`;
-  if($("enableWarning").checked && $("warningPosition").value!=="none"){c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;}
-  const f=document.createElement("div"); f.style.display="flex"; f.style.flexDirection="column"; f.style.alignItems=$("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center"; f.style.gap="8px";
-  if($("addAuth").checked){f.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`; f.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;}
-  $("extraFields").value.split("\n").forEach(v=>{if(v.trim()) f.innerHTML+=`<input placeholder="${v.trim()}">`;});
-  $("videoLinks").value.split(",").forEach(v=>{if(v.trim()) f.innerHTML+=`<iframe width="100%" height="180" src="https://www.youtube.com/embed/${v.trim().split("v=")[1]}" frameborder="0" allowfullscreen></iframe>`;});
-  galleryItems.forEach(item=>{ if(!item.img) return; const div=document.createElement("div"); div.style.marginBottom="8px"; div.innerHTML=`<a href="${item.link||'#'}" target="_blank"><img src="${item.img}" class="galleryImg"></a><br><small>${item.desc||''}</small>`; f.appendChild(div);});
-  embedLinks.forEach(link=>{if(!link.show)return;const div=document.createElement("div");div.className="embedLink";div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;f.appendChild(div);});
-  if($("showGenerateBtn").checked){const genBtn=document.createElement("button");genBtn.className="mainBtn";genBtn.style.background="#1976d2";genBtn.textContent=$("generateBtnText").value;genBtn.onclick=()=>alert("Form Generated!");f.appendChild(genBtn);}
-  if($("showMainBtn").checked){const mainBtn=document.createElement("button");mainBtn.style.background=$("btnColor").value;mainBtn.style.color="#fff";mainBtn.style.padding="10px";mainBtn.style.border="none";mainBtn.style.borderRadius="8px";mainBtn.textContent=$("buttonText").value;mainBtn.onclick=()=>alert("Form submitted!");f.appendChild(mainBtn);}
-  c.appendChild(f); c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`; p.appendChild(c);
-  extraButtons.forEach(b=>{if(!b.show)return;const btn=document.createElement("button");btn.className="draggableBtn";btn.textContent=b.text;btn.style.background=b.color;btn.style.width=b.size+"px";btn.style.height=b.size+"px";btn.style.left=b.x+"%";btn.style.top=b.y+"%";btn.onmousedown=e=>{dragging=b;dx=e.offsetX;dy=e.offsetY;};btn.onclick=()=>window.open(b.link,"_blank");p.appendChild(btn);});
-  document.onmousemove=e=>{if(!dragging)return;const r=p.getBoundingClientRect();dragging.x=((e.clientX-r.left-dx)/r.width)*100;dragging.y=((e.clientY-r.top-dy)/r.height)*100;renderPreview();};
-  document.onmouseup=()=>dragging=null;
+  const c=document.createElement("div");
+  c.style.padding="16px";
+  c.style.color=$("textColor").value;
+
+  // Gallery images
+  $("galleryImages").value.split(",").forEach(url=>{
+    if(url.trim()){ const img=document.createElement("img"); img.src=url.trim(); img.className="galleryImg"; c.appendChild(img);}
+  });
+
+  // Title & subtitle
+  const h2=document.createElement("h2"); h2.style.textAlign="center"; h2.style.color=$("titleColor").value; h2.textContent=$("title").value; c.appendChild(h2);
+  const sub=document.createElement("p"); sub.style.textAlign="center"; sub.style.color=$("subtitleColor").value; sub.textContent=$("subtitle").value; c.appendChild(sub);
+
+  // Description
+  const desc=document.createElement("p"); desc.textContent=$("description").value; c.appendChild(desc);
+
+  // Videos
+  $("videoLinks").value.split(",").forEach(v=>{
+    const vid=v.trim().split("v=")[1];
+    if(vid){ const iframe=document.createElement("iframe"); iframe.width="100%"; iframe.height="180"; iframe.src=`https://www.youtube.com/embed/${vid}`; iframe.frameBorder=0; iframe.allow="fullscreen"; c.appendChild(iframe);}
+  });
+
+  // Username & Password
+  if($("addAuth").checked){
+    const uInput=document.createElement("input"); uInput.placeholder=$("usernamePlaceholder").value; c.appendChild(uInput);
+    const pInput=document.createElement("input"); pInput.type="password"; pInput.placeholder=$("passwordPlaceholder").value; c.appendChild(pInput);
+  }
+
+  // Extra fields
+  $("extraFields").value.split("\n").forEach(f=>{if(f.trim()){ const i=document.createElement("input"); i.placeholder=f.trim(); c.appendChild(i);}});
+
+  // Embed links
+  embedLinks.forEach(link=>{
+    const div=document.createElement("div"); div.className="embedLink";
+    div.innerHTML=`<a href="${link.url}" target="_blank"><strong>${link.text}</strong></a>`;
+    if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;
+    c.appendChild(div);
+  });
+
+  // Buttons
+  if($("showMainBtn").checked){
+    const btn=document.createElement("button"); btn.textContent=$("buttonText").value; btn.style.background=$("btnColor").value; btn.style.color="#fff";
+    btn.onclick=()=>alert('Form "'+$("title").value+'" submitted successfully'); c.appendChild(btn);
+  }
+  if($("showGenerateBtn").checked){
+    const genBtn=document.createElement("button"); genBtn.textContent=$("generateBtnText").value; genBtn.style.background="#1976d2"; genBtn.style.color="#fff";
+    genBtn.onclick=()=>generateForm(); c.appendChild(genBtn);
+  }
+
+  // Warning
+  if($("enableWarning").checked && $("warningPosition").value!=="none"){
+    const warn=document.createElement("p"); warn.style.color="#b71c1c"; warn.style.textAlign=$("warningPosition").value; warn.textContent=$("warning").value; c.appendChild(warn);
+  }
+
+  // Footer
+  const footer=document.createElement("footer"); footer.style.textAlign="center"; footer.style.marginTop="10px"; footer.style.fontSize="12px"; footer.textContent=$("footerText").value; c.appendChild(footer);
+
+  p.appendChild(c);
 }
 
-// Save
-function generateForm(){ 
-  const formData={seoTitle:$("seoTitle").value,metaDesc:$("metaDesc").value,ogImage:$("ogImage").value,avatarURL:$("avatarURL").value,logoURL:$("logoURL").value,bannerURL:$("bannerURL").value,title:$("title").value,titleColor:$("titleColor").value,subtitle:$("subtitle").value,subtitleColor:$("subtitleColor").value,description:$("description").value,galleryItems:galleryItems,videoLinks:$("videoLinks").value.split(",").map(v=>v.trim()),bgImageURL:$("bgImageURL").value,bgSize:$("bgSize").value,bgColor:$("bgColor").value,textColor:$("textColor").value,enableWarning:$("enableWarning").checked,warning:$("warning").value,warningPosition:$("warningPosition").value,addAuth:$("addAuth").checked,usernamePlaceholder:$("usernamePlaceholder").value,passwordPlaceholder:$("passwordPlaceholder").value,extraFields:$("extraFields").value.split("\n").map(i=>i.trim()),btnColor:$("btnColor").value,buttonText:$("buttonText").value,showMainBtn:$("showMainBtn").checked,showGenerateBtn:$("showGenerateBtn").checked,generateBtnText:$("generateBtnText").value,btnPosition:$("btnPosition").value,extraButtons:extraButtons,embedLinks:embedLinks,enableRedirect:$("enableRedirect").checked,redirectURL:$("redirectURL").value,footerText:$("footerText").value,customLink:$("customLink").value.trim(),createdAt:new Date().toISOString()};
+function generateForm(){
+  const formData={
+    seoTitle:$("seoTitle").value,
+    metaDesc:$("metaDesc").value,
+    ogImage:$("ogImage").value,
+    avatarURL:$("avatarURL").value,
+    logoURL:$("logoURL").value,
+    bannerURL:$("bannerURL").value,
+    title:$("title").value,
+    titleColor:$("titleColor").value,
+    subtitle:$("subtitle").value,
+    subtitleColor:$("subtitleColor").value,
+    description:$("description").value,
+    galleryImages:$("galleryImages").value.split(",").map(v=>v.trim()).filter(v=>v),
+    videoLinks:$("videoLinks").value.split(",").map(v=>v.trim()).filter(v=>v),
+    addAuth:$("addAuth").checked,
+    usernamePlaceholder:$("usernamePlaceholder").value,
+    passwordPlaceholder:$("passwordPlaceholder").value,
+    extraFields:$("extraFields").value.split("\n").map(v=>v.trim()).filter(v=>v),
+    buttonText:$("buttonText").value,
+    btnColor:$("btnColor").value,
+    showMainBtn:$("showMainBtn").checked,
+    showGenerateBtn:$("showGenerateBtn").checked,
+    generateBtnText:$("generateBtnText").value,
+    embedLinks:embedLinks,
+    enableRedirect:$("enableRedirect").checked,
+    redirectURL:$("redirectURL").value,
+    footerText:$("footerText").value,
+    createdAt:new Date().toISOString()
+  };
+
   db.collection("forms").add(formData).then(docRef=>{
-    let link = $("customLink").value.trim() || `${window.location.origin}/form.html?id=${docRef.id}`;
+    const link=`${window.location.origin}/form.html?id=${docRef.id}`;
     $("linkArea").style.display="block";
-    $("linkArea").innerHTML = `✅ Form saved successfully! <br>Link: <a href="${link}" target="_blank">${link}</a>`;
-    db.collection("forms").doc(docRef.id).update({ customLink: link });
-  }).catch(err=>{$("linkArea").style.display="block";$("linkArea").textContent="❌ Error saving form: "+err;});
+    $("linkArea").innerHTML=`✅ Form saved successfully! <br>Shareable Link: <a href="${link}" target="_blank">${link}</a>`;
+    db.collection("forms").doc(docRef.id).update({customLink:link});
+  }).catch(err=>{
+    $("linkArea").style.display="block";
+    $("linkArea").textContent="❌ Error saving form: "+err;
+  });
 }
 
 renderPreview();
