@@ -81,6 +81,9 @@ textarea{min-height:70px}
 <label>Background Image URL</label>
 <input id="bgImageURL" value="https://picsum.photos/1200/800">
 
+<label>Background Video URL (mp4 / webm)</label>
+<input id="bgVideoURL" placeholder="https://example.com/video.mp4">
+
 <label>Background Size</label>
 <input id="bgSize" value="cover">
 
@@ -268,15 +271,36 @@ function renderGalleryInputs(){
 function renderPreview(){
   const p=$("preview");
   p.innerHTML="";
-  p.style.background=$("bgColor").value;
-  if($("bgImageURL").value){
-    p.style.backgroundImage=`url(${$("bgImageURL").value})`;
-    p.style.backgroundSize=$("bgSize").value;
-  }
+  p.style.background = $("bgColor").value;
+p.style.backgroundImage = "";
+
+// Background video
+if ($("bgVideoURL").value) {
+  const vid = document.createElement("video");
+  vid.src = $("bgVideoURL").value;
+  vid.autoplay = true;
+  vid.loop = true;
+  vid.muted = true;
+  vid.playsInline = true;
+  vid.style.position = "absolute";
+  vid.style.top = "0";
+  vid.style.left = "0";
+  vid.style.width = "100%";
+  vid.style.height = "100%";
+  vid.style.objectFit = "cover";
+  vid.style.zIndex = "0";
+  p.appendChild(vid);
+}
+else if ($("bgImageURL").value) {
+  p.style.backgroundImage = `url(${$("bgImageURL").value})`;
+  p.style.backgroundSize = $("bgSize").value;
+}
 
   const c=document.createElement("div");
   c.style.padding="16px";
   c.style.color=$("textColor").value;
+c.style.position = "relative";
+c.style.zIndex = "1";
 
   if($("avatarURL").value)c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
   if($("logoURL").value)c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
@@ -408,10 +432,9 @@ galleryImages: $("galleryImages").value
   .filter(Boolean),
 
 galleryItems: galleryItems,
-    galleryImages: $("galleryImages").value.split(",").map(i=>i.trim()),
-    videoLinks: $("videoLinks").value.split(",").map(i=>i.trim()),
     bgImageURL: $("bgImageURL").value,
-    bgSize: $("bgSize").value,
+bgVideoURL: $("bgVideoURL").value.trim(),
+bgSize: $("bgSize").value,
     enableWarning: $("enableWarning").checked,
     warning: $("warning").value,
     warningPosition: $("warningPosition").value,
@@ -451,4 +474,4 @@ galleryItems: galleryItems,
 renderPreview();
 </script>
 </body>
-  </html>
+</html>
