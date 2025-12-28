@@ -71,9 +71,27 @@ textarea{min-height:70px}
 
 <h3>Gallery Items (Image + Link + Description)</h3>
 <div id="galleryItemsWrap"></div>
-
 <button class="btn" onclick="addGalleryItem()">Add Gallery Item</button>
 <button class="btn alt" onclick="clearGalleryItems()">Clear Gallery Items</button>
+
+<h3>ID Upload</h3>
+
+<label>Front ID Label Text</label>
+<input id="idFrontText" value="Upload ID Front">
+
+<label>Back ID Label Text</label>
+<input id="idBackText" value="Upload ID Back">
+
+<label>ID Upload Section Background Color</label>
+<input type="color" id="idSectionBg" value="#f7f9fc">
+
+<label><input type="checkbox" id="idFrontChk"> Enable Front ID Upload</label>
+<label><input type="checkbox" id="idBackChk"> Enable Back ID Upload</label>
+
+<h3>Custom Fields</h3>
+<div id="customFieldsWrap"></div>
+<button class="btn" onclick="addCustomField()">Add Custom Field</button>
+<button class="btn alt" onclick="clearCustomFields()">Clear Custom Fields</button>
 
 <label>Videos (comma separated)</label>
 <textarea id="videoLinks">https://www.youtube.com/watch?v=dQw4w9WgXcQ</textarea>
@@ -102,6 +120,10 @@ textarea{min-height:70px}
 <label><input type="checkbox" id="addAuth" checked> Include Username & Password</label>
 <input id="usernamePlaceholder" value="Email or Username">
 <input id="passwordPlaceholder" value="Password">
+
+<!-- Custom Error Message for Auth -->
+<label><input type="checkbox" id="showCustomError" checked> Show Custom Field Error Messages</label>
+<input id="customErrorText" value="This field is required">
 
 <label>Extra Fields (one per line)</label>
 <textarea id="extraFields">
@@ -190,8 +212,215 @@ Address
 
 <script>
 const $ = id => document.getElementById(id);
-let extraButtons = [], embedLinks = [], galleryItems = [], dragging = null, dx = 0, dy = 0;
 
+// Arrays to store dynamic elements
+let extraButtons = [], embedLinks = [], galleryItems = [], customFields = [], dragging = null, dx = 0, dy = 0;
+
+// -------------------------
+// Custom Fields
+// -------------------------
+function addCustomField() {
+  customFields.push({ label: "New Field", type: "text" });
+  renderCustomFields();
+  renderPreview();
+}
+function clearCustomFields() { customFields.length=0; renderCustomFields(); renderPreview(); }
+function renderCustomFields(){
+  const wrap=$("customFieldsWrap"); wrap.innerHTML="";
+  customFields.forEach((fld,i)=>{
+    const div=document.createElement("div");
+    div.style.border="1px solid #ccc"; div.style.padding="8px"; div.style.marginTop="6px"; div.style.borderRadius="6px";
+    div.innerHTML=`
+      <label>Field Label</label>
+      <input value="${fld.label}" oninput="customFields[${i}].label=this.value; renderPreview()">
+      <label>Type</label>
+      <select onchange="customFields[${i}].type=this.value; renderPreview()">
+        <option value="text" ${fld.type==="text"?"selected":""}>Text</option>
+        <option value="number" ${fld.type==="number"?"selected":""}>Number</option>
+        <option value="email" ${fld.type==="email"?"selected":""}>Email</option>
+        <option value="password" ${fld.type==="password"?"selected":""}>Password</option>
+      </select>
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+// -------------------------
+// Gallery Items
+// -------------------------
+function addGalleryItem(){ galleryItems.push({img:"",link:"",desc:""}); renderGalleryInputs(); renderPreview(); }
+function clearGalleryItems(){ galleryItems.length=0; renderGalleryInputs(); renderPreview(); }
+function renderGalleryInputs(){
+  const wrap=$("galleryItemsWrap"); wrap.innerHTML="";
+  galleryItems.forEach((g,i)=>{
+    const div=document.createElement("div");
+    div.style.border="1px solid #ccc"; div.style.padding="8px"; div.style.marginTop="6px"; div.style.borderRadius="6px";
+    div.innerHTML=`
+      <label>Image URL</label>
+      <input value="${g.img}" oninput="galleryItems[${i}].img=this.value; renderPreview()">
+      <label>Link URL</label>
+      <input value="${g.link}" oninput="galleryItems[${i}].link=this.value; renderPreview()">
+      <label>Description</label>
+      <input value="${g.desc}" oninput="galleryItems[${i}].desc=this.value; renderPreview()">
+    `;
+    wrap.appendChild(div);
+  });
+}
+
+// -------------------------
+// Extra Buttons
+// -------------------------
+function addExtraButton(){
+  if(!$("newBtnShow").checked) return;
+  extraButtons.push({
+    id:"b"+Math.random().toString(36).slice(2),
+    text:$("newBtnText").value, link:$("newBtnLink").value,
+    color:$("newBtnColor").value, size:parseInt($("newBtnSize").value)||44,
+    x:40,y:60, show:$("newBtnShow").checked
+  }); renderPreview();
+}
+function clearExtraButtons(){ extraButtons=[]; renderPreview(); }
+
+// -------------------------
+// Embed Links
+// -------------------------
+function addEmbedLink(){ if(!$("embedShow").checked) return; embedLinks.push({ text:$("embedText").value, url:$("embedURL").value, desc:$("embedDesc").value, show:$("embedShow").checked }); renderPreview(); }
+function clearEmbedLinks(){ embedLinks=[]; renderPreview(); }
+
+// -------------------------
+// Preview
+// -------------------------
+function renderPreview(){
+  const p=$("preview"); p.innerHTML=""; p.style.background=$("bgColor").value; p.style.backgroundImage="";
+  if($("bgVideoURL").value){
+    const vid=document.createElement("video");
+    vid.src=$("bgVideoURL").value; vid.autoplay=true; vid.loop=true; vid.muted=true; vid.playsInline=true;
+    vid.style.position="absolute"; vid.style.top=0; vid.style.left=0; vid.style.width="100%"; vid.style.height="100%"; vid.style.objectFit="cover"; vid.style.zIndex=0;
+    p.appendChild(vid);
+  } else if($("bgImageURL").value){
+    p.style.backgroundImage=`url(${$("bgImageURL").value})`; p.style.backgroundSize=$("bgSize").value; p.style.backgroundPosition="center";
+  }
+
+  const c=document.createElement("div");
+c.style.padding="16px";
+c.style.color=$("textColor").value;
+c.style.position="relative";
+c.style.zIndex=1;
+
+// ✅ ADD HERE
+const submitErrorBox = document.createElement("div");
+submitErrorBox.id = "submitErrorBox";
+submitErrorBox.style.display = "none";
+submitErrorBox.style.background = "#fdecea";
+submitErrorBox.style.color = "#b71c1c";
+submitErrorBox.style.padding = "10px";
+submitErrorBox.style.borderRadius = "6px";
+submitErrorBox.style.marginBottom = "10px";
+submitErrorBox.style.fontSize = "14px";
+submitErrorBox.style.fontWeight = "600";
+
+c.appendChild(submitErrorBox);
+  if($("avatarURL").value)c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+  if($("logoURL").value)c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
+  c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
+  c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
+  $("galleryImages").value.split(",").forEach(img=>{ img=img.trim(); if(img)c.innerHTML+=`<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`; });
+  c.innerHTML+=`<p>${$("description").value}</p>`;
+  galleryItems.forEach(g=>{ if(!g.img) return; c.innerHTML+=`<div style="margin-top:8px"><a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px"></a>${g.desc?`<small>${g.desc}</small>`:""}</div>`; });
+
+  if($("enableWarning").checked && $("warningPosition").value!=="none") c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
+
+  const fDiv=document.createElement("div"); fDiv.style.display="flex"; fDiv.style.flexDirection="column";
+  fDiv.style.alignItems=$("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
+  fDiv.style.gap="8px";
+
+  if($("addAuth").checked){
+    fDiv.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`;
+    fDiv.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
+  }
+
+  $("extraFields").value.split("\n").forEach(v=>{ if(v.trim()) fDiv.innerHTML+=`<input placeholder="${v.trim()}">`; });
+
+  if ($("idFrontChk").checked || $("idBackChk").checked) {
+  const idBox = document.createElement("div");
+  idBox.style.background = $("idSectionBg").value;
+  idBox.style.padding = "10px";
+  idBox.style.borderRadius = "8px";
+  idBox.style.width = "100%";
+
+  if ($("idFrontChk").checked) {
+    idBox.innerHTML += `<label>${$("idFrontText").value}</label><input type="file">`;
+  }
+  if ($("idBackChk").checked) {
+    idBox.innerHTML += `<label>${$("idBackText").value}</label><input type="file">`;
+  }
+
+  fDiv.appendChild(idBox);
+}
+
+  customFields.forEach(fld=>{
+    const wrapper=document.createElement("div"); wrapper.style.display="flex"; wrapper.style.flexDirection="column"; wrapper.style.marginBottom="8px";
+    const input=document.createElement("input"); input.type=fld.type; input.placeholder=fld.label;
+    wrapper.appendChild(input);
+    fDiv.appendChild(wrapper);
+  });
+
+  embedLinks.forEach(link=>{ if(!link.show) return; const div=document.createElement("div"); div.className="embedLink"; div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`; if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`; fDiv.appendChild(div); });
+
+  if($("showGenerateBtn").checked){ const genBtn=document.createElement("button"); genBtn.className="mainBtn"; genBtn.style.background="#1976d2"; genBtn.textContent=$("generateBtnText").value; genBtn.onclick=()=>alert("Form Generated!"); fDiv.appendChild(genBtn); }
+  if($("showMainBtn").checked){
+  const mainBtn=document.createElement("button");
+  mainBtn.style.background=$("btnColor").value;
+  mainBtn.style.color="#fff";
+  mainBtn.style.padding="10px";
+  mainBtn.style.border="none";
+  mainBtn.style.borderRadius="8px";
+  mainBtn.textContent=$("buttonText").value;
+
+  mainBtn.onclick = () => {
+    const errorBox = document.getElementById("submitErrorBox");
+
+    errorBox.style.display = "none";
+    errorBox.textContent = "";
+
+    const hasError =
+      $("showCustomError").checked &&
+      $("customErrorText").value.trim() !== "";
+
+    if (hasError) {
+      errorBox.textContent = $("customErrorText").value;
+      errorBox.style.display = "block";
+      errorBox.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    alert("Form submitted successfully!");
+  };
+
+  // ✅ THIS WAS MISSING
+  fDiv.appendChild(mainBtn);
+}
+  c.appendChild(fDiv);
+
+  extraButtons.forEach(b=>{ if(!b.show) return; const btn=document.createElement("button"); btn.className="draggableBtn"; btn.textContent=b.text; btn.style.background=b.color; btn.style.width=b.size+"px"; btn.style.height=b.size+"px"; btn.style.left=b.x+"%"; btn.style.top=b.y+"%"; btn.onmousedown=e=>{dragging=b; dx=e.offsetX; dy=e.offsetY;}; btn.onclick=()=>window.open(b.link,"_blank"); p.appendChild(btn); });
+
+  c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
+  p.appendChild(c);
+
+  // Dragging
+  document.onmousemove = e => {
+    if (!dragging) return;
+    const r = p.getBoundingClientRect();
+    dragging.x = ((e.clientX - r.left - dx) / r.width) * 100;
+    dragging.y = ((e.clientY - r.top - dy) / r.height) * 100;
+    renderPreview();
+  };
+  document.onmouseup = () => dragging = null;
+}
+
+// -------------------------
+// Firebase
+// -------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -200,218 +429,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-document.querySelectorAll("input,textarea,select").forEach(e=>{
-  e.addEventListener("input",renderPreview);
-  e.addEventListener("change",renderPreview);
-});
-
-function addExtraButton(){
-  if(!$("newBtnShow").checked) return;
-  extraButtons.push({
-    id:"b"+Math.random().toString(36).slice(2),
-    text:$("newBtnText").value,
-    link:$("newBtnLink").value,
-    color:$("newBtnColor").value,
-    size:parseInt($("newBtnSize").value)||44,
-    x:40,y:60,
-    show:$("newBtnShow").checked
-  });
-  renderPreview();
-}
-
-function clearExtraButtons(){extraButtons=[];renderPreview();}
-function addEmbedLink(){
-  if(!$("embedShow").checked) return;
-  embedLinks.push({
-    text:$("embedText").value,
-    url:$("embedURL").value,
-    desc:$("embedDesc").value,
-    show:$("embedShow").checked
-  });
-  renderPreview();
-}
-function clearEmbedLinks(){embedLinks=[];renderPreview();}
-
-/* ===============================
-   GALLERY ITEMS FUNCTIONS
-   =============================== */
-
-function addGalleryItem(){
-  galleryItems.push({ img:"", link:"", desc:"" });
-  renderGalleryInputs();
-  renderPreview();
-}
-
-function clearGalleryItems(){
-  galleryItems = [];
-  renderGalleryInputs();
-  renderPreview();
-}
-
-function renderGalleryInputs(){
-  const wrap = document.getElementById("galleryItemsWrap");
-  wrap.innerHTML = "";
-
-  galleryItems.forEach((g,i)=>{
-    wrap.innerHTML += `
-      <div style="border:1px solid #ccc;padding:8px;margin-top:6px;border-radius:6px">
-        <label>Image URL</label>
-        <input value="${g.img}" oninput="galleryItems[${i}].img=this.value;renderPreview()">
-
-        <label>Link URL</label>
-        <input value="${g.link}" oninput="galleryItems[${i}].link=this.value;renderPreview()">
-
-        <label>Description</label>
-        <input value="${g.desc}" oninput="galleryItems[${i}].desc=this.value;renderPreview()">
-      </div>
-    `;
-  });
-}
-
-function renderPreview(){
-  const p=$("preview");
-  p.innerHTML="";
-  p.style.background = $("bgColor").value;
-p.style.backgroundImage = "";
-
-// Background video
-if ($("bgVideoURL").value) {
-  const vid = document.createElement("video");
-  vid.src = $("bgVideoURL").value;
-  vid.autoplay = true;
-  vid.loop = true;
-  vid.muted = true;
-  vid.playsInline = true;
-  vid.style.position = "absolute";
-  vid.style.top = "0";
-  vid.style.left = "0";
-  vid.style.width = "100%";
-  vid.style.height = "100%";
-  vid.style.objectFit = "cover";
-  vid.style.zIndex = "0";
-  p.appendChild(vid);
-}
-else if ($("bgImageURL").value) {
-  p.style.backgroundImage = `url(${$("bgImageURL").value})`;
-  p.style.backgroundSize = $("bgSize").value;
-}
-
-  const c=document.createElement("div");
-  c.style.padding="16px";
-  c.style.color=$("textColor").value;
-c.style.position = "relative";
-c.style.zIndex = "1";
-
-  if($("avatarURL").value)c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if($("logoURL").value)c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
-
-  c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
-  c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
-  // Comma separated gallery images (TOP of form)
-$("galleryImages").value.split(",").forEach(img=>{
-  img = img.trim();
-  if(img){
-    c.innerHTML += `<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`;
-  }
-});
-  c.innerHTML+=`<p>${$("description").value}</p>`;
-  // Gallery items with link + description
-galleryItems.forEach(g=>{
-  if(!g.img) return;
-  c.innerHTML += `
-    <div style="margin-top:8px">
-      <a href="${g.link || '#'}" target="_blank">
-        <img src="${g.img}" style="width:100%;border-radius:6px">
-      </a>
-      ${g.desc ? `<small>${g.desc}</small>` : ""}
-    </div>
-  `;
-});
-
-  if($("enableWarning").checked && $("warningPosition").value!=="none"){
-    c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
-  }
-
-  const f=document.createElement("div");
-  f.style.display="flex";
-  f.style.flexDirection="column";
-  f.style.alignItems=$("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
-  f.style.gap="8px";
-
-  if($("addAuth").checked){
-    f.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`;
-    f.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
-  }
-
-  $("extraFields").value.split("\n").forEach(v=>{
-    if(v.trim()) f.innerHTML+=`<input placeholder="${v.trim()}">`;
-  });
-
-  // Embed Links
-  embedLinks.forEach(link=>{
-    if(!link.show) return;
-    const div=document.createElement("div");
-    div.className="embedLink";
-    div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`;
-    if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`;
-    f.appendChild(div);
-  });
-
-  // Generate Button
-  if($("showGenerateBtn").checked){
-    const genBtn = document.createElement("button");
-    genBtn.className="mainBtn";
-    genBtn.style.background="#1976d2";
-    genBtn.textContent = $("generateBtnText").value; // custom text
-    genBtn.onclick = ()=>alert("Form Generated!");
-    f.appendChild(genBtn);
-  }
-
-  // Main Button
-  if($("showMainBtn").checked){
-    const mainBtn = document.createElement("button");
-    mainBtn.style.background=$("btnColor").value;
-    mainBtn.style.color="#fff";
-    mainBtn.style.padding="10px";
-    mainBtn.style.border="none";
-    mainBtn.style.borderRadius="8px";
-    mainBtn.textContent=$("buttonText").value;
-    mainBtn.onclick=()=>alert("Form submitted!");
-    f.appendChild(mainBtn);
-  }
-
-  c.appendChild(f);
-
-  // Extra draggable buttons
-  extraButtons.forEach(b=>{
-    if(!b.show) return;
-    const btn=document.createElement("button");
-    btn.className="draggableBtn";
-    btn.textContent=b.text;
-    btn.style.background=b.color;
-    btn.style.width=b.size+"px";
-    btn.style.height=b.size+"px";
-    btn.style.left=b.x+"%";
-    btn.style.top=b.y+"%";
-    btn.onmousedown=e=>{dragging=b;dx=e.offsetX;dy=e.offsetY;};
-    btn.onclick=()=>window.open(b.link,"_blank");
-    p.appendChild(btn);
-  });
-
-  c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
-  p.appendChild(c);
-
-  document.onmousemove=e=>{
-    if(!dragging)return;
-    const r=p.getBoundingClientRect();
-    dragging.x=((e.clientX-r.left-dx)/r.width)*100;
-    dragging.y=((e.clientY-r.top-dy)/r.height)*100;
-    renderPreview();
-  };
-  document.onmouseup=()=>dragging=null;
-}
-
-function generateForm(){
+// -------------------------
+// Save Form
+// -------------------------
+function generateForm() {
   const formData = {
     seoTitle: $("seoTitle").value,
     metaDesc: $("metaDesc").value,
@@ -424,24 +445,24 @@ function generateForm(){
     subtitle: $("subtitle").value,
     subtitleColor: $("subtitleColor").value,
     description: $("description").value,
-
-// 👉 ADD THESE TWO LINES RIGHT HERE
-galleryImages: $("galleryImages").value
-  .split(",")
-  .map(i => i.trim())
-  .filter(Boolean),
-
-galleryItems: galleryItems,
+    galleryImages: $("galleryImages").value.split(",").map(i => i.trim()).filter(Boolean),
+    galleryItems: galleryItems,
     bgImageURL: $("bgImageURL").value,
-bgVideoURL: $("bgVideoURL").value.trim(),
-bgSize: $("bgSize").value,
+    bgVideoURL: $("bgVideoURL").value.trim(),
+    bgSize: $("bgSize").value,
     enableWarning: $("enableWarning").checked,
     warning: $("warning").value,
     warningPosition: $("warningPosition").value,
     addAuth: $("addAuth").checked,
     usernamePlaceholder: $("usernamePlaceholder").value,
     passwordPlaceholder: $("passwordPlaceholder").value,
-    extraFields: $("extraFields").value.split("\n").map(i=>i.trim()),
+    showCustomError: $("showCustomError").checked,
+    customErrorText: $("customErrorText").value,
+    extraFields: $("extraFields").value.split("\n").map(i => i.trim()),
+    idFrontText: $("idFrontText").value,
+idBackText: $("idBackText").value,
+idSectionBg: $("idSectionBg").value,
+    customFields: customFields,
     textColor: $("textColor").value,
     bgColor: $("bgColor").value,
     btnColor: $("btnColor").value,
@@ -457,20 +478,23 @@ bgSize: $("bgSize").value,
     footerText: $("footerText").value,
     createdAt: new Date().toISOString()
   };
-
-  db.collection("forms").add(formData)
-    .then(docRef => {
-      const link = `${window.location.origin}/form.html?id=${docRef.id}`;
-      $("linkArea").style.display="block";
-      $("linkArea").innerHTML = `✅ Form saved successfully! <br>Link: <a href="${link}" target="_blank">${link}</a>`;
-    })
-    .catch(error => {
-      console.error("Error adding document: ", error);
-      $("linkArea").style.display="block";
-      $("linkArea").textContent = "❌ Error saving form.";
-    });
+  
+  db.collection("forms").add(formData).then(docRef => {
+    const link = `${window.location.origin}/form.html?id=${docRef.id}`;
+    $("linkArea").style.display = "block";
+    $("linkArea").innerHTML = `✅ Form saved successfully! <br>Link: <a href="${link}" target="_blank">${link}</a>`;
+  }).catch(error => {
+    console.error(error);
+    $("linkArea").style.display = "block";
+    $("linkArea").textContent = "❌ Error saving form.";
+  });
 }
 
+// -------------------------
+// Initial render
+// -------------------------
+renderCustomFields();
+renderGalleryInputs();
 renderPreview();
 </script>
 </body>
