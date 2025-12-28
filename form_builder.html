@@ -69,6 +69,12 @@ textarea{min-height:70px}
 <label>Gallery Images (comma separated)</label>
 <textarea id="galleryImages">https://picsum.photos/300/200, https://picsum.photos/301/200</textarea>
 
+<h3>Gallery Items (Image + Link + Description)</h3>
+<div id="galleryItemsWrap"></div>
+
+<button class="btn" onclick="addGalleryItem()">Add Gallery Item</button>
+<button class="btn alt" onclick="clearGalleryItems()">Clear Gallery Items</button>
+
 <label>Videos (comma separated)</label>
 <textarea id="videoLinks">https://www.youtube.com/watch?v=dQw4w9WgXcQ</textarea>
 
@@ -181,7 +187,7 @@ Address
 
 <script>
 const $ = id => document.getElementById(id);
-let extraButtons = [], embedLinks = [], dragging = null, dx = 0, dy = 0;
+let extraButtons = [], embedLinks = [], galleryItems = [], dragging = null, dx = 0, dy = 0;
 
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
@@ -223,6 +229,42 @@ function addEmbedLink(){
 }
 function clearEmbedLinks(){embedLinks=[];renderPreview();}
 
+/* ===============================
+   GALLERY ITEMS FUNCTIONS
+   =============================== */
+
+function addGalleryItem(){
+  galleryItems.push({ img:"", link:"", desc:"" });
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function clearGalleryItems(){
+  galleryItems = [];
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function renderGalleryInputs(){
+  const wrap = document.getElementById("galleryItemsWrap");
+  wrap.innerHTML = "";
+
+  galleryItems.forEach((g,i)=>{
+    wrap.innerHTML += `
+      <div style="border:1px solid #ccc;padding:8px;margin-top:6px;border-radius:6px">
+        <label>Image URL</label>
+        <input value="${g.img}" oninput="galleryItems[${i}].img=this.value;renderPreview()">
+
+        <label>Link URL</label>
+        <input value="${g.link}" oninput="galleryItems[${i}].link=this.value;renderPreview()">
+
+        <label>Description</label>
+        <input value="${g.desc}" oninput="galleryItems[${i}].desc=this.value;renderPreview()">
+      </div>
+    `;
+  });
+}
+
 function renderPreview(){
   const p=$("preview");
   p.innerHTML="";
@@ -241,7 +283,26 @@ function renderPreview(){
 
   c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
   c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
+  // Comma separated gallery images (TOP of form)
+$("galleryImages").value.split(",").forEach(img=>{
+  img = img.trim();
+  if(img){
+    c.innerHTML += `<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`;
+  }
+});
   c.innerHTML+=`<p>${$("description").value}</p>`;
+  // Gallery items with link + description
+galleryItems.forEach(g=>{
+  if(!g.img) return;
+  c.innerHTML += `
+    <div style="margin-top:8px">
+      <a href="${g.link || '#'}" target="_blank">
+        <img src="${g.img}" style="width:100%;border-radius:6px">
+      </a>
+      ${g.desc ? `<small>${g.desc}</small>` : ""}
+    </div>
+  `;
+});
 
   if($("enableWarning").checked && $("warningPosition").value!=="none"){
     c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
@@ -339,6 +400,14 @@ function generateForm(){
     subtitle: $("subtitle").value,
     subtitleColor: $("subtitleColor").value,
     description: $("description").value,
+
+// 👉 ADD THESE TWO LINES RIGHT HERE
+galleryImages: $("galleryImages").value
+  .split(",")
+  .map(i => i.trim())
+  .filter(Boolean),
+
+galleryItems: galleryItems,
     galleryImages: $("galleryImages").value.split(",").map(i=>i.trim()),
     videoLinks: $("videoLinks").value.split(",").map(i=>i.trim()),
     bgImageURL: $("bgImageURL").value,
@@ -382,4 +451,4 @@ function generateForm(){
 renderPreview();
 </script>
 </body>
-</html>
+  </html>
