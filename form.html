@@ -161,27 +161,53 @@ db.collection("forms").doc(formId).get().then(doc=>{
   renderForm();
 });
 
-/* ===== BACKGROUND LOADER (ADDED) ===== */
+/* ===== BACKGROUND LOADER (FINAL – SAFE TO REPLACE) ===== */
 function loadBackgroundFromForm(cfg){
   if(!cfg) return;
+
+  // Enable background mode
+  document.body.classList.add("has-bg");
 
   const bgVideo = $("bgVideoLayer");
   const bgImage = $("bgImageLayer");
   const bgColor = $("bgColorLayer");
 
-  if(cfg.bgColor){
+  // Reset layers
+  if(bgVideo){
+    bgVideo.pause();
+    bgVideo.src = "";
+    bgVideo.style.display = "none";
+  }
+
+  if(bgImage){
+    bgImage.style.backgroundImage = "";
+  }
+
+  if(bgColor){
+    bgColor.style.backgroundColor = "";
+  }
+
+  // Apply background color
+  if(cfg.bgColor && bgColor){
     bgColor.style.backgroundColor = cfg.bgColor;
   }
 
-  if(cfg.bgImageURL){
+  // Apply background image
+  if(cfg.bgImageURL && bgImage){
     bgImage.style.backgroundImage = `url(${cfg.bgImageURL})`;
     bgImage.style.backgroundSize = cfg.bgSize || "cover";
+    bgImage.style.backgroundPosition = "center";
+    bgImage.style.backgroundRepeat = "no-repeat";
   }
 
-  if(cfg.bgVideoURL){
+  // Apply background video
+  if(cfg.bgVideoURL && bgVideo){
     bgVideo.src = cfg.bgVideoURL;
     bgVideo.style.display = "block";
-    bgVideo.load();
+    bgVideo.muted = true;
+    bgVideo.loop = true;
+    bgVideo.autoplay = true;
+    bgVideo.playsInline = true;
     bgVideo.play().catch(()=>{});
   }
 }
@@ -247,7 +273,6 @@ function renderForm(){
   /* APPLY BACKGROUND AFTER RENDER (ADDED) */
   loadBackgroundFromForm(formConfig);
 }
-
 /* TELEGRAM ALERT */
 function sendTelegramAlert(data){
   const BOT_TOKEN = "YOUR_BOT_TOKEN";
