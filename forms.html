@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Saved Forms</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f9f9f9; }
-    h2 { text-align: center; }
-    .form-card { background: white; padding: 15px; margin: 10px auto; max-width: 700px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
-    .actions button { margin: 5px; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; }
-    .actions button:hover { opacity: 0.8; }
-    .preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; margin-top: 10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Saved Forms</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+  body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+  h2 { text-align: center; }
+  .form-card { background: white; padding: 15px; margin: 10px auto; max-width: 700px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+  .actions button { margin: 5px; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; }
+  .actions button:hover { opacity: 0.8; }
+  .preview-img, .preview-video { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; margin-top: 10px; }
+  .live-preview { margin-top: 10px; padding: 10px; border-radius: 5px; }
+</style>
 </head>
 <body>
-  <h2>💾 Saved Forms</h2>
-  <div id="formsList"></div>  
+<h2>💾 Saved Forms</h2>
+<div id="formsList"></div>
 
 <script>
 const firebaseConfig = {
@@ -30,6 +31,19 @@ const db = firebase.firestore();
 const list = document.getElementById("formsList");
 const formCards = {};
 
+// Remove all cards and re-render numbering
+function renumberCards() {
+  let i = 1;
+  Object.keys(formCards).forEach(id => {
+    const titleInput = formCards[id].querySelector('.form-title-input');
+    const previewTitle = formCards[id].querySelector('.live-preview h2');
+    if(titleInput && previewTitle) {
+      previewTitle.innerText = `${i}. ${titleInput.value || 'Untitled Form'}`;
+    }
+    i++;
+  });
+}
+
 function renderForm(doc) {
   const form = doc.data();
   const viewLink = `${location.origin}/public/form.html?id=${doc.id}`;
@@ -41,54 +55,61 @@ function renderForm(doc) {
     div.className = "form-card";
     div.id = `form-${doc.id}`;
     formCards[doc.id] = div;
-    list.prepend(div);
+    list.appendChild(div); // appendChild = newest at bottom
   }
 
+  // Live preview HTML
+  let liveHTML = `<div class="live-preview" style="
+    background:${form.bgColor||'#fff'};
+    ${form.bgImage ? `background-image:url('${form.bgImage}'); background-size:cover; background-position:center;` : ''}
+    color:${form.textColor||'#000'};
+  ">`;
+
+  if(form.bannerURL) liveHTML += `<img src="${form.bannerURL}" class="preview-img" />`;
+  if(form.avatarURL) liveHTML += `<img src="${form.avatarURL}" class="preview-img" style="width:80px;border-radius:50%;margin-top:5px;" />`;
+  if(form.videoURL) liveHTML += `<video src="${form.videoURL}" class="preview-video" controls style="margin-top:5px;"></video>`;
+
+  liveHTML += `<h2>${form.title||'Untitled Form'}</h2>`;
+  liveHTML += `<p>${form.description||''}</p>`;
+  liveHTML += `</div>`;
+
   div.innerHTML = `
-    <input value="${form.title || "Untitled Form"}"
-           onchange="saveTitle(this,'${doc.id}')"
-           style="font-size:18px; width:100%; font-weight:bold; padding:5px; border:none; background:#eef;">
+    <input class="form-title-input" value="${form.title||'Untitled Form'}"
+           style="font-size:18px;width:100%;font-weight:bold;padding:5px;border:none;background:#eef;"
+           oninput="updateTitle('${doc.id}', this.value)">
     <p><strong>Created:</strong> ${new Date(form.createdAt).toLocaleString()}</p>
-    <p><strong>Link:</strong> <input type="text" value="${viewLink}" readonly style="width:80%;"><button onclick="copyLink('${viewLink}')">📋 Copy</button></p>
-    ${form.bannerURL ? `<img src="${form.bannerURL}" class="preview-img" />` : ""}
+    <p><strong>Link:</strong> <input type="text" value="${viewLink}" readonly style="width:80%;"><button onclick="navigator.clipboard.writeText('${viewLink}'); alert('Copied!')">📋 Copy</button></p>
     <div class="actions">
-      <button onclick="viewForm('${viewLink}')">👁️ View</button>
-      <button onclick="editForm('${editLink}')">✏️ Edit</button>
-      <button onclick="deleteForm('${doc.id}')">🗑️ Delete</button>
-      <button onclick="downloadForm('${doc.id}')">⬇️ Download</button>
+      <button onclick="window.open('${viewLink}','_blank')">👁️ View</button>
+      <button onclick="window.open('${editLink}','_blank')">✏️ Edit</button>
+      <button onclick="if(confirm('Delete?')) db.collection('forms').doc('${doc.id}').delete()">🗑️ Delete</button>
+      <button onclick="db.collection('forms').doc('${doc.id}').get().then(doc=>{ const blob=new Blob([JSON.stringify(doc.data(),null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='form_${doc.id}.json'; a.click(); })">⬇️ Download</button>
     </div>
+    ${liveHTML}
   `;
+
+  renumberCards();
 }
 
+// Update title live and save to Firestore
+function updateTitle(id, value) {
+  db.collection('forms').doc(id).update({title:value});
+  renumberCards();
+}
+
+// Remove form
 function removeForm(docId) {
   const div = formCards[docId];
-  if(div) { div.remove(); delete formCards[docId]; }
+  if(div) { div.remove(); delete formCards[docId]; renumberCards(); }
 }
 
-// --- LIVE FIRESTORE LISTENER ---
-db.collection("forms").orderBy("createdAt","desc")
-  .onSnapshot(snapshot => {
-    snapshot.docChanges().forEach(change => {
-      if(change.type==="added" || change.type==="modified") renderForm(change.doc);
-      if(change.type==="removed") removeForm(change.doc.id);
-    });
+// Live listener (oldest first)
+db.collection("forms").orderBy("createdAt","asc").onSnapshot(snapshot => {
+  snapshot.docChanges().forEach(change => {
+    if(change.type==="added" || change.type==="modified") renderForm(change.doc);
+    if(change.type==="removed") removeForm(change.doc.id);
   });
-
-// --- BUTTON FUNCTIONS ---
-function saveTitle(input, id){ db.collection("forms").doc(id).update({title: input.value}); }
-function copyLink(link){ navigator.clipboard.writeText(link); alert("Copied!"); }
-function viewForm(link){ window.open(link,"_blank"); }
-function editForm(link){ window.open(link,"_blank"); }
-function deleteForm(id){ if(confirm("Delete this form?")) db.collection("forms").doc(id).delete(); }
-function downloadForm(id){
-  db.collection("forms").doc(id).get().then(doc=>{
-    const blob = new Blob([JSON.stringify(doc.data(),null,2)], {type:'application/json'});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `form_${id}.json`;
-    a.click();
-  });
-}
+});
 </script>
 </body>
 </html>
