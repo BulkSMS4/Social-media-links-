@@ -10,6 +10,7 @@ body{
   font-family: Arial, sans-serif;
   background:#f4f6f8;
   padding:20px;
+  margin:0;
 }
 
 /* ===== BACKGROUND LAYERS ===== */
@@ -51,6 +52,8 @@ body{
   padding:20px;
   border-radius:10px;
   box-shadow:0 0 10px rgba(0,0,0,0.1);
+  position:relative;
+  z-index:1;
 }
 
 .builder-media{text-align:center;margin-bottom:12px;}
@@ -105,12 +108,12 @@ button{
 
 <body>
 
+<!-- ===== BACKGROUND ELEMENTS ===== -->
 <video id="bgVideoLayer" autoplay muted loop playsinline></video>
 <div id="bgImageLayer"></div>
 <div id="bgColorLayer"></div>
 
 <div id="formContainer">
-
   <div id="imageContainer" class="builder-media"></div>
 
   <h2 id="formTitle">Loading...</h2>
@@ -122,7 +125,6 @@ button{
   <form id="dynamicForm"></form>
 
   <div id="embedLinks"></div>
-
 </div>
 
 <script>
@@ -136,7 +138,7 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-/* PARAMS */
+/* GET PARAMS */
 const formId = new URLSearchParams(location.search).get("id");
 const formEl = $("dynamicForm");
 const imageContainer = $("imageContainer");
@@ -150,7 +152,7 @@ if(!formId){
   $("formTitle").innerText = "Form ID missing!";
 }
 
-/* LOAD FORM FROM TOP-LEVEL FORMS COLLECTION */
+/* LOAD FORM */
 db.collection("forms").doc(formId).get().then(doc=>{
   if(!doc.exists){
     $("formTitle").innerText = "Form not found!";
@@ -160,31 +162,31 @@ db.collection("forms").doc(formId).get().then(doc=>{
   renderForm();
 });
 
-/* ===== BACKGROUND LOADER ===== */
+/* ===== BACKGROUND FUNCTION ===== */
 function loadBackgroundFromForm(cfg){
   if(!cfg) return;
-
-  document.body.classList.add("has-bg");
 
   const bgVideo = $("bgVideoLayer");
   const bgImage = $("bgImageLayer");
   const bgColor = $("bgColorLayer");
 
-  if(bgVideo){
-    bgVideo.pause();
-    bgVideo.src = "";
-    bgVideo.style.display = "none";
-  }
+  // Reset
+  if(bgVideo){ bgVideo.pause(); bgVideo.src=""; bgVideo.style.display="none"; }
   if(bgImage) bgImage.style.backgroundImage = "";
   if(bgColor) bgColor.style.backgroundColor = "";
 
+  // Apply color
   if(cfg.bgColor) bgColor.style.backgroundColor = cfg.bgColor;
+
+  // Apply image
   if(cfg.bgImageURL){
     bgImage.style.backgroundImage = `url(${cfg.bgImageURL})`;
     bgImage.style.backgroundSize = cfg.bgSize || "cover";
     bgImage.style.backgroundPosition = "center";
     bgImage.style.backgroundRepeat = "no-repeat";
   }
+
+  // Apply video
   if(cfg.bgVideoURL){
     bgVideo.src = cfg.bgVideoURL;
     bgVideo.style.display = "block";
@@ -208,17 +210,14 @@ function renderForm() {
   embedEl.innerHTML = "";
   failureWarning.innerText = "";
 
-  if(formConfig.avatarURL){
-    imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
-  }
-  if(formConfig.logoURL){
-    imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
-  }
+  // Avatar & Logo
+  if(formConfig.avatarURL) imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
+  if(formConfig.logoURL) imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
 
-  if(formConfig.enableWarning && formConfig.warning){
-    failureWarning.innerText = formConfig.warning;
-  }
+  // Warning
+  if(formConfig.enableWarning && formConfig.warning) failureWarning.innerText = formConfig.warning;
 
+  // Username & Password
   if(formConfig.addAuth && formConfig.usernamePlaceholder && formConfig.passwordPlaceholder){
     formEl.innerHTML += `
       <input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
@@ -226,9 +225,61 @@ function renderForm() {
     `;
   }
 
+  // Extra Fields
   if(Array.isArray(formConfig.extraFields)){
     formConfig.extraFields.filter(f=>f?.trim()).forEach(f=>{
       formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
+    });
+  }
+
+  // Custom Fields
+  if(Array.isArray(formConfig.customFields)){
+    formConfig.customFields.forEach(fld=>{
+      const input = document.createElement("input");
+      input.type = fld.type || "text";
+      input.name = fld.label || "field";
+      input.placeholder = fld.label || "Field";
+      formEl.appendChild(input);
+    });
+  }
+
+  // Gallery
+  if(Array.isArray(formConfig.galleryImages)){
+    formConfig.galleryImages.forEach(g=>{
+      if(!g) return;
+      const div = document.createElement("div");
+      div.style.marginBottom="8px";
+      div.innerHTML = `<img src="${g}" style="width:100%;border-radius:6px;margin:6px 0;">`;
+      formEl.appendChild(div);
+    });
+  }
+
+  // Videos
+  if(formConfig.videoLinks){
+    formConfig.videoLinks.forEach(link=>{
+      if(!link) return;
+      let videoEl;
+      if(link.endsWith(".mp4") || link.endsWith(".webm")){
+        videoEl = document.createElement("video");
+        videoEl.src = link;
+        videoEl.controls = true;
+        videoEl.style.width="100%";
+        videoEl.style.borderRadius="6px";
+        videoEl.style.margin="6px 0";
+      } else {
+        const videoId = link.split("v=")[1]?.split("&")[0];
+        if(videoId){
+          videoEl = document.createElement("iframe");
+          videoEl.src = `https://www.youtube.com/embed/${videoId}`;
+          videoEl.width="100%";
+          videoEl.height="315";
+          videoEl.frameBorder="0";
+          videoEl.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          videoEl.allowFullscreen = true;
+          videoEl.style.margin="6px 0";
+        }
+      }
+      if(videoEl) formEl.appendChild(videoEl);
     });
   }
 
@@ -242,6 +293,7 @@ function renderForm() {
     formEl.appendChild(btn);
   }
 
+  // Embed Links
   if(Array.isArray(formConfig.embedLinks)){
     formConfig.embedLinks.forEach(l=>{
       if(!l?.show || !l.url) return;
@@ -253,40 +305,15 @@ function renderForm() {
     });
   }
 
+  // Finally, apply background
   loadBackgroundFromForm(formConfig);
 }
 
-/* TELEGRAM ALERT */
-function sendTelegramAlert(data){
-  const BOT_TOKEN = "YOUR_BOT_TOKEN";
-  const CHAT_ID = "YOUR_CHAT_ID";
-
-  let msg = `📥 *New Form Submission*\n\n`;
-  msg += `🆔 Form ID: ${formId}\n`;
-  msg += `📄 Title: ${formConfig.title || "Untitled"}\n\n`;
-
-  Object.entries(data).forEach(([k,v])=>msg+=`• ${k}: ${v}\n`);
-
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({chat_id:CHAT_ID,text:msg,parse_mode:"Markdown"})
-  });
-}
-
-/* EMAIL ALERT */
-function sendEmailAlert(data){
-  console.log("EMAIL ALERT", {formId,title:formConfig.title,data});
-}
-
-/* SUBMIT FORM */
+/* ===== SUBMIT ===== */
 function submitForm(e){
   e.preventDefault();
-
   const data = {};
-  formEl.querySelectorAll("input,textarea").forEach(i=>{
-    if(i.value.trim()) data[i.name]=i.value;
-  });
+  formEl.querySelectorAll("input,textarea").forEach(i=>{ if(i.value.trim()) data[i.name]=i.value; });
 
   db.collection("submissions").add({
     formId,
@@ -298,9 +325,26 @@ function submitForm(e){
   sendTelegramAlert(data);
   sendEmailAlert(data);
 
-  submitResult.style.opacity = 1;
-  setTimeout(()=>submitResult.style.opacity = 0,3000);
+  submitResult.style.opacity=1;
+  setTimeout(()=>submitResult.style.opacity=0,3000);
   formEl.reset();
+}
+
+/* TELEGRAM ALERT */
+function sendTelegramAlert(data){
+  const BOT_TOKEN = "YOUR_BOT_TOKEN";
+  const CHAT_ID = "YOUR_CHAT_ID";
+  let msg = `📥 *New Form Submission*\n\n🆔 Form ID: ${formId}\n📄 Title: ${formConfig.title || "Untitled"}\n\n`;
+  Object.entries(data).forEach(([k,v])=>msg+=`• ${k}: ${v}\n`);
+  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+    method:"POST", headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({chat_id:CHAT_ID,text:msg,parse_mode:"Markdown"})
+  });
+}
+
+/* EMAIL ALERT PLACEHOLDER */
+function sendEmailAlert(data){
+  console.log("EMAIL ALERT", {formId,title:formConfig.title,data});
 }
 </script>
 </body>
