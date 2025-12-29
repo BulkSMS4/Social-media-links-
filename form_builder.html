@@ -678,6 +678,13 @@ document.addEventListener("change", e => {
   }
 });
 
+// ✅ ID Upload specific live preview
+$("chkIdFront").addEventListener("change", renderPreview);
+$("chkIdBack").addEventListener("change", renderPreview);
+$("txtIdFront").addEventListener("input", renderPreview);
+$("txtIdBack").addEventListener("input", renderPreview);
+$("idSectionBg").addEventListener("input", renderPreview);
+
 // -------------------------
 // Initial render
 // -------------------------
