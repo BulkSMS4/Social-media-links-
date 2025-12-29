@@ -142,6 +142,20 @@ Address
 <input id="buttonText" value="Continue Verification">
 <label><input type="checkbox" id="showMainBtn" checked> Show Main Button</label>
 
+<!-- ✅ Add optional ID upload settings here -->
+<div>
+  <label>
+    <input type="checkbox" id="chkIdFront"> Enable ID Front Upload
+  </label>
+  <input type="text" id="txtIdFront" placeholder="ID Front Label" value="Upload ID Front">
+</div>
+
+<div>
+  <label>
+    <input type="checkbox" id="chkIdBack"> Enable ID Back Upload
+  </label>
+  <input type="text" id="txtIdBack" placeholder="ID Back Label" value="Upload ID Back">
+</div>
 <label>Button Color</label>
 <input type="color" id="btnColor" value="#1976d2">
 
@@ -613,10 +627,10 @@ function generateForm() {
     showCustomError: $("showCustomError").checked,
     customErrorText: $("customErrorText").value,
     extraFields: $("extraFields").value.split("\n").map(i => i.trim()),
-    idFrontChk: $("idFrontChk").checked,
-    idBackChk: $("idBackChk").checked,
-    idFrontText: $("idFrontText").value,
-    idBackText: $("idBackText").value,
+    idFrontChk: $("chkIdFront").checked,
+    idBackChk: $("chkIdBack").checked,
+    idFrontText: $("txtIdFront").value || "Upload ID Front",
+    idBackText: $("txtIdBack").value || "Upload ID Back",
     idSectionBg: $("idSectionBg").value,
     customFields: customFields,
     textColor: $("textColor").value,
