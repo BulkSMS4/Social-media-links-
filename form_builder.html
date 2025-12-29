@@ -217,6 +217,50 @@ const $ = id => document.getElementById(id);
 let extraButtons = [], embedLinks = [], galleryItems = [], customFields = [], dragging = null, dx = 0, dy = 0;
 
 // -------------------------
+// Update SEO & OG Meta Tags
+// -------------------------
+function updateSEOMeta() {
+  // Page Title
+  document.title = $("seoTitle").value;
+
+  // Meta Description
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+    metaDesc = document.createElement("meta");
+    metaDesc.name = "description";
+    document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = $("metaDesc").value;
+
+  // Open Graph Image
+  let ogImage = document.querySelector('meta[property="og:image"]');
+  if (!ogImage) {
+    ogImage = document.createElement("meta");
+    ogImage.setAttribute("property", "og:image");
+    document.head.appendChild(ogImage);
+  }
+  ogImage.content = $("ogImage").value;
+
+  // OG Title
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement("meta");
+    ogTitle.setAttribute("property", "og:title");
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.content = $("seoTitle").value;
+
+  // OG Description
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (!ogDesc) {
+    ogDesc = document.createElement("meta");
+    ogDesc.setAttribute("property", "og:description");
+    document.head.appendChild(ogDesc);
+  }
+  ogDesc.content = $("metaDesc").value;
+}
+
+// -------------------------
 // Custom Fields
 // -------------------------
 function addCustomField() {
@@ -291,46 +335,108 @@ function clearEmbedLinks(){ embedLinks=[]; renderPreview(); }
 // Preview
 // -------------------------
 function renderPreview(){
-  const p=$("preview"); p.innerHTML=""; p.style.background=$("bgColor").value; p.style.backgroundImage="";
+  const p=$("preview"); 
+  p.innerHTML=""; 
+  p.style.background=$("bgColor").value; 
+  p.style.backgroundImage="";
+
   if($("bgVideoURL").value){
     const vid=document.createElement("video");
-    vid.src=$("bgVideoURL").value; vid.autoplay=true; vid.loop=true; vid.muted=true; vid.playsInline=true;
-    vid.style.position="absolute"; vid.style.top=0; vid.style.left=0; vid.style.width="100%"; vid.style.height="100%"; vid.style.objectFit="cover"; vid.style.zIndex=0;
+    vid.src=$("bgVideoURL").value; 
+    vid.autoplay=true; 
+    vid.loop=true; 
+    vid.muted=true; 
+    vid.playsInline=true;
+    vid.style.position="absolute"; 
+    vid.style.top=0; 
+    vid.style.left=0; 
+    vid.style.width="100%"; 
+    vid.style.height="100%"; 
+    vid.style.objectFit="cover"; 
+    vid.style.zIndex=0;
     p.appendChild(vid);
   } else if($("bgImageURL").value){
-    p.style.backgroundImage=`url(${$("bgImageURL").value})`; p.style.backgroundSize=$("bgSize").value; p.style.backgroundPosition="center";
+    p.style.backgroundImage=`url(${$("bgImageURL").value})`; 
+    p.style.backgroundSize=$("bgSize").value; 
+    p.style.backgroundPosition="center";
   }
 
   const c=document.createElement("div");
-c.style.padding="16px";
-c.style.color=$("textColor").value;
-c.style.position="relative";
-c.style.zIndex=1;
+  c.style.padding="16px";
+  c.style.color=$("textColor").value;
+  c.style.position="relative";
+  c.style.zIndex=1;
 
-// ✅ ADD HERE
-const submitErrorBox = document.createElement("div");
-submitErrorBox.id = "submitErrorBox";
-submitErrorBox.style.display = "none";
-submitErrorBox.style.background = "#fdecea";
-submitErrorBox.style.color = "#b71c1c";
-submitErrorBox.style.padding = "10px";
-submitErrorBox.style.borderRadius = "6px";
-submitErrorBox.style.marginBottom = "10px";
-submitErrorBox.style.fontSize = "14px";
-submitErrorBox.style.fontWeight = "600";
+  // ✅ Submit Error Box
+  const submitErrorBox = document.createElement("div");
+  submitErrorBox.id = "submitErrorBox";
+  submitErrorBox.style.display = "none";
+  submitErrorBox.style.background = "#fdecea";
+  submitErrorBox.style.color = "#b71c1c";
+  submitErrorBox.style.padding = "10px";
+  submitErrorBox.style.borderRadius = "6px";
+  submitErrorBox.style.marginBottom = "10px";
+  submitErrorBox.style.fontSize = "14px";
+  submitErrorBox.style.fontWeight = "600";
+  c.appendChild(submitErrorBox);
 
-c.appendChild(submitErrorBox);
-  if($("avatarURL").value)c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if($("logoURL").value)c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
+  if($("avatarURL").value) c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+  if($("logoURL").value) c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
   c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
   c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
-  $("galleryImages").value.split(",").forEach(img=>{ img=img.trim(); if(img)c.innerHTML+=`<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`; });
+
+  // Gallery Images
+  $("galleryImages").value.split(",").forEach(img=>{
+    img=img.trim(); 
+    if(img) c.innerHTML+=`<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`;
+  });
+
+  // ✅ Videos from comma-separated list
+  $("videoLinks").value.split(",").forEach(link => {
+    link = link.trim();
+    if (!link) return;
+
+    let videoEl;
+    if (link.endsWith(".mp4") || link.endsWith(".webm")) {
+      videoEl = document.createElement("video");
+      videoEl.src = link;
+      videoEl.controls = true;
+      videoEl.style.width = "100%";
+      videoEl.style.borderRadius = "6px";
+      videoEl.style.margin = "6px 0";
+    } else {
+      const videoId = link.split("v=")[1]?.split("&")[0];
+      if (videoId) {
+        videoEl = document.createElement("iframe");
+        videoEl.src = `https://www.youtube.com/embed/${videoId}`;
+        videoEl.width = "100%";
+        videoEl.height = "315";
+        videoEl.frameBorder = "0";
+        videoEl.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        videoEl.allowFullscreen = true;
+        videoEl.style.margin = "6px 0";
+      }
+    }
+    if (videoEl) c.appendChild(videoEl);
+  });
+
+  // Description Text
   c.innerHTML+=`<p>${$("description").value}</p>`;
-  galleryItems.forEach(g=>{ if(!g.img) return; c.innerHTML+=`<div style="margin-top:8px"><a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px"></a>${g.desc?`<small>${g.desc}</small>`:""}</div>`; });
 
-  if($("enableWarning").checked && $("warningPosition").value!=="none") c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
+  // Gallery Items
+  galleryItems.forEach(g=>{
+    if(!g.img) return;
+    c.innerHTML+=`<div style="margin-top:8px"><a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px"></a>${g.desc?`<small>${g.desc}</small>`:""}</div>`;
+  });
 
-  const fDiv=document.createElement("div"); fDiv.style.display="flex"; fDiv.style.flexDirection="column";
+  // Warning
+  if($("enableWarning").checked && $("warningPosition").value!=="none") 
+    c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
+
+  // Form Container
+  const fDiv=document.createElement("div"); 
+  fDiv.style.display="flex"; 
+  fDiv.style.flexDirection="column";
   fDiv.style.alignItems=$("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
   fDiv.style.gap="8px";
 
@@ -342,67 +448,88 @@ c.appendChild(submitErrorBox);
   $("extraFields").value.split("\n").forEach(v=>{ if(v.trim()) fDiv.innerHTML+=`<input placeholder="${v.trim()}">`; });
 
   if ($("idFrontChk").checked || $("idBackChk").checked) {
-  const idBox = document.createElement("div");
-  idBox.style.background = $("idSectionBg").value;
-  idBox.style.padding = "10px";
-  idBox.style.borderRadius = "8px";
-  idBox.style.width = "100%";
-
-  if ($("idFrontChk").checked) {
-    idBox.innerHTML += `<label>${$("idFrontText").value}</label><input type="file">`;
+    const idBox = document.createElement("div");
+    idBox.style.background = $("idSectionBg").value;
+    idBox.style.padding = "10px";
+    idBox.style.borderRadius = "8px";
+    idBox.style.width = "100%";
+    if ($("idFrontChk").checked) idBox.innerHTML += `<label>${$("idFrontText").value}</label><input type="file">`;
+    if ($("idBackChk").checked) idBox.innerHTML += `<label>${$("idBackText").value}</label><input type="file">`;
+    fDiv.appendChild(idBox);
   }
-  if ($("idBackChk").checked) {
-    idBox.innerHTML += `<label>${$("idBackText").value}</label><input type="file">`;
-  }
-
-  fDiv.appendChild(idBox);
-}
 
   customFields.forEach(fld=>{
-    const wrapper=document.createElement("div"); wrapper.style.display="flex"; wrapper.style.flexDirection="column"; wrapper.style.marginBottom="8px";
-    const input=document.createElement("input"); input.type=fld.type; input.placeholder=fld.label;
+    const wrapper=document.createElement("div"); 
+    wrapper.style.display="flex"; 
+    wrapper.style.flexDirection="column"; 
+    wrapper.style.marginBottom="8px";
+    const input=document.createElement("input"); 
+    input.type=fld.type; 
+    input.placeholder=fld.label;
     wrapper.appendChild(input);
     fDiv.appendChild(wrapper);
   });
 
-  embedLinks.forEach(link=>{ if(!link.show) return; const div=document.createElement("div"); div.className="embedLink"; div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`; if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`; fDiv.appendChild(div); });
+  embedLinks.forEach(link=>{ 
+    if(!link.show) return; 
+    const div=document.createElement("div"); 
+    div.className="embedLink"; 
+    div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`; 
+    if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`; 
+    fDiv.appendChild(div); 
+  });
 
-  if($("showGenerateBtn").checked){ const genBtn=document.createElement("button"); genBtn.className="mainBtn"; genBtn.style.background="#1976d2"; genBtn.textContent=$("generateBtnText").value; genBtn.onclick=()=>alert("Form Generated!"); fDiv.appendChild(genBtn); }
+  if($("showGenerateBtn").checked){ 
+    const genBtn=document.createElement("button"); 
+    genBtn.className="mainBtn"; 
+    genBtn.style.background="#1976d2"; 
+    genBtn.textContent=$("generateBtnText").value; 
+    genBtn.onclick=()=>alert("Form Generated!"); 
+    fDiv.appendChild(genBtn); 
+  }
+
   if($("showMainBtn").checked){
-  const mainBtn=document.createElement("button");
-  mainBtn.style.background=$("btnColor").value;
-  mainBtn.style.color="#fff";
-  mainBtn.style.padding="10px";
-  mainBtn.style.border="none";
-  mainBtn.style.borderRadius="8px";
-  mainBtn.textContent=$("buttonText").value;
+    const mainBtn=document.createElement("button");
+    mainBtn.style.background=$("btnColor").value;
+    mainBtn.style.color="#fff";
+    mainBtn.style.padding="10px";
+    mainBtn.style.border="none";
+    mainBtn.style.borderRadius="8px";
+    mainBtn.textContent=$("buttonText").value;
 
-  mainBtn.onclick = () => {
-    const errorBox = document.getElementById("submitErrorBox");
+    mainBtn.onclick = () => {
+      const errorBox = document.getElementById("submitErrorBox");
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+      const hasError = $("showCustomError").checked && $("customErrorText").value.trim() !== "";
+      if (hasError) {
+        errorBox.textContent = $("customErrorText").value;
+        errorBox.style.display = "block";
+        errorBox.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      alert("Form submitted successfully!");
+    };
+    fDiv.appendChild(mainBtn);
+  }
 
-    errorBox.style.display = "none";
-    errorBox.textContent = "";
-
-    const hasError =
-      $("showCustomError").checked &&
-      $("customErrorText").value.trim() !== "";
-
-    if (hasError) {
-      errorBox.textContent = $("customErrorText").value;
-      errorBox.style.display = "block";
-      errorBox.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-
-    alert("Form submitted successfully!");
-  };
-
-  // ✅ THIS WAS MISSING
-  fDiv.appendChild(mainBtn);
-}
   c.appendChild(fDiv);
 
-  extraButtons.forEach(b=>{ if(!b.show) return; const btn=document.createElement("button"); btn.className="draggableBtn"; btn.textContent=b.text; btn.style.background=b.color; btn.style.width=b.size+"px"; btn.style.height=b.size+"px"; btn.style.left=b.x+"%"; btn.style.top=b.y+"%"; btn.onmousedown=e=>{dragging=b; dx=e.offsetX; dy=e.offsetY;}; btn.onclick=()=>window.open(b.link,"_blank"); p.appendChild(btn); });
+  // Extra Buttons
+  extraButtons.forEach(b=>{
+    if(!b.show) return; 
+    const btn=document.createElement("button"); 
+    btn.className="draggableBtn"; 
+    btn.textContent=b.text; 
+    btn.style.background=b.color; 
+    btn.style.width=b.size+"px"; 
+    btn.style.height=b.size+"px"; 
+    btn.style.left=b.x+"%"; 
+    btn.style.top=b.y+"%"; 
+    btn.onmousedown=e=>{dragging=b; dx=e.offsetX; dy=e.offsetY;}; 
+    btn.onclick=()=>window.open(b.link,"_blank"); 
+    p.appendChild(btn); 
+  });
 
   c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
   p.appendChild(c);
@@ -417,7 +544,6 @@ c.appendChild(submitErrorBox);
   };
   document.onmouseup = () => dragging = null;
 }
-
 // -------------------------
 // Firebase
 // -------------------------
@@ -479,7 +605,7 @@ idSectionBg: $("idSectionBg").value,
     createdAt: new Date().toISOString()
   };
   
-  db.collection("forms").add(formData).then(docRef => {
+db.collection("forms").add(formData).then(docRef => {
     const link = `${window.location.origin}/form.html?id=${docRef.id}`;
     $("linkArea").style.display = "block";
     $("linkArea").innerHTML = `✅ Form saved successfully! <br>Link: <a href="${link}" target="_blank">${link}</a>`;
@@ -489,6 +615,19 @@ idSectionBg: $("idSectionBg").value,
     $("linkArea").textContent = "❌ Error saving form.";
   });
 }
+
+// 🔄 Auto live preview on ANY input or change
+document.addEventListener("input", e => {
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+});
+
+document.addEventListener("change", e => {
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+});
 
 // -------------------------
 // Initial render
