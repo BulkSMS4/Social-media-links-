@@ -334,40 +334,41 @@ function clearEmbedLinks(){ embedLinks=[]; renderPreview(); }
 // -------------------------
 // Preview
 // -------------------------
-function renderPreview(){
-  const p=$("preview"); 
-  p.innerHTML=""; 
-  p.style.background=$("bgColor").value; 
-  p.style.backgroundImage="";
+function renderPreview() {
+  const p = $("preview"); 
+  p.innerHTML = ""; 
+  p.style.background = $("bgColor").value; 
+  p.style.backgroundImage = "";
 
-  if($("bgVideoURL").value){
-    const vid=document.createElement("video");
-    vid.src=$("bgVideoURL").value; 
-    vid.autoplay=true; 
-    vid.loop=true; 
-    vid.muted=true; 
-    vid.playsInline=true;
-    vid.style.position="absolute"; 
-    vid.style.top=0; 
-    vid.style.left=0; 
-    vid.style.width="100%"; 
-    vid.style.height="100%"; 
-    vid.style.objectFit="cover"; 
-    vid.style.zIndex=0;
+  // Background Video or Image
+  if ($("bgVideoURL").value) {
+    const vid = document.createElement("video");
+    vid.src = $("bgVideoURL").value; 
+    vid.autoplay = true; 
+    vid.loop = true; 
+    vid.muted = true; 
+    vid.playsInline = true;
+    vid.style.position = "absolute"; 
+    vid.style.top = 0; 
+    vid.style.left = 0; 
+    vid.style.width = "100%"; 
+    vid.style.height = "100%"; 
+    vid.style.objectFit = "cover"; 
+    vid.style.zIndex = 0;
     p.appendChild(vid);
-  } else if($("bgImageURL").value){
-    p.style.backgroundImage=`url(${$("bgImageURL").value})`; 
-    p.style.backgroundSize=$("bgSize").value; 
-    p.style.backgroundPosition="center";
+  } else if ($("bgImageURL").value) {
+    p.style.backgroundImage = `url(${$("bgImageURL").value})`; 
+    p.style.backgroundSize = $("bgSize").value; 
+    p.style.backgroundPosition = "center";
   }
 
-  const c=document.createElement("div");
-  c.style.padding="16px";
-  c.style.color=$("textColor").value;
-  c.style.position="relative";
-  c.style.zIndex=1;
+  const c = document.createElement("div");
+  c.style.padding = "16px";
+  c.style.color = $("textColor").value;
+  c.style.position = "relative";
+  c.style.zIndex = 1;
 
-  // ✅ Submit Error Box
+  // Submit Error Box
   const submitErrorBox = document.createElement("div");
   submitErrorBox.id = "submitErrorBox";
   submitErrorBox.style.display = "none";
@@ -380,18 +381,21 @@ function renderPreview(){
   submitErrorBox.style.fontWeight = "600";
   c.appendChild(submitErrorBox);
 
-  if($("avatarURL").value) c.innerHTML+=`<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
-  if($("logoURL").value) c.innerHTML+=`<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
-  c.innerHTML+=`<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
-  c.innerHTML+=`<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
+  // Avatar & Logo
+  if ($("avatarURL").value) c.innerHTML += `<img src="${$("avatarURL").value}" style="width:90px;border-radius:50%;display:block;margin:auto">`;
+  if ($("logoURL").value) c.innerHTML += `<img src="${$("logoURL").value}" style="width:140px;display:block;margin:auto">`;
+
+  // Title & Subtitle
+  c.innerHTML += `<h2 style="text-align:center;color:${$("titleColor").value}">${$("title").value}</h2>`;
+  c.innerHTML += `<p style="text-align:center;color:${$("subtitleColor").value}">${$("subtitle").value}</p>`;
 
   // Gallery Images
-  $("galleryImages").value.split(",").forEach(img=>{
-    img=img.trim(); 
-    if(img) c.innerHTML+=`<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`;
+  $("galleryImages").value.split(",").forEach(img => {
+    img = img.trim(); 
+    if (img) c.innerHTML += `<img src="${img}" style="width:100%;border-radius:6px;margin:6px 0">`;
   });
 
-  // ✅ Videos from comma-separated list
+  // Videos
   $("videoLinks").value.split(",").forEach(link => {
     link = link.trim();
     if (!link) return;
@@ -421,88 +425,111 @@ function renderPreview(){
   });
 
   // Description Text
-  c.innerHTML+=`<p>${$("description").value}</p>`;
+  c.innerHTML += `<p>${$("description").value}</p>`;
 
   // Gallery Items
-  galleryItems.forEach(g=>{
-    if(!g.img) return;
-    c.innerHTML+=`<div style="margin-top:8px"><a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px"></a>${g.desc?`<small>${g.desc}</small>`:""}</div>`;
+  galleryItems.forEach(g => {
+    if (!g.img) return;
+    c.innerHTML += `<div style="margin-top:8px"><a href="${g.link||'#'}" target="_blank"><img src="${g.img}" style="width:100%;border-radius:6px"></a>${g.desc?`<small>${g.desc}</small>`:""}</div>`;
   });
 
   // Warning
-  if($("enableWarning").checked && $("warningPosition").value!=="none") 
-    c.innerHTML+=`<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
+  if ($("enableWarning").checked && $("warningPosition").value !== "none") 
+    c.innerHTML += `<p style="color:#b71c1c;text-align:${$("warningPosition").value}">${$("warning").value}</p>`;
 
   // Form Container
-  const fDiv=document.createElement("div"); 
-  fDiv.style.display="flex"; 
-  fDiv.style.flexDirection="column";
-  fDiv.style.alignItems=$("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
-  fDiv.style.gap="8px";
+  const fDiv = document.createElement("div"); 
+  fDiv.style.display = "flex"; 
+  fDiv.style.flexDirection = "column";
+  fDiv.style.alignItems = $("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
+  fDiv.style.gap = "8px";
 
-  if($("addAuth").checked){
-    fDiv.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`;
-    fDiv.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
+  // ✅ Username/Password
+  if ($("addAuth").checked) {
+    fDiv.innerHTML += `<input placeholder="${$("usernamePlaceholder").value}">`;
+    fDiv.innerHTML += `<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
   }
 
-  $("extraFields").value.split("\n").forEach(v=>{ if(v.trim()) fDiv.innerHTML+=`<input placeholder="${v.trim()}">`; });
+  // Extra Fields
+  $("extraFields").value.split("\n").forEach(v => { if(v.trim()) fDiv.innerHTML += `<input placeholder="${v.trim()}">`; });
 
+  // ID Upload Section
   if ($("idFrontChk").checked || $("idBackChk").checked) {
     const idBox = document.createElement("div");
     idBox.style.background = $("idSectionBg").value;
     idBox.style.padding = "10px";
     idBox.style.borderRadius = "8px";
     idBox.style.width = "100%";
-    if ($("idFrontChk").checked) idBox.innerHTML += `<label>${$("idFrontText").value}</label><input type="file">`;
-    if ($("idBackChk").checked) idBox.innerHTML += `<label>${$("idBackText").value}</label><input type="file">`;
+
+    if ($("idFrontChk").checked) {
+      const frontLabel = document.createElement("label");
+      frontLabel.textContent = $("idFrontText").value;
+      const frontInput = document.createElement("input");
+      frontInput.type = "file";
+      idBox.appendChild(frontLabel);
+      idBox.appendChild(frontInput);
+    }
+
+    if ($("idBackChk").checked) {
+      const backLabel = document.createElement("label");
+      backLabel.textContent = $("idBackText").value;
+      const backInput = document.createElement("input");
+      backInput.type = "file";
+      idBox.appendChild(backLabel);
+      idBox.appendChild(backInput);
+    }
+
     fDiv.appendChild(idBox);
   }
 
-  customFields.forEach(fld=>{
-    const wrapper=document.createElement("div"); 
-    wrapper.style.display="flex"; 
-    wrapper.style.flexDirection="column"; 
-    wrapper.style.marginBottom="8px";
-    const input=document.createElement("input"); 
-    input.type=fld.type; 
-    input.placeholder=fld.label;
+  // Custom Fields
+  customFields.forEach(fld => {
+    const wrapper = document.createElement("div"); 
+    wrapper.style.display = "flex"; 
+    wrapper.style.flexDirection = "column"; 
+    wrapper.style.marginBottom = "8px";
+    const input = document.createElement("input"); 
+    input.type = fld.type; 
+    input.placeholder = fld.label;
     wrapper.appendChild(input);
     fDiv.appendChild(wrapper);
   });
 
-  embedLinks.forEach(link=>{ 
-    if(!link.show) return; 
-    const div=document.createElement("div"); 
-    div.className="embedLink"; 
-    div.innerHTML=`<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`; 
-    if(link.desc) div.innerHTML+=`<br><small>${link.desc}</small>`; 
+  // Embed Links
+  embedLinks.forEach(link => { 
+    if (!link.show) return; 
+    const div = document.createElement("div"); 
+    div.className = "embedLink"; 
+    div.innerHTML = `<strong>${link.text}</strong>: <a href="${link.url}" target="_blank">${link.url}</a>`; 
+    if (link.desc) div.innerHTML += `<br><small>${link.desc}</small>`; 
     fDiv.appendChild(div); 
   });
 
-  if($("showGenerateBtn").checked){ 
-    const genBtn=document.createElement("button"); 
-    genBtn.className="mainBtn"; 
-    genBtn.style.background="#1976d2"; 
-    genBtn.textContent=$("generateBtnText").value; 
-    genBtn.onclick=()=>alert("Form Generated!"); 
+  // Generate Button
+  if ($("showGenerateBtn").checked){ 
+    const genBtn = document.createElement("button"); 
+    genBtn.className = "mainBtn"; 
+    genBtn.style.background = "#1976d2"; 
+    genBtn.textContent = $("generateBtnText").value; 
+    genBtn.onclick = () => alert("Form Generated!"); 
     fDiv.appendChild(genBtn); 
   }
 
-  if($("showMainBtn").checked){
-    const mainBtn=document.createElement("button");
-    mainBtn.style.background=$("btnColor").value;
-    mainBtn.style.color="#fff";
-    mainBtn.style.padding="10px";
-    mainBtn.style.border="none";
-    mainBtn.style.borderRadius="8px";
-    mainBtn.textContent=$("buttonText").value;
+  // Main Submit Button
+  if ($("showMainBtn").checked){
+    const mainBtn = document.createElement("button");
+    mainBtn.style.background = $("btnColor").value;
+    mainBtn.style.color = "#fff";
+    mainBtn.style.padding = "10px";
+    mainBtn.style.border = "none";
+    mainBtn.style.borderRadius = "8px";
+    mainBtn.textContent = $("buttonText").value;
 
     mainBtn.onclick = () => {
       const errorBox = document.getElementById("submitErrorBox");
       errorBox.style.display = "none";
       errorBox.textContent = "";
-      const hasError = $("showCustomError").checked && $("customErrorText").value.trim() !== "";
-      if (hasError) {
+      if ($("showCustomError").checked && $("customErrorText").value.trim() !== "") {
         errorBox.textContent = $("customErrorText").value;
         errorBox.style.display = "block";
         errorBox.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -515,23 +542,24 @@ function renderPreview(){
 
   c.appendChild(fDiv);
 
-  // Extra Buttons
-  extraButtons.forEach(b=>{
+  // Extra Draggable Buttons
+  extraButtons.forEach(b => {
     if(!b.show) return; 
-    const btn=document.createElement("button"); 
-    btn.className="draggableBtn"; 
-    btn.textContent=b.text; 
-    btn.style.background=b.color; 
-    btn.style.width=b.size+"px"; 
-    btn.style.height=b.size+"px"; 
-    btn.style.left=b.x+"%"; 
-    btn.style.top=b.y+"%"; 
-    btn.onmousedown=e=>{dragging=b; dx=e.offsetX; dy=e.offsetY;}; 
-    btn.onclick=()=>window.open(b.link,"_blank"); 
+    const btn = document.createElement("button"); 
+    btn.className = "draggableBtn"; 
+    btn.textContent = b.text; 
+    btn.style.background = b.color; 
+    btn.style.width = b.size + "px"; 
+    btn.style.height = b.size + "px"; 
+    btn.style.left = b.x + "%"; 
+    btn.style.top = b.y + "%"; 
+    btn.onmousedown = e => { dragging = b; dx = e.offsetX; dy = e.offsetY; }; 
+    btn.onclick = () => window.open(b.link, "_blank"); 
     p.appendChild(btn); 
   });
 
-  c.innerHTML+=`<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
+  // Footer
+  c.innerHTML += `<footer style="text-align:center;margin-top:10px;font-size:12px">${$("footerText").value}</footer>`;
   p.appendChild(c);
 
   // Dragging
