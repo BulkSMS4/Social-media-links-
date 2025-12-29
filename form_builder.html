@@ -76,17 +76,22 @@ textarea{min-height:70px}
 
 <h3>ID Upload</h3>
 
-<label>Front ID Label Text</label>
-<input id="idFrontText" value="Upload ID Front">
+<div>
+  <label>
+    <input type="checkbox" id="chkIdFront"> Enable Front ID Upload
+  </label>
+  <input type="text" id="txtIdFront" placeholder="ID Front Label" value="Upload ID Front">
+</div>
 
-<label>Back ID Label Text</label>
-<input id="idBackText" value="Upload ID Back">
+<div>
+  <label>
+    <input type="checkbox" id="chkIdBack"> Enable Back ID Upload
+  </label>
+  <input type="text" id="txtIdBack" placeholder="ID Back Label" value="Upload ID Back">
+</div>
 
 <label>ID Upload Section Background Color</label>
 <input type="color" id="idSectionBg" value="#f7f9fc">
-
-<label><input type="checkbox" id="idFrontChk"> Enable Front ID Upload</label>
-<label><input type="checkbox" id="idBackChk"> Enable Back ID Upload</label>
 
 <h3>Custom Fields</h3>
 <div id="customFieldsWrap"></div>
@@ -468,34 +473,34 @@ function renderPreview() {
   $("extraFields").value.split("\n").forEach(v => { if(v.trim()) fDiv.innerHTML += `<input placeholder="${v.trim()}">`; });
 
   // ID Upload Section
-  if ($("idFrontChk").checked || $("idBackChk").checked) {
-    const idBox = document.createElement("div");
-    idBox.style.background = $("idSectionBg").value;
-    idBox.style.padding = "10px";
-    idBox.style.borderRadius = "8px";
-    idBox.style.width = "100%";
+if ($("chkIdFront").checked || $("chkIdBack").checked) {
+  const idBox = document.createElement("div");
+  idBox.style.background = $("idSectionBg").value;
+  idBox.style.padding = "10px";
+  idBox.style.borderRadius = "8px";
+  idBox.style.width = "100%";
+  idBox.style.marginTop = "10px";
 
-    if ($("idFrontChk").checked) {
-      const frontLabel = document.createElement("label");
-      frontLabel.textContent = $("idFrontText").value;
-      const frontInput = document.createElement("input");
-      frontInput.type = "file";
-      idBox.appendChild(frontLabel);
-      idBox.appendChild(frontInput);
-    }
-
-    if ($("idBackChk").checked) {
-      const backLabel = document.createElement("label");
-      backLabel.textContent = $("idBackText").value;
-      const backInput = document.createElement("input");
-      backInput.type = "file";
-      idBox.appendChild(backLabel);
-      idBox.appendChild(backInput);
-    }
-
-    fDiv.appendChild(idBox);
+  if ($("chkIdFront").checked) {
+    const frontLabel = document.createElement("label");
+    frontLabel.textContent = $("txtIdFront").value;
+    const frontInput = document.createElement("input");
+    frontInput.type = "file";
+    idBox.appendChild(frontLabel);
+    idBox.appendChild(frontInput);
   }
 
+  if ($("chkIdBack").checked) {
+    const backLabel = document.createElement("label");
+    backLabel.textContent = $("txtIdBack").value;
+    const backInput = document.createElement("input");
+    backInput.type = "file";
+    idBox.appendChild(backLabel);
+    idBox.appendChild(backInput);
+  }
+
+  fDiv.appendChild(idBox);
+}
   // Custom Fields
   customFields.forEach(fld => {
     const wrapper = document.createElement("div"); 
