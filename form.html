@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dynamic Form</title>
+<title>Loading...</title>
+
+<meta name="description" id="metaDesc" content="Loading...">
+
+<!-- Open Graph -->
+<meta property="og:title" id="ogTitle" content="Loading...">
+<meta property="og:description" id="ogDesc" content="Loading...">
+<meta property="og:image" id="ogImage" content="">
+<meta property="og:url" content="">
+<meta property="og:type" content="website">
 
 <style>
 body{
@@ -114,6 +123,49 @@ button{
 <script>
 const $ = id => document.getElementById(id);
 
+/* 🔥 UPDATE SEO + OG TAGS */
+/* 🔥 UPDATE SEO + OG TAGS */
+function applySEOMeta(config){
+  if(!config) return;
+
+  // Page title
+  document.title = config.seoTitle || config.title || "Form";
+
+  // Meta description
+  document.querySelector('meta[name="description"]').setAttribute(
+    "content",
+    config.metaDesc || config.description || ""
+  );
+
+  // OG Title
+  document.querySelector('meta[property="og:title"]').setAttribute(
+    "content",
+    config.seoTitle || config.title || ""
+  );
+
+  // OG Description
+  document.querySelector('meta[property="og:description"]').setAttribute(
+    "content",
+    config.metaDesc || config.description || ""
+  );
+
+  // OG Image
+  if(config.ogImage){
+    document.querySelector('meta[property="og:image"]').setAttribute(
+      "content",
+      config.ogImage
+    );
+  }
+
+  // ✅ OG URL (important for Facebook, WhatsApp, Telegram)
+  let ogUrlTag = document.querySelector('meta[property="og:url"]');
+  if (!ogUrlTag) {
+    ogUrlTag = document.createElement("meta");
+    ogUrlTag.setAttribute("property", "og:url");
+    document.head.appendChild(ogUrlTag);
+  }
+  ogUrlTag.setAttribute("content", window.location.href);
+}
 /* FIREBASE */
 firebase.initializeApp({
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
@@ -143,7 +195,11 @@ db.collection("forms").doc(formId).get().then(doc=>{
     return;
   }
   formConfig = doc.data();
-  renderForm();
+
+/* ✅ APPLY SEO & OG */
+applySEOMeta(formConfig);
+
+renderForm();
 });
 
 /* RENDER BUILDER-ACCURATE (NO EXTRA INPUTS) */
