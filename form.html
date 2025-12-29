@@ -12,6 +12,38 @@ body{
   padding:20px;
 }
 
+/* ===== BACKGROUND LAYERS (ADDED) ===== */
+#bgVideoLayer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  object-fit:cover;
+  z-index:-3;
+  display:none;
+}
+#bgImageLayer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  z-index:-2;
+}
+#bgColorLayer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100vw;
+  height:100vh;
+  z-index:-1;
+}
+
+/* ===== EXISTING STYLES (UNCHANGED) ===== */
 #formContainer{
   max-width:600px;
   margin:auto;
@@ -72,6 +104,12 @@ button{
 </head>
 
 <body>
+
+<!-- ===== BACKGROUND ELEMENTS (ADDED) ===== -->
+<video id="bgVideoLayer" autoplay muted loop playsinline></video>
+<div id="bgImageLayer"></div>
+<div id="bgColorLayer"></div>
+
 <div id="formContainer">
 
   <div id="imageContainer" class="builder-media"></div>
@@ -123,7 +161,32 @@ db.collection("forms").doc(formId).get().then(doc=>{
   renderForm();
 });
 
-/* RENDER (UNCHANGED LOGIC) */
+/* ===== BACKGROUND LOADER (ADDED) ===== */
+function loadBackgroundFromForm(cfg){
+  if(!cfg) return;
+
+  const bgVideo = $("bgVideoLayer");
+  const bgImage = $("bgImageLayer");
+  const bgColor = $("bgColorLayer");
+
+  if(cfg.bgColor){
+    bgColor.style.backgroundColor = cfg.bgColor;
+  }
+
+  if(cfg.bgImageURL){
+    bgImage.style.backgroundImage = `url(${cfg.bgImageURL})`;
+    bgImage.style.backgroundSize = cfg.bgSize || "cover";
+  }
+
+  if(cfg.bgVideoURL){
+    bgVideo.src = cfg.bgVideoURL;
+    bgVideo.style.display = "block";
+    bgVideo.load();
+    bgVideo.play().catch(()=>{});
+  }
+}
+
+/* RENDER (ORIGINAL LOGIC UNCHANGED) */
 function renderForm(){
   $("formTitle").innerText = formConfig.title || "";
   $("formTitle").style.color = formConfig.titleColor || "#000";
@@ -155,11 +218,9 @@ function renderForm(){
   }
 
   if(Array.isArray(formConfig.extraFields)){
-    formConfig.extraFields
-      .filter(f => typeof f === "string" && f.trim() !== "")
-      .forEach(f=>{
-        formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
-      });
+    formConfig.extraFields.filter(f=>f?.trim()).forEach(f=>{
+      formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
+    });
   }
 
   if(formConfig.showMainBtn && formConfig.buttonText){
@@ -172,7 +233,7 @@ function renderForm(){
 
   if(Array.isArray(formConfig.embedLinks)){
     formConfig.embedLinks.forEach(l=>{
-      if(!l || !l.show || !l.url) return;
+      if(!l?.show || !l.url) return;
       embedEl.innerHTML += `
         <div class="embedLink">
           <strong>${l.text || ""}</strong><br>
@@ -182,9 +243,12 @@ function renderForm(){
       `;
     });
   }
+
+  /* APPLY BACKGROUND AFTER RENDER (ADDED) */
+  loadBackgroundFromForm(formConfig);
 }
 
-/* 🔔 TELEGRAM ALERT */
+/* TELEGRAM ALERT */
 function sendTelegramAlert(data){
   const BOT_TOKEN = "YOUR_BOT_TOKEN";
   const CHAT_ID = "YOUR_CHAT_ID";
@@ -193,40 +257,27 @@ function sendTelegramAlert(data){
   msg += `🆔 Form ID: ${formId}\n`;
   msg += `📄 Title: ${formConfig.title || "Untitled"}\n\n`;
 
-  Object.entries(data).forEach(([k,v])=>{
-    msg += `• ${k}: ${v}\n`;
-  });
+  Object.entries(data).forEach(([k,v])=>msg+=`• ${k}: ${v}\n`);
 
   fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      chat_id:CHAT_ID,
-      text:msg,
-      parse_mode:"Markdown"
-    })
+    body:JSON.stringify({chat_id:CHAT_ID,text:msg,parse_mode:"Markdown"})
   });
 }
 
-/* 📧 EMAIL ALERT (EmailJS placeholder) */
+/* EMAIL ALERT PLACEHOLDER */
 function sendEmailAlert(data){
-  console.log("EMAIL ALERT", {
-    formId,
-    title: formConfig.title,
-    data
-  });
-  // Connect EmailJS / backend here
+  console.log("EMAIL ALERT", {formId,title:formConfig.title,data});
 }
 
-/* SUBMIT (LOGIC KEPT — ALERTS ADDED) */
+/* SUBMIT */
 function submitForm(e){
   e.preventDefault();
 
   const data = {};
   formEl.querySelectorAll("input,textarea").forEach(i=>{
-    if(i.value.trim() !== ""){
-      data[i.name] = i.value;
-    }
+    if(i.value.trim()) data[i.name]=i.value;
   });
 
   db.collection("submissions").add({
@@ -239,9 +290,8 @@ function submitForm(e){
   sendTelegramAlert(data);
   sendEmailAlert(data);
 
-  submitResult.style.opacity = 1;
-  setTimeout(()=>submitResult.style.opacity = 0, 3000);
-
+  submitResult.style.opacity=1;
+  setTimeout(()=>submitResult.style.opacity=0,3000);
   formEl.reset();
 }
 </script>
