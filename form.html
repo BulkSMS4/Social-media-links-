@@ -1,11 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Form</title>
+
+<style>
+/* ===== RESET ===== */
+*{box-sizing:border-box}
+body{
+  font-family:Arial,sans-serif;
+  margin:0;
+  padding:20px;
+  background:transparent;
+}
+
+/* ===== BACKGROUND LAYERS ===== */
+#bgVideoLayer,
+#bgImageLayer,
+#bgColorLayer{
+  position:fixed;
+  top:0;left:0;
+  width:100vw;height:100vh;
+  z-index:-10;
+  pointer-events:none;
+}
+
+#bgVideoLayer{
+  display:none;
+  object-fit:cover;
+}
+
+#bgImageLayer{
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+
+#bgColorLayer{}
+
+/* ===== FORM ===== */
+#formContainer{
+  max-width:600px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+
+.builder-media{text-align:center;margin-bottom:10px}
+.builder-media img{max-width:120px;margin:6px auto;display:block}
+
+input, textarea, button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  background:#1976d2;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+
+/* ===== POSITIONS ===== */
+.pos-left{text-align:left}
+.pos-center{text-align:center}
+.pos-right{text-align:right}
+.pos-top{margin-top:0}
+.pos-bottom{margin-top:20px}
+
+/* ===== MEDIA ===== */
+.media-img, .media-video{
+  width:100%;
+  border-radius:8px;
+  margin:10px 0;
+}
+
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+}
+.gallery-grid img{
+  width:100%;
+  border-radius:6px;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+
 <body>
 
-<!-- BACKGROUND LAYERS -->
+<!-- ===== BACKGROUND ===== -->
 <video id="bgVideoLayer" muted autoplay loop playsinline></video>
 <div id="bgImageLayer"></div>
 <div id="bgColorLayer"></div>
 
-<!-- FORM -->
+<!-- ===== FORM ===== -->
 <div id="formContainer">
   <div id="imageContainer" class="builder-media"></div>
   <h2 id="formTitle"></h2>
@@ -13,142 +111,167 @@
   <form id="dynamicForm"></form>
 </div>
 
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
 <script>
-/* ================= UTILS ================= */
 const $ = id => document.getElementById(id);
 
-/* ================= FIREBASE ================= */
+/* ===== FIREBASE ===== */
 firebase.initializeApp({
-  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland"
+  apiKey:"AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain:"usahackersland.firebaseapp.com",
+  projectId:"usahackersland"
 });
 const db = firebase.firestore();
 
-/* ================= FORM LOAD ================= */
+/* ===== GET FORM ID ===== */
 const formId = new URLSearchParams(location.search).get("id");
-if (!formId) {
+let formConfig = null;
+
+if(!formId){
   $("formTitle").innerText = "Form ID missing";
-  throw new Error("Missing form ID");
 }
 
-db.collection("forms").doc(formId).get().then(doc => {
-  if (!doc.exists) {
+/* ===== LOAD FORM ===== */
+db.collection("forms").doc(formId).get().then(doc=>{
+  if(!doc.exists){
     $("formTitle").innerText = "Form not found";
     return;
   }
-  renderForm(doc.data());
+  formConfig = doc.data();
+  renderForm(formConfig);
 });
 
-/* ================= BACKGROUND ================= */
+/* ===== BACKGROUND ===== */
 function loadBackground(cfg){
-  const video = $("bgVideoLayer");
-  const image = $("bgImageLayer");
-  const color = $("bgColorLayer");
+  const v = $("bgVideoLayer");
+  const i = $("bgImageLayer");
+  const c = $("bgColorLayer");
 
-  video.pause();
-  video.src = "";
-  video.style.display = "none";
-  image.style.backgroundImage = "";
-  color.style.backgroundColor = "";
+  v.pause(); v.src=""; v.style.display="none";
+  i.style.backgroundImage="";
+  c.style.backgroundColor="";
 
-  if (cfg.bgColor)
-    color.style.backgroundColor = cfg.bgColor;
+  if(cfg.bgColor) c.style.backgroundColor = cfg.bgColor;
 
-  if (cfg.bgImageURL)
-    image.style.backgroundImage = `url(${cfg.bgImageURL})`;
+  if(cfg.bgImageURL){
+    i.style.backgroundImage = `url(${cfg.bgImageURL})`;
+  }
 
-  if (cfg.bgVideoURL) {
-    video.src = cfg.bgVideoURL;
-    video.style.display = "block";
-    video.play().catch(()=>{});
+  if(cfg.bgVideoURL){
+    if(cfg.bgVideoURL.includes("youtube")){
+      let id = cfg.bgVideoURL.split("v=")[1] || cfg.bgVideoURL.split("youtu.be/")[1];
+      if(id) id = id.split("&")[0];
+      i.innerHTML = `
+        <iframe src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0"
+        style="width:100%;height:100%;border:0"></iframe>`;
+    } else {
+      v.src = cfg.bgVideoURL;
+      v.style.display="block";
+      v.play().catch(()=>{});
+    }
   }
 }
 
-/* ================= RENDER FORM ================= */
+/* ===== RENDER FORM ===== */
 function renderForm(cfg){
   const form = $("dynamicForm");
   const media = $("imageContainer");
-
-  form.innerHTML = "";
-  media.innerHTML = "";
+  form.innerHTML="";
+  media.innerHTML="";
 
   $("formTitle").innerText = cfg.title || "";
   $("formDesc").innerText = cfg.description || "";
 
-  /* AVATAR & LOGO */
-  if (cfg.avatarURL)
-    media.innerHTML += `<img src="${cfg.avatarURL}" style="width:80px;border-radius:50%">`;
+  if(cfg.avatarURL) media.innerHTML += `<img src="${cfg.avatarURL}" style="border-radius:50%">`;
+  if(cfg.logoURL) media.innerHTML += `<img src="${cfg.logoURL}">`;
 
-  if (cfg.logoURL)
-    media.innerHTML += `<img src="${cfg.logoURL}">`;
-
-  /* ===== GALLERY IMAGES ===== */
-  (cfg.galleryImages || "").toString().split(",").forEach(url => {
-    url = url.trim();
-    if (!url) return;
-    const img = document.createElement("img");
-    img.src = url;
-    img.style.width = "100%";
-    img.style.borderRadius = "6px";
-    form.appendChild(img);
+  /* ===== GALLERY ITEMS ===== */
+  (cfg.galleryItems||[]).forEach(g=>{
+    const box = document.createElement("div");
+    box.className = `pos-${g.position||"center"}`;
+    box.innerHTML = `
+      <img src="${g.img}" class="media-img">
+      ${g.mask?`<strong>${g.mask}</strong>`:""}
+      ${g.desc?`<p>${g.desc}</p>`:""}
+    `;
+    form.appendChild(box);
   });
+
+  /* ===== GALLERY IMAGES (MEDIA) ===== */
+  if(cfg.galleryImages){
+    const grid = document.createElement("div");
+    grid.className="gallery-grid";
+    cfg.galleryImages.split(",").forEach(url=>{
+      if(url.trim()){
+        const img = document.createElement("img");
+        img.src = url.trim();
+        grid.appendChild(img);
+      }
+    });
+    form.appendChild(grid);
+  }
 
   /* ===== VIDEOS ===== */
-  (cfg.videoLinks || "").toString().split(",").forEach(link => {
-    link = link.trim();
-    if (!link) return;
-
-    let el;
-    if (link.endsWith(".mp4")) {
-      el = document.createElement("video");
-      el.src = link;
-      el.controls = true;
-    } else if (link.includes("youtu")) {
-      const id = link.split("v=")[1]?.split("&")[0] || link.split("youtu.be/")[1];
-      if (!id) return;
-      el = document.createElement("iframe");
-      el.src = `https://www.youtube.com/embed/${id}`;
-      el.allowFullscreen = true;
-      el.height = 315;
-    }
-
-    if (el) {
-      el.style.width = "100%";
-      el.style.margin = "10px 0";
+  if(cfg.videoLinks){
+    cfg.videoLinks.split(",").forEach(link=>{
+      link = link.trim();
+      if(!link) return;
+      let el;
+      if(link.endsWith(".mp4")){
+        el=document.createElement("video");
+        el.src=link; el.controls=true;
+      }else{
+        let id = link.split("v=")[1] || link.split("youtu.be/")[1];
+        if(id) id=id.split("&")[0];
+        el=document.createElement("iframe");
+        el.src=`https://www.youtube.com/embed/${id}`;
+        el.allowFullscreen=true;
+        el.height=315;
+      }
+      el.className="media-video";
       form.appendChild(el);
+    });
+  }
+
+  /* ===== INPUT FIELDS ===== */
+  (cfg.fields||[]).forEach(f=>{
+    let input;
+    if(f.type==="textarea"){
+      input=document.createElement("textarea");
+    }else{
+      input=document.createElement("input");
+      input.type=f.type||"text";
     }
+    input.placeholder=f.label||"";
+    input.name=f.name||"field";
+    input.required=!!f.required;
+    form.appendChild(input);
   });
 
-  /* SUBMIT BUTTON */
-  const btn = document.createElement("button");
-  btn.textContent = cfg.buttonText || "Submit";
-  btn.type = "button";
-  btn.onclick = submitForm;
+  /* ===== SUBMIT ===== */
+  const btn=document.createElement("button");
+  btn.textContent=cfg.buttonText||"Submit";
+  btn.onclick=submitForm;
   form.appendChild(btn);
 
-  /* APPLY BACKGROUND LAST */
   loadBackground(cfg);
 }
 
-/* ================= SUBMIT ================= */
+/* ===== SUBMIT ===== */
 function submitForm(){
-  const data = {};
-  document.querySelectorAll("#dynamicForm input, textarea")
-    .forEach(i => data[i.name || "field"] = i.value);
+  const data={};
+  document.querySelectorAll("#dynamicForm input,textarea")
+    .forEach(i=>data[i.name]=i.value);
 
   db.collection("submissions").add({
     formId,
     data,
-    createdAt: new Date()
+    createdAt:new Date()
   });
 
   alert("Submitted");
   $("dynamicForm").reset();
 }
 </script>
+
 </body>
+</html>
