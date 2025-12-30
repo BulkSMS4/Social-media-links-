@@ -1,80 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dynamic Form</title>
-
-<style>
-body{
-  font-family: Arial, sans-serif;
-  margin:0;
-  padding:20px;
-}
-
-/* ===== BACKGROUND ===== */
-#bgVideoLayer{
-  position:fixed;
-  inset:0;
-  width:100vw;
-  height:100vh;
-  object-fit:cover;
-  z-index:-3;
-  display:none;
-}
-#bgImageLayer{
-  position:fixed;
-  inset:0;
-  background-size:cover;
-  background-position:center;
-  z-index:-2;
-}
-#bgColorLayer{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-}
-
-/* ===== FORM ===== */
-#formContainer{
-  max-width:600px;
-  margin:auto;
-  background:#fff;
-  padding:20px;
-  border-radius:10px;
-  box-shadow:0 0 10px rgba(0,0,0,.1);
-}
-
-.builder-media{text-align:center;margin-bottom:12px;}
-.builder-media img{max-width:140px;margin:6px auto;display:block}
-
-input, textarea, button{
-  width:100%;
-  padding:10px;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-button{
-  background:#1976d2;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-}
-</style>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-</head>
-
 <body>
 
-<!-- BACKGROUND -->
+<!-- BACKGROUND LAYERS -->
 <video id="bgVideoLayer" muted autoplay loop playsinline></video>
 <div id="bgImageLayer"></div>
 <div id="bgColorLayer"></div>
 
+<!-- FORM -->
 <div id="formContainer">
   <div id="imageContainer" class="builder-media"></div>
   <h2 id="formTitle"></h2>
@@ -82,10 +13,15 @@ button{
   <form id="dynamicForm"></form>
 </div>
 
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
 <script>
+/* ================= UTILS ================= */
 const $ = id => document.getElementById(id);
 
-/* FIREBASE */
+/* ================= FIREBASE ================= */
 firebase.initializeApp({
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -93,125 +29,126 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
+/* ================= FORM LOAD ================= */
 const formId = new URLSearchParams(location.search).get("id");
-let formConfig = null;
-
-if(!formId){
+if (!formId) {
   $("formTitle").innerText = "Form ID missing";
+  throw new Error("Missing form ID");
 }
 
-/* LOAD FORM */
-db.collection("forms").doc(formId).get().then(doc=>{
-  if(!doc.exists){
+db.collection("forms").doc(formId).get().then(doc => {
+  if (!doc.exists) {
     $("formTitle").innerText = "Form not found";
     return;
   }
-  formConfig = doc.data();
-  renderForm();
+  renderForm(doc.data());
 });
 
-/* ===== BACKGROUND ===== */
+/* ================= BACKGROUND ================= */
 function loadBackground(cfg){
-  const v = $("bgVideoLayer");
-  const i = $("bgImageLayer");
-  const c = $("bgColorLayer");
+  const video = $("bgVideoLayer");
+  const image = $("bgImageLayer");
+  const color = $("bgColorLayer");
 
-  v.pause(); v.src=""; v.style.display="none";
-  i.style.backgroundImage="";
-  c.style.backgroundColor="";
+  video.pause();
+  video.src = "";
+  video.style.display = "none";
+  image.style.backgroundImage = "";
+  color.style.backgroundColor = "";
 
-  if(cfg.bgColor) c.style.backgroundColor = cfg.bgColor;
+  if (cfg.bgColor)
+    color.style.backgroundColor = cfg.bgColor;
 
-  if(cfg.bgImageURL){
-    i.style.backgroundImage = `url(${cfg.bgImageURL})`;
-    i.style.backgroundSize = cfg.bgSize || "cover";
-  }
+  if (cfg.bgImageURL)
+    image.style.backgroundImage = `url(${cfg.bgImageURL})`;
 
-  if(cfg.bgVideoURL && /\.(mp4|webm)$/i.test(cfg.bgVideoURL)){
-    v.src = cfg.bgVideoURL;
-    v.style.display="block";
-    v.play().catch(()=>{});
+  if (cfg.bgVideoURL) {
+    video.src = cfg.bgVideoURL;
+    video.style.display = "block";
+    video.play().catch(()=>{});
   }
 }
 
-/* ===== RENDER FORM ===== */
-function renderForm(){
+/* ================= RENDER FORM ================= */
+function renderForm(cfg){
   const form = $("dynamicForm");
   const media = $("imageContainer");
 
-  form.innerHTML="";
-  media.innerHTML="";
+  form.innerHTML = "";
+  media.innerHTML = "";
 
-  $("formTitle").innerText = formConfig.title || "";
-  $("formDesc").innerText = formConfig.description || "";
+  $("formTitle").innerText = cfg.title || "";
+  $("formDesc").innerText = cfg.description || "";
 
-  if(formConfig.avatarURL){
-    media.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
-  }
-  if(formConfig.logoURL){
-    media.innerHTML += `<img src="${formConfig.logoURL}">`;
-  }
+  /* AVATAR & LOGO */
+  if (cfg.avatarURL)
+    media.innerHTML += `<img src="${cfg.avatarURL}" style="width:80px;border-radius:50%">`;
 
-  /* GALLERY IMAGES */
-  let imgs = Array.isArray(formConfig.galleryImages)
-    ? formConfig.galleryImages
-    : (formConfig.galleryImages || "").split(",");
+  if (cfg.logoURL)
+    media.innerHTML += `<img src="${cfg.logoURL}">`;
 
-  imgs.forEach(u=>{
-    if(!u.trim()) return;
-    form.innerHTML += `<img src="${u.trim()}" style="width:100%;border-radius:6px;margin:6px 0">`;
+  /* ===== GALLERY IMAGES ===== */
+  (cfg.galleryImages || "").toString().split(",").forEach(url => {
+    url = url.trim();
+    if (!url) return;
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.width = "100%";
+    img.style.borderRadius = "6px";
+    form.appendChild(img);
   });
 
-  /* VIDEOS */
-  let vids = Array.isArray(formConfig.videoLinks)
-    ? formConfig.videoLinks
-    : (formConfig.videoLinks || "").split(",");
+  /* ===== VIDEOS ===== */
+  (cfg.videoLinks || "").toString().split(",").forEach(link => {
+    link = link.trim();
+    if (!link) return;
 
-  vids.forEach(l=>{
-    l=l.trim(); if(!l) return;
     let el;
-    if(/\.(mp4|webm)$/i.test(l)){
-      el=document.createElement("video");
-      el.src=l; el.controls=true;
-    }else if(l.includes("youtube")||l.includes("youtu.be")){
-      let id=l.split("v=")[1]||l.split("youtu.be/")[1];
-      if(id){ id=id.split("&")[0];
-        el=document.createElement("iframe");
-        el.src=`https://www.youtube.com/embed/${id}`;
-        el.height=315;
-        el.allowFullscreen=true;
-      }
+    if (link.endsWith(".mp4")) {
+      el = document.createElement("video");
+      el.src = link;
+      el.controls = true;
+    } else if (link.includes("youtu")) {
+      const id = link.split("v=")[1]?.split("&")[0] || link.split("youtu.be/")[1];
+      if (!id) return;
+      el = document.createElement("iframe");
+      el.src = `https://www.youtube.com/embed/${id}`;
+      el.allowFullscreen = true;
+      el.height = 315;
     }
-    if(el){
-      el.style.width="100%";
-      el.style.margin="6px 0";
+
+    if (el) {
+      el.style.width = "100%";
+      el.style.margin = "10px 0";
       form.appendChild(el);
     }
   });
 
-  /* SUBMIT */
-  const btn=document.createElement("button");
-  btn.textContent=formConfig.buttonText||"Submit";
-  btn.onclick=submitForm;
+  /* SUBMIT BUTTON */
+  const btn = document.createElement("button");
+  btn.textContent = cfg.buttonText || "Submit";
+  btn.type = "button";
+  btn.onclick = submitForm;
   form.appendChild(btn);
 
-  loadBackground(formConfig);
+  /* APPLY BACKGROUND LAST */
+  loadBackground(cfg);
 }
 
-/* SUBMIT */
+/* ================= SUBMIT ================= */
 function submitForm(){
-  const data={};
-  document.querySelectorAll("#dynamicForm input,textarea")
-    .forEach(i=>data[i.name||"field"]=i.value);
+  const data = {};
+  document.querySelectorAll("#dynamicForm input, textarea")
+    .forEach(i => data[i.name || "field"] = i.value);
 
   db.collection("submissions").add({
-    formId,data,createdAt:new Date()
+    formId,
+    data,
+    createdAt: new Date()
   });
 
-  alert("Submitted successfully");
+  alert("Submitted");
   $("dynamicForm").reset();
 }
 </script>
-
 </body>
-</html>
