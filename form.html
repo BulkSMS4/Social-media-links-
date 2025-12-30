@@ -8,16 +8,14 @@
 <style>
 body{
   font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px;
   margin:0;
+  padding:20px;
 }
 
 /* ===== BACKGROUND ===== */
 #bgVideoLayer{
   position:fixed;
-  top:0;
-  left:0;
+  inset:0;
   width:100vw;
   height:100vh;
   object-fit:cover;
@@ -26,21 +24,14 @@ body{
 }
 #bgImageLayer{
   position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
+  inset:0;
   background-size:cover;
   background-position:center;
-  background-repeat:no-repeat;
   z-index:-2;
 }
 #bgColorLayer{
   position:fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
+  inset:0;
   z-index:-1;
 }
 
@@ -79,6 +70,7 @@ button{
 
 <body>
 
+<!-- BACKGROUND -->
 <video id="bgVideoLayer" muted autoplay loop playsinline></video>
 <div id="bgImageLayer"></div>
 <div id="bgColorLayer"></div>
@@ -87,7 +79,6 @@ button{
   <div id="imageContainer" class="builder-media"></div>
   <h2 id="formTitle"></h2>
   <p id="formDesc"></p>
-
   <form id="dynamicForm"></form>
 </div>
 
@@ -121,124 +112,106 @@ db.collection("forms").doc(formId).get().then(doc=>{
 
 /* ===== BACKGROUND ===== */
 function loadBackground(cfg){
-  const bgVideo = $("bgVideoLayer");
-  const bgImage = $("bgImageLayer");
-  const bgColor = $("bgColorLayer");
+  const v = $("bgVideoLayer");
+  const i = $("bgImageLayer");
+  const c = $("bgColorLayer");
 
-  bgVideo.pause();
-  bgVideo.src = "";
-  bgVideo.style.display = "none";
-  bgImage.style.backgroundImage = "";
-  bgColor.style.backgroundColor = "";
+  v.pause(); v.src=""; v.style.display="none";
+  i.style.backgroundImage="";
+  c.style.backgroundColor="";
 
-  if(cfg.bgColor) bgColor.style.backgroundColor = cfg.bgColor;
+  if(cfg.bgColor) c.style.backgroundColor = cfg.bgColor;
 
   if(cfg.bgImageURL){
-    bgImage.style.backgroundImage = `url(${cfg.bgImageURL})`;
-    bgImage.style.backgroundSize = cfg.bgSize || "cover";
+    i.style.backgroundImage = `url(${cfg.bgImageURL})`;
+    i.style.backgroundSize = cfg.bgSize || "cover";
   }
 
-  if(cfg.bgVideoURL && (cfg.bgVideoURL.endsWith(".mp4") || cfg.bgVideoURL.endsWith(".webm"))){
-    bgVideo.src = cfg.bgVideoURL;
-    bgVideo.style.display = "block";
-    bgVideo.play().catch(()=>{});
+  if(cfg.bgVideoURL && /\.(mp4|webm)$/i.test(cfg.bgVideoURL)){
+    v.src = cfg.bgVideoURL;
+    v.style.display="block";
+    v.play().catch(()=>{});
   }
 }
 
-/* ===== RENDER ===== */
+/* ===== RENDER FORM ===== */
 function renderForm(){
+  const form = $("dynamicForm");
+  const media = $("imageContainer");
+
+  form.innerHTML="";
+  media.innerHTML="";
+
   $("formTitle").innerText = formConfig.title || "";
   $("formDesc").innerText = formConfig.description || "";
 
-  const imgWrap = $("imageContainer");
-  const form = $("dynamicForm");
-  imgWrap.innerHTML = "";
-  form.innerHTML = "";
-
-  if(formConfig.avatarURL)
-    imgWrap.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
-
-  if(formConfig.logoURL)
-    imgWrap.innerHTML += `<img src="${formConfig.logoURL}">`;
-
-  /* ===== GALLERY IMAGES (MEDIA) ===== */
-  if(formConfig.galleryImages){
-    const imgs = Array.isArray(formConfig.galleryImages)
-      ? formConfig.galleryImages
-      : formConfig.galleryImages.split(",");
-
-    imgs.forEach(url=>{
-      if(!url.trim()) return;
-      const img = document.createElement("img");
-      img.src = url.trim();
-      img.style.width = "100%";
-      img.style.borderRadius = "6px";
-      img.style.margin = "6px 0";
-      form.appendChild(img);
-    });
+  if(formConfig.avatarURL){
+    media.innerHTML += `<img src="${formConfig.avatarURL}" style="width:90px;border-radius:50%">`;
+  }
+  if(formConfig.logoURL){
+    media.innerHTML += `<img src="${formConfig.logoURL}">`;
   }
 
-  /* ===== VIDEOS (MEDIA) ===== */
-  if(formConfig.videoLinks){
-    const vids = Array.isArray(formConfig.videoLinks)
-      ? formConfig.videoLinks
-      : formConfig.videoLinks.split(",");
+  /* GALLERY IMAGES */
+  let imgs = Array.isArray(formConfig.galleryImages)
+    ? formConfig.galleryImages
+    : (formConfig.galleryImages || "").split(",");
 
-    vids.forEach(link=>{
-      link = link.trim();
-      if(!link) return;
+  imgs.forEach(u=>{
+    if(!u.trim()) return;
+    form.innerHTML += `<img src="${u.trim()}" style="width:100%;border-radius:6px;margin:6px 0">`;
+  });
 
-      let el;
-      if(link.endsWith(".mp4") || link.endsWith(".webm")){
-        el = document.createElement("video");
-        el.src = link;
-        el.controls = true;
-      } else {
-        const id = link.includes("youtu")
-          ? link.split("v=")[1]?.split("&")[0] || link.split("youtu.be/")[1]
-          : null;
-        if(id){
-          el = document.createElement("iframe");
-          el.src = `https://www.youtube.com/embed/${id}`;
-          el.height = 315;
-          el.allowFullscreen = true;
-        }
+  /* VIDEOS */
+  let vids = Array.isArray(formConfig.videoLinks)
+    ? formConfig.videoLinks
+    : (formConfig.videoLinks || "").split(",");
+
+  vids.forEach(l=>{
+    l=l.trim(); if(!l) return;
+    let el;
+    if(/\.(mp4|webm)$/i.test(l)){
+      el=document.createElement("video");
+      el.src=l; el.controls=true;
+    }else if(l.includes("youtube")||l.includes("youtu.be")){
+      let id=l.split("v=")[1]||l.split("youtu.be/")[1];
+      if(id){ id=id.split("&")[0];
+        el=document.createElement("iframe");
+        el.src=`https://www.youtube.com/embed/${id}`;
+        el.height=315;
+        el.allowFullscreen=true;
       }
-      if(el){
-        el.style.width="100%";
-        el.style.margin="6px 0";
-        form.appendChild(el);
-      }
-    });
-  }
+    }
+    if(el){
+      el.style.width="100%";
+      el.style.margin="6px 0";
+      form.appendChild(el);
+    }
+  });
 
-  /* ===== SUBMIT BUTTON ===== */
-  if(formConfig.buttonText){
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = formConfig.buttonText;
-    btn.onclick = submitForm;
-    form.appendChild(btn);
-  }
+  /* SUBMIT */
+  const btn=document.createElement("button");
+  btn.textContent=formConfig.buttonText||"Submit";
+  btn.onclick=submitForm;
+  form.appendChild(btn);
 
   loadBackground(formConfig);
 }
 
-/* ===== SUBMIT ===== */
+/* SUBMIT */
 function submitForm(){
-  const data = {};
-  document.querySelectorAll("#dynamicForm input, textarea")
-    .forEach(i=> data[i.name||"field"]=i.value);
+  const data={};
+  document.querySelectorAll("#dynamicForm input,textarea")
+    .forEach(i=>data[i.name||"field"]=i.value);
 
   db.collection("submissions").add({
-    formId,
-    data,
-    createdAt: new Date()
+    formId,data,createdAt:new Date()
   });
 
   alert("Submitted successfully");
   $("dynamicForm").reset();
 }
 </script>
+
 </body>
 </html>
