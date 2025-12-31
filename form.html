@@ -1,228 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Dynamic Form</title>
 <style>
-body{margin:0;padding:0;font-family:Arial,sans-serif;}
-#formContainer{max-width:650px;margin:30px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,.1);position:relative;}
-img, video, iframe{max-width:100%;border-radius:8px;margin:6px 0;}
-input, textarea, select{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc;box-sizing:border-box;}
-button{cursor:pointer;color:#fff;border:none;padding:10px;border-radius:8px;}
-.draggableBtn{position:absolute;cursor:move;}
+  body { margin:0; font-family:Arial,sans-serif; overflow-x:hidden; }
+  #dynamicFormContainer { position: relative; width: 100%; min-height: 100vh; overflow-x:hidden; }
+  #bgVideoLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-2; object-fit:cover; }
+  #bgImageLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-3; background-size:cover; background-repeat:no-repeat; background-position:center; }
+  #bgColorLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-4; }
+  #dynamicForm { position:relative; z-index:1; width:100%; max-width:1200px; margin:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+  #dynamicForm img, #dynamicForm video, #dynamicForm iframe { border-radius:8px; max-width:100%; display:block; margin:6px 0; }
+  #dynamicForm h2, #dynamicForm p { text-align:center; margin:6px 0; }
+  input, textarea, select, button { font-size:16px; padding:10px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
+  button { cursor:pointer; border:none; color:#fff; }
+  #generatedLink { color: #007bff; font-weight: bold; margin-top:12px; }
+  .draggable { position:absolute; cursor:move; }
+  .scrollable { max-height:80vh; overflow-y:auto; }
 </style>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
 
-<div id="formContainer">
-  <div id="imageContainer"></div>
-  <h2 id="formTitle"></h2>
-  <p id="formDesc"></p>
-  <div id="galleryContainer"></div>
-  <div id="videoContainer"></div>
-  <p id="warningMsg" style="color:#b71c1c;text-align:center;"></p>
-  <form id="dynamicForm"></form>
-  <footer id="formFooter" style="text-align:center;margin-top:10px;font-size:12px;"></footer>
+<div id="dynamicFormContainer">
+  <div id="bgColorLayer"></div>
+  <div id="bgImageLayer"></div>
+  <video id="bgVideoLayer" autoplay muted loop playsinline></video>
+  <form id="dynamicForm" class="scrollable"></form>
 </div>
+
+<div id="generatedLinkContainer" style="text-align:center; margin:10px 0;">
+  <span id="generatedLink"></span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <script>
 const $ = id => document.getElementById(id);
 
-/* ===== CONFIG ===== */
-const CLOUDINARY_UPLOAD_PRESET = "form_upload_preset";
-const CLOUDINARY_CLOUD_NAME = "dymwisuau";
-const TELEGRAM_BOT = "YOUR_TELEGRAM_BOT_TOKEN";
-const TELEGRAM_CHAT_ID = "YOUR_CHAT_ID";
-const ALERT_EMAIL = "youremail@example.com";
-
-/* ===== FIREBASE INIT ===== */
-firebase.initializeApp({
+/* ===== FIREBASE CONFIG ===== */
+const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
   projectId: "usahackersland"
-});
+};
+firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+/* ===== GET FORM ID ===== */
 const formId = new URLSearchParams(location.search).get("id");
-if(!formId){ $("formTitle").innerText="Form ID missing"; }
+let formConfig = null;
 
-let formConfig=null;
-let draggingBtn=null, dx=0, dy=0;
+if(!formId){
+  alert("Form ID missing");
+}
 
-/* ===== LOAD FORM ===== */
-db.collection("forms").doc(formId).get().then(doc=>{
-  if(!doc.exists){ $("formTitle").innerText="Form not found"; return; }
-  formConfig=doc.data();
+/* ===== CLOUDINARY CONFIG ===== */
+const CLOUDINARY_UPLOAD_PRESET = "form_upload_preset";
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dymwisuau/upload";
+
+/* ===== LOAD FORM CONFIG ===== */
+db.collection("forms").doc(formId).get().then(doc => {
+  if(!doc.exists){
+    alert("Form not found");
+    return;
+  }
+  formConfig = doc.data();
   renderForm();
 });
 
-/* ===== BACKGROUND ===== */
-function setBackground(cfg){
-  document.body.style.backgroundColor = cfg.bgColor || "#fff";
-
-  if(cfg.bgImageURL) document.body.style.backgroundImage = `url(${cfg.bgImageURL})`;
-  if(cfg.bgVideoURL){
-    if(cfg.bgVideoURL.includes("youtube.com")||cfg.bgVideoURL.includes("youtu.be")){
-      const id = cfg.bgVideoURL.split("v=")[1] || cfg.bgVideoURL.split("youtu.be/")[1]; 
-      const iframe=document.createElement("iframe");
-      iframe.src=`https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0`;
-      iframe.style.position="fixed"; iframe.style.top=0; iframe.style.left=0;
-      iframe.style.width="100%"; iframe.style.height="100%"; iframe.style.zIndex=-1; iframe.style.pointerEvents="none";
-      document.body.appendChild(iframe);
-    } else {
-      const video=document.createElement("video");
-      video.src=cfg.bgVideoURL; video.autoplay=true; video.loop=true; video.muted=true; video.playsInline=true;
-      video.style.position="fixed"; video.style.top=0; video.style.left=0; video.style.width="100%"; video.style.height="100%"; video.style.objectFit="cover"; video.style.zIndex=-1;
-      document.body.appendChild(video);
-    }
-  }
-}
+/* ===== DRAGGING LOGIC FOR LIVE PREVIEW ONLY ===== */
+let dragging = null, offsetX=0, offsetY=0;
+document.addEventListener("mousemove", e => {
+  if(!dragging) return;
+  dragging.style.left = (e.clientX - offsetX) + "px";
+  dragging.style.top = (e.clientY - offsetY) + "px";
+});
+document.addEventListener("mouseup", () => dragging = null);
 
 /* ===== RENDER FORM ===== */
 function renderForm(){
   const form = $("dynamicForm");
-  const imgContainer = $("imageContainer");
-  const galleryContainer = $("galleryContainer");
-  const videoContainer = $("videoContainer");
+  form.innerHTML = "";
 
-  $("formTitle").innerText = formConfig.title || "";
-  $("formDesc").innerText = formConfig.subtitle || "";
-  setBackground(formConfig);
+  // Background
+  if(formConfig.bgColor) $("bgColorLayer").style.backgroundColor = formConfig.bgColor;
+  if(formConfig.bgImageURL) $("bgImageLayer").style.backgroundImage = `url(${formConfig.bgImageURL})`;
+  if(formConfig.bgVideoURL){
+    const v = $("bgVideoLayer");
+    v.src = formConfig.bgVideoURL;
+    v.autoplay = true;
+    v.loop = true;
+    v.muted = true;
+    v.playsInline = true;
+    v.style.display="block";
+  }
 
-  // Avatar / Logo / Banner
-  const addImg = (url, width, round=false) => {
-    if(!url) return;
-    const img = document.createElement("img"); img.src=url; img.style.width=width;
-    if(round) img.style.borderRadius="50%"; imgContainer.appendChild(img);
+  // Avatar, Logo, Banner
+  const addImage = (url, width, round=false) => {
+    if(!url) return null;
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.width = width;
+    if(round) img.style.borderRadius="50%";
+    img.classList.add("draggable");
+    form.appendChild(img);
+    return img;
   };
-  addImg(formConfig.avatarURL,"90px",true);
-  addImg(formConfig.logoURL,"140px");
-  addImg(formConfig.bannerURL,"100%");
+  const avatar = addImage(formConfig.avatarURL, "90px", true);
+  const logo = addImage(formConfig.logoURL, "140px");
+  const banner = addImage(formConfig.bannerURL, "100%");
 
-  // Gallery
-  if(Array.isArray(formConfig.galleryItems)){
-    galleryContainer.innerHTML="";
-    const layout = formConfig.galleryItemsLayout || "list";
-    const wrapper = document.createElement("div");
-    if(layout==="grid") wrapper.style.display="grid"; wrapper.style.gridTemplateColumns="repeat(auto-fit,minmax(120px,1fr))"; wrapper.style.gap="10px";
-    if(layout==="large-grid") wrapper.style.display="grid"; wrapper.style.gridTemplateColumns="repeat(auto-fit,minmax(200px,1fr))"; wrapper.style.gap="12px";
-    if(layout==="mix") wrapper.style.display="grid"; wrapper.style.gridTemplateColumns="repeat(auto-fit,minmax(120px,1fr))"; wrapper.style.gap="12px";
-    if(layout==="list") wrapper.style.display="flex"; wrapper.style.flexDirection="column"; wrapper.style.gap="12px";
+  // Title / Subtitle / Description
+  const titleEl = document.createElement("h2");
+  titleEl.textContent = formConfig.title || "";
+  titleEl.style.color = formConfig.titleColor || "#000";
+  titleEl.classList.add("draggable");
+  form.appendChild(titleEl);
 
-    formConfig.galleryItems.forEach(item=>{
-      const div=document.createElement("div"); div.style.position="relative"; div.style.marginBottom="12px";
-      const img=document.createElement("img"); img.src=item.img; div.appendChild(img);
-      if(item.link && item.mask){
-        const a=document.createElement("a"); a.href=item.link; a.textContent=item.mask; a.target="_blank"; a.style.display="block"; a.style.color="#1976d2"; div.appendChild(a);
-      }
-      if(item.desc){ const p=document.createElement("p"); p.textContent=item.desc; div.appendChild(p);}
-      wrapper.appendChild(div);
+  if(formConfig.subtitle){
+    const subEl = document.createElement("p");
+    subEl.textContent = formConfig.subtitle;
+    subEl.style.color = formConfig.subtitleColor || "#555";
+    subEl.classList.add("draggable");
+    form.appendChild(subEl);
+  }
+
+  if(formConfig.description){
+    const descEl = document.createElement("p");
+    descEl.textContent = formConfig.description;
+    descEl.classList.add("draggable");
+    form.appendChild(descEl);
+  }
+
+  // Gallery Images
+  if(Array.isArray(formConfig.galleryImages)){
+    formConfig.galleryImages.forEach(url => {
+      if(!url) return;
+      const img = document.createElement("img");
+      img.src = url;
+      img.classList.add("draggable");
+      form.appendChild(img);
     });
-    galleryContainer.appendChild(wrapper);
+  }
+
+  // Gallery Items (image + masked link + description)
+  if(Array.isArray(formConfig.galleryItems)){
+    formConfig.galleryItems.forEach(item => {
+      const wrapper = document.createElement("div");
+      wrapper.style.margin="8px 0";
+      wrapper.classList.add("draggable");
+
+      const img = document.createElement("img");
+      img.src = item.img;
+      wrapper.appendChild(img);
+
+      if(item.link && item.mask){
+        const a = document.createElement("a");
+        a.href=item.link; a.target="_blank"; a.textContent=item.mask;
+        a.style.display="block"; a.style.color="#1976d2";
+        wrapper.appendChild(a);
+      }
+
+      if(item.desc){
+        const p = document.createElement("p");
+        p.textContent=item.desc;
+        wrapper.appendChild(p);
+      }
+      form.appendChild(wrapper);
+    });
   }
 
   // Videos
-  if(formConfig.videoLinks){
-    videoContainer.innerHTML="";
-    formConfig.videoLinks.forEach(link=>{
+  if(Array.isArray(formConfig.videoLinks)){
+    formConfig.videoLinks.forEach(link => {
+      if(!link) return;
       let el;
-      if(link.endsWith(".mp4")||link.endsWith(".webm")){
-        el=document.createElement("video"); el.src=link; el.controls=true; el.style.width="100%"; videoContainer.appendChild(el);
-      } else if(link.includes("youtube.com")||link.includes("youtu.be")){
-        let id = link.includes("youtu.be")? link.split("youtu.be/")[1] : link.split("v=")[1];
+      if(/\.(mp4|webm)$/i.test(link)){
+        el = document.createElement("video");
+        el.src=link;
+        el.controls=true;
+        el.loop=false;
+      } else if(link.includes("youtube.com") || link.includes("youtu.be")){
+        let id = link.includes("youtu.be") ? link.split("youtu.be/")[1] : link.split("v=")[1];
         if(id.includes("&")) id=id.split("&")[0];
-        el=document.createElement("iframe"); el.src=`https://www.youtube.com/embed/${id}?autoplay=0&controls=1&rel=0`; el.width="100%"; el.height="315"; el.frameBorder="0"; el.allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"; el.allowFullscreen=true;
-        videoContainer.appendChild(el);
+        el=document.createElement("iframe");
+        el.src=`https://www.youtube.com/embed/${id}`;
+        el.width="100%"; el.height="315"; el.allowFullscreen=true;
+      }
+      if(el){
+        el.classList.add("draggable");
+        form.appendChild(el);
       }
     });
   }
 
-  // Warning
-  if(formConfig.enableWarning){
-    $("warningMsg").innerText = formConfig.warning;
-    $("warningMsg").style.textAlign = formConfig.warningPosition || "center";
-  }
-
   // Form Fields
-  if(formConfig.addAuth){
-    const user=document.createElement("input"); user.placeholder=formConfig.usernamePlaceholder; form.appendChild(user);
-    const pass=document.createElement("input"); pass.type="password"; pass.placeholder=formConfig.passwordPlaceholder; form.appendChild(pass);
-  }
-  if(Array.isArray(formConfig.extraFields)) formConfig.extraFields.forEach(f=>{const i=document.createElement("input"); i.placeholder=f; form.appendChild(i);});
-  if(Array.isArray(formConfig.customFields)) formConfig.customFields.forEach(f=>{const i=document.createElement("input"); i.type=f.type; i.placeholder=f.label; form.appendChild(i);});
+  if(Array.isArray(formConfig.fields)){
+    formConfig.fields.forEach(field => {
+      const wrap = document.createElement("div");
+      wrap.style.margin="8px 0";
+      wrap.classList.add("draggable");
 
-  // ID uploads
-  if(formConfig.idFrontChk){
-    const lbl=document.createElement("label"); lbl.textContent=formConfig.txtIdFront||"ID Front"; form.appendChild(lbl);
-    const inp=document.createElement("input"); inp.type="file"; inp.addEventListener("change",e=>uploadFile(e,"front")); form.appendChild(inp);
-  }
-  if(formConfig.idBackChk){
-    const lbl=document.createElement("label"); lbl.textContent=formConfig.txtIdBack||"ID Back"; form.appendChild(lbl);
-    const inp=document.createElement("input"); inp.type="file"; inp.addEventListener("change",e=>uploadFile(e,"back")); form.appendChild(inp);
+      if(field.label){
+        const label = document.createElement("label");
+        label.textContent = field.label;
+        wrap.appendChild(label);
+      }
+
+      let input;
+      if(field.type==="textarea") input=document.createElement("textarea");
+      else if(field.type==="file") input=document.createElement("input",{type:"file"});
+      else input=document.createElement("input");
+
+      input.type = field.type==="file"?"file":field.type;
+      input.name = field.name;
+      input.placeholder = field.placeholder||"";
+      wrap.appendChild(input);
+
+      // Cloudinary upload for file inputs
+      if(field.type==="file"){
+        input.addEventListener("change", async e=>{
+          const file = e.target.files[0];
+          if(!file) return;
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+          const res = await axios.post(CLOUDINARY_URL, formData);
+          e.target.dataset.url = res.data.secure_url;
+          alert("File uploaded!");
+        });
+      }
+
+      form.appendChild(wrap);
+    });
   }
 
   // Buttons
-  if(formConfig.showMainBtn){
-    const btn=document.createElement("button"); btn.type="button"; btn.textContent=formConfig.buttonText||"Submit"; btn.style.background=formConfig.btnColor||"#1976d2"; btn.onclick=submitForm; form.appendChild(btn);
-  }
-
-  // Extra draggable buttons
-  if(formConfig.extraButtons){
-    formConfig.extraButtons.forEach(b=>{
-      if(!b.show) return;
-      const btn=document.createElement("button"); btn.className="draggableBtn"; btn.textContent=b.text; btn.style.background=b.color; btn.style.width=b.size+"px"; btn.style.height=b.size+"px"; btn.style.left=b.x+"%"; btn.style.top=b.y+"%";
-      btn.onmousedown=e=>{draggingBtn=b; dx=e.offsetX; dy=e.offsetY;};
-      btn.onclick=()=>window.open(b.link,"_blank"); document.body.appendChild(btn);
-    });
-  }
+  const btn = document.createElement("button");
+  btn.textContent = formConfig.buttonText || "Submit";
+  btn.style.background=formConfig.btnColor||"#1976d2";
+  btn.addEventListener("click", e=>{ e.preventDefault(); submitForm(); });
+  form.appendChild(btn);
 
   // Footer
-  $("formFooter").innerText = formConfig.footerText||"";
+  if(formConfig.footerText){
+    const footer = document.createElement("footer");
+    footer.textContent=formConfig.footerText;
+    footer.style.textAlign="center";
+    footer.classList.add("draggable");
+    form.appendChild(footer);
+  }
 
-  // Dragging
-  document.onmousemove = e => {
-    if(!draggingBtn) return;
-    draggingBtn.x = ((e.clientX - dx) / window.innerWidth) * 100;
-    draggingBtn.y = ((e.clientY - dy) / window.innerHeight) * 100;
-    document.querySelectorAll(".draggableBtn").forEach(btn=>{
-      btn.style.left = draggingBtn.x+"%"; btn.style.top = draggingBtn.y+"%";
-    });
-  };
-  document.onmouseup = ()=>draggingBtn=null;
-}
-
-/* ===== CLOUDINARY UPLOAD ===== */
-async function uploadFile(e,type){
-  const file=e.target.files[0]; if(!file) return;
-  const fd=new FormData(); fd.append("file",file); fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
-  try{
-    const res=await axios.post(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,fd);
-    e.target.dataset.cloudinaryUrl=res.data.secure_url;
-    alert(type+" uploaded successfully!");
-  }catch(err){ console.error(err); alert("Upload failed"); }
-}
-
-/* ===== SUBMIT ===== */
-async function submitForm(){
-  const data={};
-  document.querySelectorAll("#dynamicForm input,textarea").forEach(i=>{
-    if(i.type==="file") data[i.previousSibling?.textContent||i.name]=i.dataset.cloudinaryUrl||""; 
-    else data[i.placeholder||i.name]=i.value;
+  // Make all draggable elements draggable in preview only
+  document.querySelectorAll(".draggable").forEach(el=>{
+    el.onmousedown = e=>{
+      dragging=el;
+      offsetX=e.offsetX;
+      offsetY=e.offsetY;
+    };
   });
-  await db.collection("submissions").add({ formId, data, createdAt:new Date() });
+}
 
-  // Telegram
-  try{ await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT}/sendMessage`,{ chat_id: TELEGRAM_CHAT_ID, text:`New submission for form ${formId}: ${JSON.stringify(data)}` }); }catch(e){console.error(e);}
+/* ===== SUBMIT FORM ===== */
+async function submitForm(){
+  const data = {};
+  document.querySelectorAll("#dynamicForm input, textarea").forEach(i=>{
+    if(i.name) data[i.name]=i.value||i.dataset.url||"";
+  });
 
-  // Email
-  try{ await axios.post("/send-email",{ to:ALERT_EMAIL, subject:"New Form Submission", body:JSON.stringify(data) }); }catch(e){console.error(e);}
-
-  alert("Submitted successfully!");
-  $("dynamicForm").reset();
+  try{
+    await db.collection("submissions").add({ formId, data, createdAt:new Date() });
+    alert("Submitted successfully!");
+  }catch(err){ console.error(err); alert("Submission failed"); }
 }
 </script>
 </body>
