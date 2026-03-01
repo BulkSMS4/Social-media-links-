@@ -6,6 +6,153 @@
 <title>🎨 COMPLETE FINAL</title>
 
 <style>
+    /* =========================
+   Facebook Animations
+========================= */
+@keyframes fbFadeIn {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@keyframes fbPop {
+  0% { transform:scale(.9); opacity:0; }
+  100% { transform:scale(1); opacity:1; }
+}
+
+@keyframes fbPulse {
+  0% { transform:scale(1); }
+  50% { transform:scale(1.05); }
+  100% { transform:scale(1); }
+}
+
+.fb-card-animate {
+  animation: fbFadeIn .6s ease;
+}
+
+.fb-post-animate {
+  animation: fbPop .5s ease;
+}
+
+/* ===============================
+   TITLE ANIMATIONS (COMPLETE)
+================================ */
+
+/* Fade */
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slide Up */
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Slide Down */
+@keyframes slideDown {
+  from { transform: translateY(-40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Slide Left */
+@keyframes slideLeft {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Slide Right */
+@keyframes slideRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Zoom In */
+@keyframes zoomIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Zoom Out */
+@keyframes zoomOut {
+  from { transform: scale(1.4); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Rotate */
+@keyframes rotate {
+  from { transform: rotate(-180deg); opacity: 0; }
+  to   { transform: rotate(0deg); opacity: 1; }
+}
+
+/* Rotate In */
+@keyframes rotateIn {
+  from { transform: rotate(180deg) scale(0.5); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+/* Bounce */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* Pulse */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+
+/* Flip X */
+@keyframes flipX {
+  from { transform: rotateX(90deg); opacity: 0; }
+  to   { transform: rotateX(0deg); opacity: 1; }
+}
+
+/* Flip Y */
+@keyframes flipY {
+  from { transform: rotateY(90deg); opacity: 0; }
+  to   { transform: rotateY(0deg); opacity: 1; }
+}
+
+/* Fade Left */
+@keyframes fadeLeft {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Fade Right */
+@keyframes fadeRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Skew */
+@keyframes skew {
+  from { transform: skewX(20deg); opacity: 0; }
+  to   { transform: skewX(0deg); opacity: 1; }
+}
+
+/* Drop In */
+@keyframes dropIn {
+  from { transform: translateY(-80px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Slide + Rotate */
+@keyframes slideRotate {
+  from { transform: translateX(40px) rotate(90deg); opacity: 0; }
+  to   { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+
 /* ===============================
    PREVIEW
    =============================== */
@@ -118,12 +265,227 @@
 #generateFormButton:hover {
   background-color: #115293; /* Darker blue on hover */
 }
+
+/* ===== TEXT GRADIENT SUPPORT ===== */
+.gradient-text {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 5px #fff; }
+  50% { text-shadow: 0 0 20px #0ff; }
+  100% { text-shadow: 0 0 5px #fff; }
+}
+
+@keyframes flashBlink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes waveMove {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+.preview-box {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f9f9f9;
+  margin-top: 10px;
+}
+
+/* SAMPLE STYLE CLASSES */
+
+.style1 { text-decoration: underline; }
+.style2 { font-weight: bold; }
+.style3 { font-style: italic; }
+.style4 { text-transform: uppercase; }
+.style5 { letter-spacing: 4px; }
+
+.style6 { text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.style8 { text-shadow: 0 0 10px #00f; }
+.style9 { text-shadow: 0 0 10px #ff00ff; }
+
+.style21 {
+  background: linear-gradient(90deg,#00f,#0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== BUTTON EFFECTS ===== */
+
+.glow-blue { box-shadow:0 0 15px #2196f3; }
+.glow-red { box-shadow:0 0 15px #f44336; }
+.glow-green { box-shadow:0 0 15px #4caf50; }
+.neon { box-shadow:0 0 5px #fff,0 0 20px #0ff; }
+.soft-shadow { box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+.hard-shadow { box-shadow:4px 4px 0 #000; }
+.outer-ring { box-shadow:0 0 0 4px rgba(0,0,0,0.2); }
+.inner-glow { box-shadow: inset 0 0 15px rgba(255,255,255,0.5); }
+.floating { box-shadow:0 10px 25px rgba(0,0,0,0.3); }
+.glass { backdrop-filter: blur(10px); background:rgba(255,255,255,0.2); }
+
+.rainbow-glow {
+  box-shadow:0 0 10px red,0 0 20px orange,0 0 30px yellow;
+}
+
+.cyber-glow { box-shadow:0 0 20px #00f0ff; }
+.fire-glow { box-shadow:0 0 20px #ff5722; }
+.ice-glow { box-shadow:0 0 20px #00e5ff; }
+
+.shadow-left { box-shadow:-6px 6px 12px rgba(0,0,0,0.3); }
+.shadow-right { box-shadow:6px 6px 12px rgba(0,0,0,0.3); }
+.shadow-top { box-shadow:0 -6px 12px rgba(0,0,0,0.3); }
+.shadow-bottom { box-shadow:0 6px 12px rgba(0,0,0,0.3); }
+
+.scale-hover:hover { transform:scale(1.1); }
+.spin-hover:hover { transform:rotate(5deg); }
+.bounce-hover:hover { transform:translateY(-6px); }
+.shake-hover:hover { animation:shake .3s; }
+.flash-hover:hover { opacity:.7; }
+
+@keyframes shake {
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px);}
+  75%{transform:translateX(4px);}
+}
+
+/* ===== SHAPES ===== */
+
+.square { border-radius:0; }
+.sharp { border-radius:2px; }
+.circle { border-radius:50%; }
+.semi-round { border-radius:20px 0 20px 0; }
+.top-round { border-radius:20px 20px 0 0; }
+.bottom-round { border-radius:0 0 20px 20px; }
+.left-round { border-radius:20px 0 0 20px; }
+.right-round { border-radius:0 20px 20px 0; }
+.blob { border-radius:40% 60% 60% 40%; }
+.diamond { transform:rotate(45deg); }
+.skew { transform:skewX(-15deg); }
+.parallelogram { transform:skewX(-20deg); }
+.cut-corner { clip-path:polygon(10% 0,100% 0,100% 90%,90% 100%,0 100%,0 10%); }
+.double-border { border:4px double #000; }
+.thick-border { border:4px solid #000; }
+.outline { background:transparent !important; border:2px solid currentColor; }
+.ghost { background:transparent !important; border:2px solid #fff; color:#fff; }
+.neumorphic {
+  box-shadow:6px 6px 12px #bbb,-6px -6px 12px #fff;
+}
+.3d { box-shadow:0 6px 0 #0d47a1; }
+
+/* ===============================
+   🚀 ULTRA PRO BUTTON EFFECTS
+================================ */
+
+/* Animated Gradient Border */
+.gradient-border {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg,#ff00cc,#3333ff,#00ffcc);
+  background-size: 300% 300%;
+  animation: borderMove 4s linear infinite;
+  z-index: -1;
+}
+
+@keyframes borderMove {
+  0% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+  100% { background-position:0% 50%; }
+}
+
+/* Glow Pulse */
+.glow-pulse {
+  animation: glowPulseBtn 1.5s infinite;
+}
+
+@keyframes glowPulseBtn {
+  0% { box-shadow:0 0 5px #2196f3; }
+  50% { box-shadow:0 0 25px #2196f3; }
+  100% { box-shadow:0 0 5px #2196f3; }
+}
+
+/* 3D Press */
+.press-3d {
+  box-shadow: 0 6px 0 #0d47a1;
+  transition: all .1s ease;
+}
+.press-3d:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #0d47a1;
+}
+
+/* Ripple Effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple span {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: rippleAnim .6s linear;
+  background: rgba(255,255,255,0.7);
+}
+
+@keyframes rippleAnim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
-</head>
+
+<script>
+// JavaScript to handle the custom image uploads
+document.addEventListener("DOMContentLoaded", function () {
+  const fbAdImage = document.getElementById("fbAdImage");
+  const fbSocialPreviewImage = document.getElementById("fbSocialPreviewImage");
+
+  // Ad Image Upload
+  fbAdImage.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        console.log("Ad Image uploaded:", e.target.result);
+        // You can add logic to display the uploaded image in a preview or use it in the ad settings.
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Social Preview Image Upload
+  fbSocialPreviewImage.addEventListener("change", function () {
+    const file = this.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        console.log("Social Preview Image uploaded:", e.target.result);
+        // Add logic for handling the social preview image here as needed.
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+});
+</script>
 
 <body>
 <div class="wrap">
@@ -145,38 +507,347 @@
 
   <label>OG Image URL</label>
   <input id="ogImage" value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+  <label>Upload OG Image</label>
+<input type="file" id="ogImageFile" accept="image/*">
 </div>
 
 <!-- BRANDING -->
 <div class="section">
   <h3>🖼 Branding</h3>
+
+  <!-- Avatar -->
   <label>Avatar Image URL</label>
-  <input id="avatarURL"value="https://i.postimg.cc/59qvyb1Y/Screenshot-20251123-191324-2-removebg-preview.png">
+  <input id="avatarURL"
+    value="https://i.postimg.cc/59qvyb1Y/Screenshot-20251123-191324-2-removebg-preview.png">
 
+  <label>Upload Avatar Image</label>
+  <input type="file" id="avatarFile" accept="image/*">
+
+
+  <!-- Logo -->
   <label>Logo Image URL</label>
-  <input id="logoURL"value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+  <input id="logoURL"
+    value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
 
+  <label>Upload Logo Image</label>
+  <input type="file" id="logoFile" accept="image/*">
+
+
+  <!-- Banner -->
   <label>Banner Image URL</label>
-  <input id="bannerURL"value="https://i.postimg.cc/CxfCxLzw/IMG_20251112_WA0002_2.jpg">
+  <input id="bannerURL"
+    value="https://i.postimg.cc/CxfCxLzw/IMG_20251112_WA0002_2.jpg">
+
+  <label>Upload Banner Image</label>
+  <input type="file" id="bannerFile" accept="image/*">
 </div>
 
 <!-- TEXT -->
 <div class="section">
   <h3>✍️ Page Content</h3>
+
   <label>Page Title</label>
-  <input id="title"value="Welcome to Your Secure Page">
+  <input id="title" value="Welcome to Your Secure Page">
 
   <label>Title Color</label>
-  <input type="color" id="titleColor">
+  <input type="color" id="titleColor" value="#000000">
+  
+  <label>Title Position</label>
+  <select id="titlePosition">
+  <option value="center">Center</option>
+  <option value="left">Left</option>
+  <option value="right">Right</option>
+</select>
 
-  <label>Subtitle</label>
-  <input id="subtitle" value="Please fill in your details below">
+  <hr>
 
-  <label>Subtitle Color</label>
-  <input type="color" id="subtitleColor">
+  <label>Extra Title Styles</label>
+<select id="titleStyleSelect" multiple size="12">
 
-  <label>Description</label>
-  <textarea id="description">
+<option value="style1">Underline Classic</option>
+<option value="style2">Bold Strong</option>
+<option value="style3">Italic Elegant</option>
+<option value="style4">Uppercase Power</option>
+<option value="style5">Letter Spaced</option>
+
+<option value="style6">Soft Shadow</option>
+<option value="style7">Deep Shadow</option>
+<option value="style8">Neon Blue Glow</option>
+<option value="style9">Neon Pink Glow</option>
+<option value="style10">Neon Green Glow</option>
+
+<option value="style11">Luxury Gold</option>
+<option value="style12">Silver Metallic</option>
+<option value="style13">Rose Gold</option>
+<option value="style14">Platinum Shine</option>
+<option value="style15">Chrome Effect</option>
+
+<option value="style16">Glass Effect</option>
+<option value="style17">Frosted Glass</option>
+<option value="style18">Transparent Outline</option>
+<option value="style19">Border Box</option>
+<option value="style20">Pill Shape</option>
+
+<option value="style21">Gradient Ocean</option>
+<option value="style22">Gradient Fire</option>
+<option value="style23">Gradient Sunset</option>
+<option value="style24">Gradient Purple Sky</option>
+<option value="style25">Gradient Cyber</option>
+
+<option value="style26">3D Depth</option>
+<option value="style27">3D Pop</option>
+<option value="style28">3D Emboss</option>
+<option value="style29">3D Deboss</option>
+<option value="style30">Hard Outline</option>
+
+<option value="style31">Double Outline</option>
+<option value="style32">Dotted Border</option>
+<option value="style33">Dashed Border</option>
+<option value="style34">Thick Frame</option>
+<option value="style35">Minimal Clean</option>
+
+<option value="style36">Cyberpunk Pink</option>
+<option value="style37">Hacker Green</option>
+<option value="style38">Matrix Style</option>
+<option value="style39">Retro 80s</option>
+<option value="style40">Vaporwave</option>
+
+<option value="style41">Royal Blue</option>
+<option value="style42">Royal Purple</option>
+<option value="style43">Luxury Black</option>
+<option value="style44">Luxury White</option>
+<option value="style45">Champagne Gold</option>
+
+<option value="style46">Soft Glow White</option>
+<option value="style47">Blue Ice</option>
+<option value="style48">Fire Red</option>
+<option value="style49">Toxic Green</option>
+<option value="style50">Dark Mode Glow</option>
+
+<option value="style51">Heavy Weight</option>
+<option value="style52">Ultra Light</option>
+<option value="style53">Wide Text</option>
+<option value="style54">Tall Text</option>
+<option value="style55">Compact Text</option>
+
+<option value="style56">Highlight Yellow</option>
+<option value="style57">Highlight Blue</option>
+<option value="style58">Highlight Pink</option>
+<option value="style59">Highlight Green</option>
+<option value="style60">Highlight Purple</option>
+
+<option value="style61">Shadow Left</option>
+<option value="style62">Shadow Right</option>
+<option value="style63">Shadow Top</option>
+<option value="style64">Shadow Bottom</option>
+<option value="style65">Floating Shadow</option>
+
+<option value="style66">Glitch Effect</option>
+<option value="style67">Blur Text</option>
+<option value="style68">Blur + Glow</option>
+<option value="style69">Outline Only</option>
+<option value="style70">Inner Shadow</option>
+
+<option value="style71">Soft Rounded</option>
+<option value="style72">Strong Rounded</option>
+<option value="style73">Card Style</option>
+<option value="style74">Banner Style</option>
+<option value="style75">Badge Style</option>
+
+<option value="style76">Premium Gold Glow</option>
+<option value="style77">Diamond Shine</option>
+<option value="style78">Emerald Luxury</option>
+<option value="style79">Ruby Luxury</option>
+<option value="style80">Sapphire Luxury</option>
+
+<option value="style81">Instagram Gradient</option>
+<option value="style82">YouTube Red</option>
+<option value="style83">Facebook Blue</option>
+<option value="style84">TikTok Neon</option>
+<option value="style85">LinkedIn Blue</option>
+
+<option value="style86">Matte Black</option>
+<option value="style87">Soft Cream</option>
+<option value="style88">Cool Gray</option>
+<option value="style89">Warm Beige</option>
+<option value="style90">Snow White</option>
+
+<option value="style91">Animated Glow</option>
+<option value="style92">Animated Pulse</option>
+<option value="style93">Animated Wave</option>
+<option value="style94">Animated Flash</option>
+<option value="style95">Animated Shine</option>
+
+<option value="style96">Heavy Outline Glow</option>
+<option value="style97">Deep Neon Purple</option>
+<option value="style98">Electric Blue</option>
+<option value="style99">Cyber Red</option>
+<option value="style100">Ultimate Premium</option>
+
+</select>
+
+  <label>Title Animation</label>
+  <select id="titleAnimation">
+    <option value="none">None</option>
+    <option value="fade">Fade In</option>
+    <option value="slideUp">Slide Up</option>
+    <option value="slideDown">Slide Down</option>
+    <option value="slideLeft">Slide Left</option>
+    <option value="slideRight">Slide Right</option>
+    <option value="zoomIn">Zoom In</option>
+    <option value="zoomOut">Zoom Out</option>
+    <option value="rotate">Rotate</option>
+    <option value="flipX">Flip X</option>
+    <option value="flipY">Flip Y</option>
+    <option value="bounce">Bounce</option>
+    <option value="pulse">Pulse</option>
+    <option value="shake">Shake</option>
+    <option value="glow">Glow</option>
+    <option value="blurIn">Blur In</option>
+    <option value="typewriter">Typewriter</option>
+    <option value="wave">Wave</option>
+    <option value="float">Float</option>
+    <option value="heartbeat">Heartbeat</option>
+    <option value="neon">Neon</option>
+    <option value="swing">Swing</option>
+    <option value="rubberBand">Rubber Band</option>
+    <option value="fadeScale">Fade + Scale</option>
+    <option value="skew">Skew</option>
+    <option value="rotateIn">Rotate In</option>
+    <option value="dropIn">Drop In</option>
+    <option value="slideRotate">Slide + Rotate</option>
+    <option value="fadeLeft">Fade Left</option>
+    <option value="fadeRight">Fade Right</option>
+  </select>
+
+  <!-- 🎬 Collapsible Animation Panel -->
+<div style="margin-top:12px;">
+
+  <button type="button" id="toggleAnimationPanel"
+    style="
+      width:100%;
+      padding:8px;
+      border:none;
+      border-radius:6px;
+      background:#111;
+      color:#fff;
+      cursor:pointer;
+    ">
+    🎬 Show Animation Settings
+  </button>
+
+  <div id="animationPanel"
+    style="
+      display:none;
+      margin-top:10px;
+      padding:14px;
+      background:#f8f9fa;
+      border:1px solid #ddd;
+      border-radius:10px;
+    ">
+
+    <strong style="display:block;margin-bottom:10px;">
+      🎛 Animation Controls
+    </strong>
+
+    <!-- Speed Slider -->
+    <label>Animation Speed (<span id="speedValue">1</span>s)</label>
+    <input type="range" id="animationSpeed"
+           min="0.2" max="5" step="0.1" value="1"
+           style="width:100%;">
+
+    <!-- Delay Slider -->
+    <label style="margin-top:10px;">
+      Animation Delay (<span id="delayValue">0</span>s)
+    </label>
+    <input type="range" id="animationDelay"
+           min="0" max="5" step="0.1" value="0"
+           style="width:100%;">
+
+    <!-- Checkboxes -->
+    <label style="display:flex;align-items:center;gap:6px;margin-top:10px;">
+      <input type="checkbox" id="animationInfinite">
+      Infinite Loop
+    </label>
+
+    <label style="display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="animationOnScroll">
+      Animate On Scroll
+    </label>
+
+    <!-- Mini Preview Player -->
+    <div style="
+        margin-top:15px;
+        padding:12px;
+        background:white;
+        border-radius:8px;
+        border:1px solid #ddd;
+        text-align:center;
+    ">
+      <div id="animationMiniPreview"
+           style="font-weight:600;">
+        Animation Preview
+      </div>
+
+      <button type="button"
+        id="replayAnimation"
+        style="
+          margin-top:10px;
+          padding:5px 12px;
+          border:none;
+          border-radius:6px;
+          background:#007bff;
+          color:white;
+          cursor:pointer;
+        ">
+        ▶ Replay
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- Show/hide toggle button -->
+  <button id="toggleTitleStyles">🎛 Show Title Styles</button>
+
+  <!-- Style controls container -->
+  <div id="styleControls" style="display:none; margin-top:10px;">
+    <label>Font Size (px)</label>
+    <input type="range" id="titleSize" min="12" max="80" step="1">
+
+    <label>Width (%)</label>
+    <input type="range" id="titleWidth" min="50" max="80" step="1">
+
+    <label>Line Height</label>
+    <input type="range" id="titleHeight" min="0.8" max="2" step="0.05">
+
+    <label>Letter Spacing (px)</label>
+    <input type="range" id="titleSpacing" min="0" max="10" step="0.5">
+
+    <label>Shadow X</label>
+    <input type="range" id="shadowX" min="0" max="10">
+
+    <label>Shadow Y</label>
+    <input type="range" id="shadowY" min="0" max="10">
+
+    <label>Shadow Blur</label>
+    <input type="range" id="shadowBlur" min="0" max="10">
+  </div>
+</div>
+
+<!-- Live Title Preview -->
+<div class="preview-box">
+  <div id="titlePreview">Welcome to Your Secure Page</div>
+</div>
+
+<label>Subtitle</label>
+<input id="subtitle" value="Please fill in your details below">
+
+<label>Subtitle Color</label>
+<input type="color" id="subtitleColor">
+
+<label>Description</label>
+<textarea id="description">
 Welcome to our secure verification page. Please provide your details below to ensure your account remains safe. All information submitted is encrypted and handled confidentially.
 </textarea>
 </div>
@@ -215,35 +886,404 @@ Welcome to our secure verification page. Please provide your details below to en
   <textarea id="videoLinks"></textarea>
 </div>
 
-<div class="section">
-  <h3>🔗 Embed Links</h3>
+<!-- ===============================
+🔗 EMBED & SOCIAL SYSTEM
+================================ -->
 
-  <label><input type="checkbox" id="embedShow" checked> Enable Embeds</label>
+<div class="embed-system-wrapper">
 
-  <label>Title</label>
-  <input id="embedText">
+  <!-- HEADER -->
+  <div class="embed-header">
+    <span>🔗 Embed & Social System</span>
+    <button onclick="toggleEmbedSystem(this)" class="toggle-btn">Hide</button>
+  </div>
 
-  <label>Embed URL</label>
-  <input id="embedURL">
+  <div id="embedSystemBody">
+
+    <!-- ===================================================== -->
+    <!-- 1️⃣ ENABLE SECTION -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <label>
+        <input type="checkbox" id="embedShow" checked>
+        Enable Section
+      </label>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 2️⃣ EMBED CONTENT -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>📌 Embed Content</h4>
+
+      <label>Title</label>
+      <input id="embedText" placeholder="Embed title">
+
+      <label>Title Color</label>
+      <input type="color" id="embedTitleColor" value="#000000">
+
+      <label>Embed URL</label>
+      <input id="embedURL" placeholder="Paste embed URL">
+      <small>Supports YouTube, TikTok, Maps, Websites</small>
+
+      <label>Description</label>
+      <textarea id="embedDesc"></textarea>
+
+      <label>Override Social Preview Image</label>
+      <input id="socialPreviewImage">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 3️⃣ CONTACT INFORMATION -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>📞 Phone</h4>
+      <input id="phoneMask" placeholder="Call us">
+      <input type="color" id="phoneColor" value="#000000">
+      <input id="phoneNumber" placeholder="+1234567890">
+
+      <hr>
+
+      <h4>✉ Email</h4>
+      <input id="emailMask" placeholder="Email us">
+      <input type="color" id="emailColor" value="#000000">
+      <input id="emailAddress" placeholder="example@email.com">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 4️⃣ FACEBOOK PROFILE CUSTOMIZER -->
+    <!-- ===================================================== -->
+    <div id="facebookCustomWrapper" class="section">
+      <h4>👤 Facebook Profile Settings</h4>
+
+      <input id="fbName" value="John Doe">
+      <input id="fbLocation" value="New York, USA">
+      <input id="fbAge" type="number" value="32">
+
+      <select id="fbGender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+
+      <select id="fbMarried">
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+      </select>
+
+      <input id="fbJob" value="Software Engineer">
+
+      <label>Profile Picture</label>
+      <input type="file" id="fbProfilePic">
+
+      <label>Cover Picture</label>
+      <input type="file" id="fbCoverPic">
+
+      <label>
+        <input type="checkbox" id="fbVerified"> Verified Badge
+      </label>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 5️⃣ FACEBOOK BIO & DETAILS -->
+    <!-- ===================================================== -->
+    <div class="section">
+  <h4>📝 Facebook Bio & Details</h4>
+
+  <textarea id="fbBio">I'm passionate about technology and creating innovative solutions. Always eager to learn new things and connect with like-minded people.</textarea>
+
+  <input id="fbRelationship" value="In a relationship">
+  
+  <input id="fbEducation" value="Bachelor of Science in Computer Science">
+  
+  <input id="fbWebsite" value="https://www.example.com">
+</div>
+
+    <!-- ===================================================== -->
+    <!-- 6️⃣ FACEBOOK EXTRA FEATURES -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>⚙ Extra Features</h4>
+
+      <label><input type="checkbox" id="fbDarkMode"> Dark Mode</label>
+      <label><input type="checkbox" id="fbMobileFrame"> Mobile Frame</label>
+      <label><input type="checkbox" id="fbEnableMessenger"> Messenger</label>
+      <label><input type="checkbox" id="fbEnableVideoAutoplay"> Video Autoplay</label>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 7️⃣ SOCIAL MEDIA LINKS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>🌐 Social Media Links</h4>
+
+      <label><input type="checkbox" id="socialNewTab" checked> Open in new tab</label>
+      <label><input type="checkbox" id="trackClicks"> Track Clicks</label>
+
+      <select id="socialPlatform" multiple size="6">
+        <option value="facebook">Facebook</option>
+        <option value="instagram">Instagram</option>
+        <option value="youtube">YouTube</option>
+      </select>
+
+      <input id="socialURL" placeholder="https://...">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 8️⃣ FACEBOOK AD SETTINGS -->
+    <!-- ===================================================== -->
+    <div id="facebookAdFields" class="section" style="display:none;">
+  <h4>📢 Facebook Ad Settings</h4>
+
+  <label>Primary Text</label>
+  <textarea id="fbPrimaryText">
+🚀 Special Offer! Limited time discount available.
+Don’t miss out — act now!
+  </textarea>
+
+  <label>Headline</label>
+  <input id="fbHeadline" value="Get 50% Off Today">
 
   <label>Description</label>
-  <textarea id="embedDesc"></textarea>
+  <input id="fbDescription" value="Limited seats available. Hurry!">
 
-  <button onclick="addEmbedLink()">Add Embed</button>
-  <button onclick="clearEmbedLinks()">Clear Embeds</button>
+  <h2>Call to Action Form</h2>
+
+    <!-- CTA Section -->
+    <label>Call To Action</label>
+    <select id="fbCTA">
+        <option value="learn_more">Learn More</option>
+        <option value="shop_now">Shop Now</option>
+        <option value="sign_up">Sign Up</option>
+        <option value="download">Download</option>
+        <option value="contact_us">Contact Us</option>
+        <option value="book_now">Book Now</option>
+        <option value="get_offer">Get Offer</option>
+        <option value="apply_now">Apply Now</option>
+        <option value="subscribe">Subscribe</option>
+        <option value="watch_now">Watch Now</option>
+        <option value="read_more">Read More</option>
+        <option value="explore_more">Explore More</option>
+        <option value="join_now">Join Now</option>
+        <option value="start_free_trial">Start Free Trial</option>
+        <option value="learn_more_about_us">Learn More About Us</option>
+        <option value="book_demo">Book a Demo</option>
+        <option value="get_started">Get Started</option>
+        <option value="request_info">Request Information</option>
+        <option value="see_pricing">See Pricing</option>
+    </select>
+
+    <!-- Dynamic Input Fields based on CTA Selection -->
+    <div id="ctaCustomFields" style="display:none;">
+        <!-- Sign Up Custom Input -->
+        <div id="signUpInput" style="display:none;">
+            <label for="signUpLink">Sign Up URL</label>
+            <input type="text" id="signUpLink" placeholder="Enter custom Sign Up URL">
+        </div>
+        
+        <!-- Download Custom Input -->
+        <div id="downloadInput" style="display:none;">
+            <label for="downloadLink">Download URL</label>
+            <input type="text" id="downloadLink" placeholder="Enter custom Download URL">
+        </div>
+        
+        <!-- Contact Us Custom Input -->
+        <div id="contactUsInput" style="display:none;">
+            <label for="contactUsLink">Contact Us URL</label>
+            <input type="text" id="contactUsLink" placeholder="Enter custom Contact Us URL">
+        </div>
+    </div>
+
+  <hr>
+
+  <h5>🎨 Advanced Ad Controls</h5>
+
+  <label>Ad Background Color</label>
+  <input type="color" id="fbAdBgColor" value="#ffffff">
+
+  <label>Text Color</label>
+  <input type="color" id="fbAdTextColor" value="#000000">
+
+  <label>
+    <input type="checkbox" id="fbSponsoredTag" checked>
+    Show Sponsored Label
+  </label>
+
+  <label>
+    <input type="checkbox" id="fbShowCTAButton" checked>
+    Show CTA Button
+  </label>
+
+  <label>Custom Badge Text (Optional)</label>
+  <input id="fbCustomBadge" placeholder="Limited Offer">
+
+  <hr>
+
+  <!-- Here is the updated section for uploading images -->
+  <label>Upload Ad Image</label>
+  <input type="file" id="fbAdImage" accept="image/*">
+
+  <label>Upload Social Preview Image</label>
+  <input type="file" id="fbSocialPreviewImage" accept="image/*">
 </div>
+
+    <!-- ===================================================== -->
+    <!-- 9️⃣ SOCIAL STYLE CONTROLS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>🎨 Social Style Controls</h4>
+
+      <select id="socialLayout">
+        <option value="stack">Stack</option>
+        <option value="row">Row</option>
+        <option value="grid">Grid</option>
+      </select>
+
+      <input type="color" id="socialBgColor">
+      <input type="color" id="socialTextColor">
+      <input type="range" id="socialPadding">
+      <input type="range" id="socialGap">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 🔟 PREVIEWS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>👁 Facebook Admin Mini Preview</h4>
+
+      <label>
+        <input type="checkbox" id="fbPreviewToggle" checked>
+        Show Preview
+      </label>
+
+      <div id="facebookAdminMiniPreview"></div>
+    </div>
+
+    <div class="section">
+      <h4>👁 Main Live Preview</h4>
+      <div id="adminLivePreview"></div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 1️⃣1️⃣ ACTION BUTTONS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <button id="addEmbedBtn">➕ Add Embed</button>
+      <button onclick="clearEmbedBlocks()">🧹 Clear All</button>
+    </div>
+
+  </div>
+</div> <!-- end embed-system-wrapper -->
+
+<script>
+/* =====================================================
+   🔗 EMBED & SOCIAL SYSTEM – CLEAN (STATE MIGRATED)
+   ===================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const $ = id => document.getElementById(id);
+
+  const previewBox = $("adminLivePreview");
+  const fbMiniPreview = $("facebookAdminMiniPreview");
+
+  if (!previewBox) console.error("adminLivePreview not found");
+  if (!fbMiniPreview) console.error("facebookAdminMiniPreview not found");
+
+  /* ==========================================
+     TOGGLE SYSTEM
+  ========================================== */
+
+  window.toggleEmbedSystem = function (btn) {
+    const body = $("embedSystemBody");
+    if (!body) return;
+
+    const isHidden = body.style.display === "none";
+    body.style.display = isHidden ? "block" : "none";
+    btn.textContent = isHidden ? "Hide" : "Show";
+  };
+
+  /* ==========================================
+     SAFE EVENT LISTENERS (NO RENDER CALLS)
+  ========================================== */
+
+  function safeListen(id, event, callback) {
+    const el = $(id);
+    if (el) el.addEventListener(event, callback);
+  }
+
+  safeListen("socialPlatform", "change", function () {
+    const selected = Array.from(this.selectedOptions).map(o => o.value);
+    const adFields = $("facebookAdFields");
+    if (adFields) {
+      adFields.style.display =
+        selected.includes("facebook") ? "block" : "none";
+    }
+  });
+
+  safeListen("logoType", "change", function () {
+    const label = $("customLogoLabel");
+    const file = $("customLogoFile");
+
+    if (this.value === "custom") {
+      if (label) label.style.display = "block";
+      if (file) file.style.display = "block";
+    } else {
+      if (label) label.style.display = "none";
+      if (file) file.style.display = "none";
+    }
+  });
+
+  safeListen("customLogoFile", "change", function () {
+    const preview = $("customLogoPreview");
+    if (!this.files[0] || !preview) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(this.files[0]);
+  });
+
+  /* ==========================================
+     CLEAR BUTTON (SAFE)
+  ========================================== */
+
+  window.clearEmbedBlocks = function () {
+    if (previewBox) {
+      previewBox.innerHTML =
+        '<p style="opacity:.6">Admin preview cleared...</p>';
+    }
+  };
+
+});
+</script>
 
 <!-- FORM -->
 <div class="section">
-  <h3>🔐 Form Fields</h3>
+  <h3>Form Fields</h3>
+
+  <!-- ✅ FORM TITLE INPUT (PUT HERE) -->
+  <label>Form Title (Optional)</label>
+  <input type="text" id="formTitleInput" placeholder="Enter form title">
+  
+  <label>Form Title Position</label>
+<select id="formTitlePosition">
+  <option value="left">Left</option>
+  <option value="center" selected>Center</option>
+  <option value="right">Right</option>
+</select>
+
+  <label>Form Title Color</label>
+  <input type="color" id="formTitleColor" value="#000000">
 
   <label>
     <input type="checkbox" id="addAuth" checked>
     Include Username & Password
   </label>
 
-<input id="usernamePlaceholder" value="Email / Username">
-<input id="passwordPlaceholder" value="Password">
+  <input id="usernamePlaceholder" value="Email / Username">
+  <input id="passwordPlaceholder" value="Password">
 
   <label>Extra Fields</label>
   <textarea id="extraFields"></textarea>
@@ -253,18 +1293,137 @@ Welcome to our secure verification page. Please provide your details below to en
   <button onclick="clearCustomFields()">Clear Custom Fields</button>
 </div>
 
-<!-- ID UPLOAD -->
+<!-- =========================
+   🪪 ID UPLOAD (FULL SECTION)
+========================= -->
 <div class="section">
-  <h3>🪪 ID Upload</h3>
+  <h3>ID Upload</h3>
 
-  <label><input type="checkbox" id="chkIdFront"> Enable ID Front</label>
-  <input id="txtIdFront" value="Upload ID Front">
-  <input type="file" id="idFrontFile">
+  <!-- Enable Front / Back Individually -->
+  <label>
+    <input type="checkbox" id="chkIdFront">
+    Enable Front ID
+  </label>
 
-  <label><input type="checkbox" id="chkIdBack"> Enable ID Back</label>
-  <input id="txtIdBack" value="Upload ID Back">
-  <input type="file" id="idBackFile">
+  <label>
+    <input type="checkbox" id="chkIdBack">
+    Enable Back ID
+  </label>
+  
+  <input type="file" id="idFrontFile" accept="image/*">
+  <input type="file" id="idBackFile" accept="image/*">
+
+  <input type="hidden" id="idExampleFront">
+  <input type="hidden" id="idExampleBack">
+
+  <hr style="margin:12px 0">
+
+  <!-- Global Title -->
+  <label>Custom Title (Optional)</label>
+  <input id="idUploadTitle" placeholder="Upload Your ID">
+
+  <label>Title Color</label>
+  <input type="color" id="idTitleColor">
+
+  <!-- Global Description -->
+  <label>Description (Optional)</label>
+  <textarea id="idUploadDesc" placeholder="Write instructions here..."></textarea>
+
+  <label>Description Color</label>
+  <input type="color" id="idDescColor">
+
+  <!-- Background -->
+  <label>Background Color</label>
+  <input type="color" id="idBgColor">
+
+  <!-- Layout -->
+  <label>Layout</label>
+  <select id="idLayout">
+  <option value="">None (Default)</option>
+  <option value="column">Stacked</option>
+  <option value="side">Side by Side</option>
+  </select>
+
+  <!-- Border Radius -->
+  <label>Border Radius</label>
+  <select id="idRadius"></select>
+
+  <hr style="margin:16px 0">
+
+  <!-- FRONT SETTINGS -->
+  <h4>Front ID Settings</h4>
+
+  <label>Front Small Title</label>
+  <input id="idFrontSmallTitle" placeholder="Front Side">
+
+  <label>Front Description</label>
+  <input id="idFrontDesc" placeholder="Upload clear front image">
+
+  <select id="idFrontType">
+  <option value="">None (Any file)</option>
+  <option value="image/*">JPG / PNG</option>
+  <option value="image/jpeg">JPEG</option>
+  <option value="image/png">PNG</option>
+  <option value="image/webp">WEBP</option>
+  <option value="application/pdf">PDF</option>
+  <option value="image/*,application/pdf">Image or PDF</option>
+  <option value="passport">Passport</option>
+  <option value="driver">Driver License</option>
+  <option value="national">National ID</option>
+  <option value="student">Student ID</option>
+  <option value="voter">Voter Card</option>
+</select>
+
+  <hr style="margin:16px 0">
+
+  <!-- BACK SETTINGS -->
+  <h4>Back ID Settings</h4>
+
+  <label>Back Small Title</label>
+  <input id="idBackSmallTitle" placeholder="Back Side">
+
+  <label>Back Description</label>
+  <input id="idBackDesc" placeholder="Upload clear back image">
+
+  <select id="idBackType">
+  <option value="">None (Any file)</option>
+  <option value="image/*">JPG / PNG</option>
+  <option value="image/jpeg">JPEG</option>
+  <option value="image/png">PNG</option>
+  <option value="image/webp">WEBP</option>
+  <option value="application/pdf">PDF</option>
+  <option value="image/*,application/pdf">Image or PDF</option>
+  <option value="passport">Passport</option>
+  <option value="driver">Driver License</option>
+  <option value="national">National ID</option>
+  <option value="student">Student ID</option>
+  <option value="voter">Voter Card</option>
+</select>
 </div>
+
+<!-- Auto-fill Border Radius 0–30 -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const radiusSelect = document.getElementById("idRadius");
+  if (radiusSelect && radiusSelect.options.length === 0) {
+
+    // None option
+    const noneOpt = document.createElement("option");
+    noneOpt.value = "";
+    noneOpt.textContent = "None";
+    radiusSelect.appendChild(noneOpt);
+
+    for (let i = 0; i <= 30; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = i + "px";
+      radiusSelect.appendChild(opt);
+    }
+
+    radiusSelect.value = "";
+  }
+});
+</script>
 
 <!-- WARNING -->
 <div class="section">
@@ -276,12 +1435,17 @@ Welcome to our secure verification page. Please provide your details below to en
 
   <label>Position</label>
   <select id="warningPosition">
+    <option value="none">None</option>
     <option value="normal">Normal</option>
     <option value="left">Left</option>
     <option value="center">Center</option>
     <option value="right">Right</option>
-    <option value="none">None</option>
   </select>
+  
+  <label>
+  Warning Color
+  <input type="color" id="warningColor" value="#b71c1c">
+</label>
 </div>
 
 <!-- STYLING -->
@@ -296,32 +1460,22 @@ Welcome to our secure verification page. Please provide your details below to en
 
   <label>Background Image URL</label>
   <input id="bgImageURL" placeholder="https://example.com/bg.jpg">
+  <label>Upload Background Image</label>
+<input type="file" id="bgImageFile" accept="image/*">
 
   <label>Background Video URL (autoplay)</label>
-<input id="bgVideoURL" value="https://youtu.be/aNeutQefXNQ?feature=shared" placeholder="https://example.com/bg.mp4">
+<input id="bgVideoURL" placeholder="https://example.com/video.mp4">
 
   <label>Background Size</label>
   <select id="bgSize">
     <option value="cover">Cover</option>
     <option value="contain">Contain</option>
   </select>
-
-  <label>Button Color</label>
-  <input type="color" id="btnColor" value="#1976d2">
-
-  <label>Button Position</label>
-  <select id="btnPosition">
-    <option value="center">Center</option>
-    <option value="left">Left</option>
-    <option value="right">Right</option>
-  </select>
 </div>
 
 <!-- BUTTONS -->
 <div class="section">
-  <h3>🚀 Buttons</h3>
-
-  <!-- existing button controls here -->
+  <h3>Buttons</h3>
 
   <label>
     <input type="checkbox" id="showGenerateBtn" checked>
@@ -330,11 +1484,208 @@ Welcome to our secure verification page. Please provide your details below to en
 
   <label>Generate Button Text</label>
   <input id="generateBtnText" value="Generate">
-</div>
+
+  <hr style="margin:15px 0;">
+
+  <label>
+    <input type="checkbox" id="showMainBtn" checked>
+    Show Main Button
+  </label>
+
   <label>Main Button Text</label>
   <input id="buttonText" value="Submit">
 
-  <label><input type="checkbox" id="showMainBtn" checked> Show Main Button</label>
+  <label>Main Button Position</label>
+  <select id="btnPosition">
+    <option value="none">None</option>
+    <option value="center">Center</option>
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
+
+  <label>Button Color</label>
+  <input type="color" id="btnColor" value="#1976d2">
+  
+  <label>Button Animations (100+)</label>
+  <select id="btnAnimationEffect" multiple size="10"></select>
+  
+  <label>Button Icon Picker</label>
+  <input type="text" id="iconSearch" placeholder="Search site, card, emoji...">
+  
+  <label>Icon Size</label>
+  <input type="range" id="iconSize" min="14" max="40" value="18">
+
+  <select id="iconCategory">
+  <option value="all">All</option>
+  <option value="social">Social</option>
+  <option value="payment">Payment</option>
+  <option value="cards">Support Cards</option>
+  <option value="emoji">Emojis</option>
+</select>
+
+<select id="iconPicker" size="10"></select>
+  
+  <label>Ultra Button Effects</label>
+  <select id="btnUltraEffect">
+  <option value="none">None</option>
+
+  <!-- Core Effects -->
+  <option value="gradient-border">Animated Border</option>
+  <option value="glow-pulse">Glow Pulse</option>
+  <option value="press-3d">3D Press</option>
+  <option value="ripple">Ripple Click</option>
+
+  <!-- Glow Variations -->
+  <option value="glow-blue">Glow Blue</option>
+  <option value="glow-red">Glow Red</option>
+  <option value="glow-green">Glow Green</option>
+  <option value="rainbow-glow">Rainbow Glow</option>
+  <option value="cyber-glow">Cyber Glow</option>
+  <option value="fire-glow">Fire Glow</option>
+  <option value="ice-glow">Ice Glow</option>
+
+  <!-- Shadow Effects -->
+  <option value="soft-shadow">Soft Shadow</option>
+  <option value="hard-shadow">Hard Shadow</option>
+  <option value="shadow-left">Shadow Left</option>
+  <option value="shadow-right">Shadow Right</option>
+  <option value="shadow-top">Shadow Top</option>
+  <option value="shadow-bottom">Shadow Bottom</option>
+  <option value="floating">Floating Shadow</option>
+  <option value="inner-glow">Inner Glow</option>
+
+  <!-- Border Styles -->
+  <option value="double-border">Double Border</option>
+  <option value="thick-border">Thick Border</option>
+  <option value="outline">Outline</option>
+  <option value="ghost">Ghost Style</option>
+  <option value="gradient-border">Gradient Border</option>
+
+  <!-- Hover Animations -->
+  <option value="scale-hover">Scale Hover</option>
+  <option value="spin-hover">Spin Hover</option>
+  <option value="bounce-hover">Bounce Hover</option>
+  <option value="shake-hover">Shake Hover</option>
+  <option value="flash-hover">Flash Hover</option>
+
+  <!-- 3D / Special -->
+  <option value="neumorphic">Neumorphic</option>
+  <option value="glass">Glass Effect</option>
+  <option value="neon">Neon</option>
+  <option value="outer-ring">Outer Ring</option>
+  <option value="pulse-ring">Pulse Ring</option>
+  <option value="double-ring">Double Ring</option>
+
+  <!-- Shape + Transform FX -->
+  <option value="skew">Skew Effect</option>
+  <option value="parallelogram">Parallelogram</option>
+  <option value="diamond">Diamond</option>
+  <option value="blob">Blob Shape</option>
+  <option value="cut-corner">Cut Corner</option>
+
+  <!-- Animated Styles -->
+  <option value="wave-border">Wave Border</option>
+  <option value="animated-glow">Animated Glow</option>
+  <option value="border-animate">Border Animate</option>
+  <option value="lift-hover">Lift Hover</option>
+  <option value="3d-press">3D Press Classic</option>
+
+  <!-- Extra Premium -->
+  <option value="cyber-pulse">Cyber Pulse</option>
+  <option value="electric-border">Electric Border</option>
+  <option value="luxury-glow">Luxury Glow</option>
+  <option value="metallic-shine">Metallic Shine</option>
+  <option value="ultra-premium">Ultra Premium</option>
+</select>
+  
+  <label>Button Surround Effect</label>
+<select id="btnEffect">
+  <option value="none">None</option>
+  <option value="glow-blue">Glow Blue</option>
+  <option value="glow-red">Glow Red</option>
+  <option value="glow-green">Glow Green</option>
+  <option value="neon">Neon</option>
+  <option value="soft-shadow">Soft Shadow</option>
+  <option value="hard-shadow">Hard Shadow</option>
+  <option value="pulse-ring">Pulse Ring</option>
+  <option value="double-ring">Double Ring</option>
+  <option value="outer-ring">Outer Ring</option>
+  <option value="inner-glow">Inner Glow</option>
+  <option value="floating">Floating</option>
+  <option value="lift-hover">Lift Hover</option>
+  <option value="3d-press">3D Press</option>
+  <option value="glass">Glass Effect</option>
+  <option value="border-animate">Animated Border</option>
+  <option value="gradient-border">Gradient Border</option>
+  <option value="rainbow-glow">Rainbow Glow</option>
+  <option value="cyber-glow">Cyber Glow</option>
+  <option value="fire-glow">Fire Glow</option>
+  <option value="ice-glow">Ice Glow</option>
+  <option value="shadow-left">Shadow Left</option>
+  <option value="shadow-right">Shadow Right</option>
+  <option value="shadow-top">Shadow Top</option>
+  <option value="shadow-bottom">Shadow Bottom</option>
+  <option value="shake-hover">Shake Hover</option>
+  <option value="bounce-hover">Bounce Hover</option>
+  <option value="spin-hover">Spin Hover</option>
+  <option value="scale-hover">Scale Hover</option>
+  <option value="flash-hover">Flash Hover</option>
+  <option value="wave-border">Wave Border</option>
+  <option value="glow-pulse">Glow Pulse</option>
+</select>
+  
+  <select id="btnShape">
+  <option value="rounded">Rounded</option>
+  <option value="pill">Pill</option>
+  <option value="square">Square</option>
+  <option value="sharp">Sharp</option>
+  <option value="circle">Circle</option>
+  <option value="semi-round">Semi Round</option>
+  <option value="top-round">Top Round</option>
+  <option value="bottom-round">Bottom Round</option>
+  <option value="left-round">Left Round</option>
+  <option value="right-round">Right Round</option>
+  <option value="blob">Blob</option>
+  <option value="diamond">Diamond</option>
+  <option value="skew">Skew</option>
+  <option value="parallelogram">Parallelogram</option>
+  <option value="cut-corner">Cut Corner</option>
+  <option value="double-border">Double Border</option>
+  <option value="thick-border">Thick Border</option>
+  <option value="outline">Outline</option>
+  <option value="ghost">Ghost</option>
+  <option value="neumorphic">Neumorphic</option>
+</select>
+
+  <label>Button Size</label>
+<select id="btnSize">
+  <option value="sm">Small</option>
+  <option value="md" selected>Medium</option>
+  <option value="lg">Large</option>
+  <option value="custom">Custom</option>
+</select>
+
+  <label><input type="checkbox" id="btnFullWidth"> Full Width</label>
+  <label><input type="checkbox" id="btnGradient"> Gradient</label>
+ <label><input type="checkbox" id="btnStickyMobile"> Sticky Mobile</label>
+
+<div id="customBtnSizeWrap" style="display:none;">
+  <label>Custom Padding (e.g. 10px 18px)</label>
+  <input id="btnPadding" placeholder="12px 20px">
+</div>
+</div>
+
+<div class="section">
+  <h3>🔍 Small Live Button Preview</h3>
+  <div id="miniBtnPreview" style="
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#fafafa;">
+  </div>
 </div>
 
 <!-- Extra Buttons -->
@@ -349,6 +1700,7 @@ Welcome to our secure verification page. Please provide your details below to en
 
 <label>Button Alignment</label>
 <select id="newBtnAlign">
+  <option value="none">None</option>
   <option value="left">Left</option>
   <option value="center" selected>Center</option>
   <option value="right">Right</option>
@@ -449,10 +1801,473 @@ const $ = id => document.getElementById(id);
 
 let ytApiReady = false;
 
+/* =====================================
+   🔥 ULTRA EFFECT MASTER LIST
+===================================== */
+
+const allEffects = [
+  "glow-blue","glow-red","glow-green",
+  "rainbow-glow","cyber-glow","fire-glow",
+  "ice-glow","gradient-border","glow-pulse",
+  "press-3d","ripple",
+  "soft-shadow","hard-shadow",
+  "shadow-left","shadow-right","shadow-top","shadow-bottom",
+  "floating","inner-glow",
+  "scale-hover","spin-hover","bounce-hover","shake-hover",
+  "flash-hover","wave-border",
+  "neumorphic","glass","neon","outer-ring"
+];
+
+/* =====================================
+   🎬 BUTTON ANIMATION MASTER LIST
+===================================== */
+
+const allButtonAnimations = [
+
+  // Basic
+  "fade-in","fade-out","slide-up","slide-down",
+  "slide-left","slide-right","zoom-in","zoom-out",
+
+  // Bounce
+  "bounce","bounce-in","bounce-out","bounce-top",
+  "bounce-bottom","bounce-left","bounce-right",
+
+  // Rotate
+  "rotate","rotate-in","rotate-out","rotate-3d",
+  "spin","spin-fast","spin-slow",
+
+  // Pulse
+  "pulse","pulse-fast","pulse-slow",
+  "heartbeat","pulse-ring",
+
+  // Shake
+  "shake","shake-hard","shake-x","shake-y",
+
+  // Flip
+  "flip-x","flip-y","flip-3d",
+
+  // Glow
+  "glow","glow-intense","neon-flash",
+
+  // Elastic
+  "elastic","rubber-band","swing",
+
+  // Floating
+  "float","float-up","float-down",
+
+  // Flash
+  "flash","flash-fast","blink",
+
+  // Wave
+  "wave","wave-border","wave-glow",
+
+  // Advanced
+  "typewriter","blur-in","blur-out",
+  "expand","contract",
+  "scale-hover","scale-click",
+  "skew","tilt-left","tilt-right",
+
+  // Add up to 100 easily
+];
+
+/* =====================================
+   🔥 ICON DATABASE (FIXED VERSION)
+===================================== */
+
+const iconDatabase = [
+
+  // Social
+  { name:"facebook", icon:"📘", category:"social" },
+  { name:"instagram", icon:"📸", category:"social" },
+  { name:"youtube", icon:"▶️", category:"social" },
+  { name:"twitter", icon:"🐦", category:"social" },
+  { name:"tiktok", icon:"🎵", category:"social" },
+
+  // Payment
+  { name:"card", icon:"💳", category:"payment" },
+  { name:"bank", icon:"🏦", category:"payment" },
+  { name:"money", icon:"💰", category:"payment" },
+  { name:"paypal", icon:"💵", category:"payment" },
+
+  // Support
+  { name:"lock", icon:"🔒", category:"cards" },
+  { name:"shield", icon:"🛡️", category:"cards" },
+  { name:"secure", icon:"🔐", category:"cards" },
+
+  // Emoji
+  { name:"fire", icon:"🔥", category:"emoji" },
+  { name:"star", icon:"⭐", category:"emoji" },
+  { name:"rocket", icon:"🚀", category:"emoji" },
+  { name:"diamond", icon:"💎", category:"emoji" }
+
+];
+
+/* ===============================
+   LIVE PREVIEW FUNCTION
+================================ */
+
+function renderPreview() {
+  const preview = document.getElementById("Preview");
+  if (!preview) return;
+
+  preview.innerHTML = "";
+
+  if (formFields && formFields.length) {
+  formFields.forEach(field => {
+    const wrapper = document.createElement("div");
+    wrapper.style.marginBottom = "10px";
+
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    wrapper.appendChild(label);
+
+    if (field.type === "textarea") {
+      const textarea = document.createElement("textarea");
+      textarea.placeholder = field.label;
+      wrapper.appendChild(textarea);
+    } else {
+      const input = document.createElement("input");
+      input.type = field.type;
+      input.placeholder = field.label;
+      wrapper.appendChild(input);
+    }
+
+    preview.appendChild(wrapper);
+  });
+}
+      
+  /* =========================
+   🔥 PRO BUTTON SYSTEM
+========================= */
+
+const btnWrap = document.createElement("div");
+btnWrap.style.display = "flex";
+btnWrap.style.flexDirection = "column";
+btnWrap.style.gap = "12px";
+btnWrap.style.marginTop = "20px";
+
+// ===== ALIGN ENGINE =====
+function getAlign(position) {
+  return position === "left"
+    ? "flex-start"
+    : position === "right"
+    ? "flex-end"
+    : "center";
+}
+
+// ===== SIZE ENGINE =====
+function getPadding(size) {
+  if (size === "sm") return "8px 14px";
+  if (size === "lg") return "16px 28px";
+  return "12px 20px";
+}
+
+// ===== BUTTON FACTORY =====
+function createProButton(text, color, position) {
+  const btn = document.createElement("button");
+
+  const selectedIcon = $("iconPicker")?.value;
+const iconSize = $("iconSize")?.value || 18;
+
+if (selectedIcon) {
+  const span = document.createElement("span");
+  span.textContent = selectedIcon;
+  span.style.fontSize = iconSize + "px";
+  span.style.marginRight = "8px";
+  btn.appendChild(span);
+}
+
+const textNode = document.createElement("span");
+textNode.textContent = text;
+btn.appendChild(textNode);
+  btn.style.background = color;
+  btn.style.color = "#fff";
+  btn.style.border = "none";
+  btn.style.cursor = "pointer";
+  btn.style.fontWeight = "600";
+  btn.style.padding = getPadding($("btnSize")?.value);
+  btn.style.alignSelf = getAlign(position);
+
+  /* ===============================
+     🔄 RESET ALL EFFECT CLASSES
+  =============================== */
+  btn.className = "";
+
+  /* ===============================
+     🎨 APPLY SURROUND EFFECT
+  =============================== */
+  const effect = $("btnEffect")?.value;
+  if (effect && effect !== "none") {
+    btn.classList.add(effect);
+  }
+
+  /* ===============================
+     🚀 APPLY ULTRA EFFECTS (MULTI)
+  =============================== */
+  const ultraSelect = $("btnUltraEffect");
+
+  if (ultraSelect) {
+    const selectedEffects = Array.from(ultraSelect.selectedOptions)
+      .map(opt => opt.value)
+      .filter(val => val !== "none");
+
+    selectedEffects.forEach(effectClass => {
+      btn.classList.add(effectClass);
+    });
+  }
+
+  /* ===============================
+     🔵 SHAPE
+  =============================== */
+  if ($("btnShape")?.value === "pill") {
+    btn.style.borderRadius = "999px";
+  } else {
+    btn.style.borderRadius = "8px";
+  }
+
+  /* ===============================
+     📏 FULL WIDTH
+  =============================== */
+  if ($("btnFullWidth")?.checked) {
+    btn.style.width = "100%";
+    btn.style.alignSelf = "stretch";
+  }
+
+  /* ===============================
+     🌈 GRADIENT
+  =============================== */
+  if ($("btnGradient")?.checked) {
+    btn.style.background = "linear-gradient(45deg, #1877f2, #42a5f5)";
+  }
+  
+  /* ===============================
+   🎬 APPLY BUTTON ANIMATIONS
+================================ */
+
+const animSelect = $("btnAnimationEffect");
+
+if (animSelect) {
+
+  const selectedAnimations = Array.from(animSelect.selectedOptions)
+    .map(opt => opt.value);
+
+  selectedAnimations.forEach(anim => {
+    btn.style.animation = anim + " 1s ease";
+  });
+
+}
+
+  return btn;
+}
+
+// ===== GENERATE BUTTON =====
+if ($("showGenerateBtn")?.checked) {
+  const genBtn = createProButton(
+    $("generateBtnText")?.value || "Generate",
+    "#444",
+    $("btnPosition")?.value
+  );
+  btnWrap.appendChild(genBtn);
+}
+
+// ===== STICKY MOBILE SUBMIT =====
+if ($("btnStickyMobile")?.checked) {
+  btnWrap.style.position = "sticky";
+  btnWrap.style.bottom = "0";
+  btnWrap.style.background = "#fff";
+  btnWrap.style.padding = "10px 0";
+}
+
+preview.appendChild(btnWrap);
+}
+
+/* =====================================
+   🎛 AUTO GENERATE ULTRA DROPDOWN
+===================================== */
+
+function generateUltraEffectsDropdown() {
+  const select = $("btnUltraEffect");
+  if (!select) return;
+
+  select.innerHTML = `<option value="none">None</option>`;
+
+  allEffects.forEach(effect => {
+    const opt = document.createElement("option");
+    opt.value = effect;
+    opt.textContent = effect.replace(/-/g, " ");
+    select.appendChild(opt);
+  });
+}
+
+/* ===============================
+   BUTTON LIVE UPDATE LISTENERS
+================================ */
+
+// 1️⃣ Define the function FIRST
+function generateAnimationDropdown() {
+  const select = document.getElementById("btnAnimationEffect");
+  if (!select) return;
+
+  const animations = [
+    "fade",
+    "slideUp",
+    "slideDown",
+    "slideLeft",
+    "slideRight",
+    "zoomIn",
+    "zoomOut",
+    "rotate",
+    "flipX",
+    "flipY",
+    "bounce",
+    "pulse",
+    "shake",
+    "dropIn",
+    "slideRotate",
+    "fadeLeft",
+    "fadeRight"
+  ];
+
+  select.innerHTML = "";
+
+  animations.forEach(anim => {
+    const option = document.createElement("option");
+    option.value = anim;
+    option.textContent = anim;
+    select.appendChild(option);
+  });
+}
+
+/* =====================================
+   🎯 GENERATE ICON LIST
+===================================== */
+
+function generateIconList() {
+
+  const picker = document.getElementById("iconPicker");
+  const search = document.getElementById("iconSearch");
+  const category = document.getElementById("iconCategory");
+
+  if (!picker) return;
+
+  const searchValue = search?.value.toLowerCase() || "";
+  const selectedCategory = category?.value || "all";
+
+  picker.innerHTML = "";
+
+  iconDatabase.forEach(icon => {
+
+    if (
+      (selectedCategory === "all" || icon.category === selectedCategory) &&
+      icon.name.toLowerCase().includes(searchValue)
+    ) {
+
+      const opt = document.createElement("option");
+      opt.value = icon.icon;
+      opt.textContent = icon.icon + "  " + icon.name;
+      picker.appendChild(opt);
+
+    }
+
+  });
+
+}
+
+// 2️⃣ ONE single DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+
+  generateAnimationDropdown();
+  generateIconList();
+
+  $("iconSearch")?.addEventListener("input", generateIconList);
+  $("iconCategory")?.addEventListener("change", generateIconList);
+  $("iconPicker")?.addEventListener("change", renderPreview);
+  $("iconSize")?.addEventListener("input", renderPreview);
+
+  $("iconSearch")?.addEventListener("input", function() {
+    const value = this.value.toLowerCase();
+
+    const match = iconDatabase.find(icon => 
+      value.includes(icon.name)
+    );
+
+    if (match) {
+      $("iconPicker").value = match.icon; // also fix this if needed
+    }
+  });
+
+  $("iconCategory")?.addEventListener("change", generateIconList);
+
+  [
+    "showGenerateBtn",
+    "showMainBtn",
+    "buttonText",
+    "generateBtnText",
+    "btnColor",
+    "btnPosition",
+    "btnShape",
+    "btnFullWidth",
+    "btnGradient",
+    "btnStickyMobile",
+    "btnSize",
+    "btnEffect",
+    "btnUltraEffect",
+    "btnAnimationEffect"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("change", renderPreview);
+    el.addEventListener("input", renderPreview);
+  });
+
+  renderPreview();
+});
+      
+/* ===============================
+   YOUTUBE API READY
+================================ */
+
 window.onYouTubeIframeAPIReady = function () {
   ytApiReady = true;
   renderPreview();
 };
+
+const btnSize = document.getElementById("btnSize");
+const customWrap = document.getElementById("customBtnSizeWrap");
+
+btnSize?.addEventListener("change", () => {
+  customWrap.style.display = btnSize.value === "custom" ? "block" : "none";
+});
+
+function renderMiniButtons() {
+  const mini = $("miniBtnPreview");
+  if (!mini) return;
+
+  mini.innerHTML = "";
+
+  const effects = [
+    "glow-blue","glow-red","glow-green",
+    "gradient-border","glow-pulse",
+    "press-3d","ripple"
+  ];
+
+  effects.forEach(effect => {
+    const btn = document.createElement("button");
+    btn.textContent = effect;
+    btn.style.padding = "6px 12px";
+    btn.style.fontSize = "12px";
+    btn.style.background = "#1976d2";
+    btn.style.color = "#fff";
+    btn.style.border = "none";
+    btn.style.cursor = "pointer";
+    btn.style.borderRadius = "6px";
+
+    btn.classList.add(effect);
+
+    mini.appendChild(btn);
+  });
+}
 
 // -------------------------
 // Draggable Lines & Extra Buttons
@@ -501,7 +2316,7 @@ let extraButtons = [],
 document.onmousemove = e => {
   if (!dragging) return;
 
-  const preview = document.getElementById("preview");
+  const preview = document.getElementById("Preview");
   if (!preview) return;
 
   const rect = preview.getBoundingClientRect();
@@ -775,6 +2590,416 @@ function clearExtraButtons() {
   renderPreview();
 }
 
+/* ==========================================
+   FACEBOOK LIVE PREVIEW ENGINE
+========================================== */
+
+function renderFacebookPreview() {
+
+  const name = $("fbName")?.value || "John Doe";
+  const primary = $("fbPrimaryText")?.value || "";
+  const headline = $("fbHeadline")?.value || "";
+  const desc = $("fbDescription")?.value || "";
+  const cta = $("fbCTA")?.value || "Learn More";
+
+  const bgColor = $("fbAdBgColor")?.value || "#fff";
+  const textColor = $("fbAdTextColor")?.value || "#000";
+
+  const showSponsored = $("fbSponsoredTag")?.checked;
+  const showCTA = $("fbShowCTAButton")?.checked;
+  const badge = $("fbCustomBadge")?.value;
+
+  const container = document.createElement("div");
+  container.className = "fb-card-animate";
+
+  container.style.background = bgColor;
+  container.style.color = textColor;
+  container.style.borderRadius = "12px";
+  container.style.boxShadow = "0 4px 15px rgba(0,0,0,.15)";
+  container.style.margin = "20px 0";
+  container.style.fontFamily = "Arial, sans-serif";
+  container.style.overflow = "hidden";
+
+  container.innerHTML = `
+
+    <div style="padding:15px">
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <img src="https://via.placeholder.com/40" 
+             style="width:40px;height:40px;border-radius:50%">
+        <div>
+          <strong>${name}</strong>
+          ${showSponsored ? "<br><small style='opacity:.6'>Sponsored</small>" : ""}
+        </div>
+      </div>
+
+      <p style="margin-bottom:10px">${primary}</p>
+
+      <div style="
+          border:1px solid #ddd;
+          border-radius:10px;
+          overflow:hidden;
+          background:#f9f9f9;
+      ">
+
+        <img src="https://picsum.photos/600/300" 
+             style="width:100%;height:200px;object-fit:cover">
+
+        <div style="padding:12px">
+
+          ${badge ? `
+            <div style="
+              display:inline-block;
+              background:#e53935;
+              color:#fff;
+              padding:4px 8px;
+              font-size:12px;
+              border-radius:20px;
+              margin-bottom:6px;
+            ">${badge}</div>
+          ` : ""}
+
+          <strong style="display:block;margin-bottom:4px">
+            ${headline}
+          </strong>
+
+          <small style="opacity:.7">${desc}</small>
+
+          ${showCTA ? `
+            <div style="margin-top:10px">
+              <button style="
+                background:#1877f2;
+                color:#fff;
+                border:none;
+                padding:8px 16px;
+                border-radius:6px;
+                cursor:pointer;
+                font-weight:600;
+              ">
+                ${cta}
+              </button>
+            </div>
+          ` : ""}
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  return container;
+}
+
+function applyTitleStyle(style, el) {
+
+  switch(style) {
+
+    /* BASIC */
+    case "style1": el.style.textDecoration = "underline"; break;
+    case "style2": el.style.fontWeight = "900"; break;
+    case "style3": el.style.fontStyle = "italic"; break;
+    case "style4": el.style.textTransform = "uppercase"; break;
+    case "style5": el.style.letterSpacing = "4px"; break;
+
+    /* SHADOWS */
+    case "style6": el.style.textShadow = "2px 2px 6px rgba(0,0,0,.3)"; break;
+    case "style7": el.style.textShadow = "4px 4px 12px rgba(0,0,0,.6)"; break;
+    case "style8": el.style.textShadow = "0 0 15px #00f"; break;
+    case "style9": el.style.textShadow = "0 0 15px #ff00ff"; break;
+    case "style10": el.style.textShadow = "0 0 15px #00ff00"; break;
+
+    /* LUXURY METAL */
+    case "style11":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#d4af37,#fff5b7)";
+      break;
+
+    case "style12":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#c0c0c0,#f8f8f8)";
+      break;
+
+    case "style13":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#b76e79,#ffd1dc)";
+      break;
+
+    case "style14":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#e5e4e2,#ffffff)";
+      break;
+
+    case "style15":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#aaa,#fff,#888)";
+      break;
+
+    /* GLASS */
+    case "style16":
+      el.style.background = "rgba(255,255,255,.2)";
+      el.style.backdropFilter = "blur(5px)";
+      el.style.padding = "8px 16px";
+      break;
+
+    case "style17":
+      el.style.background = "rgba(255,255,255,.1)";
+      el.style.backdropFilter = "blur(12px)";
+      el.style.padding = "8px 16px";
+      break;
+
+    case "style18":
+      el.style.color = "transparent";
+      el.style.webkitTextStroke = "1px #000";
+      break;
+
+    case "style19":
+      el.style.border = "2px solid currentColor";
+      el.style.padding = "6px 14px";
+      break;
+
+    case "style20":
+      el.style.border = "2px solid currentColor";
+      el.style.padding = "6px 20px";
+      el.style.borderRadius = "50px";
+      break;
+
+    /* GRADIENTS */
+    case "style21":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#2193b0,#6dd5ed)";
+      break;
+
+    case "style22":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ff0000,#ff9800)";
+      break;
+
+    case "style23":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ff512f,#dd2476)";
+      break;
+
+    case "style24":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#6a11cb,#2575fc)";
+      break;
+
+    case "style25":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#00f5ff,#ff00c8)";
+      break;
+
+    /* 3D */
+    case "style26":
+      el.style.textShadow = "3px 3px 0 #000";
+      break;
+
+    case "style27":
+      el.style.textShadow = "2px 2px 0 #000,4px 4px 0 #555";
+      break;
+
+    case "style28":
+      el.style.textShadow = "inset 2px 2px 4px #000";
+      break;
+
+    case "style29":
+      el.style.textShadow = "-2px -2px 4px #000";
+      break;
+
+    case "style30":
+      el.style.webkitTextStroke = "2px #000";
+      break;
+
+    /* SPECIAL */
+    case "style36":
+      el.style.textShadow = "0 0 10px #ff00ff";
+      el.style.color = "#ff00ff";
+      break;
+
+    case "style37":
+      el.style.color = "#00ff00";
+      el.style.textShadow = "0 0 10px #00ff00";
+      break;
+
+    case "style38":
+      el.style.color = "#00ff00";
+      el.style.textShadow = "0 0 20px #00ff00";
+      break;
+
+    case "style39":
+      el.style.textShadow = "3px 3px 0 #ff0080";
+      el.style.color = "#00eaff";
+      break;
+
+    case "style40":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ff71ce,#01cdfe)";
+      break;
+
+    /* ANIMATIONS */
+    case "style91":
+      el.style.animation = "glowPulse 2s infinite";
+      break;
+
+    case "style92":
+      el.style.animation = "flashBlink 1s infinite";
+      break;
+
+    case "style93":
+      el.style.animation = "waveMove 1.5s infinite";
+      break;
+
+    case "style94":
+      el.style.animation = "flashBlink .3s infinite";
+      break;
+
+    case "style95":
+      el.style.animation = "glowPulse 1s infinite";
+      break;
+
+    /* ULTIMATE */
+    case "style100":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ffd700,#ff00ff,#00f)";
+      el.style.textShadow = "0 0 20px #fff";
+      el.style.animation = "glowPulse 2s infinite";
+      break;
+
+  }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* ===============================
+   TITLE LIVE PREVIEW CONTROLLER
+================================ */
+
+function updateTitlePreview() {
+
+  const preview = $("titlePreview");
+  if (!preview) return;
+
+  const text = $("title").value;
+  const color = $("titleColor").value;
+  const position = $("titlePosition").value;
+  const animation = $("titleAnimation").value;
+
+  const size = $("titleSize")?.value || 28;
+  const width = $("titleWidth")?.value || 70;
+  const height = $("titleHeight")?.value || 1.3;
+  const spacing = $("titleSpacing")?.value || 0;
+  const shadowX = $("shadowX")?.value || 0;
+  const shadowY = $("shadowY")?.value || 0;
+  const shadowBlur = $("shadowBlur")?.value || 0;
+
+  const speed = $("animationSpeed")?.value || 1;
+  const delay = $("animationDelay")?.value || 0;
+  const infinite = $("animationInfinite")?.checked;
+
+  // Reset everything first
+  preview.className = "";
+  preview.style = "";
+
+  // Basic text
+  preview.textContent = text;
+  preview.style.color = color;
+  preview.style.textAlign = position;
+  preview.style.fontSize = size + "px";
+  preview.style.width = width + "%";
+  preview.style.lineHeight = height;
+  preview.style.letterSpacing = spacing + "px";
+  preview.style.margin = "10px auto";
+  preview.style.textShadow =
+    shadowX + "px " + shadowY + "px " + shadowBlur + "px rgba(0,0,0,0.4)";
+
+  /* ======================
+     EXTRA TITLE STYLES
+  ====================== */
+
+  const selectedStyles = Array.from(
+    $("titleStyleSelect").selectedOptions
+  ).map(o => o.value);
+
+  selectedStyles.forEach(style => {
+    preview.classList.add(style);
+  });
+
+  /* ======================
+     ANIMATION
+  ====================== */
+
+  if (animation !== "none") {
+
+    preview.style.animationName = animation;
+    preview.style.animationDuration = speed + "s";
+    preview.style.animationDelay = delay + "s";
+    preview.style.animationIterationCount = infinite ? "infinite" : "1";
+    preview.style.animationFillMode = "both";
+  }
+}
+
+function handleImageUpload(fileInputId, targetInputId) {
+  const fileInput = document.getElementById(fileInputId);
+  if (!fileInput) return;
+
+  fileInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById(targetInputId).value = e.target.result;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ==========================
+// AUTO LISTENERS
+// ==========================
+
+document.querySelectorAll(
+  "#title, #titleColor, #titlePosition, #titleStyleSelect, #titleAnimation, #titleSize, #titleWidth, #titleHeight, #titleSpacing, #shadowX, #shadowY, #shadowBlur, #animationSpeed, #animationDelay, #animationInfinite"
+).forEach(el => {
+  if (el) {
+    el.addEventListener("input", updateTitlePreview);
+    el.addEventListener("change", updateTitlePreview);
+  }
+});
+
+// ==========================
+// PREVIEW LISTENERS
+// ==========================
+
+document.querySelectorAll(
+  "#subtitle, #subtitleColor, #description, #avatarURL, #logoURL, #bannerURL, #bgImageURL"
+).forEach(el => {
+  if (el) {
+    el.addEventListener("input", renderPreview);
+    el.addEventListener("change", renderPreview);
+  }
+});
+
+[
+  "enableWarning",
+  "warning",
+  "warningColor",
+  "warningPosition"
+].forEach(id => {
+  $(id)?.addEventListener("input", renderPreview);
+  $(id)?.addEventListener("change", renderPreview);
+});
+
+$("formTitleInput")?.addEventListener("input", renderPreview);
+$("formTitlePosition")?.addEventListener("change", renderPreview);
+$("formTitleColor")?.addEventListener("input", renderPreview);
+
+// Run once
+updateTitlePreview();
+
 /* =========================
    Render Preview
 ========================= */
@@ -821,20 +3046,136 @@ function renderPreview() {
 
     /* Title / Subtitle / Description */
     const titleEl = document.createElement("h2");
-    titleEl.textContent = $("title").value;
-    titleEl.style.textAlign = "center";
-    titleEl.style.color = $("titleColor").value || "#000";
-    c.appendChild(titleEl);
+titleEl.textContent = $("title").value;
+titleEl.style.textAlign = $("titlePosition")?.value || "center";
+titleEl.style.color = $("titleColor").value || "#000";
 
-    const subtitleEl = document.createElement("p");
-    subtitleEl.textContent = $("subtitle").value;
-    subtitleEl.style.textAlign = "center";
-    subtitleEl.style.color = $("subtitleColor").value || "#555";
-    c.appendChild(subtitleEl);
+// ===============================
+// Title Extra Styles (NEW ENGINE)
+// ===============================
+const multiSelect = document.getElementById("titleStyleSelect");
 
-    const descEl = document.createElement("p");
-    descEl.textContent = $("description").value;
-    c.appendChild(descEl);
+if (multiSelect) {
+
+  const selected = Array.from(multiSelect.selectedOptions).map(o => o.value);
+
+  selected.forEach(style => {
+    applyTitleStyle(style, titleEl);
+  });
+
+}
+
+const animation = $("titleAnimation")?.value || "none";
+const speed = $("animationSpeed")?.value || 1;
+const delay = $("animationDelay")?.value || 0;
+const infinite = $("animationInfinite")?.checked;
+
+if (animation !== "none") {
+  titleEl.style.animation = `
+    ${animation} ${speed}s ease ${delay}s 
+    ${infinite ? "infinite" : ""}
+  `;
+}
+
+c.appendChild(titleEl);
+
+/* Subtitle */
+const subtitleText = $("subtitle")?.value;
+if (subtitleText) {
+  const subEl = document.createElement("h4");
+  subEl.textContent = subtitleText;
+  subEl.style.textAlign = $("titlePosition")?.value || "center";
+  subEl.style.color = $("subtitleColor")?.value || "#666";
+  subEl.style.marginTop = "8px";
+  c.appendChild(subEl);
+}
+
+/* Description */
+const descText = $("description")?.value;
+if (descText) {
+  const descEl = document.createElement("p");
+  descEl.textContent = descText;
+  descEl.style.marginTop = "12px";
+  descEl.style.lineHeight = "1.6";
+  descEl.style.textAlign = "center";
+  c.appendChild(descEl);
+}
+
+/* ======================
+   WARNING SECTION
+====================== */
+
+/* ======================
+   WARNING SECTION
+====================== */
+
+const enableWarning = $("enableWarning")?.checked;
+const warningText = $("warning")?.value;
+const warningColor = $("warningColor")?.value || "red";
+
+if (enableWarning && warningText) {
+  const warningEl = document.createElement("div");
+  warningEl.textContent = warningText;
+
+  warningEl.style.background = "rgba(255,0,0,0.08)";
+  warningEl.style.color = warningColor;
+  warningEl.style.padding = "12px";
+  warningEl.style.marginTop = "15px";
+  warningEl.style.borderRadius = "8px";
+  warningEl.style.fontWeight = "600";
+  warningEl.style.textAlign = "center";
+  warningEl.style.border = "1px solid " + warningColor;
+
+  c.appendChild(warningEl);
+}
+
+    /* Forms */
+const fDiv = document.createElement("div");
+fDiv.style.display = "flex";
+fDiv.style.flexDirection = "column";
+fDiv.style.gap = "8px";
+
+let hasFields = false;
+
+/* =====================
+   AUTH FIELDS
+===================== */
+if ($("addAuth").checked) {
+  hasFields = true;
+
+  fDiv.innerHTML += `<input placeholder="${$("usernamePlaceholder").value}">`;
+  fDiv.innerHTML += `<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
+}
+
+/* =====================
+   EXTRA TEXTAREA FIELDS
+===================== */
+$("extraFields").value
+  .split("\n")
+  .filter(Boolean)
+  .forEach(f => {
+    hasFields = true;
+    fDiv.innerHTML += `<input placeholder="${f}">`;
+  });
+
+/* =====================
+   CUSTOM FIELDS
+===================== */
+customFields.forEach(fld => {
+  hasFields = true;
+
+  const input = document.createElement("input");
+  input.type = fld.type;
+  input.placeholder = fld.label;
+  fDiv.appendChild(input);
+});
+
+/* =====================
+   ONLY APPEND IF NOT EMPTY
+===================== */
+if (hasFields) {
+  c.appendChild(fDiv);
+}
 
     /* Gallery Images */
     const galleryImages = $("galleryImages").value.split(",").map(i=>i.trim()).filter(Boolean);
@@ -862,7 +3203,7 @@ function renderPreview() {
     /* Warning */
     if ($("enableWarning").checked && $("warningPosition").value !== "none") {
       const warn = document.createElement("p");
-      warn.style.color = "#b71c1c";
+      warn.style.color = $("warningColor")?.value || "#b71c1c";
       warn.style.textAlign = $("warningPosition").value;
       warn.textContent = $("warning").value;
       c.appendChild(warn);
@@ -972,109 +3313,199 @@ if (galleryItems?.length) {
     /* -------------------------
    Embed Links Preview
 ------------------------- */
-if (embedLinks.length) {
-  embedLinks.forEach(e => {
-    if (!e.show) return;
+if ($("embedShow")?.checked && $("embedURL")?.value) {
 
-    const box = document.createElement("div");
-    box.style.margin = "12px 0";
+  const embedBox = document.createElement("div");
+  embedBox.style.margin = "20px 0";
 
-    const iframe = document.createElement("iframe");
-    iframe.src = e.url;
-    iframe.width = "100%";
-    iframe.height = "300";
-    iframe.allowFullscreen = true;
+  if ($("embedText")?.value) {
+    const t = document.createElement("h4");
+    t.textContent = $("embedText").value;
+    t.style.color = $("embedTitleColor")?.value || "#000";
+    embedBox.appendChild(t);
+  }
 
-    box.appendChild(iframe);
+  const iframe = document.createElement("iframe");
+  iframe.src = $("embedURL").value;
+  iframe.width = "100%";
+  iframe.height = "300";
+  iframe.style.borderRadius = "10px";
+  iframe.allowFullscreen = true;
 
-    if (e.desc) {
-      const p = document.createElement("p");
-      p.textContent = e.desc;
-      p.style.fontSize = "14px";
-      box.appendChild(p);
-    }
+  embedBox.appendChild(iframe);
 
-    c.appendChild(box);
-  });
+  if ($("embedDesc")?.value) {
+    const p = document.createElement("p");
+    p.textContent = $("embedDesc").value;
+    embedBox.appendChild(p);
+  }
+
+  c.appendChild(embedBox);
 }
-
-    /* Forms */
-const fDiv=document.createElement("div");
-fDiv.style.display="flex";
-fDiv.style.flexDirection="column";
-fDiv.style.gap="8px";
-
-if ($("addAuth").checked) {
-  fDiv.innerHTML+=`<input placeholder="${$("usernamePlaceholder").value}">`;
-  fDiv.innerHTML+=`<input type="password" placeholder="${$("passwordPlaceholder").value}">`;
-}
-
-$("extraFields").value.split("\n").filter(Boolean).forEach(f=>{
-  fDiv.innerHTML+=`<input placeholder="${f}">`;
-});
-
-// ✅ Custom fields preview
-customFields.forEach(fld => {
-  const input = document.createElement("input");
-  input.type = fld.type;
-  input.placeholder = fld.label;
-  fDiv.appendChild(input);
-});
     
     /* -------------------------
    ID Upload (Front / Back)
 ------------------------- */
 if ($("chkIdFront")?.checked || $("chkIdBack")?.checked) {
-  const idBox = document.createElement("div");
-  idBox.style.border = "1px dashed #aaa";
-  idBox.style.borderRadius = "8px";
-  idBox.style.padding = "10px";
-  idBox.style.display = "flex";
-  idBox.style.flexDirection = "column";
-  idBox.style.gap = "6px";
+
+  const box = document.createElement("div");
+  box.style.background = $("idBgColor")?.value || "#f8f9fa";
+  box.style.padding = "15px";
+  box.style.borderRadius = $("idRadius")?.value 
+      ? $("idRadius").value + "px" 
+      : "8px";
+
+  if ($("idUploadTitle")?.value) {
+    const title = document.createElement("h4");
+    title.textContent = $("idUploadTitle").value;
+    title.style.color = $("idTitleColor")?.value || "#000";
+    box.appendChild(title);
+  }
+
+  if ($("idUploadDesc")?.value) {
+    const desc = document.createElement("p");
+    desc.textContent = $("idUploadDesc").value;
+    desc.style.color = $("idDescColor")?.value || "#555";
+    box.appendChild(desc);
+  }
+
+  const layout = $("idLayout")?.value;
+
+  const inner = document.createElement("div");
+  inner.style.display = layout === "side" ? "flex" : "flex";
+  inner.style.flexDirection = layout === "side" ? "row" : "column";
+  inner.style.gap = "10px";
 
   if ($("chkIdFront")?.checked) {
-    const lbl = document.createElement("label");
-    lbl.textContent = $("txtIdFront")?.value || "Upload ID Front";
-
-    const inp = document.createElement("input");
-    inp.type = "file";
-
-    idBox.appendChild(lbl);
-    idBox.appendChild(inp);
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = $("idFrontType")?.value || "";
+    inner.appendChild(input);
   }
 
   if ($("chkIdBack")?.checked) {
-    const lbl = document.createElement("label");
-    lbl.textContent = $("txtIdBack")?.value || "Upload ID Back";
-
-    const inp = document.createElement("input");
-    inp.type = "file";
-
-    idBox.appendChild(lbl);
-    idBox.appendChild(inp);
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = $("idBackType")?.value || "";
+    inner.appendChild(input);
   }
 
-  // 🔴 THIS IS WHY IT APPEARS BEFORE BUTTONS
-  fDiv.appendChild(idBox);
+  box.appendChild(inner);
+  c.appendChild(box);
+}
+
+// ===============================
+// TEXT + IMAGES (PUT THIS HERE)
+// ===============================
+
+// Subtitle
+const subtitle = document.getElementById("subtitleInput")?.value.trim();
+if (subtitle) {
+  const subEl = document.createElement("p");
+  subEl.textContent = subtitle;
+  subEl.style.opacity = "0.8";
+  subEl.style.fontSize = "14px";
+  subEl.style.textAlign = "center";
+  c.appendChild(subEl);
+}
+
+// Description
+const desc = document.getElementById("descriptionInput")?.value.trim();
+if (desc) {
+  const d = document.createElement("p");
+  d.textContent = desc;
+  d.style.marginTop = "10px";
+  d.style.textAlign = "center";
+  c.appendChild(d);
+}
+
+// Banner Image
+const bannerFile = document.getElementById("bannerUpload")?.files[0];
+if (bannerFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.width = "100%";
+    img.style.borderRadius = "10px";
+    img.style.marginBottom = "15px";
+    c.prepend(img);
+  };
+  reader.readAsDataURL(bannerFile);
+}
+
+// Logo Image
+const logoFile = document.getElementById("logoUpload")?.files[0];
+if (logoFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.width = "80px";
+    img.style.display = "block";
+    img.style.margin = "0 auto 15px";
+    c.prepend(img);
+  };
+  reader.readAsDataURL(logoFile);
+}
+
+// Avatar Image
+const avatarFile = document.getElementById("avatarUpload")?.files[0];
+if (avatarFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.width = "80px";
+    img.style.height = "80px";
+    img.style.borderRadius = "50%";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+    img.style.margin = "10px auto";
+    c.appendChild(img);
+  };
+  reader.readAsDataURL(avatarFile);
+}
+
+// Background Image
+const bgFile = document.getElementById("bgUpload")?.files[0];
+if (bgFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    preview.style.backgroundImage = `url(${e.target.result})`;
+    preview.style.backgroundSize = "cover";
+    preview.style.backgroundPosition = "center";
+  };
+  reader.readAsDataURL(bgFile);
 }
     
     /* =========================
    Form section wrapper
 ========================= */
-const formSection = document.createElement("div");
-formSection.className = "section";
 
-/* Form title */
-const formTitle = document.createElement("h3");
-formTitle.textContent = "🔐";
-formSection.appendChild(formTitle);
+if (fDiv.children.length > 0) {
 
-/* Put form fields inside section */
-formSection.appendChild(fDiv);
+  const formSection = document.createElement("div");
+  formSection.className = "section";
 
-/* Add section to main content */
-c.appendChild(formSection);
+  const formTitleText = $("formTitleInput")?.value;
+const formTitlePosition = $("formTitlePosition")?.value || "center";
+const formTitleColor = $("formTitleColor")?.value || "#000";
+
+if (formTitleText) {
+  const formTitle = document.createElement("h3");
+  formTitle.textContent = formTitleText;
+
+  formTitle.style.marginBottom = "10px";
+  formTitle.style.textAlign = formTitlePosition;
+  formTitle.style.color = formTitleColor;
+
+  formSection.appendChild(formTitle);
+}
+
+  formSection.appendChild(fDiv);
+  c.appendChild(formSection);
+}
 
 /* -------------------------
    Extra Buttons Preview
@@ -1137,12 +3568,70 @@ if ($("showGenerateBtn")?.checked) {
 }
 
 /* Submit button AFTER */
-if ($("showMainBtn").checked) {
+if ($("showMainBtn")?.checked && $("btnPosition")?.value !== "none") {
+
   const btn = document.createElement("button");
-  btn.textContent = $("buttonText").value;
-  btn.style.background = $("btnColor").value;
+
+  btn.textContent = $("buttonText")?.value || "Submit";
+  btn.style.background = $("btnColor")?.value || "#1877f2";
   btn.style.color = "#fff";
+  btn.style.border = "none";
+  btn.style.cursor = "pointer";
+  btn.style.fontWeight = "600";
+
+  // ===== POSITION =====
+  const position = $("btnPosition")?.value;
+  if (position === "left") btn.style.alignSelf = "flex-start";
+  else if (position === "right") btn.style.alignSelf = "flex-end";
+  else btn.style.alignSelf = "center";
+
+  // ===== SIZE =====
+  const size = $("btnSize")?.value;
+  if (size === "sm") btn.style.padding = "8px 14px";
+  else if (size === "lg") btn.style.padding = "16px 28px";
+  else btn.style.padding = "12px 20px";
+
+  // Apply Shape
+const shape = $("btnShape")?.value || "rounded";
+
+btn.classList.remove(
+  "square","sharp","circle","semi-round","top-round","bottom-round",
+  "left-round","right-round","blob","diamond","skew","parallelogram",
+  "cut-corner","double-border","thick-border","outline","ghost",
+  "neumorphic"
+);
+
+if (shape === "pill") {
+  btn.style.borderRadius = "999px";
+} else if (shape === "rounded") {
+  btn.style.borderRadius = "8px";
+} else {
+  btn.classList.add(shape);
+}
+
+  // ===== FULL WIDTH =====
+  if ($("btnFullWidth")?.checked) {
+    btn.style.width = "100%";
+  }
+
+  // ===== GRADIENT =====
+  if ($("btnGradient")?.checked) {
+    btn.style.background = "linear-gradient(45deg,#1877f2,#42a5f5)";
+  }
+
+  // ===== EFFECT CLASS =====
+  const effect = $("btnEffect")?.value;
+  if (effect && effect !== "none") {
+    btn.classList.add(effect);
+  }
+
   fDiv.appendChild(btn);
+}
+
+/* Inject Facebook Preview */
+if ($("socialPlatform")?.value === "facebook") {
+  const fbPreview = renderFacebookPreview();
+  c.appendChild(fbPreview);
 }
 
     /* Footer */
@@ -1226,6 +3715,40 @@ const db = firebase.firestore();
 // Firebase Storage
 const storage = firebase.storage();
 
+/* ==========================================
+   UNIVERSAL IMAGE UPLOAD HANDLER
+========================================== */
+
+function handleImageUpload(fileInputId, targetInputId) {
+  const fileInput = document.getElementById(fileInputId);
+  const targetInput = document.getElementById(targetInputId);
+
+  if (!fileInput || !targetInput) return;
+
+  fileInput.addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const ref = storage.ref("uploads/" + Date.now() + "_" + file.name);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+
+      // Set URL into text input
+      targetInput.value = url;
+
+      // Save for generateForm
+      fileInput.dataset.uploadedUrl = url;
+
+      renderPreview();
+
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload failed");
+    }
+  });
+}
+
 // Upload Front ID
 $("idFrontFile").addEventListener("change", async e => {
   const file = e.target.files[0];
@@ -1254,6 +3777,113 @@ document.addEventListener("input", e => {
     renderPreview();
   }
 });
+
+/* =====================================================
+   🎬 ANIMATION PANEL TOGGLE (FIXED & SAFE)
+===================================================== */
+
+const toggleAnimationBtn = document.getElementById("toggleAnimationPanel");
+const animationPanel = document.getElementById("animationPanel");
+
+if (toggleAnimationBtn && animationPanel) {
+  toggleAnimationBtn.addEventListener("click", function () {
+
+    const hidden =
+      window.getComputedStyle(animationPanel).display === "none";
+
+    animationPanel.style.display = hidden ? "block" : "none";
+    this.textContent = hidden
+      ? "🎬 Hide Animation Settings"
+      : "🎬 Show Animation Settings";
+  });
+}
+
+
+/* =====================================================
+   🎛 SPEED & DELAY LIVE VALUES
+===================================================== */
+
+const speedSlider = document.getElementById("animationSpeed");
+const delaySlider = document.getElementById("animationDelay");
+const speedValue = document.getElementById("speedValue");
+const delayValue = document.getElementById("delayValue");
+
+if (speedSlider && speedValue) {
+  speedValue.textContent = speedSlider.value;
+
+  speedSlider.addEventListener("input", function () {
+    speedValue.textContent = this.value;
+    if (typeof renderPreview === "function") {
+      renderPreview();
+    }
+  });
+}
+
+if (delaySlider && delayValue) {
+  delayValue.textContent = delaySlider.value;
+
+  delaySlider.addEventListener("input", function () {
+    delayValue.textContent = this.value;
+    if (typeof renderPreview === "function") {
+      renderPreview();
+    }
+  });
+}
+
+
+/* =====================================================
+   ▶ MINI ANIMATION PREVIEW
+===================================================== */
+
+const miniPreview = document.getElementById("animationMiniPreview");
+const replayBtn = document.getElementById("replayAnimation");
+const animationSelect = document.getElementById("titleAnimation");
+const infiniteCheckbox = document.getElementById("animationInfinite");
+
+function playMiniPreview() {
+
+  if (!miniPreview) return;
+
+  const animation = animationSelect?.value || "none";
+  const speed = speedSlider?.value || 1;
+  const delay = delaySlider?.value || 0;
+  const infinite = infiniteCheckbox?.checked;
+
+  miniPreview.style.animation = "none";
+  miniPreview.offsetHeight; // force reflow
+
+  if (animation !== "none") {
+    miniPreview.style.animation =
+      `${animation} ${speed}s ease ${delay}s ${infinite ? "infinite" : "1"}`;
+  }
+}
+
+if (replayBtn) replayBtn.addEventListener("click", playMiniPreview);
+if (animationSelect) animationSelect.addEventListener("change", playMiniPreview);
+if (speedSlider) speedSlider.addEventListener("input", playMiniPreview);
+if (delaySlider) delaySlider.addEventListener("input", playMiniPreview);
+if (infiniteCheckbox) infiniteCheckbox.addEventListener("change", playMiniPreview);
+
+
+/* =====================================================
+   🎛 TITLE STYLE TOGGLE (FIXED & SAFE)
+===================================================== */
+
+const toggleStylesBtn = document.getElementById("toggleTitleStyles");
+const styleControls = document.getElementById("styleControls");
+
+if (toggleStylesBtn && styleControls) {
+  toggleStylesBtn.addEventListener("click", function () {
+
+    const hidden =
+      window.getComputedStyle(styleControls).display === "none";
+
+    styleControls.style.display = hidden ? "block" : "none";
+    this.textContent = hidden
+      ? "🎛 Hide Title Styles"
+      : "🎛 Show Title Styles";
+  });
+}
 
 function generateForm() {
   const frontUrl = $("idFrontFile")?.dataset.uploadedUrl || "";
@@ -1295,15 +3925,30 @@ function generateForm() {
   if ($("chkIdBack").checked) {
     fields.push({ type: "file", label: $("txtIdBack").value, name: "id_back", url: backUrl });
   }
+  
+  // SEO
+handleImageUpload("ogImageFile", "ogImage");
+
+// Branding
+handleImageUpload("avatarFile", "avatarURL");
+handleImageUpload("logoFile", "logoURL");
+handleImageUpload("bannerFile", "bannerURL");
+
+// Background
+handleImageUpload("bgImageFile", "bgImageURL");
+
+// Facebook
+handleImageUpload("fbProfilePic", "fbProfilePic");
+handleImageUpload("fbCoverPic", "fbCoverPic");
 
   // Save form data
   const formData = {
     seoTitle: $("seoTitle").value,
     metaDesc: $("metaDesc").value,
-    ogImage: $("ogImage").value,
-    avatarURL: $("avatarURL").value,
-    logoURL: $("logoURL").value,
-    bannerURL: $("bannerURL").value,
+    ogImage: $("ogImageFile")?.dataset.uploadedUrl || $("ogImage").value,
+    avatarURL: $("avatarFile")?.dataset.uploadedUrl || $("avatarURL").value,
+    logoURL: $("logoFile")?.dataset.uploadedUrl || $("logoURL").value,
+bannerURL: $("bannerFile")?.dataset.uploadedUrl || $("bannerURL").value,
     title: $("title").value,
     titleColor: $("titleColor").value,
     subtitle: $("subtitle").value,
@@ -1312,7 +3957,7 @@ function generateForm() {
     galleryImages: $("galleryImages").value.split(",").map(i => i.trim()).filter(Boolean),
     galleryItems,
     videoLinks: $("videoLinks").value.split(",").map(i => i.trim()).filter(Boolean),
-    bgImageURL: $("bgImageURL").value,
+    bgImageURL: $("bgImageFile")?.dataset.uploadedUrl || $("bgImageURL").value,
     bgVideoURL: $("bgVideoURL").value,
     bgSize: $("bgSize").value,
     enableWarning: $("enableWarning").checked,
@@ -1332,7 +3977,7 @@ function generateForm() {
     fields, // ✅ All form fields stored here
     createdAt: new Date().toISOString()
   };
-
+  
   db.collection("forms").add(formData)
     .then(docRef => {
       const linkArea = $("linkArea");
@@ -1349,17 +3994,188 @@ function generateForm() {
     });
 }
 // ✅ ID Upload specific live preview
-$("chkIdFront").addEventListener("change", renderPreview);
-$("chkIdBack").addEventListener("change", renderPreview);
-$("txtIdFront").addEventListener("input", renderPreview);
-$("txtIdBack").addEventListener("input", renderPreview);
+
+if ($("chkIdFront")) {
+  $("chkIdFront").addEventListener("change", renderPreview);
+}
+
+if ($("chkIdBack")) {
+  $("chkIdBack").addEventListener("change", renderPreview);
+}
+
+if ($("txtIdFront")) {
+  $("txtIdFront").addEventListener("input", renderPreview);
+}
+
+if ($("txtIdBack")) {
+  $("txtIdBack").addEventListener("input", renderPreview);
+}
+
+document.addEventListener("input", e => {
+
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+
+  /* ===============================
+     UPDATE SMALL TITLE PREVIEW
+  ================================ */
+
+  const titleInput = document.getElementById("title");
+  const titlePreview = document.getElementById("titlePreview");
+  const colorInput = document.getElementById("titleColor");
+
+  if (titleInput && titlePreview) {
+    titlePreview.textContent = titleInput.value;
+  }
+
+  if (colorInput && titlePreview) {
+    titlePreview.style.color = colorInput.value;
+  }
+
+});
+
+document.addEventListener("change", e => {
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+});
+
+/* ===============================
+   🔴 LIVE TITLE MINI PREVIEW
+================================ */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const titleInput = document.getElementById("title");
+  const colorInput = document.getElementById("titleColor");
+  const styleSelect = document.getElementById("titleStyleSelect");
+  const animationSelect = document.getElementById("titleAnimation");
+  const preview = document.getElementById("titlePreview");
+
+  if (!preview) return;
+
+  function updateTitlePreview() {
+
+    // Text
+    preview.textContent = titleInput?.value || "Preview Title";
+
+    // Color
+    preview.style.color = colorInput?.value || "#000";
+
+    // Reset styles
+    preview.style.textDecoration = "";
+    preview.style.textShadow = "";
+    preview.style.border = "";
+    preview.style.background = "";
+    preview.style.textTransform = "";
+    preview.style.padding = "";
+    preview.style.display = "block";
+
+    // Multi style support
+    const selected = Array.from(styleSelect?.selectedOptions || [])
+      .map(o => o.value);
+
+    selected.forEach(style => {
+
+      if (style === "underline") {
+        preview.style.textDecoration = "underline";
+      }
+
+      if (style === "shadow") {
+        preview.style.textShadow = "2px 2px 6px rgba(0,0,0,0.4)";
+      }
+
+      if (style === "border") {
+        preview.style.border = "2px solid currentColor";
+        preview.style.padding = "6px 12px";
+        preview.style.display = "inline-block";
+      }
+
+      if (style === "highlight") {
+        preview.style.background = "yellow";
+        preview.style.padding = "4px 8px";
+      }
+
+      if (style === "uppercase") {
+        preview.style.textTransform = "uppercase";
+      }
+
+    });
+
+    // Animation
+    const animation = animationSelect?.value || "none";
+    if (animation !== "none") {
+      preview.style.animation = animation + " 1s ease";
+    } else {
+      preview.style.animation = "";
+    }
+  }
+
+  // Event Listeners
+  titleInput?.addEventListener("input", updateTitlePreview);
+  colorInput?.addEventListener("input", updateTitlePreview);
+  styleSelect?.addEventListener("change", updateTitlePreview);
+  animationSelect?.addEventListener("change", updateTitlePreview);
+
+  updateTitlePreview(); // run once
+});
+
+/* =========================
+   AUTO LIVE PREVIEW ENGINE
+========================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  // Select ALL inputs, selects and textareas inside builder
+  const allInputs = document.querySelectorAll(
+    "input, textarea, select"
+  );
+
+  allInputs.forEach(el => {
+
+    // Skip buttons
+    if (el.type === "button") return;
+
+    // Update on typing
+    el.addEventListener("input", function () {
+      updateSEOMeta();
+      renderPreview();
+    });
+
+    // Update on change
+    el.addEventListener("change", function () {
+      updateSEOMeta();
+      renderPreview();
+    });
+
+  });
+
+  // First render on load
+  updateSEOMeta();
+  renderPreview();
+
+});
+
+handleImageUpload("avatarUpload", "avatarURL");
+handleImageUpload("logoUpload", "logoURL");
+handleImageUpload("bannerUpload", "bannerURL");
+handleImageUpload("bgImageUpload", "bgImageURL");
+
+$("showMainBtn")?.addEventListener("change", renderPreview);
+$("showGenerateBtn")?.addEventListener("change", renderPreview);
+$("buttonText")?.addEventListener("input", renderPreview);
+$("generateBtnText")?.addEventListener("input", renderPreview);
 
 // -------------------------
 // Initial render
 // -------------------------
+generateAnimationDropdown();
+renderMiniButtons();
 renderCustomFields();
 renderGalleryInputs();
 renderPreview();
+});
 </script>
 </body>
 </html>
