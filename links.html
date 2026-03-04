@@ -43,40 +43,51 @@ const container = document.getElementById("linksContainer");
 
 function loadLinks(){
   container.innerHTML="";
-  db.collection("forms").orderBy("createdAt","desc").get()
-  .then(snapshot=>{
-    if(snapshot.empty){
-      container.textContent = "No forms found!";
-      return;
-    }
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      const link = `${window.location.origin}/form.html?id=${doc.id}`;
-      const date = data.createdAt ? new Date(data.createdAt).toLocaleString() : "Unknown";
-      const div = document.createElement("div");
-      div.className="formLinkBox";
-      div.dataset.docId = doc.id;
-      div.innerHTML = `
-        <div class="checkboxWrapper">
-          <input type="checkbox" class="selectCheckbox">
-          <div class="linkText">
-            <strong>${data.title || "Untitled Form"}</strong> <br>
-            ${date} <br>
-            <a href="${link}" target="_blank">${link}</a>
+
+  db.collection("forms")
+    .orderBy("createdAt","desc")
+    .get()
+    .then(snapshot=>{
+      if(snapshot.empty){
+        container.textContent = "No forms found!";
+        return;
+      }
+
+      snapshot.forEach(doc=>{
+        const data = doc.data();
+
+        const link = `${window.location.origin}${window.location.pathname.replace("links.html","")}form.html?id=${doc.id}`;
+
+        const date = data.createdAt && data.createdAt.toDate
+          ? data.createdAt.toDate().toLocaleString()
+          : "Unknown";
+
+        const div = document.createElement("div");
+        div.className="formLinkBox";
+        div.dataset.docId = doc.id;
+
+        div.innerHTML = `
+          <div class="checkboxWrapper">
+            <input type="checkbox" class="selectCheckbox">
+            <div class="linkText">
+              <strong>${data.title || "Untitled Form"}</strong><br>
+              ${date}<br>
+              <a href="${link}" target="_blank">${link}</a>
+            </div>
           </div>
-        </div>
-        <div class="linkActions">
-          <button onclick="copyLink('${link}')">Copy</button>
-          <button class="deleteBtn" onclick="deleteForm('${doc.id}')">Delete</button>
-        </div>
-      `;
-      container.appendChild(div);
+          <div class="linkActions">
+            <button onclick="copyLink('${link}')">Copy</button>
+            <button class="deleteBtn" onclick="deleteForm('${doc.id}')">Delete</button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    })
+    .catch(err=>{
+      console.error(err);
+      container.textContent = "Error loading form links.";
     });
-  })
-  .catch(err=>{
-    console.error(err);
-    container.textContent = "Error loading form links.";
-  });
 }
 
 function copyLink(link){
