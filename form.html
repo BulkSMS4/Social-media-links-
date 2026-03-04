@@ -4,150 +4,336 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Form</title>
+
 <style>
-  html, body {margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif;}
-  body {overflow-x:hidden;}
-  #bgVideoLayer, #bgImageLayer {position:fixed; top:0; left:0; width:100%; height:100%; z-index:-2; object-fit:cover;}
-  #dynamicForm {position:relative; z-index:1; width:90%; max-width:800px; margin:50px auto; background:rgba(255,255,255,0.9); border-radius:10px; padding:20px; box-sizing:border-box;}
-  #dynamicForm img, #dynamicForm video, #dynamicForm iframe {max-width:100%; margin:6px 0; border-radius:6px;}
-  #formTitle {text-align:center; font-size:28px; font-weight:bold; margin-bottom:8px;}
-  #formDesc {text-align:center; font-size:16px; margin-bottom:16px;}
-  input, textarea, select, button {width:100%; margin:6px 0; padding:10px; font-size:14px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;}
-  button {background:#1976d2; color:#fff; border:none; cursor:pointer;}
+html, body {
+  margin:0;
+  padding:0;
+  height:100%;
+  font-family:Arial, sans-serif;
+}
+
+#bgVideoLayer,
+#bgImageLayer {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-2;
+  object-fit:cover;
+}
+
+#bgImageLayer {
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+
+#dynamicForm {
+  position:relative;
+  z-index:1;
+  width:92%;
+  max-width:850px;
+  margin:40px auto;
+  background:rgba(255,255,255,0.95);
+  border-radius:12px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  box-sizing:border-box;
+}
+
+#dynamicForm img,
+#dynamicForm video,
+#dynamicForm iframe {
+  max-width:100%;
+  border-radius:8px;
+  margin:8px 0;
+}
+
+#formTitle {
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+#formDesc {
+  text-align:center;
+  margin-bottom:20px;
+  opacity:.8;
+}
+
+input, textarea, select, button {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+  box-sizing:border-box;
+}
+
+button {
+  background:#1976d2;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+  transition:.2s;
+}
+
+button:hover {
+  opacity:.9;
+}
+
+.successMessage {
+  text-align:center;
+  padding:20px;
+  background:#e8f5e9;
+  border-radius:8px;
+  margin-top:15px;
+  color:#2e7d32;
+  font-weight:bold;
+}
 </style>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
 </head>
 <body>
 
 <video id="bgVideoLayer" autoplay muted loop playsinline style="display:none;"></video>
 <div id="bgImageLayer"></div>
 
-<div id="dynamicForm">
-  <h1 id="formTitle">Loading form…</h1>
+<form id="dynamicForm">
+  <h1 id="formTitle">Loading form...</h1>
   <p id="formDesc"></p>
-</div>
+</form>
 
 <script>
 const $ = id => document.getElementById(id);
 
+/* =============================
+   🔥 FIREBASE INIT
+============================= */
 firebase.initializeApp({
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
-  projectId: "usahackersland",
-  storageBucket: "usahackersland.appspot.com"
+  projectId: "usahackersland"
 });
-const db = firebase.firestore();
-const storage = firebase.storage();
 
+const db = firebase.firestore();
+
+/* =============================
+   🔍 GET FORM ID
+============================= */
 const formId = new URLSearchParams(location.search).get("id");
 const form = $("dynamicForm");
 
-if(!formId){
-  form.innerHTML = "<p>Form ID missing</p>";
+if (!formId) {
+  form.innerHTML = "<p>Form ID missing.</p>";
+  throw new Error("Form ID not provided");
 }
 
-// Load form from Firestore
-db.collection("forms").doc(formId).get().then(doc => {
-  if(!doc.exists){
-    form.innerHTML = "<p>Form not found</p>";
+/* =============================
+   📦 LOAD FORM
+============================= */
+db.collection("forms").doc(formId).get()
+.then(doc => {
+
+  if (!doc.exists) {
+    form.innerHTML = "<p>Form not found.</p>";
     return;
   }
+
   const data = doc.data();
 
-  // Set title/description
+  /* =============================
+     🎨 BACKGROUND
+  ============================= */
+  const bgVideo = $("bgVideoLayer");
+  const bgImage = $("bgImageLayer");
+
+  if (data.bgVideoURL) {
+    bgVideo.src = data.bgVideoURL;
+    bgVideo.style.display = "block";
+    bgImage.style.backgroundImage = "";
+  } 
+  else if (data.bgImageURL) {
+    bgImage.style.backgroundImage = `url(${data.bgImageURL})`;
+    bgImage.style.backgroundSize = data.bgSize || "cover";
+    bgVideo.style.display = "none";
+  }
+
+  /* =============================
+     📝 TITLE & DESCRIPTION
+  ============================= */
   $("formTitle").innerText = data.title || "Form";
   $("formDesc").innerText = data.subtitle || "";
 
-  // Background
-  const bgVideo = $("bgVideoLayer");
-  const bgImage = $("bgImageLayer");
-  if(data.bgVideoURL){
-    bgVideo.src = data.bgVideoURL;
-    bgVideo.style.display="block";
-    bgImage.style.background="";
-  } else if(data.bgImageURL){
-    bgImage.style.backgroundImage = `url(${data.bgImageURL})`;
-    bgImage.style.backgroundSize = data.bgSize || "cover";
-    bgImage.style.backgroundRepeat="no-repeat";
-    bgImage.style.backgroundPosition="center";
-    bgVideo.style.display="none";
+  /* =============================
+     🖼 BRANDING
+  ============================= */
+  function addImage(url, width, round=false) {
+    if (!url) return;
+    const img = document.createElement("img");
+    img.src = url;
+    img.style.width = width;
+    img.style.display = "block";
+    img.style.margin = "0 auto 12px";
+    if (round) img.style.borderRadius = "50%";
+    form.appendChild(img);
   }
 
-  // Center avatar, logo, banner
-  if(data.avatarURL) {
-    const img = document.createElement("img"); img.src=data.avatarURL; img.style.width="90px"; img.style.borderRadius="50%"; img.style.display="block"; img.style.margin="0 auto 10px"; form.appendChild(img);
-  }
-  if(data.logoURL) {
-    const img = document.createElement("img"); img.src=data.logoURL; img.style.display="block"; img.style.margin="0 auto 10px"; img.style.width="140px"; form.appendChild(img);
-  }
-  if(data.bannerURL) {
-    const img = document.createElement("img"); img.src=data.bannerURL; img.style.display="block"; img.style.margin="0 auto 10px"; img.style.width="100%"; form.appendChild(img);
-  }
+  addImage(data.avatarURL, "100px", true);
+  addImage(data.logoURL, "150px");
+  addImage(data.bannerURL, "100%");
 
-  // Gallery Images
-  if(Array.isArray(data.galleryImages)){
-    data.galleryImages.forEach(u=>{
-      if(!u) return;
-      const img = document.createElement("img"); img.src=u; form.appendChild(img);
+  /* =============================
+     🖼 GALLERY IMAGES
+  ============================= */
+  if (Array.isArray(data.galleryImages)) {
+    data.galleryImages.forEach(url => {
+      if (!url) return;
+      const img = document.createElement("img");
+      img.src = url;
+      form.appendChild(img);
     });
   }
 
-  // Gallery Items
-  if(Array.isArray(data.galleryItems)){
-    data.galleryItems.forEach(item=>{
-      const wrap = document.createElement("div"); wrap.style.margin="10px 0";
-      if(item.img){ const img=document.createElement("img"); img.src=item.img; wrap.appendChild(img);}
-      if(item.link && item.mask){ const a=document.createElement("a"); a.href=item.link; a.target="_blank"; a.textContent=item.mask; wrap.appendChild(a);}
-      if(item.desc){ const p=document.createElement("p"); p.textContent=item.desc; wrap.appendChild(p);}
+  /* =============================
+     🖼 GALLERY ITEMS
+  ============================= */
+  if (Array.isArray(data.galleryItems)) {
+    data.galleryItems.forEach(item => {
+      const wrap = document.createElement("div");
+      wrap.style.margin = "10px 0";
+
+      if (item.img) {
+        const img = document.createElement("img");
+        img.src = item.img;
+        wrap.appendChild(img);
+      }
+
+      if (item.link && item.mask) {
+        const a = document.createElement("a");
+        a.href = item.link;
+        a.target = "_blank";
+        a.textContent = item.mask;
+        wrap.appendChild(a);
+      }
+
+      if (item.desc) {
+        const p = document.createElement("p");
+        p.textContent = item.desc;
+        wrap.appendChild(p);
+      }
+
       form.appendChild(wrap);
     });
   }
 
-  // Videos
-  if(Array.isArray(data.videoLinks)){
-    data.videoLinks.forEach(l=>{
-      if(!l) return;
+  /* =============================
+     🎬 VIDEOS
+  ============================= */
+  if (Array.isArray(data.videoLinks)) {
+    data.videoLinks.forEach(link => {
+
+      if (!link) return;
+
       let el;
-      if(/\.(mp4|webm)$/i.test(l)){
-        el = document.createElement("video"); el.src=l; el.controls=true;
-      } else if (l.includes("youtube") || l.includes("youtu.be")) {
-        let id = l.split("v=")[1] || l.split("youtu.be/")[1]; if(id.includes("&")) id=id.split("&")[0];
-        el = document.createElement("iframe"); el.src=`https://www.youtube.com/embed/${id}`; el.height=315; el.allowFullscreen=true;
+
+      if (/\.(mp4|webm)$/i.test(link)) {
+        el = document.createElement("video");
+        el.src = link;
+        el.controls = true;
       }
-      if(el){ el.style.width="100%"; el.style.borderRadius="6px"; el.style.margin="6px 0"; form.appendChild(el);}
+      else if (link.includes("youtube") || link.includes("youtu.be")) {
+        let id = link.split("v=")[1] || link.split("youtu.be/")[1];
+        if (id && id.includes("&")) id = id.split("&")[0];
+
+        el = document.createElement("iframe");
+        el.src = "https://www.youtube.com/embed/" + id;
+        el.height = "315";
+        el.allowFullscreen = true;
+      }
+
+      if (el) form.appendChild(el);
+
     });
   }
 
-  // Form Fields
-  if(Array.isArray(data.fields)){
-    data.fields.forEach(f=>{
+  /* =============================
+     📋 FORM FIELDS
+  ============================= */
+  if (Array.isArray(data.fields)) {
+    data.fields.forEach(field => {
+
       const wrap = document.createElement("div");
-      wrap.style.margin="6px 0";
+
       let input;
-      if(f.type==="textarea"){ input=document.createElement("textarea"); } else { input=document.createElement("input"); input.type=f.type || "text";}
-      input.name=f.name || "";
-      input.placeholder=f.placeholder || f.label || "";
+
+      if (field.type === "textarea") {
+        input = document.createElement("textarea");
+      } else {
+        input = document.createElement("input");
+        input.type = field.type || "text";
+      }
+
+      input.name = field.name || "";
+      input.placeholder = field.placeholder || field.label || "";
+
       wrap.appendChild(input);
       form.appendChild(wrap);
+
     });
   }
 
-  // Submit button
+  /* =============================
+     🚀 SUBMIT BUTTON
+  ============================= */
   const btn = document.createElement("button");
+  btn.type = "submit";
   btn.textContent = data.buttonText || "Submit";
-  btn.onclick = async function(e){
-    e.preventDefault();
-    const formData = {};
-    form.querySelectorAll("input, textarea, select").forEach(i=>{if(i.name) formData[i.name]=i.value;});
-    await db.collection("submissions").add({formId, data:formData, createdAt:new Date()});
-    alert("Submitted successfully!");
-    form.reset && form.reset();
-  };
   form.appendChild(btn);
 
-}).catch(err=>{ console.error(err); form.innerHTML="<p>Error loading form</p>"; });
+  /* =============================
+     📤 SUBMIT HANDLER
+  ============================= */
+  form.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    const formData = {};
+
+    form.querySelectorAll("input, textarea, select")
+      .forEach(el => {
+        if (el.name) formData[el.name] = el.value;
+      });
+
+    await db.collection("submissions").add({
+      formId: formId,
+      data: formData,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    form.innerHTML += `
+      <div class="successMessage">
+        ✅ Submitted successfully!
+      </div>
+    `;
+
+    form.reset();
+
+  });
+
+})
+.catch(err => {
+  console.error(err);
+  form.innerHTML = "<p>Error loading form.</p>";
+});
 </script>
+
 </body>
 </html>
