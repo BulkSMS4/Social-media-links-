@@ -836,7 +836,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <label>Line Height</label>
     <input type="range" id="titleHeight" min="0.8" max="2" step="0.05">
 
-    <label>Letter Spacing (px)</label>
+    <label>Llabel Spacing (px)</label>
     <input type="range" id="titleSpacing" min="0" max="10" step="0.5">
 
     <label>Shadow X</label>
@@ -1904,10 +1904,51 @@ button {
 
     // 💾 Save to Firestore
     await db.collection("forms").doc(formId).set({
-      id: formId,
-      html: formHTML,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  title: $("titleInput")?.value || "",
+  subtitle: $("subtitleInput")?.value || "",
+  description: $("descriptionInput")?.value || "",
+
+  titleColor: $("titleColorInput")?.value || "#111",
+  subtitleColor: $("subtitleColorInput")?.value || "#555",
+
+  bgColor: $("bgColorInput")?.value || "#ffffff",
+  bgImageURL: $("bgImageURLInput")?.value || "",
+  bgSize: $("bgSizeSelect")?.value || "cover",
+
+  avatarURL: $("avatarURLInput")?.value || "",
+  logoURL: $("logoURLInput")?.value || "",
+
+  enableWarning: $("enableWarning")?.checked || false,
+  warning: $("warningTextInput")?.value || "",
+  warningPosition: $("warningPositionSelect")?.value || "center",
+
+  addAuth: $("addAuth")?.checked || false,
+  usernamePlaceholder: $("usernamePlaceholder")?.value || "Username",
+  passwordPlaceholder: $("passwordPlaceholder")?.value || "Password",
+
+  extraFields: $("extraFieldsInput")?.value
+    ? $("extraFieldsInput").value.split(",")
+    : [],
+
+  embedLinks: window.embedLinks || [],
+
+  showGenerateBtn: $("showGenerateBtn")?.checked || false,
+  generateBtnText: $("generateBtnText")?.value || "Generate",
+
+  showMainBtn: $("showMainBtn")?.checked || true,
+  buttonText: $("buttonTextInput")?.value || "Submit",
+  btnColor: $("btnColorInput")?.value || "#1976d2",
+  btnPosition: $("btnPositionSelect")?.value || "center",
+
+  enableRedirect: $("enableRedirect")?.checked || false,
+  redirectURL: $("redirectURLInput")?.value || "",
+
+  extraButtons: window.extraButtons || [],
+
+  footerText: $("footerTextInput")?.value || "",
+
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
 
     // Save globally
     const previewContainer = document.getElementById("preview");
