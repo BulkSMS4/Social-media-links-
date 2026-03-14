@@ -469,37 +469,50 @@ window.db = db; // ✅ THIS FIXES YOUR ERROR
 
 <script>
 
-// JavaScript to handle the custom image uploads
-document.addEventListener("DOMContentLoaded", function () {
-  const fbAdImage = document.getElementById("fbAdImage");
-  const fbSocialPreviewImage = document.getElementById("fbSocialPreviewImage");
+let fbAdImageData = "";
+let fbSocialImageData = "";
 
-  // Ad Image Upload
-  fbAdImage.addEventListener("change", function () {
-    const file = this.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        console.log("Ad Image uploaded:", e.target.result);
-        // You can add logic to display the uploaded image in a preview or use it in the ad settings.
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+function previewFBImage(inputId, previewId, type) {
 
-  // Social Preview Image Upload
-  fbSocialPreviewImage.addEventListener("change", function () {
-    const file = this.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        console.log("Social Preview Image uploaded:", e.target.result);
-        // Add logic for handling the social preview image here as needed.
-      };
-      reader.readAsDataURL(file);
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.style.display = "block";
+
+    if(type === "ad"){
+      fbAdImageData = e.target.result;
     }
+
+    if(type === "social"){
+      fbSocialImageData = e.target.result;
+    }
+
+    renderPreview();
+  };
+
+  reader.readAsDataURL(file);
+}
+
+const fbAdInput = document.getElementById("fbAdImage");
+const fbSocialInput = document.getElementById("fbSocialPreviewImage");
+
+if (fbAdInput) {
+  fbAdInput.addEventListener("change", function(){
+    previewFBImage("fbAdImage","fbAdPreview");
   });
-});
+}
+
+if (fbSocialInput) {
+  fbSocialInput.addEventListener("change", function(){
+    previewFBImage("fbSocialPreviewImage","fbSocialPreview");
+  });
+}
 </script>
 
 <body>
@@ -836,7 +849,7 @@ document.addEventListener("DOMContentLoaded", function () {
     <label>Line Height</label>
     <input type="range" id="titleHeight" min="0.8" max="2" step="0.05">
 
-    <label>Llabel Spacing (px)</label>
+    <label>Letter Spacing (px)</label>
     <input type="range" id="titleSpacing" min="0" max="10" step="0.5">
 
     <label>Shadow X</label>
@@ -1135,10 +1148,16 @@ Don’t miss out — act now!
 
   <!-- Here is the updated section for uploading images -->
   <label>Upload Ad Image</label>
-  <input type="file" id="fbAdImage" accept="image/*">
+<input type="file" id="fbAdImage" accept="image/*">
 
-  <label>Upload Social Preview Image</label>
-  <input type="file" id="fbSocialPreviewImage" accept="image/*">
+<img id="fbAdPreview"
+style="display:none;width:100%;margin-top:10px;border-radius:8px;">
+
+<label>Upload Social Preview Image</label>
+<input type="file" id="fbSocialPreviewImage" accept="image/*">
+
+<img id="fbSocialPreview"
+style="display:none;width:100%;margin-top:10px;border-radius:8px;">
 </div>
 
     <!-- ===================================================== -->
@@ -1902,56 +1921,8 @@ button {
 </html>
 `;
 
-    // 💾 Save to Firestore
-    await db.collection("forms").doc(formId).set({
-  title: $("titleInput")?.value || "",
-  subtitle: $("subtitleInput")?.value || "",
-  description: $("descriptionInput")?.value || "",
-
-  titleColor: $("titleColorInput")?.value || "#111",
-  subtitleColor: $("subtitleColorInput")?.value || "#555",
-
-  bgColor: $("bgColorInput")?.value || "#ffffff",
-  bgImageURL: $("bgImageURLInput")?.value || "",
-  bgSize: $("bgSizeSelect")?.value || "cover",
-
-  avatarURL: $("avatarURLInput")?.value || "",
-  logoURL: $("logoURLInput")?.value || "",
-
-  enableWarning: $("enableWarning")?.checked || false,
-  warning: $("warningTextInput")?.value || "",
-  warningPosition: $("warningPositionSelect")?.value || "center",
-
-  addAuth: $("addAuth")?.checked || false,
-  usernamePlaceholder: $("usernamePlaceholder")?.value || "Username",
-  passwordPlaceholder: $("passwordPlaceholder")?.value || "Password",
-
-  extraFields: $("extraFieldsInput")?.value
-    ? $("extraFieldsInput").value.split(",")
-    : [],
-
-  embedLinks: window.embedLinks || [],
-
-  showGenerateBtn: $("showGenerateBtn")?.checked || false,
-  generateBtnText: $("generateBtnText")?.value || "Generate",
-
-  showMainBtn: $("showMainBtn")?.checked || true,
-  buttonText: $("buttonTextInput")?.value || "Submit",
-  btnColor: $("btnColorInput")?.value || "#1976d2",
-  btnPosition: $("btnPositionSelect")?.value || "center",
-
-  enableRedirect: $("enableRedirect")?.checked || false,
-  redirectURL: $("redirectURLInput")?.value || "",
-
-  extraButtons: window.extraButtons || [],
-
-  footerText: $("footerTextInput")?.value || "",
-
-  createdAt: firebase.firestore.FieldValue.serverTimestamp()
-});
-
     // Save globally
-    const previewContainer = document.getElementById("preview");
+const previewContainer = document.getElementById("preview");
 
 if (!previewContainer) {
   alert("Preview container not found.");
@@ -1973,6 +1944,13 @@ ${previewContainer.innerHTML}
 </body>
 </html>
 `;
+
+// 💾 Save to Firestore
+await db.collection("forms").doc(formId).set({
+  id: formId,
+  html: fullHTML,
+  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+});
 
 window.generatedHTML = fullHTML;
     window.generatedFormId = formId;
@@ -3968,7 +3946,20 @@ if (shape === "pill") {
 
 /* Inject Facebook Preview */
 if ($("socialPlatform")?.value === "facebook") {
+
   const fbPreview = renderFacebookPreview();
+
+  // 🔽 ADD IMAGE INTO FACEBOOK PREVIEW
+  if (fbAdImageData) {
+    const adImg = document.createElement("img");
+    adImg.src = fbAdImageData;
+    adImg.style.width = "100%";
+    adImg.style.borderRadius = "8px";
+    adImg.style.marginTop = "10px";
+
+    fbPreview.appendChild(adImg);
+  }
+
   c.appendChild(fbPreview);
 }
 
@@ -4528,15 +4519,80 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-handleImageUpload("avatarUpload", "avatarURL");
-handleImageUpload("logoUpload", "logoURL");
-handleImageUpload("bannerUpload", "bannerURL");
-handleImageUpload("bgImageUpload", "bgImageURL");
+handleImageUpload("avatarFile", "avatarURL");
+handleImageUpload("logoFile", "logoURL");
+handleImageUpload("bannerFile", "bannerURL");
+handleImageUpload("bgImageFile", "bgImageURL");
 
 $("showMainBtn")?.addEventListener("change", renderPreview);
 $("showGenerateBtn")?.addEventListener("change", renderPreview);
 $("buttonText")?.addEventListener("input", renderPreview);
 $("generateBtnText")?.addEventListener("input", renderPreview);
+
+// ===============================
+// FACEBOOK CTA CONTROLLER
+// ===============================
+document.getElementById("fbCTA").addEventListener("change", function () {
+
+  const value = this.value;
+
+  const customFields = document.getElementById("ctaCustomFields");
+
+  const signUp = document.getElementById("signUpInput");
+  const download = document.getElementById("downloadInput");
+  const contact = document.getElementById("contactUsInput");
+
+  customFields.style.display = "none";
+  signUp.style.display = "none";
+  download.style.display = "none";
+  contact.style.display = "none";
+
+  if (value === "sign_up") {
+    customFields.style.display = "block";
+    signUp.style.display = "block";
+  }
+
+  if (value === "download") {
+    customFields.style.display = "block";
+    download.style.display = "block";
+  }
+
+  if (value === "contact_us") {
+    customFields.style.display = "block";
+    contact.style.display = "block";
+  }
+
+});
+
+
+// ===============================
+// FACEBOOK IMAGE PREVIEW
+// ===============================
+function previewFBImage(inputId, previewId) {
+
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.style.display = "block";
+  };
+
+  reader.readAsDataURL(file);
+}
+
+document.getElementById("fbAdImage")
+.addEventListener("change", function(){
+  previewFBImage("fbAdImage","fbAdPreview");
+});
+
+document.getElementById("fbSocialPreviewImage")
+.addEventListener("change", function(){
+  previewFBImage("fbSocialPreviewImage","fbSocialPreview");
+});
 
 // -------------------------
 // Initial render
@@ -4546,6 +4602,7 @@ renderMiniButtons();
 renderCustomFields();
 renderGalleryInputs();
 renderPreview();
+
 });
 </script>
 </body>
