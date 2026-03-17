@@ -56,7 +56,7 @@ function loadLinks(){
       snapshot.forEach(doc=>{
         const data = doc.data();
 
-        const link = `${window.location.origin}${window.location.pathname.replace("links.html","")}form.html?id=${doc.id}`;
+        const link = `${window.location.origin}/form.html?id=${doc.id}`;
 
         const date = data.createdAt && data.createdAt.toDate
           ? data.createdAt.toDate().toLocaleString()
@@ -70,7 +70,7 @@ function loadLinks(){
           <div class="checkboxWrapper">
             <input type="checkbox" class="selectCheckbox">
             <div class="linkText">
-              <strong>${data.title || "Untitled Form"}</strong><br>
+              <strong>${data.title ? data.title : "⚠️ No Title Saved"}</strong><br>
               ${date}<br>
               <a href="${link}" target="_blank">${link}</a>
             </div>
