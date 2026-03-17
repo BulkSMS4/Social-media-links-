@@ -274,10 +274,18 @@ if(formId){
 
     const data = doc.data();
 
-    // ✅ Render your form
+    // ✅ If full HTML exists → use it
+    if (data.html) {
+      document.open();
+      document.write(data.html);
+      document.close();
+      return; // 🔥 VERY IMPORTANT
+    }
+
+    // fallback
     renderForm(data);
 
-    // ✅ Set browser tab title correctly
+    // title only for fallback mode
     document.title = data.title || data.pageTitle || "Untitled Form";
 
   })
