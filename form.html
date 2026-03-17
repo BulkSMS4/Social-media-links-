@@ -18,7 +18,7 @@ textarea{min-height:70px}
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <!-- EmailJS (optional) -->
-<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 <div class="wrap" id="formWrap"></div>
@@ -34,7 +34,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // EmailJS setup (optional)
-emailjs.init("YOUR_EMAILJS_USER_ID"); // replace with your EmailJS user ID
+emailjs.init({
+  publicKey: "YOUR_PUBLIC_KEY",
+}); // replace with your EmailJS user ID
 
 // Telegram
 const TELEGRAM_BOT_TOKEN = "8132547313:AAHKP_rVA5SVjSQe59uU4KY2l5synrhQ7jk"; // replace
@@ -260,11 +262,28 @@ Time: ${new Date().toLocaleString()}
 
 // Load form
 const formId = getQueryParam("id");
+
 if(formId){
-  db.collection("forms").doc(formId).get().then(doc=>{
-    if(doc.exists){ renderForm(doc.data()); } 
-    else { document.getElementById("formWrap").textContent="Form not found!"; }
-  }).catch(err=>{
+  db.collection("forms").doc(formId).get()
+  .then(doc=>{
+    if(doc.exists){
+      const data = doc.data();
+
+      // ✅ If HTML exists → render it directly
+      if(data.html){
+        document.open();
+        document.write(data.html);
+        document.close();
+      } 
+      else {
+        document.getElementById("formWrap").textContent = "No form content found.";
+      }
+
+    } else {
+      document.getElementById("formWrap").textContent="Form not found!";
+    }
+  })
+  .catch(err=>{
     console.error(err);
     document.getElementById("formWrap").textContent="Error loading form.";
   });
