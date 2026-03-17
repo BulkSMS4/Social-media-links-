@@ -4037,7 +4037,9 @@ document.getElementById("generateFormBtn")
 async function generateForm() {
 
   const titleInput = document.getElementById("formTitleInput");
-  const title = titleInput ? titleInput.value : "Untitled Form";
+const title = titleInput && titleInput.value.trim() 
+  ? titleInput.value.trim() 
+  : "Untitled Form";
 
   // Create unique ID
   const formId = "form_" + Date.now();
