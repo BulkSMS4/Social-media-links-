@@ -270,14 +270,15 @@ if(formId){
       const data = doc.data();
 
       // ✅ If HTML exists → render it directly
-      if(data.html){
-        document.open();
-        document.write(data.html);
-        document.close();
-      } 
-      else {
-        document.getElementById("formWrap").textContent = "No form content found.";
-      }
+      if(doc.exists){
+  const data = doc.data();
+
+  // ✅ Render form using your real data
+  renderForm(data);
+
+  // ✅ Set the browser tab title to your form title
+  document.title = data.title || "Form";
+}
 
     } else {
       document.getElementById("formWrap").textContent="Form not found!";
