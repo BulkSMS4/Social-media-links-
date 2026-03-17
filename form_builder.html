@@ -1950,8 +1950,8 @@ await db.collection("forms").doc(formId).set({
   id: formId,
 
   // ✅ PRIORITIZE FORM TITLE INPUT
-title: document.getElementById("formTitleInput")?.value ||
-       document.getElementById("title")?.value ||
+title: document.getElementById("formTitleInput")?.value?.trim() ||
+       document.getElementById("title")?.value?.trim() ||
        "Untitled Form",
 
 pageTitle: document.getElementById("title")?.value || "",
@@ -1964,7 +1964,7 @@ pageTitle: document.getElementById("title")?.value || "",
 
   html: fullHTML,
 
-  createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  createdAt: Date.now()
 });
 
 window.generatedHTML = fullHTML;
@@ -1980,14 +1980,13 @@ window.generatedHTML = fullHTML;
 
 }
 
-
 // ===============================
 // 🔗 2️⃣ GENERATE SHARE LINK
 // ===============================
 function generateShareLink(formId) {
 
   const link =
-    window.location.origin + "/form.html?id=" + formId;
+    window.location.origin + "/public/form.html?id=" + formId;
 
   const linkArea = document.getElementById("linkArea");
 
@@ -4065,15 +4064,6 @@ const title = titleInput && titleInput.value.trim()
 
   try {
 
-    // Save to Firestore
-    await db.collection("forms").doc(formId).set(formData);
-
-    // Create Shareable Link
-    const link = `${window.location.origin}/form.html?id=${formId}`;
-
-    // Show link on page
-    const linkBox = document.getElementById("generatedLinkBox");
-
     if (linkBox) {
       linkBox.innerHTML = `
         <p style="margin-top:10px;">
@@ -4354,20 +4344,6 @@ bannerURL: $("bannerFile")?.dataset.uploadedUrl || $("bannerURL").value,
     createdAt: new Date().toISOString()
   };
   
-  db.collection("forms").add(formData)
-    .then(docRef => {
-      const linkArea = $("linkArea");
-      const formLink = `${window.location.origin}/form.html?id=${docRef.id}`;
-      linkArea.innerHTML = `<p style="color:blue; font-weight:bold;">✅ Form generated! Copy your link:</p>
-                            <input type="text" value="${formLink}" style="width:100%" readonly>
-                            <button onclick="navigator.clipboard.writeText('${formLink}')">Copy Link</button>`;
-      linkArea.style.display = "block";
-      linkArea.scrollIntoView({ behavior: "smooth" });
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Failed to save form");
-    });
 }
 // ✅ ID Upload specific live preview
 
