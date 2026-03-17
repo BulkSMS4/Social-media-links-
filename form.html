@@ -79,7 +79,7 @@ function renderForm(data){
   const title = document.createElement("h2");
   title.style.textAlign = "center";
   title.style.color = data.titleColor || "#111";
-  title.textContent = data.title || "";
+  title.textContent = data.title || data.pageTitle || "Untitled Form";
   wrap.appendChild(title);
 
   const subtitle = document.createElement("p");
