@@ -39,13 +39,7 @@ function renumberCards() {
   Object.keys(formCards).forEach(id => {
     const titleInput = formCards[id].querySelector('.form-title-input');
     const previewTitle = formCards[id].querySelector('.live-preview h2');
-    if(titleInput && previewTitle) {
-  const safeTitle = titleInput.value && titleInput.value.trim()
-    ? titleInput.value.trim()
-    : "Untitled Form";
-
-  previewTitle.innerText = `${i}. ${safeTitle}`;
-}
+    if(titleInput && previewTitle) previewTitle.innerText = `${i}. ${titleInput.value || 'Untitled Form'}`;
     i++;
   });
 }
@@ -53,12 +47,6 @@ function renumberCards() {
 // Render each form with live preview
 function renderForm(doc) {
   const form = doc.data();
-
-  // ✅ FIX: Proper title handling (no empty/space issues)
-  const safeTitle = form.title && form.title.trim() 
-    ? form.title.trim() 
-    : "Untitled Form";
-
   const viewLink = `${location.origin}/public/form.html?id=${doc.id}`;
   const editLink = `${location.origin}/public/build.html?edit=${doc.id}`;
 
@@ -89,16 +77,16 @@ function renderForm(doc) {
   if(form.bannerURL) liveHTML += `<img src="${form.bannerURL}" class="preview-img" />`;
   if(form.avatarURL) liveHTML += `<img src="${form.avatarURL}" class="preview-img" style="width:80px;border-radius:50%;margin-top:5px;" />`;
 
-  // ✅ FIXED TITLE
-  liveHTML += `<h2>${safeTitle}</h2>`;
+  // Title & description
+  liveHTML += `<h2>${form.title || form.pageTitle || 'Untitled Form'}</h2>`;
   liveHTML += `<p>${form.description||''}</p>`;
   liveHTML += `</div>`;
 
   div.innerHTML = `
-    <input class="form-title-input" value="${safeTitle}"
+    <input class="form-title-input" value="${form.title || form.pageTitle || 'Untitled Form'}"
            style="font-size:18px;width:100%;font-weight:bold;padding:5px;border:none;background:#eef;"
            oninput="updateTitle('${doc.id}', this.value)">
-    <p><strong>Created:</strong> ${new Date(form.createdAt).toLocaleString()}</p>
+    <p><strong>Created:</strong> ${form.createdAt ? new Date(form.createdAt).toLocaleString() : "Unknown"}</p>
     <p><strong>Link:</strong> <input type="text" value="${viewLink}" readonly style="width:80%;"><button onclick="navigator.clipboard.writeText('${viewLink}'); alert('Copied!')">📋 Copy</button></p>
     <div class="actions">
       <button onclick="window.open('${viewLink}','_blank')">👁️ View</button>
