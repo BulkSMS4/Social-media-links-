@@ -1948,7 +1948,22 @@ ${previewContainer.innerHTML}
 // 💾 Save to Firestore
 await db.collection("forms").doc(formId).set({
   id: formId,
+
+  // ✅ PRIORITIZE FORM TITLE INPUT
+title: document.getElementById("formTitleInput")?.value ||
+       document.getElementById("title")?.value ||
+       "Untitled Form",
+
+pageTitle: document.getElementById("title")?.value || "",
+
+  subtitle: document.getElementById("subtitle")?.value || "",
+  description: document.getElementById("description")?.value || "",
+
+  buttonText: document.getElementById("buttonText")?.value || "Submit",
+  bgColor: document.getElementById("bgColor")?.value || "#fff",
+
   html: fullHTML,
+
   createdAt: firebase.firestore.FieldValue.serverTimestamp()
 });
 
@@ -2096,9 +2111,6 @@ function downloadGeneratedHTML() {
   alert("HTML downloaded successfully!");
 }
 
-// ===============================
-// 📄 COPY HTML
-// ===============================
 // ===============================
 // 📄 COPY FULL HTML (LIVE VERSION)
 // ===============================
