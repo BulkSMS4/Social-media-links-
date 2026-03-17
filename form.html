@@ -265,31 +265,28 @@ const formId = getQueryParam("id");
 
 if(formId){
   db.collection("forms").doc(formId).get()
-  .then(doc=>{
-    if(doc.exists){
-      const data = doc.data();
+  .then(doc => {
 
-      // ✅ If HTML exists → render it directly
-      if(doc.exists){
-  const data = doc.data();
-
-  // ✅ Render form using your real data
-  renderForm(data);
-
-  // ✅ Set the browser tab title to your form title
-  document.title = data.title || "Form";
-}
-
-    } else {
-      document.getElementById("formWrap").textContent="Form not found!";
+    if(!doc.exists){
+      document.getElementById("formWrap").textContent = "Form not found!";
+      return;
     }
+
+    const data = doc.data();
+
+    // ✅ Render your form
+    renderForm(data);
+
+    // ✅ Set browser tab title correctly
+    document.title = data.title || data.pageTitle || "Untitled Form";
+
   })
-  .catch(err=>{
+  .catch(err => {
     console.error(err);
-    document.getElementById("formWrap").textContent="Error loading form.";
+    document.getElementById("formWrap").textContent = "Error loading form.";
   });
 } else {
-  document.getElementById("formWrap").textContent="No form ID provided.";
+  document.getElementById("formWrap").textContent = "No form ID provided.";
 }
 </script>
 </body>
