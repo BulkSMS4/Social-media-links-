@@ -3,7 +3,22 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Dynamic Form</title>
+
+<title id="dynamicTitle">Loading...</title>
+
+<meta name="description" content="Loading preview...">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Loading...">
+<meta property="og:description" content="Loading preview...">
+<meta property="og:image" content="">
+<meta property="og:type" content="website">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Loading...">
+<meta name="twitter:description" content="Loading preview...">
+<meta name="twitter:image" content="">
 <style>
 body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:18px}
 .wrap{max-width:800px;margin:auto;background:#fff;padding:18px;border-radius:10px;position:relative;}
@@ -273,6 +288,23 @@ if(formId){
     }
 
     const data = doc.data();
+    
+    // ✅ UPDATE SEO META TAGS (for browser, not bots)
+const seoTitle = data.seoTitle || data.title || "Untitled Form";
+const metaDesc = data.metaDesc || "";
+const ogImage = data.ogImage || "";
+
+document.title = seoTitle;
+
+document.querySelector('meta[name="description"]')?.setAttribute("content", metaDesc);
+
+document.querySelector('meta[property="og:title"]')?.setAttribute("content", seoTitle);
+document.querySelector('meta[property="og:description"]')?.setAttribute("content", metaDesc);
+document.querySelector('meta[property="og:image"]')?.setAttribute("content", ogImage);
+
+document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", seoTitle);
+document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", metaDesc);
+document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
 
     // ✅ If full HTML exists → use it
     if (data.html) {
