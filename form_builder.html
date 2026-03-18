@@ -1985,8 +1985,7 @@ window.generatedHTML = fullHTML;
 // ===============================
 function generateShareLink(formId) {
 
-  const link =
-    window.location.origin + "/public/form.html?id=" + formId;
+  const link = `${window.location.origin}/form.html?id=${formId}`;
 
   const linkArea = document.getElementById("linkArea");
 
