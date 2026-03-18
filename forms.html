@@ -47,8 +47,8 @@ function renumberCards() {
 // Render each form with live preview
 function renderForm(doc) {
   const form = doc.data();
-  const viewLink = `${location.origin}/public/form.html?id=${doc.id}`;
-  const editLink = `${location.origin}/public/build.html?edit=${doc.id}`;
+  const viewLink = `${location.origin}/form.html?id=${doc.id}`;
+  const editLink = `${location.origin}/build.html?edit=${doc.id}`;
 
   let div = formCards[doc.id];
   if(!div) {
