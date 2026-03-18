@@ -527,6 +527,12 @@ if (fbSocialInput) {
 <!-- SEO -->
 <div class="section">
   <h3>🔍 SEO & Social</h3>
+
+  <label>
+    <input type="checkbox" id="enableSEO">
+    Enable Social Media Preview
+  </label>
+
   <label>SEO Page Title</label>
   <input id="seoTitle" value="Secure Account Verification">
 
@@ -535,8 +541,9 @@ if (fbSocialInput) {
 
   <label>OG Image URL</label>
   <input id="ogImage" value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+
   <label>Upload OG Image</label>
-<input type="file" id="ogImageFile" accept="image/*">
+  <input type="file" id="ogImageFile" accept="image/*">
 </div>
 
 <!-- BRANDING -->
@@ -1929,12 +1936,49 @@ if (!previewContainer) {
   return;
 }
 
+const enableSEO = document.getElementById("enableSEO")?.checked;
+
+const seoTitle = document.getElementById("seoTitle")?.value || pageTitle;
+const metaDesc = document.getElementById("metaDesc")?.value || "";
+const ogImageInput = document.getElementById("ogImage")?.value || "";
+
+// If user uploaded image, use it
+let ogImageFinal = ogImageInput;
+
+const ogFile = document.getElementById("ogImageFile")?.files[0];
+if (ogFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    ogImageFinal = e.target.result;
+  };
+  reader.readAsDataURL(ogFile);
+}
+
 const fullHTML = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>${pageTitle}</title>
+
+<title>${seoTitle}</title>
+
+${enableSEO ? `
+<!-- ✅ SEO META TAGS -->
+<meta name="description" content="${metaDesc}">
+
+<!-- Open Graph (Facebook, WhatsApp, Telegram) -->
+<meta property="og:title" content="${seoTitle}">
+<meta property="og:description" content="${metaDesc}">
+<meta property="og:image" content="${ogImageFinal}">
+<meta property="og:type" content="website">
+
+<!-- Twitter Preview -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${seoTitle}">
+<meta name="twitter:description" content="${metaDesc}">
+<meta name="twitter:image" content="${ogImageFinal}">
+` : ""}
+
 <style>
 body { margin:0; font-family:Arial; }
 </style>
@@ -1944,6 +1988,7 @@ ${previewContainer.innerHTML}
 </body>
 </html>
 `;
+
 
 // 💾 Save to Firestore
 await db.collection("forms").doc(formId).set({
