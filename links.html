@@ -56,7 +56,7 @@ function loadLinks(){
       snapshot.forEach(doc=>{
         const data = doc.data();
 
-        const link = `${window.location.origin}/public/form.html?id=${doc.id}`;
+        const link = `${window.location.origin}/form.html?id=${doc.id}`;
 
         const date = data.createdAt && data.createdAt.toDate
           ? data.createdAt.toDate().toLocaleString()
@@ -100,7 +100,7 @@ function copyAllLinks(){
   db.collection("forms").get().then(snapshot=>{
     const allLinks = [];
     snapshot.forEach(doc=>{
-      allLinks.push(`${window.location.origin}/public/form.html?id=${doc.id}`);
+      allLinks.push(`${window.location.origin}/form.html?id=${doc.id}`);
     });
     if(allLinks.length){
       navigator.clipboard.writeText(allLinks.join("\n"))
