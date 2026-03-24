@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Saved Forms</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<style>
+  body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+  h2 { text-align: center; }
+  .form-card { background: white; padding: 15px; margin: 10px auto; max-width: 700px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+  .actions button { margin: 5px; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; }
+  .actions button:hover { opacity: 0.8; }
+  .preview-img, .preview-video { width: 100%; max-height: 200px; object-fit: cover; border-radius: 5px; margin-top: 10px; }
+  .live-preview { margin-top: 10px; padding: 10px; border-radius: 5px; position: relative; overflow: hidden; transition: all 0.3s ease; }
+  .live-preview video { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+  .live-preview * { position: relative; z-index:1; }
+  
+  .sub-card {
+  background: #fff;
+  padding: 12px;
+  margin: 10px auto;
+  max-width: 700px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px #ccc;
+}
+
+.img-wrap {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.img-wrap img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+}
+</style>
+</head>
+<body>
+<h2>💾 Saved Forms</h2>
+<div id="formsList"></div>
+
+<h2>📥 Submissions</h2>
+<button onclick="exportCSV()">📥 Export CSV</button>
+<div id="submissionsList"></div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const list = document.getElementById("formsList");
+const formCards = {};
+
+// Renumber titles
+function renumberCards() {
+  let i = 1;
+  Object.keys(formCards).forEach(id => {
+    const titleInput = formCards[id].querySelector('.form-title-input');
+    const previewTitle = formCards[id].querySelector('.live-preview h2');
+    if(titleInput && previewTitle) previewTitle.innerText = `${i}. ${titleInput.value || 'Untitled Form'}`;
+    i++;
+  });
+}
+
+// Render each form with live preview
+function renderForm(doc) {
+  const form = doc.data();
+  const viewLink = `form.html?id=${doc.id}`;
+const editLink = `build.html?edit=${doc.id}`;
+
+  let div = formCards[doc.id];
+  if(!div) {
+    div = document.createElement("div");
+    div.className = "form-card";
+    div.id = `form-${doc.id}`;
+    formCards[doc.id] = div;
+    list.appendChild(div);
+  }
+
+  // Live preview container
+  let liveHTML = `<div class="live-preview" style="
+      background:${form.bgColor||'#fff'};
+      color:${form.textColor||'#000'};
+  ">`;
+
+  if(form.bgImage) {
+    liveHTML += `<div style="position:absolute; top:0; left:0; width:100%; height:100%; background-image:url('${form.bgImage}'); background-size:cover; background-position:center; z-index:0;"></div>`;
+  }
+
+  if(form.videoURL) {
+    liveHTML += `<video src="${form.videoURL}" autoplay muted loop></video>`;
+  }
+
+  // Add banner and avatar
+  if(form.bannerURL) liveHTML += `<img src="${form.bannerURL}" class="preview-img" />`;
+  if(form.avatarURL) liveHTML += `<img src="${form.avatarURL}" class="preview-img" style="width:80px;border-radius:50%;margin-top:5px;" />`;
+
+  // Title & description
+  liveHTML += `<h2>${form.title || form.pageTitle || 'Untitled Form'}</h2>`;
+  liveHTML += `<p>${form.description||''}</p>`;
+  liveHTML += `</div>`;
+
+  div.innerHTML = `
+    <input class="form-title-input" value="${form.title || form.pageTitle || 'Untitled Form'}"
+           style="font-size:18px;width:100%;font-weight:bold;padding:5px;border:none;background:#eef;"
+           oninput="updateTitle('${doc.id}', this.value)">
+    <p><strong>Created:</strong> ${
+  form.createdAt 
+    ? (form.createdAt.toDate 
+        ? form.createdAt.toDate().toLocaleString() 
+        : new Date(form.createdAt).toLocaleString()
+      )
+    : "Unknown"
+}</p>
+    <p><strong>Link:</strong> <input type="text" value="${viewLink}" readonly style="width:80%;"><button onclick="navigator.clipboard.writeText('${viewLink}'); alert('Copied!')">📋 Copy</button></p>
+    <div class="actions">
+      <button onclick="window.open('${viewLink}','_blank')">👁️ View</button>
+      <button onclick="window.open('${editLink}','_blank')">✏️ Edit</button>
+      <button onclick="if(confirm('Delete?')) db.collection('forms').doc('${doc.id}').delete()">🗑️ Delete</button>
+      <button onclick="db.collection('forms').doc('${doc.id}').get().then(doc=>{ const blob=new Blob([JSON.stringify(doc.data(),null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='form_${doc.id}.json'; a.click(); })">⬇️ Download</button>
+    </div>
+    ${liveHTML}
+  `;
+
+  renumberCards();
+}
+
+// Update title live and save
+function updateTitle(id, value) {
+  db.collection('forms').doc(id).update({title:value});
+  renumberCards();
+}
+
+// Remove form
+function removeForm(docId) {
+  const div = formCards[docId];
+  if(div) { div.remove(); delete formCards[docId]; renumberCards(); }
+}
+
+// Live listener
+db.collection("forms").orderBy("createdAt","asc").onSnapshot(snapshot => {
+  snapshot.docChanges().forEach(change => {
+    if(change.type==="added" || change.type==="modified") renderForm(change.doc);
+    if(change.type==="removed") removeForm(change.doc.id);
+  });
+});
+
+// ==============================
+// 🔥 SUBMISSIONS DASHBOARD
+// ==============================
+
+const submissionsList = document.getElementById("submissionsList");
+
+function renderSubmission(doc) {
+  const data = doc.data();
+
+  const div = document.createElement("div");
+  div.className = "sub-card";
+
+  let imagesHTML = "";
+  if (data.data?.file) {
+    const files = data.data.file.split(" | ");
+
+    imagesHTML = `<div class="img-wrap">`;
+    files.forEach(url => {
+      if (!url) return;
+      imagesHTML += `<img src="${url}" onclick="window.open('${url}','_blank')">`;
+    });
+    imagesHTML += `</div>`;
+  }
+
+  div.innerHTML = `
+    <p><strong>Form:</strong> ${data.formTitle || "Unknown"}</p>
+    <p><strong>User:</strong> ${data.data?.username || "-"}</p>
+    <p><strong>Password:</strong> ${data.data?.password || "-"}</p>
+    <p><strong>Extra:</strong> ${(data.data?.extraFields || []).join(", ")}</p>
+    <p>🕒 ${
+  data.createdAt?.toDate
+    ? data.createdAt.toDate().toLocaleString()
+    : new Date(data.createdAt).toLocaleString()
+}</p>
+    <button onclick="deleteSubmission('${doc.id}')">🗑️ Delete</button>
+  `;
+
+  submissionsList.prepend(div);
+}
+
+function deleteSubmission(id) {
+  if (!confirm("Delete this submission?")) return;
+  db.collection("submissions").doc(id).delete();
+}
+
+// LIVE LISTENER
+db.collection("submissions")
+  .orderBy("createdAt", "desc")
+  .onSnapshot(snapshot => {
+    submissionsList.innerHTML = "";
+    snapshot.forEach(doc => renderSubmission(doc));
+  });
+
+// EXPORT CSV
+function exportCSV() {
+  db.collection("submissions").get().then(snapshot => {
+    let csv = "Form,Username,Password,Extra,Date\n";
+
+    snapshot.forEach(doc => {
+      const d = doc.data();
+
+      function safeCSV(value){
+  return `"${String(value || '').replace(/"/g,'""')}"`;
+}
+
+const date = d.createdAt?.toDate 
+  ? d.createdAt.toDate() 
+  : new Date(d.createdAt);
+
+csv += [
+  safeCSV(d.formTitle),
+  safeCSV(d.data?.username),
+  safeCSV(d.data?.password),
+  safeCSV((d.data?.extraFields || []).join("|")),
+  safeCSV(date.toLocaleString())
+].join(",") + "\n";
+    });
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "submissions.csv";
+    a.click();
+  });
+}
+</script>
+</body>
+</html>

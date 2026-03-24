@@ -134,12 +134,21 @@ function deleteSelected(){
   if(selected.length===0){ alert("No forms selected!"); return; }
   if(!confirm(`Are you sure you want to delete ${selected.length} selected form(s)?`)) return;
 
-  selected.forEach(cb=>{
-    const docId = cb.closest(".formLinkBox").dataset.docId;
-    db.collection("forms").doc(docId).delete().catch(err=>console.error(err));
-  });
-  alert("Selected forms deleted!");
-  setTimeout(loadLinks,500); // reload after deletion
+  const promises = [];
+
+selected.forEach(cb=>{
+  const docId = cb.closest(".formLinkBox").dataset.docId;
+  promises.push(
+    db.collection("forms").doc(docId).delete()
+  );
+});
+
+Promise.all(promises)
+  .then(()=>{
+    alert("Selected forms deleted!");
+    loadLinks(); // ✅ reload AFTER all deletes finish
+  })
+  .catch(err=>console.error(err));
 }
 
 // Initial load

