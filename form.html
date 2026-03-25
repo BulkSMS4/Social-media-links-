@@ -479,7 +479,11 @@ document.querySelector('meta[name="twitter:description"]')?.setAttribute("conten
 document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
 
 // ✅ LOAD GENERATED HTML DIRECTLY
-renderForm(data);
+if(data.htmlContent){
+  document.getElementById("formWrap").innerHTML = data.htmlContent;
+} else {
+  renderForm(data);
+}
 
   })
   .catch(err => {
