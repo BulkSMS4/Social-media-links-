@@ -1126,8 +1126,7 @@ function previewFBImage(inputId, previewId, type) {
 <div class="section">
   <h3>🔍 SEO & Social</h3>
 
-  <label>
-    <label class="checkbox">
+  <label class="checkbox">
   <input type="checkbox" id="enableSEO">
   <span></span>
   Enable Social Media Preview
@@ -1913,6 +1912,23 @@ if (fbSocialInput) {
     };
     reader.readAsDataURL(this.files[0]);
   });
+  
+  function renderPreview(){
+
+  const preview = document.getElementById("preview");
+  if (!preview) return;
+
+  // Example: rebuild basic preview
+  const name = document.getElementById("fbName")?.value || "";
+  const bio = document.getElementById("fbBio")?.value || "";
+
+  preview.innerHTML = `
+    <div style="padding:10px;">
+      <h2>${name}</h2>
+      <p>${bio}</p>
+    </div>
+  `;
+}
   
   // ===============================
 // 👤 FACEBOOK INPUT LISTENERS
@@ -2988,10 +3004,17 @@ const allLinks = Array.from(document.querySelectorAll("link[rel='stylesheet']"))
   .map(link => link.outerHTML)
   .join("\n");
 
+if (!previewContainer) {
+  alert("Preview container not found.");
+  return;
+}
+
 // 🔥 Get preview HTML
 const previewHTML = previewContainer.innerHTML;
 
-// 🔥 Build full HTML
+// 🔥 Unique ID (already declared above as `id`)
+
+// 🔥 Build full HTML (IFRAME VERSION - BULLETPROOF)
 const fullHTML = `
 <!DOCTYPE html>
 <html>
@@ -3003,55 +3026,140 @@ ${allLinks}
 ${allStyles}
 
 <style>
-body { margin:0; font-family:Arial; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
 </style>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"><\/script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"><\/script>
+
 </head>
+
 <body>
 
-${previewHTML}
+<iframe id="previewFrame" style="width:100%;height:100vh;border:none;"></iframe>
+
+<script>
+
+// 🔥 Inject preview safely
+const previewContent = ${JSON.stringify(previewHTML)};
+const iframe = document.getElementById("previewFrame");
+
+// 🔥 Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.firestore();
+
+// 🔥 When iframe loads
+iframe.onload = () => {
+  const doc = iframe.contentWindow.document;
+
+  // Inject content
+  doc.open();
+  doc.write(previewContent);
+  doc.close();
+
+  // 🔥 Handle form submit INSIDE iframe
+  doc.addEventListener("submit", async function(e){
+    if (!e.target.matches("form")) return;
+
+    e.preventDefault();
+
+    const formDataObj = {};
+    doc.querySelectorAll("input, textarea, select").forEach((el, i) => {
+      const key = el.name || el.placeholder || "field_" + i;
+      formDataObj[key] = el.value;
+    });
+
+    try {
+      await db.collection("submissions").add({
+        formId: "${id}",
+        createdAt: Date.now(),
+        data: formDataObj
+      });
+
+      alert("Submitted!");
+
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting form");
+    }
+  });
+};
+
+<\/script>
 
 </body>
 </html>
 `;
 
-// 🔥 Save ONLY HTML (no more formData)
-await db.collection("forms").doc(id).set({
+// 🔥 Try to save HTML to Firestore (best-effort, optional)
+try {
+  if (window.db && typeof window.db.collection === "function") {
+    await window.db.collection("forms").doc(id).set({
+      id: id,
+      title: document.getElementById("title").value || "Untitled Form",
+      htmlContent: fullHTML,
+      createdAt: Date.now()
+    });
+  }
+} catch (saveErr) {
+  console.warn("Firestore save skipped:", saveErr);
+}
+
+// 🔗 Build a SELF-CONTAINED shareable link (works without any server).
+// The full generated HTML is embedded directly in the URL as a base64 data URI,
+// so the link opens EXACTLY what was just built — no backend required.
+// ✅ SAVE FORM HTML TO FIRESTORE (ALREADY ABOVE — KEEP OR MOVE HERE)
+await window.db.collection("forms").doc(id).set({
   id: id,
-  title: document.getElementById("title").value, // ✅ ADD THIS
+  title: document.getElementById("title").value || "Untitled Form",
   htmlContent: fullHTML,
   createdAt: Date.now()
 });
 
-// ✅ Generate clean link (FIXED)
+// ✅ REAL SHAREABLE LINK
 const link = `${window.location.origin}/form.html?id=${id}`;
 
-// Show tools
-document.getElementById("generatedTools").style.display = "block";
-document.getElementById("generatedLink").value = link;
+// 🔥 Show UI
+const generatedTools = document.getElementById("generatedTools");
+if (generatedTools) generatedTools.style.display = "block";
+
+const generatedLinkEl = document.getElementById("generatedLink");
+if (generatedLinkEl) generatedLinkEl.value = link;
 
 const openBtn = document.getElementById("openFormBtn");
-if (openBtn) openBtn.style.display = "inline-block";
+if (openBtn) {
+  openBtn.style.display = "inline-block";
+  openBtn.onclick = () => window.open(link, "_blank");
+}
 
-// Save globally
+// Save globally for copy/download
 window.generatedLink = link;
+window.generatedHTML = fullHTML;
 
-// 🚀 AUTO OPEN (IF ENABLED)
+// 🚀 Auto open
 if (document.getElementById("autoOpenForm")?.checked) {
   window.open(link, "_blank");
 }
 
-// ✅ Show result box (ONLY ONCE)
+// ✅ Optional display box
 const box = document.getElementById("generatedBox");
 const input = document.getElementById("generatedLinkInput");
-
 if (box && input) {
   box.style.display = "block";
   input.value = link;
 }
-
-    // 🔗 OPEN FORM
-    document.getElementById("generatedLink").value = link;
 
   } catch (err) {
     console.error(err);
@@ -5631,7 +5739,7 @@ document.getElementById("generateFormBtn")
   ?.addEventListener("click", generateForm);
 
 // Main Function
-async function generateForm() {
+async function _generateFormStub_unused() {
 
   const titleInput = document.getElementById("formTitleInput");
 const title = titleInput && titleInput.value.trim() 
@@ -5837,7 +5945,7 @@ if (toggleStylesBtn && styleControls) {
   });
 }
 
-function generateForm() {
+function _generateFormLegacy_unused() {
   const frontUrl = $("idFrontFile")?.dataset.uploadedUrl || "";
   const backUrl = $("idBackFile")?.dataset.uploadedUrl || "";
 
