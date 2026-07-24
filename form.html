@@ -475,6 +475,10 @@ if(formId){
     }
 
     const data = doc.data();
+
+console.log("FORM DATA:", data);
+console.log("HTML Content:", data.htmlContent);
+console.log("HTML Length:", data.htmlContent?.length);
     console.log("FORM DATA:", data);
     
     // ✅ UPDATE SEO META TAGS (for browser, not bots)
@@ -498,7 +502,17 @@ document.querySelector('meta[name="twitter:description"]')?.setAttribute("conten
 document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
 
 // ✅ LOAD GENERATED HTML DIRECTLY
-renderForm(data);
+if (data.htmlContent && data.htmlContent.trim() !== "") {
+
+  // Create a temporary element
+  document.open();
+document.write(data.htmlContent);
+document.close();
+return;
+
+} else {
+  renderForm(data);
+}
 
   })
   .catch(err => {
