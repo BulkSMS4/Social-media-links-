@@ -1628,6 +1628,7 @@ p.appendChild(c);
 // -------------------------
 // Firebase
 // -------------------------
+
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -1635,14 +1636,28 @@ const firebaseConfig = {
   storageBucket: "usahackersland.appspot.com"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+let db = null;
+let storage = null;
 
-// Firestore
-const db = firebase.firestore();
+// Make sure Firebase SDK is loaded first
+if (typeof firebase !== "undefined") {
 
-// Firebase Storage
-const storage = firebase.storage();
+  // Initialize only once
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+
+  db = firebase.firestore();
+  storage = firebase.storage();
+
+  console.log("✅ Firebase initialized successfully.");
+
+} else {
+
+  console.error("❌ Firebase SDK failed to load.");
+  alert("Firebase SDK failed to load. Check that firebase-app-compat.js, firebase-firestore-compat.js, and firebase-storage-compat.js are loading correctly.");
+
+}
 
 // Upload Front ID
 $("idFrontFile").addEventListener("change", async e => {
@@ -1814,15 +1829,23 @@ async function generateForm() {
 generatedHTML = JSON.stringify(data, null, 2);
 
     /* =========================
-       SAVE TO FIRESTORE
-    ========================= */
-    const docRef = await db.collection("forms").add(data);
+   SAVE TO FIRESTORE
+========================= */
 
-    const publicLink =
-      location.origin +
-      location.pathname.replace(/\/[^\/]*$/, "") +
-      "/form.html?id=" +
-      docRef.id;
+// Save the complete form data and generated HTML
+const docRef = await db.collection("forms").add({
+    ...data,
+    htmlContent: generatedHTML
+});
+
+// Generate the public link
+const publicLink =
+    location.origin +
+    location.pathname.replace(/\/[^\/]*$/, "") +
+    "/form.html?id=" +
+    docRef.id;
+
+console.log("Form saved:", docRef.id);
 
     /* /* =========================
    SHOW LINK
@@ -1867,9 +1890,15 @@ style="padding:8px 14px;border:none;border-radius:6px;background:#ff9800;color:#
 
   } catch (err) {
     console.error("Generate form error:", err);
-    alert("❌ Error generating form. Check console.");
-  }
+    console.error("Stack trace:", err.stack);
+
+    alert(
+        "❌ Error generating form.\n\n" +
+        err.name + ": " + err.message +
+        "\n\nSee the browser console for the exact line number."
+    );
 }
+} // End of generateForm()
 
 function copyGeneratedHTML() {
 
