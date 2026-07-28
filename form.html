@@ -89,6 +89,35 @@ async function uploadFile(file) {
 const formId = getQueryParam("id");
 
 function renderForm(data){
+
+// Convert nested data to the format this page expects
+if (data.page) {
+  data.title = data.page.title || "";
+  data.subtitle = data.page.subtitle || "";
+  data.description = data.page.description || "";
+  data.footerText = data.page.footer || "";
+}
+
+if (data.branding) {
+  data.avatarURL = data.branding.avatar || "";
+  data.logoURL = data.branding.logo || "";
+  data.bannerURL = data.branding.banner || "";
+}
+
+if (data.styling) {
+  data.bgColor = data.styling.bgColor || "#fff";
+  data.bgImage = data.styling.bgImage || "";
+  data.bgVideoURL = data.styling.bgVideo || "";
+  data.btnColor = data.styling.buttonColor || "#1976d2";
+}
+
+if (Array.isArray(data.fields)) {
+  data.addAuth = data.fields.some(f => f.name === "username");
+  data.extraFields = data.fields
+    .filter(f => f.name !== "username" && f.name !== "password")
+    .map(f => f.placeholder);
+}
+
   const wrap = document.getElementById("formWrap");
   wrap.innerHTML = "";
   wrap.style.background = data.bgColor || "#fff";
@@ -502,17 +531,7 @@ document.querySelector('meta[name="twitter:description"]')?.setAttribute("conten
 document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", ogImage);
 
 // ✅ LOAD GENERATED HTML DIRECTLY
-if (data.htmlContent && data.htmlContent.trim() !== "") {
-
-  // Create a temporary element
-  document.open();
-document.write(data.htmlContent);
-document.close();
-return;
-
-} else {
-  renderForm(data);
-}
+renderForm(data);
 
   })
   .catch(err => {
