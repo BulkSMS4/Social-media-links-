@@ -219,9 +219,9 @@ wrap.appendChild(title);
   wrap.appendChild(desc);
   
   // 🖼 GALLERY
-if(data.galleryImages){
-  const gallery = document.createElement("div");
+if (Array.isArray(data.galleryItems) && data.galleryItems.length > 0) {
 
+  const gallery = document.createElement("div");
   gallery.style.display = "grid";
   gallery.style.gridTemplateColumns =
     data.galleryLayout === "grid" ? "repeat(3,1fr)" :
@@ -230,12 +230,13 @@ if(data.galleryImages){
 
   gallery.style.gap = "10px";
 
-  data.galleryImages.split("\n").forEach(url=>{
-    if(!url.trim()) return;
+  data.galleryItems.forEach(item => {
 
     const img = document.createElement("img");
-    img.src = url.trim();
+
+    img.src = item.url || item;
     img.style.width = "100%";
+    img.style.borderRadius = "8px";
 
     gallery.appendChild(img);
   });
