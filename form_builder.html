@@ -73,9 +73,6 @@ function onPaymentSuccess(){
 <!-- PAYPAL SDK (Use your client-id in live) -->
 <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=EUR"></script>
 
-</head>
-<body>
-
 <!-- ================= PAYMENT GATE ================= -->
 <div id="paymentGate">
   <div class="gate-content">
@@ -1879,6 +1876,10 @@ const data = {
 
 generatedData = data;
 generatedHTML = JSON.stringify(data, null, 2);
+
+console.log(data);
+
+alert("✅ Form generated successfully.");
 
 /* =========================
    SAVE TO FIRESTORE
