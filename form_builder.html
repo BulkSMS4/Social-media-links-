@@ -1325,6 +1325,14 @@ function renderPreview() {
 
     // Main container
     const c = document.createElement("div");
+    
+    const data = {
+  avatarURL: $("avatarURL").value,
+  logoURL: $("logoURL").value,
+  bannerURL: $("bannerURL").value,
+  galleryItems: galleryItems,
+  videoLinks: $("videoLinks").value
+};
     const fDiv = document.createElement("form");
  fDiv.className = "preview-form";
     c.style.position = "relative";
@@ -1382,21 +1390,37 @@ video.className = "bg-video";
   }
 }
 
-    // Avatar / Logo / Banner helper
-    const addImage = (id, width, round = false, margin = "auto") => {
-      const url = $(id)?.value;
-      if (!url) return;
-      const img = document.createElement("img");
-      img.src = url;
-      img.style.width = width;
-      if (round) img.style.borderRadius = "50%";
-      img.style.display = "block";
-      img.style.margin = margin;
-      c.appendChild(img);
-    };
-    addImage("avatarURL", "90px", true);
-    addImage("logoURL", "140px");
-    addImage("bannerURL", "100%", false, "10px auto");
+    // Avatar
+if(data.avatarURL){
+    const img=document.createElement("img");
+    img.src=data.avatarURL;
+    img.style.width="90px";
+    img.style.borderRadius="50%";
+    img.style.display="block";
+    img.style.margin="auto";
+    c.appendChild(img);
+}
+
+// Logo
+if(data.logoURL){
+    const img=document.createElement("img");
+    img.src=data.logoURL;
+    img.style.width="140px";
+    img.style.display="block";
+    img.style.margin="10px auto";
+    c.appendChild(img);
+}
+
+// Banner
+if(data.bannerURL){
+    const banner=document.createElement("img");
+    banner.src=data.bannerURL;
+    banner.style.width="100%";
+    banner.style.display="block";
+    banner.style.margin="12px 0";
+    banner.style.borderRadius="8px";
+    c.appendChild(banner);
+}
 
     // Title
 const titleEl = document.createElement("h2");
@@ -1413,9 +1437,17 @@ subtitleEl.style.textAlign = "center";
 subtitleEl.style.color = $("subtitleColor")?.value || "#555";
 c.appendChild(subtitleEl);
 
-// Render Simple Gallery (Images Only)
-    const simpleGalleryWrap = renderSimpleGallery();
-if (simpleGalleryWrap) c.appendChild(simpleGalleryWrap);
+// Gallery Images #1
+const simpleGallery = renderSimpleGallery();
+if (simpleGallery) {
+    c.appendChild(simpleGallery);
+}
+
+// Gallery Items #2
+const galleryWrap = renderGalleryItems();
+if (galleryWrap) {
+    c.appendChild(galleryWrap);
+}
 
 // Description
 const descEl = document.createElement("p");
@@ -1427,12 +1459,40 @@ c.appendChild(descEl);
 const galleryItemsWrap = renderGalleryItems();
 if (galleryItemsWrap) c.appendChild(galleryItemsWrap);
 
+const videos = $("videoLinks").value
+    .split("\n")
+    .map(v => v.trim())
+    .filter(Boolean);
+
+videos.forEach(src => {
+    const video = document.createElement("video");
+    video.src = src;
+    video.controls = true;
+    video.style.width = "100%";
+    video.style.marginTop = "12px";
+    c.appendChild(video);
+});
+
    // -----------------------
 // Form fields container
 // ----------------------- // ✅ define fDiv at the top
 fDiv.style.display = "flex";
 fDiv.style.flexDirection = "column";
 fDiv.style.gap = "8px";
+
+// Warning (show above form fields)
+if ($("enableWarning")?.checked && $("warning")?.value.trim()) {
+  const warning = document.createElement("p");
+  warning.textContent = $("warning").value;
+
+  const pos = $("warningPosition")?.value || "center";
+  warning.style.textAlign = pos === "normal" ? "left" : pos;
+  warning.style.color = $("warningColor")?.value || "#d32f2f";
+  warning.style.fontWeight = "600";
+  warning.style.marginBottom = "12px";
+
+  fDiv.appendChild(warning);
+}
 
 // Auth fields
 if ($("addAuth")?.checked) {
@@ -1502,20 +1562,6 @@ customFields.forEach(fld => {
     fDiv.appendChild(box);
   }
 });
-
-// -------------------------
-// Warning message
-// -------------------------
-if ($("enableWarning")?.checked && $("warning")?.value.trim()) {
-  const warning = document.createElement("p");
-  warning.textContent = $("warning").value;
-  const pos = $("warningPosition")?.value || "center";
-  if (pos !== "none") warning.style.textAlign = pos === "normal" ? "left" : pos;
-  warning.style.color = $("warningColor")?.value || "#d32f2f"; // <-- use admin-selected color
-  warning.style.fontWeight = "600";
-  warning.style.marginBottom = "8px";
-  fDiv.appendChild(warning); // append to form container
-}
 
 // -------------------------
 // Custom submit message (optional)
