@@ -90,32 +90,56 @@ const formId = getQueryParam("id");
 
 function renderForm(data){
 
-// Convert nested data to the format this page expects
+// =========================
+// Normalize saved data
+// =========================
+
+if (data.seo) {
+  data.seoTitle = data.seo.title || data.seoTitle || "";
+  data.metaDesc = data.seo.description || data.metaDesc || "";
+  data.ogImage = data.seo.ogImage || data.ogImage || "";
+}
+
 if (data.page) {
-  data.title = data.page.title || "";
-  data.subtitle = data.page.subtitle || "";
-  data.description = data.page.description || "";
-  data.footerText = data.page.footer || "";
+  data.title = data.page.title || data.title || "";
+  data.pageTitle = data.page.title || data.pageTitle || "";
+  data.subtitle = data.page.subtitle || data.subtitle || "";
+  data.description = data.page.description || data.description || "";
+  data.footerText = data.page.footer || data.footerText || "";
 }
 
 if (data.branding) {
-  data.avatarURL = data.branding.avatar || "";
-  data.logoURL = data.branding.logo || "";
-  data.bannerURL = data.branding.banner || "";
+  data.avatarURL = data.branding.avatar || data.avatarURL || "";
+  data.logoURL = data.branding.logo || data.logoURL || "";
+  data.bannerURL = data.branding.banner || data.bannerURL || "";
 }
 
 if (data.styling) {
-  data.bgColor = data.styling.bgColor || "#fff";
-  data.bgImage = data.styling.bgImage || "";
-  data.bgVideoURL = data.styling.bgVideo || "";
-  data.btnColor = data.styling.buttonColor || "#1976d2";
+  data.textColor = data.styling.textColor || data.textColor || "#222";
+  data.bgColor = data.styling.bgColor || data.bgColor || "#fff";
+  data.bgImage = data.styling.bgImage || data.bgImage || "";
+  data.bgVideoURL = data.styling.bgVideo || data.bgVideoURL || "";
+  data.btnColor = data.styling.buttonColor || data.btnColor || "#1976d2";
+  data.btnPosition = data.styling.buttonPosition || data.btnPosition || "center";
 }
+
+if (data.warning && typeof data.warning === "object") {
+  data.enableWarning = true;
+  data.warning = data.warning.text || "";
+  data.warningPosition = data.warning.position || "center";
+}
+
+data.embedLinks = data.embedLinks || data.embeds || [];
+data.draggableItems = data.draggableItems || data.draggableLines || [];
+data.extraButtons = data.extraButtons || [];
+data.galleryItems = data.galleryItems || [];
 
 if (Array.isArray(data.fields)) {
   data.addAuth = data.fields.some(f => f.name === "username");
+
   data.extraFields = data.fields
     .filter(f => f.name !== "username" && f.name !== "password")
-    .map(f => f.placeholder);
+    .map(f => f.placeholder || f.label || "");
 }
 
   const wrap = document.getElementById("formWrap");
