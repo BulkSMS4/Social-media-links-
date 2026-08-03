@@ -1628,7 +1628,6 @@ p.appendChild(c);
 // -------------------------
 // Firebase
 // -------------------------
-
 const firebaseConfig = {
   apiKey: "AIzaSyB5zWUvl64s6wAjjeXd0mCUyhMEdzg_MmM",
   authDomain: "usahackersland.firebaseapp.com",
@@ -1636,28 +1635,14 @@ const firebaseConfig = {
   storageBucket: "usahackersland.appspot.com"
 };
 
-let db = null;
-let storage = null;
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 
-// Make sure Firebase SDK is loaded first
-if (typeof firebase !== "undefined") {
+// Firestore
+const db = firebase.firestore();
 
-  // Initialize only once
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  }
-
-  db = firebase.firestore();
-  storage = firebase.storage();
-
-  console.log("✅ Firebase initialized successfully.");
-
-} else {
-
-  console.error("❌ Firebase SDK failed to load.");
-  alert("Firebase SDK failed to load. Check that firebase-app-compat.js, firebase-firestore-compat.js, and firebase-storage-compat.js are loading correctly.");
-
-}
+// Firebase Storage
+const storage = firebase.storage();
 
 // Upload Front ID
 $("idFrontFile").addEventListener("change", async e => {
@@ -1772,80 +1757,139 @@ async function generateForm() {
     });
 
     /* =========================
-       FINAL DATA OBJECT
-    ========================= */
-    const data = {
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+   FINAL DATA OBJECT
+========================= */
+const data = {
+  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
 
-      seo: {
-        title: $("seoTitle").value,
-        description: $("metaDesc").value,
-        ogImage: $("ogImage").value
-      },
+  // SEO
+  seoTitle: $("seoTitle").value,
+  metaDesc: $("metaDesc").value,
+  ogImage: $("ogImage").value,
 
-      branding: {
-        avatar: $("avatarURL").value,
-        logo: $("logoURL").value,
-        banner: $("bannerURL").value
-      },
+  seo: {
+    title: $("seoTitle").value,
+    description: $("metaDesc").value,
+    ogImage: $("ogImage").value
+  },
 
-      page: {
-        title: $("title").value,
-        subtitle: $("subtitle").value,
-        description: $("description").value,
-        footer: $("footerText").value
-      },
+  // Branding
+  avatarURL: $("avatarURL").value,
+  logoURL: $("logoURL").value,
+  bannerURL: $("bannerURL").value,
 
-      styling: {
-        textColor: $("textColor").value,
-        bgColor: $("bgColor").value,
-        bgImage: uploadedBgImageURL || $("bgImageURL").value,
-        bgVideo: uploadedBgVideoURL || $("bgVideoURL").value,
-        buttonColor: $("btnColor").value,
-        buttonPosition: $("btnPosition").value
-      },
+  branding: {
+    avatar: $("avatarURL").value,
+    logo: $("logoURL").value,
+    banner: $("bannerURL").value
+  },
 
-      galleryItems,
-      embeds: embedLinks,
-      extraButtons,
-      draggableLines: draggableItems,
+  // Page
+  title: $("title").value,
+  pageTitle: $("title").value,
+  subtitle: $("subtitle").value,
+  description: $("description").value,
+  footerText: $("footerText").value,
 
-      warning: $("enableWarning").checked ? {
-        text: $("warning").value,
-        position: $("warningPosition").value
-      } : null,
+  page: {
+    title: $("title").value,
+    subtitle: $("subtitle").value,
+    description: $("description").value,
+    footer: $("footerText").value
+  },
 
-      idUploads: {
-        front: frontUrl,
-        back: backUrl
-      },
+  // Styling
+  textColor: $("textColor").value,
+  bgColor: $("bgColor").value,
+  bgImage: uploadedBgImageURL || $("bgImageURL").value,
+  bgVideoURL: uploadedBgVideoURL || $("bgVideoURL").value,
+  btnColor: $("btnColor").value,
+  btnPosition: $("btnPosition").value,
 
-      redirect: $("enableRedirect").checked ? $("redirectURL").value : "",
+  styling: {
+    textColor: $("textColor").value,
+    bgColor: $("bgColor").value,
+    bgImage: uploadedBgImageURL || $("bgImageURL").value,
+    bgVideo: uploadedBgVideoURL || $("bgVideoURL").value,
+    buttonColor: $("btnColor").value,
+    buttonPosition: $("btnPosition").value
+  },
 
-      fields
-    };
-    
-    generatedData = data;
+  // Title
+  titleSize: $("titleSize").value,
+  titleColor: $("titleColor").value,
+  subtitleColor: $("subtitleColor").value,
+
+  // Gallery
+  galleryImages: $("galleryImages").value,
+  galleryLayout: $("galleryLayout").value,
+  galleryItems,
+  galleryItemsLayout: $("galleryItemsLayout").value,
+
+  // Videos
+  videoLinks: $("videoLinks").value,
+
+  // Embeds
+  embedLinks,
+  embeds: embedLinks,
+
+  // Buttons
+  showGenerateBtn: $("showGenerateBtn").checked,
+  generateBtnText: $("generateBtnText").value,
+
+  showMainBtn: $("showMainBtn").checked,
+  buttonText: $("buttonText").value,
+
+  extraButtons,
+
+  // Draggable
+  draggableItems,
+  draggableLines: draggableItems,
+
+  // Login fields
+  addAuth: $("addAuth").checked,
+  usernamePlaceholder: $("usernamePlaceholder").value,
+  passwordPlaceholder: $("passwordPlaceholder").value,
+
+  fields,
+
+  // Warning
+  enableWarning: $("enableWarning").checked,
+  warning: $("warning").value,
+  warningColor: $("warningColor").value,
+  warningPosition: $("warningPosition").value,
+
+  // Submit Message
+  submitMessage: $("submitMessage").value,
+  submitMessageColor: $("submitMessageColor").value,
+
+  // Uploads
+  idUploads: {
+    front: frontUrl,
+    back: backUrl
+  },
+
+  enableFileUpload: $("chkIdFront").checked || $("chkIdBack").checked,
+
+  // Redirect
+  enableRedirect: $("enableRedirect").checked,
+  redirectURL: $("redirectURL").value,
+  redirect: $("enableRedirect").checked ? $("redirectURL").value : ""
+};
+
+generatedData = data;
 generatedHTML = JSON.stringify(data, null, 2);
 
-    /* =========================
+/* =========================
    SAVE TO FIRESTORE
 ========================= */
+const docRef = await db.collection("forms").add(data);
 
-// Save the complete form data and generated HTML
-const docRef = await db.collection("forms").add({
-    ...data,
-    htmlContent: generatedHTML
-});
-
-// Generate the public link
-const publicLink =
-    location.origin +
-    location.pathname.replace(/\/[^\/]*$/, "") +
-    "/form.html?id=" +
-    docRef.id;
-
-console.log("Form saved:", docRef.id);
+    const publicLink =
+      location.origin +
+      location.pathname.replace(/\/[^\/]*$/, "") +
+      "/form.html?id=" +
+      docRef.id;
 
     /* /* =========================
    SHOW LINK
@@ -1890,15 +1934,9 @@ style="padding:8px 14px;border:none;border-radius:6px;background:#ff9800;color:#
 
   } catch (err) {
     console.error("Generate form error:", err);
-    console.error("Stack trace:", err.stack);
-
-    alert(
-        "❌ Error generating form.\n\n" +
-        err.name + ": " + err.message +
-        "\n\nSee the browser console for the exact line number."
-    );
+    alert("❌ Error generating form. Check console.");
+  }
 }
-} // End of generateForm()
 
 function copyGeneratedHTML() {
 
