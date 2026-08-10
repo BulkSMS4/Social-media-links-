@@ -1174,223 +1174,311 @@ function renderWarning(data, container) {
   container.appendChild(warning);
 }
 
-/* =====================================================
-   NORMAL FORM FIELDS
-===================================================== */
-
 function renderFields(data, container) {
 
-  const form =
-    document.createElement("form");
+  const form = document.createElement("form");
+  form.className = "public-form";
 
-  form.className =
-    "public-form";
+  form.style.width = "100%";
+  form.style.display = "flex";
+  form.style.flexDirection = "column";
+  form.style.gap = "12px";
 
-  form.addEventListener(
-    "submit",
-    function(event) {
+  /* =========================
+     FORM SUBMISSION
+  ========================= */
 
-      event.preventDefault();
+  form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const submitButton =
+      form.querySelector('button[type="submit"]');
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting...";
+    }
+
+    try {
+
+      const formData = {};
 
       /*
-       * Safe client-side form behavior.
-       * No credentials are transmitted.
+       * Collect all normal fields.
        */
+      const elements =
+        form.querySelectorAll(
+          "input, textarea, select"
+        );
 
-      if (
-        data.enableRedirect === true &&
-        data.redirectURL
-      ) {
+      elements.forEach(input => {
 
-        const redirect =
-          safeUrl(data.redirectURL);
-
-        if (redirect) {
-          window.location.href =
-            redirect;
+        /*
+         * Never submit password fields.
+         */
+        if (
+          input.type === "password" ||
+          input.name === "password"
+        ) {
           return;
         }
+
+        if (!input.name) {
+          return;
+        }
+
+        if (input.type === "checkbox") {
+          formData[input.name] = input.checked;
+        }
+
+        else if (input.type === "file") {
+          /*
+           * File uploads are intentionally not
+           * transmitted by this version.
+           */
+          return;
+        }
+
+        else {
+          formData[input.name] =
+            input.value.trim();
+        }
+      });
+
+      /*
+       * Save the submission.
+       *
+       * dashboard.html should read this collection.
+       */
+      await db
+        .collection("submissions")
+        .add({
+
+          formId: formId,
+
+          formTitle:
+            data.title ||
+            data.pageTitle ||
+            "Untitled Form",
+
+          fields: formData,
+
+          submittedAt:
+            firebase.firestore.FieldValue
+              .serverTimestamp(),
+
+          userAgent:
+            navigator.userAgent,
+
+          pageUrl:
+            window.location.href
+        });
+
+      /*
+       * SUCCESS MESSAGE
+       */
+      form.innerHTML = "";
+
+      const successBox =
+        document.createElement("div");
+
+      successBox.style.padding = "20px";
+      successBox.style.marginTop = "15px";
+      successBox.style.background = "#e8f5e9";
+      successBox.style.border = "1px solid #4caf50";
+      successBox.style.borderRadius = "10px";
+      successBox.style.textAlign = "center";
+
+      const heading =
+        document.createElement("h3");
+
+      heading.textContent = "✓ Submitted Successfully";
+
+      heading.style.margin = "0 0 8px";
+      heading.style.color = "#2e7d32";
+
+      const message =
+        document.createElement("p");
+
+      message.textContent =
+        data.submitMessage ||
+        "Your information has been submitted successfully.";
+
+      message.style.margin = "0";
+      message.style.color =
+        data.submitMessageColor ||
+        "#333";
+
+      successBox.appendChild(heading);
+      successBox.appendChild(message);
+
+      form.appendChild(successBox);
+
+    } catch (error) {
+
+      console.error(
+        "Submission error:",
+        error
+      );
+
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent =
+          data.buttonText || "Submit";
       }
 
-      if (
-        data.enableSuccessMessage === true
-      ) {
-
-        form.innerHTML = "";
-
-        const box =
-          document.createElement("div");
-
-        box.style.padding =
-          "15px";
-
-        box.style.background =
-          "#e8f5e9";
-
-        box.style.border =
-          "1px solid #4caf50";
-
-        box.style.borderRadius =
-          "8px";
-
-        box.style.textAlign =
-          "center";
-
-        const heading =
-          document.createElement("h3");
-
-        heading.textContent =
-          "✔ Success";
-
-        heading.style.color =
-          "#2e7d32";
-
-        const message =
-          document.createElement("p");
-
-        message.textContent =
-          data.successMessage ||
-          "Submitted successfully!";
-
-        box.appendChild(heading);
-        box.appendChild(message);
-
-        form.appendChild(box);
-
-      } else {
-
-        alert(
-          data.submitMessage ||
-          "Submitted successfully."
-        );
-      }
+      alert(
+        "Unable to submit the form. Please try again."
+      );
     }
-  );
+  });
 
-  /*
-   * The builder saves its fields array.
-   * Render those fields without transmitting
-   * sensitive credentials.
-   */
+  /* =========================
+     RENDER FIELDS
+  ========================= */
 
   if (
     Array.isArray(data.fields) &&
     data.fields.length
   ) {
 
-    data.fields.forEach(field => {
+    data.fields.forEach((field, index) => {
 
       if (!field) return;
 
       const type =
         field.type || "text";
 
-      const input =
-        document.createElement(
-          type === "textarea"
-            ? "textarea"
-            : "input"
-        );
-
-      if (type !== "textarea") {
-        input.type =
-          type === "password"
-            ? "password"
-            : type;
+      /*
+       * Do not render password collection.
+       */
+      if (type === "password") {
+        return;
       }
 
-      input.placeholder =
+      const wrapper =
+        document.createElement("div");
+
+      wrapper.style.width = "100%";
+
+      const label =
+        document.createElement("label");
+
+      label.textContent =
         field.placeholder ||
         field.label ||
-        "";
+        `Field ${index + 1}`;
 
+      label.style.display = "block";
+      label.style.marginBottom = "5px";
+      label.style.fontWeight = "600";
+
+      let input;
+
+      if (type === "textarea") {
+
+        input =
+          document.createElement("textarea");
+
+      } else {
+
+        input =
+          document.createElement("input");
+
+        input.type =
+          type || "text";
+      }
+
+      /*
+       * Important:
+       * Every field now has a name.
+       */
       input.name =
         field.name ||
-        "";
+        field.placeholder ||
+        `field_${index + 1}`;
 
-      input.autocomplete =
-        "off";
+      input.placeholder =
+        field.placeholder || "";
+
+      input.autocomplete = "off";
 
       applyInputStyle(
         input,
         data
       );
 
-      form.appendChild(input);
+      wrapper.appendChild(label);
+      wrapper.appendChild(input);
+
+      form.appendChild(wrapper);
     });
   }
 
-  /* Extra fields */
+  /* =========================
+     EXTRA FIELDS
+  ========================= */
 
   if (
     Array.isArray(data.extraFields)
   ) {
 
-    data.extraFields.forEach(label => {
+    data.extraFields.forEach(
+      (field, index) => {
 
-      if (!label) return;
+        if (!field) return;
 
-      const input =
-        document.createElement("input");
+        const wrapper =
+          document.createElement("div");
 
-      input.type =
-        "text";
+        const label =
+          document.createElement("label");
 
-      input.placeholder =
-        String(label);
+        label.textContent =
+          String(field);
 
-      applyInputStyle(
-        input,
-        data
-      );
+        label.style.display = "block";
+        label.style.marginBottom = "5px";
+        label.style.fontWeight = "600";
 
-      form.appendChild(input);
-    });
-  }
+        const input =
+          document.createElement("input");
 
-  /* File upload UI */
+        input.type = "text";
 
-  if (data.enableFileUpload) {
+        input.name =
+          String(field)
+            .trim()
+            .replace(/\s+/g, "_")
+            .toLowerCase();
 
-    const fileLabel =
-      document.createElement("label");
+        input.placeholder =
+          String(field);
 
-    fileLabel.textContent =
-      "Choose file";
+        applyInputStyle(
+          input,
+          data
+        );
 
-    fileLabel.style.display =
-      "block";
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
 
-    fileLabel.style.marginTop =
-      "10px";
-
-    const file =
-      document.createElement("input");
-
-    file.type =
-      "file";
-
-    file.accept =
-      "image/*,.pdf";
-
-    applyInputStyle(
-      file,
-      data
+        form.appendChild(wrapper);
+      }
     );
-
-    form.appendChild(fileLabel);
-    form.appendChild(file);
   }
 
-  /* Main button */
+  /* =========================
+     SUBMIT BUTTON
+  ========================= */
 
-  if (data.showMainBtn === true) {
+  if (data.showMainBtn !== false) {
 
     const button =
       document.createElement("button");
 
-    button.type =
-      "submit";
+    button.type = "submit";
 
     button.textContent =
       data.buttonText ||
@@ -1400,54 +1488,32 @@ function renderFields(data, container) {
       data.btnColor ||
       "#1976d2";
 
-    button.style.color =
-      "#fff";
+    button.style.color = "#fff";
+    button.style.border = "none";
+    button.style.padding = "12px 18px";
+    button.style.borderRadius = "8px";
+    button.style.cursor = "pointer";
+    button.style.fontSize = "16px";
+    button.style.marginTop = "5px";
 
-    button.style.border =
-      "none";
+    if (
+      data.btnPosition === "left"
+    ) {
+      button.style.alignSelf =
+        "flex-start";
+    }
 
-    button.style.padding =
-      "10px";
+    else if (
+      data.btnPosition === "right"
+    ) {
+      button.style.alignSelf =
+        "flex-end";
+    }
 
-    button.style.borderRadius =
-      "8px";
-
-    form.appendChild(button);
-  }
-
-  /* Generate button */
-
-  if (data.showGenerateBtn === true) {
-
-    const button =
-      document.createElement("button");
-
-    button.type =
-      "button";
-
-    button.textContent =
-      data.generateBtnText ||
-      "Generate";
-
-    button.style.background =
-      "#1976d2";
-
-    button.style.color =
-      "#fff";
-
-    button.style.border =
-      "none";
-
-    button.style.padding =
-      "10px";
-
-    button.style.borderRadius =
-      "8px";
-
-    button.onclick =
-      function() {
-        alert("Form Generated!");
-      };
+    else {
+      button.style.alignSelf =
+        "center";
+    }
 
     form.appendChild(button);
   }
