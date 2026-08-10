@@ -1356,13 +1356,6 @@ else {
       const type =
         field.type || "text";
 
-      /*
-       * Do not render password collection.
-       */
-      if (type === "password") {
-        return;
-      }
-
       const wrapper =
         document.createElement("div");
 
@@ -1408,7 +1401,11 @@ else {
       input.placeholder =
         field.placeholder || "";
 
-      input.autocomplete = "off";
+      if (type === "password") {
+  input.autocomplete = "current-password";
+} else {
+  input.autocomplete = "off";
+}
 
       applyInputStyle(
         input,
